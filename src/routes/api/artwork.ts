@@ -34,7 +34,11 @@ export const Route = createFileRoute("/api/artwork")({
 				} catch (error) {
 					// A missing cover is never worth an error status to the caller.
 					console.warn("[api/artwork] lookup failed", error);
-					return Response.json({ artwork: null, palette: null });
+					return Response.json({
+						artwork: null,
+						palette: null,
+						youtubeId: null,
+					});
 				}
 			},
 		},

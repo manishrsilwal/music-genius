@@ -20,7 +20,7 @@ async function fetchVisuals(
 ): Promise<TrackVisuals> {
 	const query = `title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`;
 	const response = await fetch(`/api/artwork?${query}`, { signal });
-	if (!response.ok) return { artwork: null, palette: null };
+	if (!response.ok) return { artwork: null, palette: null, youtubeId: null };
 	return response.json();
 }
 

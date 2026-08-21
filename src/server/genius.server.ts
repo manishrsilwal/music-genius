@@ -17,6 +17,12 @@ interface GeniusArtist {
 	name: string | null;
 }
 
+interface GeniusMedia {
+	provider?: string;
+	type?: string;
+	url?: string;
+}
+
 interface GeniusSong {
 	id: number;
 	title: string | null;
@@ -24,6 +30,8 @@ interface GeniusSong {
 	song_art_image_url: string | null;
 	song_art_image_thumbnail_url: string | null;
 	header_image_url: string | null;
+	/** Present only on the /songs/{id} endpoint, not on search results. */
+	media?: GeniusMedia[];
 }
 
 interface GeniusSearchResponse {
@@ -164,5 +172,77 @@ export async function findArtwork(
 	} catch (error) {
 		console.warn("[genius] artwork lookup failed", error);
 		return null;
+	}
+}
+
+/* -------------------------------------------------------------------------
+   Playback source (PRD §3.2, D-022)
+
+   Genius already knows which YouTube video belongs to a song, so we take it
+   from there rather than the YouTube Data API — whose search costs 100 quota
+   units a call, or roughly 100 tracks a day on the default allowance.
+   ---------------------------------------------------------------------- */
+
+/** `watch?v=`, `youtu.be/`, and `/embed/` forms. */
+function toVideoId(url: string): string | null {
+	const match =
+		url.match(/[?&]v=([\w-]{11})/) ??
+		url.match(/youtu\.be\/([\w-]{11})/) ??
+		url.match(/\/embed\/([\w-]{11})/);
+	return match?.[1] ?? null;
+}
+
+async function fetchSong(
+	id: number,
+	signal?: AbortSignal,
+): Promise<GeniusSong | null> {
+	const response = await fetch(`${BASE}/songs/${id}`, {
+		headers: {
+			Authorization: `Bearer ${env.geniusAccessToken}`,
+			Accept: "application/json",
+		},
+		signal,
+	});
+	if (!response.ok) return null;
+
+	const payload = (await response.json()) as {
+		response?: { song?: GeniusSong };
+	};
+	return payload.response?.song ?? null;
+}
+
+export interface GeniusResult {
+	artwork: Artwork | null;
+	/** YouTube video id for playback, when Genius knows one. */
+	youtubeId: string | null;
+}
+
+/**
+ * One Genius lookup serving both the visual layer and playback.
+ *
+ * The search response carries artwork but not media, so a confident match
+ * costs a second request to /songs/{id}. Both are cached together for 30 days.
+ */
+export async function findSong(
+	title: string,
+	artist: string,
+	signal?: AbortSignal,
+): Promise<GeniusResult> {
+	const artwork = await findArtwork(title, artist, signal);
+	if (!artwork) return { artwork: null, youtubeId: null };
+
+	try {
+		const song = await fetchSong(artwork.geniusId, signal);
+		const media = (song?.media ?? []).find(
+			(entry) => entry.provider === "youtube" && entry.url,
+		);
+		return {
+			artwork,
+			youtubeId: media?.url ? toVideoId(media.url) : null,
+		};
+	} catch (error) {
+		// Playback is an enhancement; never let it cost us the artwork.
+		console.warn("[genius] media lookup failed", error);
+		return { artwork, youtubeId: null };
 	}
 }

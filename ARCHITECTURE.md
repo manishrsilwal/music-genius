@@ -6,7 +6,7 @@ logged here with its rationale and its rejected alternatives.
 **Rule:** nothing is decided by assumption. Anything unresolved lives in
 [Deferred Decisions](#deferred-decisions) until explicitly ruled on.
 
-- **Status:** Block 4 — insights drawer built; awaiting a Gemini key to verify against real output
+- **Status:** Block 5 — all PRD features implemented. Insights await a Gemini key to verify against real output
 - **Previously:** Block 3 complete — Lyric Card export shipping; selection → composer → PNG verified
 - **Last updated:** 2026-08-21
 - **Source of truth:** `prd-doc/Typographic_Lyrical_Explorer_PRD_v2.pdf` (v2.0)
@@ -130,6 +130,43 @@ Switching target later must be a one-file change per subsystem.
 
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
+
+### D-022 — Playback: YouTube, with a visible player
+**Decided 2026-08-22.** Resolves OD-002. **Both options named in PRD §2 are unusable.**
+
+Checked against the providers' own documentation, not from memory:
+
+| Option | Finding |
+|---|---|
+| Spotify Web Playback SDK | Premium required — and *"mobile only types of premium subscriptions are excluded"* |
+| Spotify `preview_url` | **Deprecated**, and *"Audio Preview Clips may not be offered as a standalone service or product"* — which is exactly what we would be doing |
+| YouTube **audio-only** | **Explicitly prohibited** |
+
+YouTube's developer policies forbid *"a background player, meaning a player
+that is not displayed in the page, tab, or screen that the user is viewing"*
+and separately forbid developers to *"separate, isolate, or modify the audio or
+video components"*. The PRD's "YouTube IFrame API audio-only" is not a grey
+area — it is the thing the policy names. It was not implemented.
+
+**What we do instead:** a visible player, docked as a compact now-playing bar.
+Free, no login, works for every listener, and exposes `currentTime` for sync.
+The cost is a persistent video element on a typographic page, so it is composed
+into the design rather than hidden.
+
+**Finding the video costs nothing extra.** Genius already stores the YouTube
+URL for a song under `media`, so playback reuses the Genius lookup we already
+cache for 30 days. The YouTube Data API was avoided deliberately: its search
+costs 100 quota units a call, roughly 100 tracks a day on the default
+allowance.
+
+**Auto-scroll.** The playback clock is polled at 250ms — the IFrame API pushes
+state changes but not position — and mapped to a stanza through
+`stanzaIndexAt`. Sync yields the moment the reader scrolls for themselves, and
+a "Resync" control brings it back (PRD §3.2).
+
+Manual override listens for `wheel`, `touchmove` and the scrolling keys rather
+than the `scroll` event: programmatic scrolling fires `scroll` too, so we would
+have spent our time cancelling ourselves.
 
 ### D-021 — Insights: no source, no quote
 **Decided 2026-08-22.** Gemini via REST (OD-003); Tavily for grounding (OD-004).
@@ -478,7 +515,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | ID | Decision | Blocks | Notes |
 |---|---|---|---|
 | OD-001 | Cache backend concrete impl | `/api/track` | Follows D-009. Upstash Redis likely (HTTP ⇒ runtime-agnostic) |
-| OD-002 | Audio SDK: Spotify vs YouTube | §3.2 playback | **Product risk** — see below |
+
 
 | OD-004 | Search API: Tavily vs Google | `/api/insights` | |
 | OD-005 | Genius auth strategy | `/api/track` | Server-held token; rate limits unverified |

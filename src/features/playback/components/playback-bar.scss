@@ -1,0 +1,79 @@
+@use "styles/mixins" as m;
+
+// Now-playing bar (PRD §3.2, D-022).
+//
+// The YouTube player is visible by requirement, not by preference: the
+// developer policies forbid a player "not displayed in the page, tab, or
+// screen that the user is viewing". So it is composed into the page rather
+// than tucked away — small, docked, and quiet enough to read past.
+
+.playback {
+	position: fixed;
+	inset-inline: 0;
+	bottom: 0;
+	z-index: 35;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.75rem 1rem;
+	@include m.glass;
+	border-inline: 0;
+	border-bottom: 0;
+	background: var(--color-surface);
+
+	@include m.from("md") {
+		inset-inline: auto 1.5rem;
+		bottom: 1.5rem;
+		border-radius: var(--radius-card);
+		border: 1px solid var(--glass-border);
+	}
+
+	// The player itself. Small, but genuinely on screen and unobstructed.
+	&__video {
+		flex: none;
+		width: 8rem;
+		aspect-ratio: 16 / 9;
+		border-radius: 0.5rem;
+		overflow: hidden;
+		background: oklch(0 0 0);
+
+		iframe {
+			width: 100%;
+			height: 100%;
+			border: 0;
+		}
+	}
+
+	&__meta {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	&__title {
+		font-family: var(--font-display);
+		@include m.line-clamp(1);
+	}
+
+	&__status {
+		font-family: var(--font-ui);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-label);
+		color: var(--color-ink-faint);
+	}
+
+	// Shown only once the reader has taken manual control.
+	&__resume {
+		margin-inline-start: auto;
+		flex: none;
+		border-radius: 999px;
+		border: 1px solid var(--track-accent);
+		color: var(--track-accent);
+		font-family: var(--font-ui);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-label);
+		cursor: pointer;
+		white-space: nowrap;
+	}
+}

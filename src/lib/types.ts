@@ -68,6 +68,12 @@ export interface TrackSummary {
 export interface TrackVisuals {
 	artwork: Artwork | null;
 	palette: Palette | null;
+	/**
+	 * YouTube video id for playback (PRD §3.2). Sourced from Genius rather than
+	 * the YouTube Data API, whose search quota would cap us at ~100 tracks a
+	 * day. Null when Genius knows no video.
+	 */
+	youtubeId: string | null;
 }
 
 /** One thing the synthesis was built from (PRD §3.5, "The Source Gallery"). */

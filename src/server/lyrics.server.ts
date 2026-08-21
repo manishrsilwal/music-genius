@@ -17,10 +17,31 @@
 import { cached, TTL } from "../lib/cache";
 import { fetchTrack, searchTracks } from "../lib/clients/lrclib";
 import type { Track, TrackSummary, TrackVisuals } from "../lib/types";
-import { findArtwork } from "./genius.server";
+import { findSong } from "./genius.server";
 import { extractPalette } from "./palette.server";
 
-const EMPTY_VISUALS: TrackVisuals = { artwork: null, palette: null };
+const EMPTY_VISUALS: TrackVisuals = {
+	artwork: null,
+	palette: null,
+	youtubeId: null,
+};
+
+/**
+ * One Genius lookup per recording, cached by name rather than by track id.
+ *
+ * Autocomplete needs a thumbnail per result, which would otherwise mean a
+ * Genius call per keystroke per row. Keying on artist+title means the same
+ * recording resolves once across every search and every track page that
+ * mentions it, and is held for 30 days. It also carries the YouTube id used
+ * for playback (D-022), so both come from a single cached lookup.
+ */
+function getGenius(title: string, artist: string) {
+	return cached(
+		`genius:${artist.toLowerCase()}::${title.toLowerCase()}`,
+		TTL.track,
+		() => findSong(title, artist),
+	);
+}
 
 /**
  * Lyrics and metadata only — the fast path, and the one the reader is waiting
@@ -31,11 +52,8 @@ export function getTrack(id: string): Promise<Track | null> {
 }
 
 /**
- * Artwork and the palette derived from it — the slow path.
- *
- * Keyed by artist and title rather than track id, so the same recording is
- * resolved once across every search result and track page that mentions it,
- * regardless of which LRCLIB upload the reader happened to open.
+ * Artwork, palette and playback source — the slow path, streamed in behind the
+ * lyrics (D-017).
  */
 export function getTrackVisuals(
 	title: string,
@@ -44,13 +62,13 @@ export function getTrackVisuals(
 	const key = `visuals:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
 	return cached(key, TTL.track, async () => {
-		const artwork = await findArtwork(title, artist);
-		if (!artwork) return EMPTY_VISUALS;
+		const { artwork, youtubeId } = await getGenius(title, artist);
+		if (!artwork) return { ...EMPTY_VISUALS, youtubeId };
 
 		// Extracted from the thumbnail, not the full image: enough pixels for
 		// colour, a fraction of the bytes to fetch and decode (D-016).
 		const palette = await extractPalette(artwork.thumbnail);
-		return { artwork, palette };
+		return { artwork, palette, youtubeId };
 	});
 }
 

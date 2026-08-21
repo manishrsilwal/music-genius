@@ -17,6 +17,8 @@ const BAND_INSET = 45;
 export interface ScrollSpy {
 	activeIndex: number;
 	register: (index: number) => (element: HTMLElement | null) => void;
+	/** Shared with auto-scroll (PRD §3.2), which needs the same elements. */
+	elements: React.RefObject<Map<number, HTMLElement>>;
 }
 
 export function useScrollSpy(count: number): ScrollSpy {
@@ -60,5 +62,5 @@ export function useScrollSpy(count: number): ScrollSpy {
 		return () => observer.disconnect();
 	}, [count]);
 
-	return { activeIndex, register };
+	return { activeIndex, register, elements };
 }
