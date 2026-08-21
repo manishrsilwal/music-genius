@@ -131,6 +131,35 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-023 — Tests for the heuristics, verified by mutation
+**Decided 2026-08-22.** Vitest, scoped to pure logic.
+
+Everything in this build was verified by hand, once, at the moment it was
+written. None of that persisted, and several of the bugs found were subtle
+enough to reappear unnoticed. The suite covers the four places where a wrong
+answer is plausible rather than obvious:
+
+| Area | What it pins |
+|---|---|
+| `lrc.ts` | multi-stamp lines, metadata tags, stanza boundaries, and the end-time extension that stops auto-scroll advancing early |
+| `lrclib.ts` | the `"A - B"` normalisation, including its **known** mis-split, pinned so it cannot change silently |
+| `card.ts` | that type never overflows either axis across Latin, Devanagari, mixed script and pathological input |
+| `genius.server.ts` | both sides of the match threshold, including the Genius translation entry that must be rejected |
+
+**Mutation-tested.** A green suite proves nothing on its own, so four fixed
+bugs were deliberately reintroduced to confirm the tests fail:
+
+| Reintroduced bug | Result |
+|---|---|
+| stanza end-time no longer extended | 1 failed |
+| hex → oklch (Satori's black card) | 1 failed |
+| match threshold loosened to 0.05 | 3 failed |
+| split on first separator, not last | 1 failed |
+
+Resolves OD-010. Not covered: components, network clients, and the Satori
+render itself — those need a browser or a live service, and are better served
+by the manual verification recorded in the commit log.
+
 ### D-022 — Playback: YouTube, with a visible player
 **Decided 2026-08-22.** Resolves OD-002. **Both options named in PRD §2 are unusable.**
 
@@ -523,7 +552,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-007 | Deployment target | Deploy | D-009 keeps this cheap to defer |
 | OD-008 | React Compiler (`compiler` add-on) — auto-memoization | Perf | Available but NOT enabled. Interaction with `motion` unverified |
 | OD-009 | Build-time env validation (`t3env` add-on) | API blocks | Attractive given 4+ secrets across OD-002..005 |
-| OD-010 | Testing strategy — none scaffolded | Quality | No runner installed; `--no-examples` skipped test setup |
+| OD-020 | No component or integration tests — pure logic only (D-023) | Quality | Needs a DOM environment and fixture servers |
 | OD-011 | Playback state store — React context vs TanStack Store | §3.2/§3.3 | Auto-scroll couples playback time to canvas |
 | OD-014 | Genius rate limits are undocumented | §3.1 | Cached per artist+title for 30d. Watch for 429s |
 | OD-016 | LRCLIB uploads sometimes set artistName equal to trackName | §3.1 | Mitigated by ranking well-tagged entries higher; underlying data still wrong |

@@ -26,6 +26,7 @@ bun install
 bun run dev              # http://localhost:3000
 bun run build            # production build → .output/
 bun run check            # Biome lint + format
+bun run test             # unit tests (vitest)
 bunx tsc --noEmit        # typecheck
 bun run generate-routes  # regenerate routeTree.gen.ts
 ```

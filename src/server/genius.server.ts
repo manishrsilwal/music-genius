@@ -48,7 +48,7 @@ interface GeniusSearchResponse {
    ---------------------------------------------------------------------- */
 
 /** Strip the noise that differs between catalogues but not between recordings. */
-function canonical(value: string): string {
+export function canonical(value: string): string {
 	return (
 		value
 			.toLowerCase()
@@ -64,7 +64,7 @@ function canonical(value: string): string {
 }
 
 /** Dice coefficient over bigrams — tolerant of small edits, cheap to compute. */
-function similarity(a: string, b: string): number {
+export function similarity(a: string, b: string): number {
 	if (a === b) return 1;
 	if (a.length < 2 || b.length < 2) return 0;
 
@@ -93,6 +93,21 @@ function similarity(a: string, b: string): number {
  * showing confidently wrong art. A mismatched hero image is worse than none.
  */
 const MATCH_THRESHOLD = 0.62;
+
+/** Exported for tests: this threshold decides whether art is shown at all. */
+export function scoreNames(
+	candidateTitle: string,
+	candidateArtist: string,
+	title: string,
+	artist: string,
+): number {
+	const titleScore = similarity(canonical(candidateTitle), canonical(title));
+	const artistScore = similarity(canonical(candidateArtist), canonical(artist));
+	// Title carries more weight: artist strings vary far more between catalogues.
+	return titleScore * 0.65 + artistScore * 0.35;
+}
+
+export { MATCH_THRESHOLD };
 
 function scoreHit(song: GeniusSong, title: string, artist: string): number {
 	const titleScore = similarity(canonical(song.title ?? ""), canonical(title));

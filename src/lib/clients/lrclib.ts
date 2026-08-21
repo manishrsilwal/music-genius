@@ -84,7 +84,11 @@ function clean(value: string | null | undefined): string {
 	return (value ?? "").replace(/\s+/g, " ").trim();
 }
 
-function normaliseNames(raw: LrclibRecord): { title: string; artist: string } {
+export function normaliseNames(raw: {
+	trackName?: string | null;
+	artistName?: string | null;
+	name?: string | null;
+}): { title: string; artist: string } {
 	let title = clean(raw.trackName);
 	const artist = clean(raw.artistName);
 
