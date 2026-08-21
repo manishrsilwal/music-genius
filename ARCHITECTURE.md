@@ -131,6 +131,42 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-032 — Every step advances on tap
+**Decided 2026-08-22.** Reported: "after step 1, I need to click Continue. Let's
+not make the user click buttons again and again while selecting preferences."
+
+Mood was multi-select (D-027), which made it the only step that could not
+advance on tap — a multi-select has no natural commit signal, so it needed a
+Continue button. Pull and familiarity advanced on tap and made that button look
+like exactly what it was: an extra click in the middle of a three-question flow
+whose whole purpose is to be lighter than a blank search bar.
+
+Three ways out were weighed. Reordering so mood came last would have turned the
+button into the terminal "Show me", the one click a reader wants — but it costs
+mood as the opening question, which is the most evocative of the three.
+Auto-advancing on a timer keeps multi-select but there is no Back in this flow,
+so an early advance is unrecoverable, and timed advance is a WCAG 2.2.1 concern.
+
+**Mood is now single-select.** All three steps behave identically: three taps,
+no buttons. `Preferences.moods: Mood[]` becomes `mood: Mood | null`, which is
+also the honest type — it now matches pull and familiarity instead of being the
+one axis shaped differently.
+
+The cost is real and accepted: a reader who wants longing *and* restless has to
+pick one, and mood carries the heaviest scoring weight (3). The widening that
+multi-select bought is partly recovered by the diversity pass, which was already
+mixing language, era and artist across the shelf.
+
+Stored preferences from before this migrate rather than reset — the first
+element of a saved `moods` array becomes `mood`, and the legacy key is
+destructured off rather than spread through, so it dies on the next save.
+
+> **Timing:** with the button gone, every step transition became a tap the
+> reader waits through. `AnimatePresence mode="wait"` runs exit then entrance in
+> sequence, so matching durations meant 0.84s of dead time per tap — the button
+> had been absorbing it. Exits now use `transition.dismiss` (0.12s, `ease.exit`),
+> giving 0.54s: what is leaving snaps away, what arrives still settles.
+
 ### D-031 — Grounding keeps what can actually ground
 **Decided 2026-08-22.** `gatherSources` fetches 8 results and discards any whose
 excerpt is under 250 characters. `InsightSource.thumbnail`, previously `null`
@@ -229,6 +265,8 @@ The **track page keeps the full display scale** — that is where a hero belongs
 This is a landing-specific size, not a change to the type system.
 
 ### D-027 — Preferences describe the reader, not the record
+> **Superseded in part by D-032:** mood is no longer multi-select.
+
 **Revised 2026-08-22.** Replaces the mood/language/era stepper.
 
 Language and era were **binary partitions**: each step halved the pool, so

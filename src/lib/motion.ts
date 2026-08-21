@@ -41,6 +41,13 @@ export const transition = {
 	editorial: { duration: duration.base, ease: ease.editorial },
 	quick: { duration: duration.quick, ease: ease.editorial },
 	cinematic: { duration: duration.cinematic, ease: ease.entrance },
+	/**
+	 * Leaving under `AnimatePresence mode="wait"`, where exit and entrance run
+	 * in sequence and the reader waits for both. Deliberately near-instant:
+	 * what is leaving has already been decided, and matching the entrance
+	 * duration doubles the perceived delay of every step.
+	 */
+	dismiss: { duration: duration.instant, ease: ease.exit },
 	/** Bottom sheet + drawer drag release (PRD §3.5). Springs, not tweens —
       a gesture that ends must feel like it carries momentum. */
 	sheet: { type: "spring", stiffness: 380, damping: 40, mass: 0.9 },

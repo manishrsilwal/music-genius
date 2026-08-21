@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import type { Preferences } from "@/lib/deep-dives";
+import type { Mood, Preferences } from "@/lib/deep-dives";
 
 /**
  * Reader preferences (PRD §3.1).
@@ -16,7 +16,7 @@ import type { Preferences } from "@/lib/deep-dives";
 const KEY = "tle:preferences";
 
 export const EMPTY_PREFERENCES: Preferences = {
-	moods: [],
+	mood: null,
 	pull: null,
 	familiarity: null,
 };
@@ -38,13 +38,20 @@ export function usePreferences(): PreferencesState {
 		try {
 			const stored = window.localStorage.getItem(KEY);
 			if (stored) {
-				const parsed = JSON.parse(stored) as Partial<Preferences>;
-				// Older saves used a single `mood` plus language/era; anything
-				// unrecognised falls back to empty rather than throwing.
+				const { moods, ...parsed } = JSON.parse(
+					stored,
+				) as Partial<Preferences> & {
+					moods?: Mood[];
+				};
+				// Saves have used `moods: Mood[]` and, before that, language and
+				// era fields. Take the first of a stored array and drop the rest.
+				// `moods` is destructured off rather than spread through, so the
+				// legacy key dies on the next save instead of being carried
+				// forward forever. Anything unrecognised falls back to empty.
 				setPreferences({
 					...EMPTY_PREFERENCES,
 					...parsed,
-					moods: Array.isArray(parsed.moods) ? parsed.moods : [],
+					mood: parsed.mood ?? moods?.[0] ?? null,
 				});
 				setAnswered(true);
 			} else {

@@ -31,8 +31,12 @@ export type Language = "english" | "hindi";
 export type Era = "classic" | "modern";
 
 export interface Preferences {
-	/** Multi-select: choosing two moods widens the shelf rather than narrowing it. */
-	moods: Mood[];
+	/**
+	 * Single-select, like every other axis. Multi-select was tried and removed:
+	 * it was the only step that could not advance on tap, so it needed a
+	 * Continue button that the other two made look like friction (D-032).
+	 */
+	mood: Mood | null;
 	pull: Pull | null;
 	familiarity: Familiarity | null;
 }
@@ -627,8 +631,7 @@ export const ALSO_LIKED_COUNT = 12;
  */
 function score(track: CuratedTrack, preferences: Preferences): number {
 	let total = 0;
-	if (preferences.moods.length > 0 && preferences.moods.includes(track.mood))
-		total += 3;
+	if (preferences.mood && track.mood === preferences.mood) total += 3;
 	if (preferences.pull && track.pull === preferences.pull) total += 2;
 	// "surprise" is a real answer meaning "no preference", so it scores nothing
 	// rather than being treated as unanswered.

@@ -12,7 +12,7 @@ import {
 	seedFromDate,
 } from "./deep-dives";
 
-const NONE: Preferences = { moods: [], pull: null, familiarity: null };
+const NONE: Preferences = { mood: null, pull: null, familiarity: null };
 const seed = seedFromDate("2026-08-22");
 
 describe("catalogue", () => {
@@ -67,7 +67,7 @@ describe("pickDeepDives", () => {
 
 	it("honours a single mood", () => {
 		for (const mood of MOODS) {
-			const picks = pickDeepDives({ ...NONE, moods: [mood] }, seed);
+			const picks = pickDeepDives({ ...NONE, mood }, seed);
 			expect(
 				picks.every((t) => t.mood === mood),
 				`mood ${mood}`,
@@ -75,27 +75,27 @@ describe("pickDeepDives", () => {
 		}
 	});
 
-	it("WIDENS rather than narrows when several moods are chosen", () => {
-		// The whole reason mood is multi-select: two answers must not shrink the
-		// pool the way the old language/era partitions did.
-		const one = pickDeepDives({ ...NONE, moods: ["longing"] }, seed);
-		const two = pickDeepDives({ ...NONE, moods: ["longing", "defiant"] }, seed);
-		const moodsInTwo = new Set(two.map((t) => t.mood));
-		expect(one).toHaveLength(DEEP_DIVE_COUNT);
-		expect(two).toHaveLength(DEEP_DIVE_COUNT);
-		expect(moodsInTwo.size).toBeGreaterThan(1);
+	it("fills the shelf for every mood, so no answer is a dead end", () => {
+		// Mood is single-select (D-032) and carries the heaviest weight, so a
+		// thin cell would show as a short or repetitive shelf.
+		for (const mood of MOODS) {
+			expect(
+				pickDeepDives({ ...NONE, mood }, seed),
+				`mood ${mood}`,
+			).toHaveLength(DEEP_DIVE_COUNT);
+		}
 	});
 
 	it("mixes languages and eras rather than returning one flavour", () => {
 		// Language and era are no longer asked about, so the shelf has to mix on
 		// its own — this is what the diversity pass exists for.
-		const picks = pickDeepDives({ ...NONE, moods: ["longing"] }, seed);
+		const picks = pickDeepDives({ ...NONE, mood: "longing" }, seed);
 		expect(new Set(picks.map((t) => t.language)).size).toBeGreaterThan(1);
 	});
 
 	it("never repeats an artist within a shelf", () => {
 		for (const mood of MOODS) {
-			const picks = pickDeepDives({ ...NONE, moods: [mood] }, seed);
+			const picks = pickDeepDives({ ...NONE, mood }, seed);
 			expect(new Set(picks.map((t) => t.artist)).size).toBe(picks.length);
 		}
 	});
@@ -103,10 +103,7 @@ describe("pickDeepDives", () => {
 	it("fills the shelf for every mood × pull combination", () => {
 		for (const mood of MOODS) {
 			for (const pull of PULLS) {
-				const picks = pickDeepDives(
-					{ moods: [mood], pull, familiarity: "deep" },
-					seed,
-				);
+				const picks = pickDeepDives({ mood, pull, familiarity: "deep" }, seed);
 				expect(picks, `${mood}/${pull}`).toHaveLength(DEEP_DIVE_COUNT);
 			}
 		}
@@ -135,13 +132,13 @@ describe("pickAlsoLiked", () => {
 	});
 
 	it("leans towards the reader's answers", () => {
-		const picks = pickAlsoLiked({ ...NONE, moods: ["defiant"] }, seed);
+		const picks = pickAlsoLiked({ ...NONE, mood: "defiant" }, seed);
 		const onMood = picks.filter((t) => t.mood === "defiant").length;
 		expect(onMood / picks.length).toBeGreaterThan(0.5);
 	});
 
 	it("still reaches beyond them, so it reads as a wander", () => {
-		const picks = pickAlsoLiked({ ...NONE, moods: ["defiant"] }, seed);
+		const picks = pickAlsoLiked({ ...NONE, mood: "defiant" }, seed);
 		expect(new Set(picks.map((t) => t.mood)).size).toBeGreaterThan(1);
 	});
 });

@@ -14,6 +14,10 @@ import "./preference-stepper.scss";
  * and removed: as binary partitions they halved the pool at each step and
  * forced a reader who enjoys both to pick a side (D-027).
  *
+ * Every step advances on tap. Mood was briefly multi-select, which made it the
+ * one step that could not — it needed a Continue button the other two made
+ * look like friction (D-032). Three taps, no buttons.
+ *
  * Skipping is a real answer — an unanswered axis simply carries no weight.
  */
 
@@ -71,20 +75,11 @@ export function PreferenceStepper({
 		else setStep(step + 1);
 	}
 
-	function toggleMood(mood: Mood) {
-		const moods = draft.moods.includes(mood)
-			? draft.moods.filter((m) => m !== mood)
-			: [...draft.moods, mood];
-		setDraft({ ...draft, moods });
-	}
-
 	const question = [
 		"What do you want to sit with?",
 		"What pulls you into a song?",
 		"How well should you know it?",
 	][step] as string;
-
-	const subtitle = step === 0 ? "Pick as many as you like" : null;
 
 	return (
 		<div className="stepper">
@@ -108,18 +103,11 @@ export function PreferenceStepper({
 					key={step}
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
-					exit={{ opacity: 0, y: -6 }}
+					exit={{ opacity: 0, y: -6, transition: transition.dismiss }}
 					transition={transition.editorial}
 					className="grid gap-5"
 				>
-					<div>
-						<h2 className="stepper__question text-title text-ink">
-							{question}
-						</h2>
-						{subtitle && (
-							<p className="mt-1 text-caption text-ink-faint">{subtitle}</p>
-						)}
-					</div>
+					<h2 className="stepper__question text-title text-ink">{question}</h2>
 
 					<div className="stepper__options">
 						{step === 0 &&
@@ -127,8 +115,7 @@ export function PreferenceStepper({
 								<StepOption
 									key={option.value}
 									option={option}
-									selected={draft.moods.includes(option.value)}
-									onSelect={() => toggleMood(option.value)}
+									onSelect={() => go({ ...draft, mood: option.value })}
 								/>
 							))}
 						{step === 1 &&
@@ -150,17 +137,6 @@ export function PreferenceStepper({
 					</div>
 
 					<div className="flex items-center gap-4">
-						{/* Multi-select needs an explicit commit; the single-choice
-						    steps advance on tap and would find a button redundant. */}
-						{step === 0 && draft.moods.length > 0 && (
-							<button
-								type="button"
-								onClick={() => go(draft)}
-								className="stepper__next text-micro uppercase tracking-label"
-							>
-								Continue · {draft.moods.length}
-							</button>
-						)}
 						<button
 							type="button"
 							className="stepper__skip text-micro"
@@ -175,23 +151,20 @@ export function PreferenceStepper({
 	);
 }
 
+/**
+ * No `aria-pressed` and no selected state: tapping an option advances, so an
+ * option is never a toggle that sits pressed. Announcing one would describe a
+ * control this is not.
+ */
 function StepOption<T extends string>({
 	option,
-	selected = false,
 	onSelect,
 }: {
 	option: Option<T>;
-	selected?: boolean;
 	onSelect: () => void;
 }) {
 	return (
-		<button
-			type="button"
-			className="stepper__option"
-			aria-pressed={selected}
-			data-selected={selected || undefined}
-			onClick={onSelect}
-		>
+		<button type="button" className="stepper__option" onClick={onSelect}>
 			<span className="stepper__label text-lead text-ink">{option.label}</span>
 			<span className="stepper__hint mt-0.5 text-caption">{option.hint}</span>
 		</button>
