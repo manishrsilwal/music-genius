@@ -873,7 +873,6 @@ Open. **To be ruled on explicitly — never assumed.**
 
 
 
-| OD-004 | Search API: Tavily vs Google | `/api/insights` | |
 | OD-005 | Genius auth strategy | `/api/track` | Server-held token; rate limits unverified |
 | OD-004 | Grounding provider — Tavily wired and verified; alternatives unevaluated | §3.5 | Researcher plan, 1000 searches/mo. Without a key there is no quote at all (D-021) |
 | OD-007 | Deployment target | Deploy | D-009 keeps this cheap to defer |
@@ -887,6 +886,10 @@ Open. **To be ruled on explicitly — never assumed.**
 
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
 | OD-021 | **Gemini free tier: 20 requests/day.** Launch blocker — needs billing or a pre-warmed catalogue | §3.5 | Accepted for development 2026-08-22 (D-029). Cache absorbs repeats, not first views |
+| OD-022 | No `errorComponent` on any route — a loader throw renders the framework default | Quality | LRCLIB or Genius being down is a normal Tuesday, not an exception |
+| OD-023 | PRD §3.3 annotated phrases are styled but never populated — Genius annotations are not fetched | §3.3 | The `.lyric__annotated` rule exists and nothing applies it |
+| OD-024 | No analytics, so none of the PRD §5 metrics can be measured | Metrics | Lyrics <500ms, 30% drawer engagement, 10% card export are all unobservable |
+| OD-025 | No CI — typecheck, Biome and tests run only when someone remembers | Quality | Everything needed already runs in one command |
 
 
 ### OD-002 is a product risk, not just a technical one
