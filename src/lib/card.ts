@@ -120,6 +120,16 @@ function extractHue(oklch: string): number {
 /** 1080 less the 104px padding either side. */
 const CONTENT_WIDTH = CARD_SIZE - 104 * 2;
 
+/**
+ * Vertical room for the lyric block: the same 872px less the credit line and
+ * the breathing space above it. Without this bound, filling the measure would
+ * push a six-line verse off the bottom of the card.
+ */
+const CONTENT_HEIGHT = CARD_SIZE - 104 * 2 - 92;
+
+/** Ceiling, so a two-word selection does not become a billboard. */
+const MAX_SIZE = 108;
+
 /** Below this the card stops reading as a display piece. */
 const MIN_SIZE = 30;
 
@@ -129,6 +139,9 @@ const MIN_SIZE = 30;
  * cheaper than an orphaned word.
  */
 const FIT_MARGIN = 0.97;
+
+/** Loosest leading we ever apply — used for the height bound so it always holds. */
+const LEADING_MAX = 1.42;
 
 /** Width of `text` at 1px, in em units. */
 export function measureEm(text: string): number {
@@ -141,22 +154,18 @@ export function cardTypeScale(lines: string[]): {
 	size: number;
 	leading: number;
 } {
-	const byCount =
-		lines.length <= 2
-			? 76
-			: lines.length <= 3
-				? 64
-				: lines.length <= 4
-					? 56
-					: 46;
-
 	const widestEm = lines.reduce(
 		(max, line) => Math.max(max, measureEm(line)),
 		0.001,
 	);
-	const byWidth = (CONTENT_WIDTH * FIT_MARGIN) / widestEm;
 
-	const size = Math.max(MIN_SIZE, Math.min(byCount, byWidth));
+	// Width leads (D-020): type grows until it fills the measure, whatever the
+	// script. Devanagari advances are narrower than Latin, so a line-count rule
+	// left those cards filling barely half the width and looking unset.
+	const byWidth = (CONTENT_WIDTH * FIT_MARGIN) / widestEm;
+	const byHeight = CONTENT_HEIGHT / (lines.length * LEADING_MAX);
+
+	const size = Math.max(MIN_SIZE, Math.min(byWidth, byHeight, MAX_SIZE));
 	const leading = size > 60 ? 1.32 : size > 48 ? 1.36 : 1.42;
 
 	return { size: Math.floor(size), leading };

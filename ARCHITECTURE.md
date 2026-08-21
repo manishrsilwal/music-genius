@@ -130,6 +130,30 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-020 — Card type fills the measure
+**Decided 2026-08-22.** Width leads; line count no longer sets the size.
+
+Devanagari advances are narrower than Latin, so a line-count rule capped those
+cards at 56px filling barely half the measure — 427px of 872 — while a Latin
+card at the same line count filled 840px. Devanagari read smaller and emptier
+for no reason a reader could perceive as intentional.
+
+Type now grows until it fills the measure, bounded by three constraints:
+
+| Bound | Value | Why |
+|---|---|---|
+| Width | `872 × 0.97 / widest line` | the measure, with kerning headroom |
+| Height | `780 / (lines × 1.42)` | a six-line verse must not run off the card |
+| Ceiling | 108px | a two-word selection is not a billboard |
+| Floor | 30px | below this it stops reading as display |
+
+The height bound uses the loosest leading we ever apply, so it always holds.
+The trade-off accepted: a card's type size now depends on its content, so two
+selections from the same song can be set differently. Filling the measure was
+judged the better read.
+
+Devanagari moved 56px → 108px, filling 823/872.
+
 ### D-019 — Devanagari: Vesper Libre alongside Rufina
 **Decided 2026-08-22.**
 
@@ -427,7 +451,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-014 | Genius rate limits are undocumented | §3.1 | Cached per artist+title for 30d. Watch for 429s |
 | OD-016 | LRCLIB uploads sometimes set artistName equal to trackName | §3.1 | Mitigated by ranking well-tagged entries higher; underlying data still wrong |
 | OD-017 | Scripts beyond Latin and Devanagari still have no face — Arabic, Bengali, Tamil, CJK would render as tofu | §3.4 | Same class of bug as D-019. Needs a face per script the catalogue serves |
-| OD-019 | Devanagari cards fill only ~half the measure, since line-count caps size before width binds | §3.4 | Design call: fill the measure, or keep scale consistent across scripts |
+
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
 | OD-013 | "Today's Deep Dives" curation — which tracks, refreshed how | §3.1 | Needs OD-003/OD-004 for pre-generated backstories |
 
