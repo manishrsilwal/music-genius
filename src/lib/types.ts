@@ -70,6 +70,38 @@ export interface TrackVisuals {
 	palette: Palette | null;
 }
 
+/** One thing the synthesis was built from (PRD §3.5, "The Source Gallery"). */
+export interface InsightSource {
+	title: string;
+	url: string;
+	kind: "article" | "video";
+	thumbnail: string | null;
+}
+
+/**
+ * A pull-quote from the artist or producer (PRD §3.5, "The Quote").
+ *
+ * Only ever present when it came from a real source. An LLM asked what a song
+ * means will happily invent a plausible quote and attribute it to the artist,
+ * and this product presents context as coming "directly from the original
+ * creators" — so an unsourced quote is not a lesser feature, it is a
+ * fabrication. No source, no quote.
+ */
+export interface InsightQuote {
+	text: string;
+	attribution: string;
+	/** Index into `Insight.sources`. Never null; see above. */
+	sourceIndex: number;
+}
+
+export interface Insight {
+	synthesis: string;
+	quote: InsightQuote | null;
+	sources: InsightSource[];
+	/** True when generated without web grounding — synthesis only, no quote. */
+	ungrounded: boolean;
+}
+
 export interface Track extends TrackSummary {
 	stanzas: Stanza[];
 	/** True when timestamps are present and auto-scroll is possible (PRD §3.2). */

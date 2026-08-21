@@ -8,6 +8,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 
+import { getInsight } from "./insights.server";
 import { getTrack, getTrackVisuals, searchLyrics } from "./lyrics.server";
 
 export const getTrackFn = createServerFn({ method: "GET" })
@@ -31,3 +32,19 @@ export const getTrackVisualsFn = createServerFn({ method: "GET" })
 		artist: String(data?.artist ?? "").trim(),
 	}))
 	.handler(({ data }) => getTrackVisuals(data.title, data.artist));
+
+/**
+ * Insights are requested on demand — the reader presses "Discover the Story"
+ * (PRD §4) — so this is never called from a loader.
+ */
+export const getInsightFn = createServerFn({ method: "GET" })
+	.validator((data: { id: string }) => ({ id: String(data?.id ?? "").trim() }))
+	.handler(async ({ data }) => {
+		const track = await getTrack(data.id);
+		if (!track) return null;
+		return getInsight({
+			title: track.title,
+			artist: track.artist,
+			stanzas: track.stanzas,
+		});
+	});

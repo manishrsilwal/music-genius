@@ -5,7 +5,9 @@ import {
 	Link,
 	notFound,
 } from "@tanstack/react-router";
+import { useState } from "react";
 
+import { InsightsAffordance } from "@/features/insights/components/insights-affordance";
 import { CardAffordance } from "@/features/lyric-card/components/card-affordance";
 import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
 import { PaletteStyle } from "@/features/scrollytelling/components/palette-style";
@@ -61,9 +63,14 @@ export const Route = createFileRoute("/track/$trackId")({
 
 function TrackPage() {
 	const { track, visuals } = Route.useLoaderData();
+	const [drawerOpen, setDrawerOpen] = useState(false);
 
 	return (
-		<article data-track-scope={track.id}>
+		<article
+			className="track-shell"
+			data-track-scope={track.id}
+			data-drawer={drawerOpen ? "open" : "closed"}
+		>
 			{/* Mounts alongside once the palette resolves, repainting every accent
 			    utility at once without disturbing anything already on screen. */}
 			<Await promise={visuals} fallback={null}>
@@ -93,6 +100,8 @@ function TrackPage() {
 					/>
 				)}
 			</Await>
+
+			<InsightsAffordance trackId={track.id} onOpenChange={setDrawerOpen} />
 
 			<footer className="pb-32 text-center">
 				<Link

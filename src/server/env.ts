@@ -18,11 +18,35 @@ function read(name: string): string | undefined {
 export const env = {
 	/** Genius API client access token — album art and metadata (OD-005). */
 	geniusAccessToken: read("GENIUS_ACCESS_TOKEN"),
+
+	/** Gemini — synthesis for the insights drawer (OD-003). */
+	geminiApiKey: read("GEMINI_API_KEY"),
+	/**
+	 * Model names churn fast, so this is configurable rather than pinned in
+	 * code. Override when a newer or cheaper model is available.
+	 */
+	geminiModel: read("GEMINI_MODEL") ?? "gemini-2.5-flash",
+
+	/** Tavily — web grounding for the sources gallery (OD-004). */
+	tavilyApiKey: read("TAVILY_API_KEY"),
 } as const;
 
 /** What this deployment can actually do, given the secrets present. */
 export const features = {
 	get artwork(): boolean {
 		return Boolean(env.geniusAccessToken);
+	},
+
+	/** The drawer needs an LLM at minimum. */
+	get insights(): boolean {
+		return Boolean(env.geminiApiKey);
+	},
+
+	/**
+	 * Web grounding. Without it the synthesis is written from the lyrics alone,
+	 * which is honest but thinner — and means no quote at all.
+	 */
+	get grounding(): boolean {
+		return Boolean(env.tavilyApiKey);
 	},
 } as const;

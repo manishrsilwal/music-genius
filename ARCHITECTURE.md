@@ -6,7 +6,8 @@ logged here with its rationale and its rejected alternatives.
 **Rule:** nothing is decided by assumption. Anything unresolved lives in
 [Deferred Decisions](#deferred-decisions) until explicitly ruled on.
 
-- **Status:** Block 3 complete — Lyric Card export shipping; selection → composer → PNG verified
+- **Status:** Block 4 — insights drawer built; awaiting a Gemini key to verify against real output
+- **Previously:** Block 3 complete — Lyric Card export shipping; selection → composer → PNG verified
 - **Last updated:** 2026-08-21
 - **Source of truth:** `prd-doc/Typographic_Lyrical_Explorer_PRD_v2.pdf` (v2.0)
 
@@ -129,6 +130,45 @@ Switching target later must be a one-file change per subsystem.
 
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
+
+### D-021 — Insights: no source, no quote
+**Decided 2026-08-22.** Gemini via REST (OD-003); Tavily for grounding (OD-004).
+
+PRD §3.5 asks for "a highlighted pull-quote from the artist or producer", and
+the product promises context "directly from the original creators". An LLM
+asked what a song means will readily invent a plausible quote and attribute it
+to a named, living person. That is not a weaker feature — it is a fabrication
+about a real individual.
+
+So the quote is gated three times over:
+
+1. The prompt forbids invention in absolute terms and states that returning
+   null is the correct answer.
+2. The response schema requires a `sourceIndex` alongside every quote.
+3. **`validateQuote` discards any quote whose `sourceIndex` does not point at a
+   real gathered source.** Prompts are guidance; this is enforcement.
+
+With no `TAVILY_API_KEY` there are no sources, therefore no quote — ever. The
+drawer says so plainly rather than quietly dropping the slot.
+
+**Typography.** The quote is set in Elms Sans *italic*, not Rufina. Rufina
+ships no italic and synthesising one shears the letterforms at that size
+(D-005). The serif→sans shift also marks the quote as a different voice from
+the song, which it is. Resolves OD-006.
+
+**Progressive by default.** Generation starts on mount, not on click: PRD §4
+puts the 3–6s behind the reader rather than in front of them. The button
+shimmers while the model works and illuminates when ready.
+
+**Two behaviours, not one restyled.** Desktop compresses the canvas with a
+side panel so the reader keeps their place; mobile is a sheet over the lower
+half with the lyrics still visible (PRD §3.5). Only the sheet's grip is a drag
+surface — `dragListener={false}` plus explicit `dragControls` — otherwise the
+body could not scroll.
+
+**REST, not the SDK.** One fewer dependency, and it keeps D-009's
+runtime-agnostic constraint. `GEMINI_MODEL` is configurable because model names
+churn; a 404 logs that specifically.
 
 ### D-020 — Card type fills the measure
 **Decided 2026-08-22.** Width leads; line count no longer sets the size.
@@ -439,10 +479,10 @@ Open. **To be ruled on explicitly — never assumed.**
 |---|---|---|---|
 | OD-001 | Cache backend concrete impl | `/api/track` | Follows D-009. Upstash Redis likely (HTTP ⇒ runtime-agnostic) |
 | OD-002 | Audio SDK: Spotify vs YouTube | §3.2 playback | **Product risk** — see below |
-| OD-003 | LLM provider: Gemini vs OpenAI | `/api/insights` | Cost/latency/quality tradeoff |
+
 | OD-004 | Search API: Tavily vs Google | `/api/insights` | |
 | OD-005 | Genius auth strategy | `/api/track` | Server-held token; rate limits unverified |
-| OD-006 | Pull-quote treatment given no Rufina italic | §3.5 | Options to be presented |
+| OD-004 | Grounding provider — Tavily wired; alternatives unevaluated | §3.5 | Without a key there is no quote at all (D-021) |
 | OD-007 | Deployment target | Deploy | D-009 keeps this cheap to defer |
 | OD-008 | React Compiler (`compiler` add-on) — auto-memoization | Perf | Available but NOT enabled. Interaction with `motion` unverified |
 | OD-009 | Build-time env validation (`t3env` add-on) | API blocks | Attractive given 4+ secrets across OD-002..005 |
