@@ -6,7 +6,7 @@ logged here with its rationale and its rejected alternatives.
 **Rule:** nothing is decided by assumption. Anything unresolved lives in
 [Deferred Decisions](#deferred-decisions) until explicitly ruled on.
 
-- **Status:** Block 2 — visual layer wired (Genius + palette); awaiting a token to verify against live artwork
+- **Status:** Block 2 complete — visual layer verified against live Genius and real album art
 - **Last updated:** 2026-08-21
 - **Source of truth:** `prd-doc/Typographic_Lyrical_Explorer_PRD_v2.pdf` (v2.0)
 
@@ -324,7 +324,8 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-009 | Build-time env validation (`t3env` add-on) | API blocks | Attractive given 4+ secrets across OD-002..005 |
 | OD-010 | Testing strategy — none scaffolded | Quality | No runner installed; `--no-examples` skipped test setup |
 | OD-011 | Playback state store — React context vs TanStack Store | §3.2/§3.3 | Auto-scroll couples playback time to canvas |
-| OD-014 | Genius rate limits are undocumented; autocomplete does up to 8 artwork lookups per cold search | §3.1 | Mitigated by caching each lookup by artist+title for 30d. Watch for 429s |
+| OD-014 | Genius rate limits are undocumented | §3.1 | Cached per artist+title for 30d. Watch for 429s |
+| OD-015 | **Cold-path latency.** Track page 1.6s cold / 8.9ms warm; search 2.07s cold. PRD §5 wants <500ms | §3.1/§4 | Artwork and palette are fetched serially *before* first byte. Needs a progressive strategy |
 | OD-013 | "Today's Deep Dives" curation — which tracks, refreshed how | §3.1 | Needs OD-003/OD-004 for pre-generated backstories |
 
 ### OD-002 is a product risk, not just a technical one
