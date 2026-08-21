@@ -1,3 +1,5 @@
+import type { SyntheticEvent } from "react";
+
 import type { Insight } from "@/lib/types";
 
 /**
@@ -5,6 +7,14 @@ import type { Insight } from "@/lib/types";
  * Shared verbatim by the desktop panel and the mobile sheet, so the two can
  * never drift apart.
  */
+/**
+ * Favicons and YouTube stills 404 often enough to matter. A broken-image glyph
+ * in an editorial gallery is worse than no image at all, so drop it silently.
+ */
+function hide(event: SyntheticEvent<HTMLImageElement>) {
+	event.currentTarget.style.display = "none";
+}
+
 export function InsightsContent({ insight }: { insight: Insight }) {
 	return (
 		<div className="insights">
@@ -41,7 +51,25 @@ export function InsightsContent({ insight }: { insight: Insight }) {
 								rel="noreferrer noopener"
 								className="insights__source"
 							>
-								<span className="insights__label text-micro">
+								{source.kind === "video" && source.thumbnail && (
+									<img
+										src={source.thumbnail}
+										alt=""
+										loading="lazy"
+										className="insights__source-still"
+										onError={hide}
+									/>
+								)}
+								<span className="insights__source-kind text-micro">
+									{source.kind === "article" && source.thumbnail && (
+										<img
+											src={source.thumbnail}
+											alt=""
+											loading="lazy"
+											className="insights__source-mark"
+											onError={hide}
+										/>
+									)}
 									{source.kind === "video" ? "Video" : "Article"}
 								</span>
 								<span className="mt-2 block text-caption">{source.title}</span>

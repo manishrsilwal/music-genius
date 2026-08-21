@@ -10,6 +10,7 @@
 
 import type { InsightSource } from "../../lib/types";
 import { env, features } from "../env";
+import { toVideoId } from "../genius.server";
 
 const TAVILY = "https://api.tavily.com/search";
 
@@ -17,7 +18,20 @@ interface TavilyResult {
 	title?: string;
 	url?: string;
 	content?: string;
+	favicon?: string;
 }
+
+/**
+ * Roughly a third of what Tavily returns for a song is a social-media stub —
+ * a facebook or instagram page whose entire excerpt is 140 characters of
+ * title and boilerplate. It cannot ground a quote, and listing it in the
+ * Source Gallery claims it fed the synthesis when it did not. Over-fetch and
+ * drop them rather than showing the reader a link to nothing.
+ */
+const MIN_EXCERPT = 250;
+
+/** Over-fetch to absorb what MIN_EXCERPT removes. Still one Tavily search. */
+const FETCH_COUNT = 8;
 
 export interface GroundingResult {
 	sources: InsightSource[];
@@ -29,6 +43,19 @@ const EMPTY: GroundingResult = { sources: [], excerpts: [] };
 
 function classify(url: string): "article" | "video" {
 	return /youtube\.com|youtu\.be|vimeo\.com/.test(url) ? "video" : "article";
+}
+
+/**
+ * PRD §3.5 asks the gallery for "YouTube thumbnails or article headlines".
+ * A video gets its real still, built from the id rather than fetched. An
+ * article falls back to the site's favicon, which Tavily already returns —
+ * a weaker visual, but it costs no extra request and gives each card an
+ * anchor beside the headline.
+ */
+function thumbnailFor(url: string, favicon: string | undefined): string | null {
+	const videoId = toVideoId(url);
+	if (videoId) return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+	return favicon?.trim() || null;
 }
 
 /**
@@ -51,7 +78,8 @@ export async function gatherSources(
 			body: JSON.stringify({
 				query: `"${title}" "${artist}" song meaning interview songwriter`,
 				search_depth: "advanced",
-				max_results: 6,
+				max_results: FETCH_COUNT,
+				include_favicon: true,
 			}),
 			signal: AbortSignal.timeout(8000),
 		});
@@ -62,14 +90,16 @@ export async function gatherSources(
 		}
 
 		const payload = (await response.json()) as { results?: TavilyResult[] };
-		const results = (payload.results ?? []).filter((r) => r.url && r.title);
+		const results = (payload.results ?? []).filter(
+			(r) => r.url && r.title && (r.content?.length ?? 0) >= MIN_EXCERPT,
+		);
 
 		return {
 			sources: results.map((r) => ({
 				title: String(r.title),
 				url: String(r.url),
 				kind: classify(String(r.url)),
-				thumbnail: null,
+				thumbnail: thumbnailFor(String(r.url), r.favicon),
 			})),
 			excerpts: results.map(
 				(r, i) => `[${i}] ${r.title}\n${(r.content ?? "").slice(0, 1200)}`,

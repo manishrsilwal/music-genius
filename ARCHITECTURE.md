@@ -131,6 +131,39 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-031 — Grounding keeps what can actually ground
+**Decided 2026-08-22.** `gatherSources` fetches 8 results and discards any whose
+excerpt is under 250 characters. `InsightSource.thumbnail`, previously `null`
+everywhere and read nowhere, is now populated.
+
+Roughly a third of what Tavily returns for a song is a social-media stub — a
+Facebook or Instagram page whose entire excerpt is ~140 characters of title and
+boilerplate. Two costs: the model gets nothing to quote from, and the Source
+Gallery lists a link that never fed the synthesis, which is a small lie about
+provenance. Over-fetching absorbs the loss at no extra cost — still one Tavily
+search. Measured across four tracks: 5–8 usable sources kept, 0–3 stubs dropped.
+
+Excluding lyrics and social domains outright was tested and **rejected**. It
+looked decisive on the first track sampled, but across three it cost more than
+it saved — Genius annotation pages carry real editorial prose, and dropping
+them took *Wish You Were Here* from 6 usable sources to 4. Excerpt length is
+the honest signal; the domain is not.
+
+For thumbnails, PRD §3.5 asks for "YouTube thumbnails or article headlines". A
+video result gets its true still, constructed from the id via `toVideoId`
+rather than fetched. An article falls back to the favicon Tavily already
+returns — a weaker visual, but free. Both 404 often enough that a failed load
+hides the element rather than showing a broken-image glyph.
+
+> **Cache:** the insight key is now `insight:v2:`. Entries live 30 days, so
+> without a bump the reader would keep receiving insights built under the old
+> rules for a month — quotes that predate the verbatim gate (D-030) and sources
+> with no thumbnail. The D-029 note that "every cached entry stays valid" held
+> for the paragraph join alone; these two changes altered the stored shape.
+
+> **Quota:** Tavily is on the Researcher plan — 1000 searches/month, and one
+> search per uncached track. Far less binding than Gemini's 20/day (OD-021).
+
 ### D-030 — The quote gate verifies the text, not just the citation
 **Decided 2026-08-22.** `validateQuote` now requires the quote to appear in the
 excerpt it cites, not merely that `sourceIndex` is in range.
@@ -735,7 +768,7 @@ Open. **To be ruled on explicitly — never assumed.**
 
 | OD-004 | Search API: Tavily vs Google | `/api/insights` | |
 | OD-005 | Genius auth strategy | `/api/track` | Server-held token; rate limits unverified |
-| OD-004 | Grounding provider — Tavily wired; alternatives unevaluated | §3.5 | Without a key there is no quote at all (D-021) |
+| OD-004 | Grounding provider — Tavily wired and verified; alternatives unevaluated | §3.5 | Researcher plan, 1000 searches/mo. Without a key there is no quote at all (D-021) |
 | OD-007 | Deployment target | Deploy | D-009 keeps this cheap to defer |
 | OD-008 | React Compiler (`compiler` add-on) — auto-memoization | Perf | Available but NOT enabled. Interaction with `motion` unverified |
 | OD-009 | Build-time env validation (`t3env` add-on) | API blocks | Attractive given 4+ secrets across OD-002..005 |

@@ -33,7 +33,11 @@ export async function getInsight(args: {
 }): Promise<Insight | null> {
 	if (!features.insights) return null;
 
-	const key = `insight:${args.artist.toLowerCase()}::${args.title.toLowerCase()}`;
+	// Bumped whenever the stored shape or the gating rules change. Entries live
+	// for 30 days, so without this the reader would keep getting insights built
+	// under the old rules — including quotes that predate the verbatim gate
+	// (D-030) and sources with no thumbnail (D-031).
+	const key = `insight:v2:${args.artist.toLowerCase()}::${args.title.toLowerCase()}`;
 
 	return cached(key, INSIGHT_TTL, async () => {
 		// Grounding first: the synthesis is materially better with sources, and

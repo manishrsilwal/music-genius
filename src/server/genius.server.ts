@@ -199,7 +199,7 @@ export async function findArtwork(
    ---------------------------------------------------------------------- */
 
 /** `watch?v=`, `youtu.be/`, and `/embed/` forms. */
-function toVideoId(url: string): string | null {
+export function toVideoId(url: string): string | null {
 	const match =
 		url.match(/[?&]v=([\w-]{11})/) ??
 		url.match(/youtu\.be\/([\w-]{11})/) ??
