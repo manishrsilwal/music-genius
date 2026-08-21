@@ -10,13 +10,22 @@
 // ── "Discover the Story" ────────────────────────────────────────────────────
 .discover {
 	position: fixed;
-	z-index: 40;
-	right: 1.5rem;
-	bottom: 1.5rem;
+	// Same layer as the playback bar, because they are one dock rather than
+	// two things competing for a corner. Stacking is done by offset, not by
+	// z-index (D-033).
+	z-index: var(--layer-dock);
+	right: var(--dock-inset);
+	// Resolved by .track-shell below, which knows what else is on screen.
+	bottom: var(--discover-bottom, calc(var(--dock-inset) + var(--dock-safe)));
 	border-radius: 999px;
 	font-family: var(--font-ui);
 	cursor: pointer;
+	transition: bottom 0.42s var(--ease-editorial);
 	@include m.glass;
+
+	@include m.reduced-motion {
+		transition: none;
+	}
 
 	// While the model works, a slow sheen crosses the button — present enough
 	// to say "something is coming", quiet enough to ignore (PRD §4).
@@ -173,9 +182,8 @@
 	position: fixed;
 	top: 0;
 	right: 0;
-	z-index: 45;
-	width: 30rem;
-	max-width: 34vw;
+	z-index: var(--layer-overlay);
+	width: var(--drawer-width);
 	height: 100dvh;
 	overflow-y: auto;
 	padding: 5rem 1.75rem 3rem;
@@ -184,17 +192,67 @@
 }
 
 // The canvas is squeezed rather than covered, so the reader keeps their place.
+//
+// Where the Discover button sits is resolved HERE, as a single inherited
+// custom property, rather than as competing descendant rules. Written as
+// rules they collided: `.track-shell:has(.playback) .discover` and
+// `.track-shell[data-drawer="open"] .discover` both score (0,3,0), so source
+// order silently decided which won. As nested custom properties the cascade
+// reads top to bottom and each case plainly out-specifies the one above it.
 .track-shell {
+	--discover-bottom: calc(var(--dock-inset) + var(--dock-safe));
+
 	transition: padding-right 0.42s var(--ease-editorial);
+
+	// The bar owns the corner when it is on screen; the button stacks above
+	// it. Nothing is measured — --dock-reach is declared next to the height it
+	// describes (D-033).
+	&:has(.playback) {
+		--discover-bottom: calc(var(--dock-reach) + var(--dock-gap));
+	}
 
 	&[data-drawer="open"] {
 		@include m.from("lg") {
-			padding-right: min(30rem, 34vw);
+			padding-right: var(--drawer-width);
+
+			// Padding moves the canvas but not the dock: `position: fixed`
+			// children ignore an ancestor's padding entirely. Without this the
+			// panel opened on top of the playback bar AND on top of the button
+			// that closes it, leaving Escape as the only way out (D-033).
+			.playback,
+			.discover {
+				transform: translateX(calc(var(--drawer-width) * -1));
+			}
+		}
+
+		// Below `lg` the drawer is a sheet across the bottom half — exactly
+		// where the dock lives. The bar rides up onto the sheet's edge rather
+		// than being buried by it: the player must stay visible (D-022), and
+		// pausing should not require closing the story first.
+		@include m.until("lg") {
+			--discover-bottom: calc(var(--drawer-sheet-height) + var(--dock-gap));
+
+			.playback {
+				transform: translateY(calc(var(--drawer-sheet-height) * -1));
+			}
+
+			&:has(.playback) {
+				--discover-bottom: calc(
+					var(--drawer-sheet-height) + var(--dock-reach) + var(--dock-gap)
+				);
+			}
 		}
 	}
 
 	@include m.reduced-motion {
 		transition: none;
+	}
+
+	// Clearance for the dock. Was a fixed `pb-32` that happened to be enough
+	// and was tied to nothing; now it follows the dock's declared height, plus
+	// room for the Discover button stacking above it.
+	&__foot {
+		padding-bottom: calc(var(--dock-reach) + var(--dock-gap) + 5rem);
 	}
 }
 
@@ -203,9 +261,10 @@
 	position: fixed;
 	inset-inline: 0;
 	bottom: 0;
-	z-index: 45;
+	z-index: var(--layer-overlay);
 	// PRD §3.5: half the screen, so the lyrics stay visible above it.
-	height: 50dvh;
+	height: var(--drawer-sheet-height);
+	padding-bottom: var(--dock-safe);
 	display: flex;
 	flex-direction: column;
 	border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;

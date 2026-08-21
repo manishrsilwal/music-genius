@@ -40,6 +40,49 @@
   --glass-bg: oklch(1 0 0 / 0.06);
   --glass-border: oklch(1 0 0 / 0.14);
   --glass-blur: 20px;
+
+  /* --- Layering (D-033) ---------------------------------------------------
+     Named by role, not by number. Six ad-hoc z-indexes spread across five
+     files is what let the Discover button and the playback bar claim the
+     same corner without either file knowing about the other. Anything that
+     floats takes a layer from here; nothing writes a bare number. */
+  --layer-hero-art: -2;
+  --layer-hero-veil: -1;
+  --layer-autocomplete: 20;
+  --layer-dock: 35;
+  --layer-overlay: 45;
+  --layer-tooltip: 50;
+  --layer-modal: 60;
+
+  /* --- The dock (D-033) ---------------------------------------------------
+     The playback bar and the Discover button share the bottom-right corner.
+     The bar's height is DECLARED here and its contents are sized to fit it,
+     rather than the height falling out of whatever the contents happen to
+     measure — so anything stacking above can offset by a value that is true
+     by construction. */
+  --dock-inset: 1.5rem;
+  --dock-gap: 0.75rem;
+  --dock-pad: 0.5rem;
+  --dock-height: 4.5rem;
+  /* Home indicator on iOS; 0 everywhere else. */
+  --dock-safe: env(safe-area-inset-bottom, 0px);
+  /* How far up from the viewport floor the bar reaches. */
+  --dock-reach: calc(var(--dock-height) + var(--dock-safe));
+
+  /* --- Insights drawer (PRD §3.5) -----------------------------------------
+     Shared by the panel itself, the canvas compression, and the dock offset,
+     so the three can never disagree about how wide the drawer is. */
+  --drawer-width: min(30rem, 34vw);
+  --drawer-sheet-height: 50dvh;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    /* Detached and inset from the corner, so it reaches further up. */
+    --dock-height: 6rem;
+    --dock-pad: 0.75rem;
+    --dock-reach: calc(var(--dock-inset) + var(--dock-height));
+  }
 }
 
 @theme {
@@ -135,6 +178,18 @@
   .font-display,
   [class*="font-display"] {
     font-synthesis: none;
+  }
+
+  /* Keyboard focus (D-035).
+     Written once, as an opt-out rather than an opt-in: six of seven controls
+     had no focus style, each relying on a default outline that a dark
+     glassmorphic surface all but swallows. `:where()` keeps specificity at
+     zero, so a component that wants a different ring simply writes one and
+     wins without !important. */
+  :where(a, button, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid var(--track-accent);
+    outline-offset: 3px;
+    border-radius: inherit;
   }
 
   /* Selection is a first-class interaction here: PRD §3.4 turns a 2–4 line

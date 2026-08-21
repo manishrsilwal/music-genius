@@ -1,5 +1,8 @@
 # Architecture — Typographic Lyrical Explorer
 
+> Design conventions — type, colour, layering, motion, interaction —
+> live in [DESIGN.md](./DESIGN.md).
+
 Living decision record. Every architectural, API, and state-management decision is
 logged here with its rationale and its rejected alternatives.
 
@@ -130,6 +133,72 @@ Switching target later must be a one-file change per subsystem.
 
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
+
+### D-035 — Focus and touch are platform rules, not component choices
+**Decided 2026-08-22.** A single `:focus-visible` rule in `@layer base`, and a
+`tap-target` mixin for controls whose padding cannot grow.
+
+Six of seven interactive controls defined no focus style at all. Each fell back
+to the browser default outline, which on a dark glassmorphic surface is close
+to invisible. Written per component this recurs forever — every new control is
+another chance to forget — so it is written once as an **opt-out**, wrapped in
+`:where()` so specificity stays at zero and any component that wants a
+different ring simply writes one and wins.
+
+Touch targets are held to 44px. WCAG 2.5.8 requires only 24px, which is too
+mean for a playback bar tapped one-handed while reading; Resync measured 32px
+and play/pause 40px. Both grow via a centred transparent `::after` rather than
+padding, because the dock's height is declared (D-033) and growing a child
+would falsify it.
+
+### D-034 — Bottom-edge surfaces respect the safe area
+**Decided 2026-08-22.** Nothing in the codebase used `env(safe-area-inset-*)`.
+The playback bar and the mobile insights sheet both anchor to `bottom: 0`, so
+on any iPhone with a home indicator they sat underneath it. `--dock-safe`
+carries the inset and is folded into `--dock-reach`, so every offset computed
+from the dock inherits it rather than each site remembering.
+
+### D-033 — Floating elements share a dock and a layer scale
+**Fixed 2026-08-22.** Reported with a screenshot: the "Preparing the story"
+pill sitting on top of the playback bar, covering the pause control.
+
+Three faults, one cause. `.discover` and `.playback` both hard-coded
+`right: 1.5rem; bottom: 1.5rem` in separate files, with z-indexes of 40 and 35
+chosen independently — six ad-hoc values across five files, no scale, nothing
+declaring what stacks above what. Neither file knew the other existed.
+
+Worse was the second instance, which the screenshot did not show. Opening the
+drawer on desktop compresses the canvas with `padding-right`, and **padding
+does not move `position: fixed` children**. The 30rem panel therefore opened on
+top of the playback bar *and* on top of the button that closes the drawer.
+Escape still worked; nothing visible did.
+
+The fix is structural rather than cosmetic:
+
+- **A named layer scale** in `styles.css`. Roles, not numbers. Nothing writes a
+  bare `z-index`.
+- **One dock.** The bar and the button share `--layer-dock` and stack by
+  offset, because they are queued rather than competing.
+- **The bar's height is declared and its contents sized to fit**, inverting the
+  old dependency. `--dock-reach` is therefore true by construction, and the
+  button above can offset by it without measuring — which matters because there
+  is no browser in this environment to measure with.
+- **The dock translates with the canvas** when the drawer opens, by the same
+  `--drawer-width` the padding uses, so the three can never disagree.
+- **On mobile the bar rides above the sheet** rather than being buried by it.
+  The player must stay visible (D-022), and pausing should not require closing
+  the story first.
+
+> **Cascade:** where the button sits is resolved as one inherited custom
+> property, not as competing descendant rules. `.track-shell:has(.playback)
+> .discover` and `.track-shell[data-drawer="open"] .discover` **both score
+> (0,3,0)**, so source order silently decided which won — and the first draft
+> of this fix got it backwards, burying the button under the sheet. Nested
+> custom properties make each case plainly out-specify the one above it.
+
+> **Do not nest overlays in the dock.** `position: fixed` creates a stacking
+> context, so a drawer rendered inside the dock could never rise above it. They
+> stay siblings.
 
 ### D-032 — Every step advances on tap
 **Decided 2026-08-22.** Reported: "after step 1, I need to click Continue. Let's

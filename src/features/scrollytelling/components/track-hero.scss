@@ -11,7 +11,7 @@
 	&__art {
 		position: absolute;
 		inset: 0;
-		z-index: -2;
+		z-index: var(--layer-hero-art);
 		overflow: hidden;
 
 		img {
@@ -31,7 +31,7 @@
 	&__veil {
 		position: absolute;
 		inset: 0;
-		z-index: -1;
+		z-index: var(--layer-hero-veil);
 		background:
 			radial-gradient(120% 80% at 50% 0%, transparent 0%, var(--color-canvas) 78%),
 			linear-gradient(to bottom, oklch(0.13 0.008 265 / 0.55), var(--color-canvas));

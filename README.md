@@ -3,7 +3,8 @@
 Lyrics as a premium editorial reading experience — synced to audio, annotated with
 AI-synthesized context, and beautifully set.
 
-> **Architecture decisions live in [ARCHITECTURE.md](./ARCHITECTURE.md).**
+> **Architecture decisions live in [doc/ARCHITECTURE.md](./doc/ARCHITECTURE.md);
+> design conventions in [doc/DESIGN.md](./doc/DESIGN.md).**
 > Nothing is decided by assumption; open questions are tracked there as
 > *Deferred Decisions* until explicitly ruled on.
 

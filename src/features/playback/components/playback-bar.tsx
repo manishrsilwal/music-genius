@@ -93,7 +93,7 @@ export function PlaybackBar({
 				onClick={toggle}
 				disabled={!ready}
 				aria-label={playing ? "Pause" : "Play"}
-				className="flex-none rounded-full border border-hairline px-4 py-2 font-ui text-caption text-ink disabled:opacity-50"
+				className="playback__toggle flex-none rounded-full border border-hairline px-4 py-2 font-ui text-caption text-ink disabled:opacity-50"
 			>
 				{playing ? "Pause" : "Play"}
 			</button>

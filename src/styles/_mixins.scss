@@ -8,6 +8,14 @@
 	}
 }
 
+/// Max-width media query by breakpoint name — the exclusive complement of
+/// `from`, so `from("lg")` and `until("lg")` never both match.
+@mixin until($name) {
+	@media (max-width: #{bp.screen($name) - 0.001}) {
+		@content;
+	}
+}
+
 /// Respect the user's motion preference.
 /// We degrade rather than disable — see src/lib/motion.ts.
 @mixin reduced-motion {
@@ -23,6 +31,26 @@
 	border: 1px solid var(--glass-border);
 	backdrop-filter: blur(var(--glass-blur));
 	-webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+/// Extend a control's touch target without changing how big it looks.
+///
+/// WCAG 2.5.8 requires only 24px, which is too mean for a bar the reader taps
+/// one-handed while reading; 44px is the Apple HIG figure and what this
+/// platform holds itself to (D-035). Padding is the wrong tool here — the
+/// dock's height is declared, and growing a child would falsify it.
+@mixin tap-target($min: 2.75rem) {
+	position: relative;
+
+	&::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		translate: -50% -50%;
+		width: max(100%, #{$min});
+		height: max(100%, #{$min});
+	}
 }
 
 /// Clamp text to a number of lines.

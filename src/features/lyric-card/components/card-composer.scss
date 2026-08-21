@@ -6,7 +6,7 @@
 .composer {
 	position: fixed;
 	inset: 0;
-	z-index: 60;
+	z-index: var(--layer-modal);
 	display: grid;
 	place-items: center;
 	padding: 1.5rem;
@@ -90,7 +90,7 @@
 // Selection tooltip — the entry point into all of the above.
 .card-tip {
 	position: fixed;
-	z-index: 50;
+	z-index: var(--layer-tooltip);
 	transform: translate(-50%, -100%);
 	@include m.glass;
 	border-radius: 999px;

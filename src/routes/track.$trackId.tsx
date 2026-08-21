@@ -121,7 +121,7 @@ function TrackPage() {
 
 			<InsightsAffordance trackId={track.id} onOpenChange={setDrawerOpen} />
 
-			<footer className="pb-32 text-center">
+			<footer className="track-shell__foot text-center">
 				<Link
 					to="/"
 					className="text-caption uppercase tracking-label text-accent"
