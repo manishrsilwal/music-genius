@@ -76,3 +76,37 @@ function DiveArt({ title, artist }: { title: string; artist: string }) {
 		</span>
 	);
 }
+
+/**
+ * "People also like" (PRD §3.1, extended).
+ *
+ * A longer shelf so discovery is not capped at three. Deliberately denser and
+ * quieter than the Deep Dives cards: this is a list to browse past, not three
+ * things to weigh.
+ */
+export function AlsoLiked({ picks }: { picks: CuratedTrack[] }) {
+	return (
+		<motion.div
+			className="also"
+			variants={staggerVariants}
+			initial="hidden"
+			animate="visible"
+		>
+			{picks.map((pick) => (
+				<motion.div
+					key={`${pick.artist}-${pick.title}`}
+					variants={riseVariants}
+				>
+					<Link
+						to="/track/$trackId"
+						params={{ trackId: pick.lrclibId }}
+						className="also__row"
+					>
+						<span className="also__title text-caption">{pick.title}</span>
+						<span className="also__artist text-micro">{pick.artist}</span>
+					</Link>
+				</motion.div>
+			))}
+		</motion.div>
+	);
+}

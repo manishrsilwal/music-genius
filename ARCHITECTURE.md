@@ -131,6 +131,55 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-028 — Landing page sized for a doorway, not a poster
+**Fixed 2026-08-22.** Reported: "huge fonts, the user has to scroll first then
+answer the question."
+
+The landing centred itself in a full-height flex column with the hero at the
+full `--text-display` scale (up to 5.5rem). On a laptop that pushed the first
+question below the fold — so the reader had to scroll before they could answer,
+which is precisely the friction the stepper exists to remove.
+
+The page now starts near the top, the hero caps at `clamp(2rem, 4.5vw, 3rem)`,
+and the stepper's internal spacing is tightened. Budget above the fold is
+roughly 540px, comfortable even on a 700px viewport.
+
+The **track page keeps the full display scale** — that is where a hero belongs.
+This is a landing-specific size, not a change to the type system.
+
+### D-027 — Preferences describe the reader, not the record
+**Revised 2026-08-22.** Replaces the mood/language/era stepper.
+
+Language and era were **binary partitions**: each step halved the pool, so
+three questions cut 45 tracks to roughly six, and a reader who enjoys both
+English and Hindi was forced to pick a side. They described the *record*.
+
+The axes now describe the *reader*:
+
+| Axis | Weight | Why |
+|---|---|---|
+| **Mood** (multi-select) | 3 | What they came in feeling. Multi-select so two answers **widen** the shelf. |
+| **Pull** — story / craft / honesty / imagery | 2 | What they value in writing. The most on-brand axis for a typographic lyrics product. |
+| **Familiarity** — canon / deep / surprise | 1.5 | Where ownership lands: "show me things I don't know." |
+
+**Language and era are still recorded but never scored.** They now drive a
+diversity pass instead: each already-picked language, era and artist penalises
+the next candidate, so the shelf mixes on its own without the reader choosing a
+side. Artist repetition is penalised hardest — the same name twice in three
+picks reads as a bug.
+
+"Surprise me" is a real answer meaning *no preference*, and scores nothing —
+distinct from an unanswered step, though they rank the same.
+
+**Two shelves, not three picks.** Discovery is no longer capped: the headline
+Deep Dives (3) sit above a longer "People also like" (12), drawn from what the
+first shelf did not take, preference-weighted but shuffled so it reads as a
+wander rather than positions 4–15 of the same ranking.
+
+Catalogue grew to **56 verified tracks** to support the new axes — all 16
+mood×pull cells covered, deep cuts raised to 41% so "deep" has somewhere to go,
+and English/Hindi balanced 27/29. All 56 verified live against `/api/track`.
+
 ### D-026 — Deep Dives: ask, then curate
 **Decided 2026-08-22.** Resolves OD-013 and completes PRD §3.1.
 

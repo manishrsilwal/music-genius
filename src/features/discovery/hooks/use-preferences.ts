@@ -16,9 +16,9 @@ import type { Preferences } from "@/lib/deep-dives";
 const KEY = "tle:preferences";
 
 export const EMPTY_PREFERENCES: Preferences = {
-	mood: null,
-	language: null,
-	era: null,
+	moods: [],
+	pull: null,
+	familiarity: null,
 };
 
 export interface PreferencesState {
@@ -38,7 +38,14 @@ export function usePreferences(): PreferencesState {
 		try {
 			const stored = window.localStorage.getItem(KEY);
 			if (stored) {
-				setPreferences({ ...EMPTY_PREFERENCES, ...JSON.parse(stored) });
+				const parsed = JSON.parse(stored) as Partial<Preferences>;
+				// Older saves used a single `mood` plus language/era; anything
+				// unrecognised falls back to empty rather than throwing.
+				setPreferences({
+					...EMPTY_PREFERENCES,
+					...parsed,
+					moods: Array.isArray(parsed.moods) ? parsed.moods : [],
+				});
 				setAnswered(true);
 			} else {
 				setAnswered(false);

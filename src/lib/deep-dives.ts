@@ -9,26 +9,32 @@
  * that did not resolve were dropped rather than shipped — a recommendation
  * that leads to a dead page is worse than one fewer recommendation.
  *
- * `lrclibId` is captured so a pick links straight to its track without a
- * search round-trip. It is a hint, not a guarantee: LRCLIB ids are per-upload,
- * so a removed upload falls back to searching by name.
- *
- * To extend: add entries, then re-run the verification described in
- * ARCHITECTURE.md D-026 before committing.
+ * To extend: add entries, confirm each resolves in LRCLIB with synced lyrics,
+ * and check the cell-coverage tests still pass.
  */
 
 export const MOODS = ["longing", "defiant", "tender", "restless"] as const;
-export const LANGUAGES = ["english", "hindi"] as const;
-export const ERAS = ["classic", "modern"] as const;
+export const PULLS = [
+	"storytelling",
+	"wordplay",
+	"confession",
+	"imagery",
+] as const;
+export const FAMILIARITIES = ["canon", "deep", "surprise"] as const;
 
 export type Mood = (typeof MOODS)[number];
-export type Language = (typeof LANGUAGES)[number];
-export type Era = (typeof ERAS)[number];
+export type Pull = (typeof PULLS)[number];
+export type Familiarity = (typeof FAMILIARITIES)[number];
+
+/** Language and era are still recorded, but deliberately NOT scored — see D-027. */
+export type Language = "english" | "hindi";
+export type Era = "classic" | "modern";
 
 export interface Preferences {
-	mood: Mood | null;
-	language: Language | null;
-	era: Era | null;
+	/** Multi-select: choosing two moods widens the shelf rather than narrowing it. */
+	moods: Mood[];
+	pull: Pull | null;
+	familiarity: Familiarity | null;
 }
 
 export interface CuratedTrack {
@@ -36,6 +42,8 @@ export interface CuratedTrack {
 	artist: string;
 	lrclibId: string;
 	mood: Mood;
+	pull: Pull;
+	familiarity: Exclude<Familiarity, "surprise">;
 	language: Language;
 	era: Era;
 }
@@ -46,6 +54,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Pink Floyd",
 		lrclibId: "33803465",
 		mood: "longing",
+		pull: "imagery",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -54,6 +64,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Lata Mangeshkar",
 		lrclibId: "23658883",
 		mood: "longing",
+		pull: "confession",
+		familiarity: "canon",
 		language: "hindi",
 		era: "classic",
 	},
@@ -62,6 +74,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "The Beatles",
 		lrclibId: "36302255",
 		mood: "longing",
+		pull: "confession",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -70,6 +84,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Kishore Kumar",
 		lrclibId: "35243934",
 		mood: "longing",
+		pull: "storytelling",
+		familiarity: "canon",
 		language: "hindi",
 		era: "classic",
 	},
@@ -78,6 +94,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Frank Ocean",
 		lrclibId: "31781093",
 		mood: "longing",
+		pull: "confession",
+		familiarity: "deep",
 		language: "english",
 		era: "modern",
 	},
@@ -86,6 +104,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "The Local Train",
 		lrclibId: "7036519",
 		mood: "longing",
+		pull: "confession",
+		familiarity: "deep",
 		language: "hindi",
 		era: "modern",
 	},
@@ -94,6 +114,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Phoebe Bridgers",
 		lrclibId: "11570429",
 		mood: "longing",
+		pull: "confession",
+		familiarity: "deep",
 		language: "english",
 		era: "modern",
 	},
@@ -102,6 +124,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Arijit Singh",
 		lrclibId: "33945230",
 		mood: "longing",
+		pull: "confession",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -110,6 +134,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "The Cranberries",
 		lrclibId: "35051290",
 		mood: "defiant",
+		pull: "storytelling",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -118,6 +144,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Public Enemy",
 		lrclibId: "37063910",
 		mood: "defiant",
+		pull: "wordplay",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -126,6 +154,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Queen",
 		lrclibId: "30585262",
 		mood: "defiant",
+		pull: "storytelling",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -134,6 +164,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Kendrick Lamar",
 		lrclibId: "9500955",
 		mood: "defiant",
+		pull: "wordplay",
+		familiarity: "canon",
 		language: "english",
 		era: "modern",
 	},
@@ -142,6 +174,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "The White Stripes",
 		lrclibId: "32223262",
 		mood: "defiant",
+		pull: "storytelling",
+		familiarity: "canon",
 		language: "english",
 		era: "modern",
 	},
@@ -150,6 +184,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "A.R. Rahman",
 		lrclibId: "34798363",
 		mood: "defiant",
+		pull: "confession",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -158,6 +194,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "The Beatles",
 		lrclibId: "36255521",
 		mood: "tender",
+		pull: "confession",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -166,6 +204,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Eric Clapton",
 		lrclibId: "15652449",
 		mood: "tender",
+		pull: "storytelling",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -174,6 +214,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Mukesh",
 		lrclibId: "8349033",
 		mood: "tender",
+		pull: "imagery",
+		familiarity: "canon",
 		language: "hindi",
 		era: "classic",
 	},
@@ -182,6 +224,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Asha Bhosle",
 		lrclibId: "33926738",
 		mood: "tender",
+		pull: "storytelling",
+		familiarity: "canon",
 		language: "hindi",
 		era: "classic",
 	},
@@ -190,6 +234,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Bon Iver",
 		lrclibId: "23555615",
 		mood: "tender",
+		pull: "imagery",
+		familiarity: "deep",
 		language: "english",
 		era: "modern",
 	},
@@ -198,6 +244,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Bright Eyes",
 		lrclibId: "17585749",
 		mood: "tender",
+		pull: "confession",
+		familiarity: "deep",
 		language: "english",
 		era: "modern",
 	},
@@ -206,6 +254,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Mohit Chauhan",
 		lrclibId: "34291699",
 		mood: "tender",
+		pull: "confession",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -214,6 +264,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Arijit Singh",
 		lrclibId: "35784288",
 		mood: "tender",
+		pull: "imagery",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -222,6 +274,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Radiohead",
 		lrclibId: "31503287",
 		mood: "restless",
+		pull: "imagery",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -230,6 +284,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Nirvana",
 		lrclibId: "31750367",
 		mood: "restless",
+		pull: "wordplay",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -238,6 +294,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Talking Heads",
 		lrclibId: "9228305",
 		mood: "restless",
+		pull: "wordplay",
+		familiarity: "deep",
 		language: "english",
 		era: "classic",
 	},
@@ -246,6 +304,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Radiohead",
 		lrclibId: "19998617",
 		mood: "restless",
+		pull: "imagery",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -254,6 +314,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "The Weeknd",
 		lrclibId: "36523298",
 		mood: "restless",
+		pull: "confession",
+		familiarity: "canon",
 		language: "english",
 		era: "modern",
 	},
@@ -262,6 +324,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Childish Gambino",
 		lrclibId: "34264408",
 		mood: "restless",
+		pull: "imagery",
+		familiarity: "canon",
 		language: "english",
 		era: "modern",
 	},
@@ -270,6 +334,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Mohit Chauhan",
 		lrclibId: "34060184",
 		mood: "restless",
+		pull: "storytelling",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -278,6 +344,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Arijit Singh",
 		lrclibId: "35458952",
 		mood: "restless",
+		pull: "storytelling",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -286,6 +354,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "A.R. Rahman",
 		lrclibId: "33769880",
 		mood: "restless",
+		pull: "imagery",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -294,6 +364,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Massive Attack",
 		lrclibId: "27327276",
 		mood: "longing",
+		pull: "imagery",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -302,6 +374,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Radiohead",
 		lrclibId: "27196790",
 		mood: "longing",
+		pull: "confession",
+		familiarity: "canon",
 		language: "english",
 		era: "classic",
 	},
@@ -310,6 +384,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "A.R. Rahman",
 		lrclibId: "35218012",
 		mood: "tender",
+		pull: "confession",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -318,6 +394,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Arijit Singh",
 		lrclibId: "879427",
 		mood: "longing",
+		pull: "wordplay",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -326,6 +404,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Mohit Chauhan",
 		lrclibId: "34637618",
 		mood: "tender",
+		pull: "wordplay",
+		familiarity: "deep",
 		language: "hindi",
 		era: "modern",
 	},
@@ -334,6 +414,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Naresh Iyer",
 		lrclibId: "7912114",
 		mood: "defiant",
+		pull: "imagery",
+		familiarity: "deep",
 		language: "hindi",
 		era: "modern",
 	},
@@ -342,6 +424,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "A.R. Rahman",
 		lrclibId: "37323926",
 		mood: "tender",
+		pull: "imagery",
+		familiarity: "canon",
 		language: "hindi",
 		era: "modern",
 	},
@@ -350,6 +434,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Mohammed Rafi",
 		lrclibId: "31558586",
 		mood: "defiant",
+		pull: "imagery",
+		familiarity: "deep",
 		language: "hindi",
 		era: "classic",
 	},
@@ -358,6 +444,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Mohammed Rafi",
 		lrclibId: "33605922",
 		mood: "defiant",
+		pull: "imagery",
+		familiarity: "deep",
 		language: "hindi",
 		era: "classic",
 	},
@@ -366,6 +454,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Mukesh",
 		lrclibId: "34787788",
 		mood: "defiant",
+		pull: "wordplay",
+		familiarity: "canon",
 		language: "hindi",
 		era: "classic",
 	},
@@ -374,6 +464,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Kishore Kumar",
 		lrclibId: "18472648",
 		mood: "restless",
+		pull: "storytelling",
+		familiarity: "deep",
 		language: "hindi",
 		era: "classic",
 	},
@@ -382,6 +474,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Kishore Kumar",
 		lrclibId: "23929923",
 		mood: "restless",
+		pull: "confession",
+		familiarity: "canon",
 		language: "hindi",
 		era: "classic",
 	},
@@ -390,6 +484,8 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Kishore Kumar",
 		lrclibId: "37924734",
 		mood: "restless",
+		pull: "confession",
+		familiarity: "canon",
 		language: "hindi",
 		era: "classic",
 	},
@@ -398,40 +494,159 @@ export const CATALOGUE: CuratedTrack[] = [
 		artist: "Mukesh",
 		lrclibId: "22267656",
 		mood: "restless",
+		pull: "confession",
+		familiarity: "deep",
 		language: "hindi",
 		era: "classic",
 	},
+	{
+		title: "The Night We Met",
+		artist: "Lord Huron",
+		lrclibId: "34481607",
+		mood: "longing",
+		pull: "confession",
+		familiarity: "deep",
+		language: "english",
+		era: "modern",
+	},
+	{
+		title: "Re: Stacks",
+		artist: "Bon Iver",
+		lrclibId: "22660720",
+		mood: "longing",
+		pull: "imagery",
+		familiarity: "deep",
+		language: "english",
+		era: "modern",
+	},
+	{
+		title: "Casimir Pulaski Day",
+		artist: "Sufjan Stevens",
+		lrclibId: "16990543",
+		mood: "tender",
+		pull: "storytelling",
+		familiarity: "deep",
+		language: "english",
+		era: "modern",
+	},
+	{
+		title: "A Case of You",
+		artist: "Joni Mitchell",
+		lrclibId: "12937387",
+		mood: "longing",
+		pull: "imagery",
+		familiarity: "deep",
+		language: "english",
+		era: "classic",
+	},
+	{
+		title: "Pyramid Song",
+		artist: "Radiohead",
+		lrclibId: "25112927",
+		mood: "restless",
+		pull: "imagery",
+		familiarity: "deep",
+		language: "english",
+		era: "modern",
+	},
+	{
+		title: "The Trapeze Swinger",
+		artist: "Iron and Wine",
+		lrclibId: "30010199",
+		mood: "longing",
+		pull: "storytelling",
+		familiarity: "deep",
+		language: "english",
+		era: "modern",
+	},
+	{
+		title: "Phir Le Aya Dil",
+		artist: "Arijit Singh",
+		lrclibId: "6827664",
+		mood: "longing",
+		pull: "imagery",
+		familiarity: "deep",
+		language: "hindi",
+		era: "modern",
+	},
+	{
+		title: "Iktara",
+		artist: "Kavita Seth",
+		lrclibId: "36067000",
+		mood: "tender",
+		pull: "imagery",
+		familiarity: "deep",
+		language: "hindi",
+		era: "modern",
+	},
+	{
+		title: "Naina Da Kya Kasoor",
+		artist: "Amit Trivedi",
+		lrclibId: "5452480",
+		mood: "restless",
+		pull: "wordplay",
+		familiarity: "deep",
+		language: "hindi",
+		era: "modern",
+	},
+	{
+		title: "Aaoge Jab Tum",
+		artist: "Ustad Rashid Khan",
+		lrclibId: "21638733",
+		mood: "tender",
+		pull: "confession",
+		familiarity: "deep",
+		language: "hindi",
+		era: "modern",
+	},
+	{
+		title: "Zinda",
+		artist: "Siddharth Mahadevan",
+		lrclibId: "9211620",
+		mood: "defiant",
+		pull: "confession",
+		familiarity: "deep",
+		language: "hindi",
+		era: "modern",
+	},
 ];
 
-/** How many picks the landing page shows (PRD §3.1 suggests three). */
+/** The headline shelf (PRD §3.1 suggests three). */
 export const DEEP_DIVE_COUNT = 3;
+/** The longer "People also like" shelf beneath it. */
+export const ALSO_LIKED_COUNT = 12;
 
 /**
  * Score a track against stated preferences.
  *
- * Partial credit rather than filtering: someone who picks "longing / hindi /
- * classic" should still see a strong longing track if that exact cell is thin,
- * instead of an empty shelf. Mood is weighted highest because it is what the
- * reader actually came in saying.
+ * Partial credit, never filtering. Language and era are excluded on purpose:
+ * as binary partitions they halved the pool at every step, and a reader who
+ * likes both English and Hindi should see both. They are used for diversity
+ * instead (see `selectDiverse`), so the shelf mixes without the reader having
+ * to choose a side.
  */
 function score(track: CuratedTrack, preferences: Preferences): number {
 	let total = 0;
-	if (preferences.mood && track.mood === preferences.mood) total += 3;
-	if (preferences.language && track.language === preferences.language)
-		total += 2;
-	if (preferences.era && track.era === preferences.era) total += 1;
+	if (preferences.moods.length > 0 && preferences.moods.includes(track.mood))
+		total += 3;
+	if (preferences.pull && track.pull === preferences.pull) total += 2;
+	// "surprise" is a real answer meaning "no preference", so it scores nothing
+	// rather than being treated as unanswered.
+	if (
+		preferences.familiarity &&
+		preferences.familiarity !== "surprise" &&
+		track.familiarity === preferences.familiarity
+	) {
+		total += 1.5;
+	}
 	return total;
 }
 
-/**
- * Deterministic shuffle from a seed, so every visitor sees the same picks on a
- * given day and they rotate at midnight — no cron, no stored state.
- */
+/** Deterministic shuffle, so a given day looks the same for every visitor. */
 function seededOrder(length: number, seed: number): number[] {
 	const indices = [...Array(length).keys()];
 	let state = seed || 1;
 	for (let i = length - 1; i > 0; i--) {
-		// xorshift; any decent PRNG would do, this one needs no dependency.
 		state ^= state << 13;
 		state ^= state >>> 17;
 		state ^= state << 5;
@@ -448,28 +663,99 @@ export function seedFromDate(date: string): number {
 	return hash;
 }
 
+interface Ranked {
+	track: CuratedTrack;
+	rank: number;
+}
+
+function rankAll(preferences: Preferences, seed: number): Ranked[] {
+	const order = seededOrder(CATALOGUE.length, seed);
+	return order
+		.map((index, position) => {
+			const track = CATALOGUE[index] as CuratedTrack;
+			// Position breaks ties, keeping the daily rotation visible when
+			// several tracks score identically.
+			return { track, rank: score(track, preferences) * 1000 - position };
+		})
+		.sort((a, b) => b.rank - a.rank);
+}
+
 /**
- * Pick the day's Deep Dives.
+ * Pick from the ranking while keeping the shelf varied.
  *
- * With no preferences this is simply the day's rotation, which is what a first
- * visitor who skipped the stepper should see.
+ * Straight top-N produced three tracks in the same language from the same era,
+ * often by the same artist. Each already-picked language, era and artist adds a
+ * penalty, so a slightly lower-scoring track wins when it brings variety. The
+ * penalties are small enough that a strong preference match still leads.
  */
+function selectDiverse(ranked: Ranked[], count: number): CuratedTrack[] {
+	const chosen: CuratedTrack[] = [];
+	const remaining = [...ranked];
+
+	const LANGUAGE_PENALTY = 600;
+	const ERA_PENALTY = 300;
+	const ARTIST_PENALTY = 4000;
+
+	while (chosen.length < count && remaining.length > 0) {
+		let bestIndex = 0;
+		let bestValue = Number.NEGATIVE_INFINITY;
+
+		for (const [index, entry] of remaining.entries()) {
+			let value = entry.rank;
+			for (const picked of chosen) {
+				if (picked.language === entry.track.language) value -= LANGUAGE_PENALTY;
+				if (picked.era === entry.track.era) value -= ERA_PENALTY;
+				if (picked.artist === entry.track.artist) value -= ARTIST_PENALTY;
+			}
+			if (value > bestValue) {
+				bestValue = value;
+				bestIndex = index;
+			}
+		}
+
+		const [picked] = remaining.splice(bestIndex, 1);
+		if (picked) chosen.push(picked.track);
+	}
+
+	return chosen;
+}
+
+/** The day's headline picks. */
 export function pickDeepDives(
 	preferences: Preferences,
 	seed: number,
 	count = DEEP_DIVE_COUNT,
 ): CuratedTrack[] {
-	const order = seededOrder(CATALOGUE.length, seed);
+	return selectDiverse(rankAll(preferences, seed), count);
+}
 
-	return order
-		.map((index) => CATALOGUE[index] as CuratedTrack)
-		.map((track, position) => ({
-			track,
-			// Position breaks ties, keeping the daily rotation visible even when
-			// several tracks score identically.
-			rank: score(track, preferences) * 1000 - position,
-		}))
-		.sort((a, b) => b.rank - a.rank)
+/**
+ * "People also like" — a longer, looser shelf beneath the headline picks.
+ *
+ * Drawn from everything the Deep Dives did not take, still preference-weighted
+ * but shuffled rather than strictly ranked, so it reads as a wander through the
+ * catalogue instead of positions 4 through 15 of the same list.
+ */
+export function pickAlsoLiked(
+	preferences: Preferences,
+	seed: number,
+	exclude: CuratedTrack[] = [],
+	count = ALSO_LIKED_COUNT,
+): CuratedTrack[] {
+	const taken = new Set(exclude.map((track) => track.lrclibId));
+	const pool = rankAll(preferences, seed + 1).filter(
+		(entry) => !taken.has(entry.track.lrclibId),
+	);
+
+	// Weighted sample: everything stays reachable, but tracks matching the
+	// reader's answers surface far more often.
+	const weighted = pool.map((entry, index) => ({
+		track: entry.track,
+		weight: score(entry.track, preferences) + 1 + ((index * 37) % 11) / 10,
+	}));
+
+	return weighted
+		.sort((a, b) => b.weight - a.weight)
 		.slice(0, count)
 		.map((entry) => entry.track);
 }

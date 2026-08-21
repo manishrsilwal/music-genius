@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
-import type { Era, Language, Mood, Preferences } from "@/lib/deep-dives";
+import type { Familiarity, Mood, Preferences, Pull } from "@/lib/deep-dives";
 import { transition } from "@/lib/motion";
 
 import { EMPTY_PREFERENCES } from "../hooks/use-preferences";
@@ -10,9 +10,11 @@ import "./preference-stepper.scss";
 /**
  * Three questions, one per screen (PRD §3.1).
  *
- * Answers the brief's actual problem — "a blank search bar is intimidating" —
- * by asking rather than demanding. Every step is skippable and skipping is a
- * real answer: unanswered axes simply carry no weight in the ranking.
+ * Every axis describes the READER, not the record. Language and era were tried
+ * and removed: as binary partitions they halved the pool at each step and
+ * forced a reader who enjoys both to pick a side (D-027).
+ *
+ * Skipping is a real answer — an unanswered axis simply carries no weight.
  */
 
 interface Option<T> {
@@ -28,14 +30,29 @@ const MOOD_OPTIONS: Option<Mood>[] = [
 	{ value: "restless", label: "Restless", hint: "Motion, nerve, escape" },
 ];
 
-const LANGUAGE_OPTIONS: Option<Language>[] = [
-	{ value: "english", label: "English", hint: "" },
-	{ value: "hindi", label: "हिन्दी", hint: "Hindi" },
+const PULL_OPTIONS: Option<Pull>[] = [
+	{
+		value: "storytelling",
+		label: "The story",
+		hint: "Songs that happen to someone",
+	},
+	{
+		value: "wordplay",
+		label: "The craft",
+		hint: "Rhyme, turn, double meaning",
+	},
+	{
+		value: "confession",
+		label: "The honesty",
+		hint: "Said plainly, unguarded",
+	},
+	{ value: "imagery", label: "The imagery", hint: "Pictures over statements" },
 ];
 
-const ERA_OPTIONS: Option<Era>[] = [
-	{ value: "classic", label: "Older", hint: "Before the 2000s" },
-	{ value: "modern", label: "Newer", hint: "This century" },
+const FAMILIARITY_OPTIONS: Option<Familiarity>[] = [
+	{ value: "canon", label: "The canon", hint: "Songs worth rereading" },
+	{ value: "deep", label: "Deep cuts", hint: "Things you may not know" },
+	{ value: "surprise", label: "Surprise me", hint: "No preference" },
 ];
 
 const STEPS = 3;
@@ -48,17 +65,26 @@ export function PreferenceStepper({
 	const [step, setStep] = useState(0);
 	const [draft, setDraft] = useState<Preferences>(EMPTY_PREFERENCES);
 
-	function advance(next: Preferences) {
+	function go(next: Preferences) {
 		setDraft(next);
 		if (step === STEPS - 1) onComplete(next);
 		else setStep(step + 1);
 	}
 
+	function toggleMood(mood: Mood) {
+		const moods = draft.moods.includes(mood)
+			? draft.moods.filter((m) => m !== mood)
+			: [...draft.moods, mood];
+		setDraft({ ...draft, moods });
+	}
+
 	const question = [
 		"What do you want to sit with?",
-		"In which words?",
-		"From when?",
+		"What pulls you into a song?",
+		"How well should you know it?",
 	][step] as string;
+
+	const subtitle = step === 0 ? "Pick as many as you like" : null;
 
 	return (
 		<div className="stepper">
@@ -80,15 +106,20 @@ export function PreferenceStepper({
 			<AnimatePresence mode="wait">
 				<motion.div
 					key={step}
-					initial={{ opacity: 0, y: 12 }}
+					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
-					exit={{ opacity: 0, y: -8 }}
+					exit={{ opacity: 0, y: -6 }}
 					transition={transition.editorial}
-					className="grid gap-8"
+					className="grid gap-5"
 				>
-					<h2 className="stepper__question text-display text-ink">
-						{question}
-					</h2>
+					<div>
+						<h2 className="stepper__question text-title text-ink">
+							{question}
+						</h2>
+						{subtitle && (
+							<p className="mt-1 text-caption text-ink-faint">{subtitle}</p>
+						)}
+					</div>
 
 					<div className="stepper__options">
 						{step === 0 &&
@@ -96,34 +127,48 @@ export function PreferenceStepper({
 								<StepOption
 									key={option.value}
 									option={option}
-									onSelect={() => advance({ ...draft, mood: option.value })}
+									selected={draft.moods.includes(option.value)}
+									onSelect={() => toggleMood(option.value)}
 								/>
 							))}
 						{step === 1 &&
-							LANGUAGE_OPTIONS.map((option) => (
+							PULL_OPTIONS.map((option) => (
 								<StepOption
 									key={option.value}
 									option={option}
-									onSelect={() => advance({ ...draft, language: option.value })}
+									onSelect={() => go({ ...draft, pull: option.value })}
 								/>
 							))}
 						{step === 2 &&
-							ERA_OPTIONS.map((option) => (
+							FAMILIARITY_OPTIONS.map((option) => (
 								<StepOption
 									key={option.value}
 									option={option}
-									onSelect={() => advance({ ...draft, era: option.value })}
+									onSelect={() => go({ ...draft, familiarity: option.value })}
 								/>
 							))}
 					</div>
 
-					<button
-						type="button"
-						className="stepper__skip text-micro"
-						onClick={() => advance(draft)}
-					>
-						{step === STEPS - 1 ? "Skip · show me anything" : "Skip this"}
-					</button>
+					<div className="flex items-center gap-4">
+						{/* Multi-select needs an explicit commit; the single-choice
+						    steps advance on tap and would find a button redundant. */}
+						{step === 0 && draft.moods.length > 0 && (
+							<button
+								type="button"
+								onClick={() => go(draft)}
+								className="stepper__next text-micro uppercase tracking-label"
+							>
+								Continue · {draft.moods.length}
+							</button>
+						)}
+						<button
+							type="button"
+							className="stepper__skip text-micro"
+							onClick={() => go(draft)}
+						>
+							{step === STEPS - 1 ? "Skip · show me anything" : "Skip this"}
+						</button>
+					</div>
 				</motion.div>
 			</AnimatePresence>
 		</div>
@@ -132,17 +177,23 @@ export function PreferenceStepper({
 
 function StepOption<T extends string>({
 	option,
+	selected = false,
 	onSelect,
 }: {
 	option: Option<T>;
+	selected?: boolean;
 	onSelect: () => void;
 }) {
 	return (
-		<button type="button" className="stepper__option" onClick={onSelect}>
-			<span className="stepper__label text-title text-ink">{option.label}</span>
-			{option.hint && (
-				<span className="stepper__hint mt-1 text-caption">{option.hint}</span>
-			)}
+		<button
+			type="button"
+			className="stepper__option"
+			aria-pressed={selected}
+			data-selected={selected || undefined}
+			onClick={onSelect}
+		>
+			<span className="stepper__label text-lead text-ink">{option.label}</span>
+			<span className="stepper__hint mt-0.5 text-caption">{option.hint}</span>
 		</button>
 	);
 }

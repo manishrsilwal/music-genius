@@ -1,0 +1,30 @@
+@use "styles/mixins" as m;
+
+// Landing page (PRD §3.1).
+//
+// Previously this centred itself in a full-height flex column with the hero at
+// the full display size. On a 900px laptop that pushed the first question below
+// the fold, so the reader had to scroll before they could answer — the exact
+// friction the stepper exists to remove.
+//
+// Now the page starts near the top and the hero is sized for a doorway rather
+// than a poster. The track page still carries the full display scale, which is
+// where a hero belongs.
+.landing {
+	padding-block: 3.5rem 5rem;
+
+	@include m.from("md") {
+		padding-block: 5rem 6rem;
+	}
+
+	&__title {
+		font-family: var(--font-display);
+		// Caps well below --text-display (5.5rem): this has to share the fold
+		// with three answer cards.
+		font-size: clamp(2rem, 4.5vw, 3rem);
+		line-height: 1.06;
+		letter-spacing: var(--tracking-display);
+		text-wrap: balance;
+		max-width: 12ch;
+	}
+}
