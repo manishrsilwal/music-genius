@@ -1,0 +1,16 @@
+// Breakpoints — mirrors Tailwind's defaults so Sass media queries and
+// Tailwind's responsive variants never disagree about where a layout changes.
+
+$screens: (
+	"sm": 40rem,
+	"md": 48rem,
+	"lg": 64rem,
+	"xl": 80rem,
+);
+
+@function screen($name) {
+	@if not map-has-key($screens, $name) {
+		@error "Unknown breakpoint `#{$name}`. Available: #{map-keys($screens)}.";
+	}
+	@return map-get($screens, $name);
+}
