@@ -131,6 +131,46 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-026 — Deep Dives: ask, then curate
+**Decided 2026-08-22.** Resolves OD-013 and completes PRD §3.1.
+
+§3.1 asks for "3 trending songs", but **neither source can supply trending**:
+Genius `/charts` returns 403 (`Action forbidden for current scope`) for a
+client access token, and LRCLIB has no such endpoint at all.
+
+Rather than fake it, the page now asks. A three-step stepper — mood, language,
+era — seeds a hand-curated catalogue. This addresses §3.1's *stated* problem
+more directly than three fixed picks ever could: "a blank search bar is
+intimidating; users don't always know what they want to search for."
+
+**"Gamified but soothing"** was read as *tactile, never game mechanics*: no
+points, badges or streaks. One question per screen, generous type, a press
+that gives 1.5% under the finger, and progress shown as three small marks
+rather than a filling bar — a bar measures what is left, which is the anxious
+framing. Every step is skippable, and skipping is a real answer: an unanswered
+axis simply carries no weight.
+
+Preferences live in `localStorage`. No account, nothing transmitted. They are
+read in an effect, not in the state initialiser, because localStorage does not
+exist during SSR and reading it on first client render would trip a hydration
+mismatch — hence the SSR placeholder, which also stops the stepper flashing at
+a returning reader.
+
+**Ranking gives partial credit rather than filtering.** Mood scores 3, language
+2, era 1. Someone answering "defiant / hindi / classic" still gets a full shelf
+if that cell is thin, instead of an empty one. Picks rotate daily from a
+date-seeded shuffle — deterministic, so every visitor sees the same three on a
+given day, with no cron and no stored state.
+
+**Every entry is verified.** All 45 tracks were checked to exist in LRCLIB with
+synced lyrics before being committed; candidates that did not resolve were
+dropped, not shipped. All 16 mood×language×era cells are covered, and a test
+enforces that. A recommendation leading to a dead page is worse than one fewer
+recommendation.
+
+To extend the catalogue: add entries, confirm each resolves in LRCLIB with
+synced lyrics, and check the cell-coverage test still passes.
+
 ### D-025 — Auto-scroll follows the line, not the stanza
 **Fixed 2026-08-22.** Reported as "auto sync is not working correctly".
 
@@ -609,7 +649,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-017 | Scripts beyond Latin and Devanagari still have no face — Arabic, Bengali, Tamil, CJK would render as tofu | §3.4 | Same class of bug as D-019. Needs a face per script the catalogue serves |
 
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
-| OD-013 | "Today's Deep Dives" curation — which tracks, refreshed how | §3.1 | Needs OD-003/OD-004 for pre-generated backstories |
+
 
 ### OD-002 is a product risk, not just a technical one
 

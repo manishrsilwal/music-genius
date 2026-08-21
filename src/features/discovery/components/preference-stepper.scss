@@ -1,0 +1,122 @@
+@use "styles/mixins" as m;
+
+// Preference stepper (PRD §3.1).
+//
+// The brief was "gamified but soothing, not annoying". Read here as tactile
+// and playful — never points, badges or streaks. One question per screen,
+// generous type, always skippable, done in about ten seconds.
+
+.stepper {
+	display: grid;
+	gap: 2.5rem;
+
+	// Progress as a quiet row of marks rather than a filling bar. A bar
+	// measures how much is left, which is the anxious framing.
+	&__marks {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	&__mark {
+		width: 1.75rem;
+		height: 2px;
+		border-radius: 999px;
+		background: var(--color-hairline);
+		transition: background-color 0.42s var(--ease-editorial);
+
+		&[data-state="done"] {
+			background: var(--color-ink-faint);
+		}
+
+		&[data-state="current"] {
+			background: var(--track-accent);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__question {
+		font-family: var(--font-display);
+		line-height: var(--leading-display);
+		text-wrap: balance;
+	}
+
+	&__options {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+
+		@include m.from("sm") {
+			gap: 1rem;
+		}
+	}
+
+	&__option {
+		position: relative;
+		overflow: hidden;
+		padding: 1.5rem 1.25rem;
+		border-radius: var(--radius-card);
+		border: 1px solid var(--color-hairline);
+		background: var(--color-surface);
+		text-align: left;
+		cursor: pointer;
+		transition:
+			border-color 0.22s var(--ease-editorial),
+			transform 0.22s var(--ease-editorial),
+			background-color 0.22s var(--ease-editorial);
+
+		&:hover {
+			border-color: var(--track-accent);
+			background: var(--color-surface-raised);
+		}
+
+		// The tactile part: the card gives slightly under the press. This is
+		// the whole "gamified" budget — anything louder becomes a toy.
+		&:active {
+			transform: scale(0.985);
+		}
+
+		&:focus-visible {
+			border-color: var(--track-accent);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+
+			&:active {
+				transform: none;
+			}
+		}
+	}
+
+	&__label {
+		font-family: var(--font-display);
+		display: block;
+	}
+
+	&__hint {
+		font-family: var(--font-ui);
+		display: block;
+		color: var(--color-ink-faint);
+	}
+
+	&__skip {
+		justify-self: start;
+		font-family: var(--font-ui);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-label);
+		color: var(--color-ink-faint);
+		cursor: pointer;
+		transition: color 0.22s var(--ease-editorial);
+
+		&:hover {
+			color: var(--color-ink-muted);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+}
