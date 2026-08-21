@@ -6,7 +6,7 @@ logged here with its rationale and its rejected alternatives.
 **Rule:** nothing is decided by assumption. Anything unresolved lives in
 [Deferred Decisions](#deferred-decisions) until explicitly ruled on.
 
-- **Status:** Phase 0 complete — scaffolded, foundation verified (typecheck, lint, build, SSR)
+- **Status:** Block 1 complete — search → track → read, verified end to end against live LRCLIB
 - **Last updated:** 2026-08-21
 - **Source of truth:** `prd-doc/Typographic_Lyrical_Explorer_PRD_v2.pdf` (v2.0)
 
@@ -130,6 +130,68 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-013 — Custom CSS: Sass, referencing tokens rather than `@apply`
+**Decided 2026-08-21.** `sass-embedded`. Tailwind entry stays `styles.css`.
+
+Tailwind v4 documents that it is not designed to run alongside a preprocessor —
+v4 *is* the CSS pipeline. Three integrations were tested rather than assumed:
+
+| Approach | Outcome |
+|---|---|
+| `@import "tailwindcss"` inside `.scss` | Sass tries to resolve it as a Sass import and fails. **The entry must stay `.css`.** |
+| Sass + `@tailwindcss/vite` | Nesting, `$vars`, math, mixins, `var(--token)` all work. But `@apply` **silently passes through unexpanded** and ships literal `@apply` to the browser. |
+| Tailwind via `@tailwindcss/postcss` | `@apply` expands, but the SSR build fails (`postcss-import` resolving `"tailwindcss"` as a path) **and all 14 font assets stop resolving**. Rejected. |
+
+So Sass is adopted for custom CSS, and `@apply` is **not used inside `.scss`**.
+The silent-failure mode is the deciding factor: a build that succeeds while
+shipping dead CSS is worse than one that errors.
+
+This costs nothing in practice. Design tokens are already CSS custom
+properties, so `.scss` reads `var(--text-lyric)` directly — which also survives
+runtime palette swapping, something `@apply` could never do.
+
+**Convention:** Tailwind utilities in JSX `className`; `.scss` for structure,
+mixins, and states utilities can't express. Partials resolve via Sass
+`loadPaths: ["src"]`, so `@use "styles/mixins"` works from any depth.
+
+### D-014 — Server boundary: one service, two exposures
+**Decided 2026-08-21.**
+
+TanStack Start's own guidance is explicit: an SSR loader must never `fetch` its
+own API route, because loaders are **isomorphic** — they run on client *and*
+server — so relative URL resolution is not portable. The same property means
+secrets must live inside `createServerFn`, never in a loader.
+
+Business logic therefore lives once in `src/server/*.server.ts` and is exposed
+through two boundaries:
+
+| Boundary | File | Caller |
+|---|---|---|
+| Server function | `src/server/lyrics.functions.ts` | Route loaders (SSR + client nav) |
+| HTTP route | `src/routes/api/*.ts` | Browser fetches, external callers (PRD §4) |
+
+### D-015 — LRCLIB metadata normalisation
+**Decided 2026-08-21.**
+
+LRCLIB metadata is user-contributed and frequently malformed — the top result
+for "bohemian rhapsody" returns `artistName` **and** `trackName` both set to
+`"Bohemian Rhapsody - Queen"`. Raw, that renders as a broken autocomplete row.
+
+`src/lib/clients/lrclib.ts` repairs the common shapes: strips an artist that is
+redundantly repeated in the title (leading or trailing), and for the degenerate
+case where both fields carry the same `"A - B"` string, applies the dominant
+user-upload convention **"Title - Artist"** and takes the trailing segment as
+the artist.
+
+That last rule is a **heuristic and will be wrong sometimes** — `"Sweet Child O'
+Mine - Guns N' Roses"` resolves correctly, but a title that genuinely contains
+" - " will not. Revisit if Genius metadata (OD-005) gives us a better authority
+to reconcile against.
+
+Results are also deduped (LRCLIB holds many uploads per recording, preferring
+synced lyrics then longest duration) and instrumentals are dropped, since they
+have nothing to read.
+
 ### D-011 — Formatting authority: Biome defaults
 **Decided 2026-08-21.** Tabs, double quotes, semicolons.
 
@@ -173,19 +235,31 @@ Feature-first. Routes stay thin; each feature owns its components, hooks, and mo
 src/
 ├── routes/
 │   ├── __root.tsx             # shell, head/meta
-│   ├── index.tsx              # TEMPORARY foundation smoke-test → becomes §3.1
-│   └── api/                   # track.ts · insights.ts · card.ts (empty)
-├── features/                  # each owns components/ + hooks/
-│   ├── discovery/ playback/ scrollytelling/ lyric-card/ insights/
-├── components/ui/             # primitives only
-├── integrations/tanstack-query/
+│   ├── index.tsx              # discovery + search (§3.1)
+│   ├── track.$trackId.tsx     # hero + canvas (§3.2, §3.3)
+│   └── api/
+│       ├── search.ts          # GET /api/search?q=
+│       └── track.ts           # GET /api/track?id=
+├── server/                    # server-only; never imported by the client
+│   ├── lyrics.server.ts       # business logic (D-014)
+│   └── lyrics.functions.ts    # createServerFn boundary for loaders
+├── features/
+│   ├── discovery/             # search-field + use-debounced
+│   ├── scrollytelling/        # lyric-canvas + use-scroll-spy
+│   └── playback/ lyric-card/ insights/     # (empty)
+├── components/ui/
 ├── lib/
+│   ├── types.ts               # domain shapes (ours, not LRCLIB's)
+│   ├── lrc.ts                 # LRC parser → stanzas (pure, isomorphic)
+│   ├── cache.ts               # CacheAdapter + memory impl (D-009)
 │   ├── motion.ts              # easing, durations, variants (D-004)
-│   └── clients/               # LRCLIB · Genius · LLM · search
+│   └── clients/lrclib.ts      # LRCLIB + normalisation (D-015)
+├── styles/                    # Sass partials (D-013)
+│   ├── _breakpoints.scss      # mirrors Tailwind's screens
+│   └── _mixins.scss           # from() · reduced-motion · glass · line-clamp
 ├── hooks/
-├── styles.css                 # token layer (D-003)
-├── router.tsx
-└── routeTree.gen.ts           # generated — do not edit
+├── styles.css                 # Tailwind entry + token layer (D-003)
+└── router.tsx
 ```
 
 Import alias: `@/*` and `#/*` both resolve to `src/*` (scaffolder default; `@/*` preferred).
@@ -209,6 +283,8 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-009 | Build-time env validation (`t3env` add-on) | API blocks | Attractive given 4+ secrets across OD-002..005 |
 | OD-010 | Testing strategy — none scaffolded | Quality | No runner installed; `--no-examples` skipped test setup |
 | OD-011 | Playback state store — React context vs TanStack Store | §3.2/§3.3 | Auto-scroll couples playback time to canvas |
+| OD-012 | Album art everywhere — hero blur, autocomplete thumbs, card gradients | §3.1/§3.2/§3.4 | All blocked on OD-005 (Genius). Shipping typographic-only until then |
+| OD-013 | "Today's Deep Dives" curation — which tracks, refreshed how | §3.1 | Needs OD-003/OD-004 for pre-generated backstories |
 
 ### OD-002 is a product risk, not just a technical one
 
