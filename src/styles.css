@@ -12,6 +12,11 @@
    browser fetches only the subsets a given track's lyrics actually need. */
 @import "@fontsource/rufina/400.css";
 @import "@fontsource/rufina/700.css";
+/* Devanagari companion (D-019). Rufina has no Devanagari coverage at all, so
+   without this the browser silently substitutes a system face and the reading
+   view stops matching the exported card. */
+@import "@fontsource/vesper-libre/devanagari-400.css";
+@import "@fontsource/vesper-libre/devanagari-700.css";
 @import "@fontsource-variable/elms-sans/wght.css";
 @import "@fontsource-variable/elms-sans/wght-italic.css";
 

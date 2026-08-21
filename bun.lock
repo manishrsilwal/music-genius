@@ -7,7 +7,12 @@
       "dependencies": {
         "@fontsource-variable/elms-sans": "^5.3.0",
         "@fontsource/elms-sans": "^5.3.0",
+        "@fontsource/martel": "^5.3.0",
+        "@fontsource/noto-serif-devanagari": "^5.3.0",
+        "@fontsource/rozha-one": "^5.3.0",
         "@fontsource/rufina": "^5.3.0",
+        "@fontsource/tiro-devanagari-hindi": "^5.3.0",
+        "@fontsource/vesper-libre": "^5.3.0",
         "@resvg/resvg-js": "^2.6.2",
         "@tailwindcss/vite": "^4.1.18",
         "@tanstack/react-devtools": "^0.10.12",
@@ -105,7 +110,17 @@
 
     "@fontsource/elms-sans": ["@fontsource/elms-sans@5.3.0", "", {}, "sha512-IMIiEmlFBZf+cRt3XyOlPI9jZ1wz7I6N2wJEhbWg37xshHx8lpObTbztqvJs+6z+tbBbfjx/hEVKzKl6R8bv5w=="],
 
+    "@fontsource/martel": ["@fontsource/martel@5.3.0", "", {}, "sha512-E/L2GnnmYkcjgt6IMN9ISgr2ldDzSeO1J+aTMwWsOy+Ti4EEC8B9RHiU32kUMGiyI9Ot8JLzQ4FA39HH1tFfbQ=="],
+
+    "@fontsource/noto-serif-devanagari": ["@fontsource/noto-serif-devanagari@5.3.0", "", {}, "sha512-POketgM+TcAbtQCpl5GUmlCVvV7zGnFmLlQTIVxp0ePZkKTJ1UhpeyscIpgljOzHjrVzXPj7x1lSXl2W/wI3Gg=="],
+
+    "@fontsource/rozha-one": ["@fontsource/rozha-one@5.3.0", "", {}, "sha512-/IUdv9LTshBBIqym7gbgOp/RbyD4HxwYOb+5lZKcv78m1xrD0wWWTWp20PNN9W5RVOQfAYQRkT76inav6uAPqg=="],
+
     "@fontsource/rufina": ["@fontsource/rufina@5.3.0", "", {}, "sha512-yUKvGuVPlJzLuvmflfzR5KlXJapaSkIdBiL8AL7dK0efYy9M+HoDj8fmasuESSkzfvvmT9JUcGbgU/cnbffohg=="],
+
+    "@fontsource/tiro-devanagari-hindi": ["@fontsource/tiro-devanagari-hindi@5.3.0", "", {}, "sha512-nlREPH/UItPmrRg2RY4O/oQNBtbwAzKyHk3ZexW1b75p8YrjmhdiPWOg9rm6dyM5v8FnIR392BG3Fdhu3+wTkg=="],
+
+    "@fontsource/vesper-libre": ["@fontsource/vesper-libre@5.3.0", "", {}, "sha512-QAEaR46t3pnQUMdDIvZAQ/b4wT9yU/jfZzVo096kRG2yk5e0XAZebKJQ7VI7/BgoiAHWokgoIyFabtcYHJQIgQ=="],
 
     "@jimp/bmp": ["@jimp/bmp@0.22.12", "", { "dependencies": { "@jimp/utils": "^0.22.12", "bmp-js": "^0.1.0" }, "peerDependencies": { "@jimp/custom": ">=0.3.5" } }, "sha512-aeI64HD0npropd+AR76MCcvvRaa+Qck6loCOS03CkkxGHN5/r336qTM5HPUdHKMDOGzqknuVPA8+kK1t03z12g=="],
 

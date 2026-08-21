@@ -20,13 +20,27 @@ const FONT_FILES = {
 	display: "node_modules/@fontsource/rufina/files/rufina-latin-400-normal.woff",
 	displayBold:
 		"node_modules/@fontsource/rufina/files/rufina-latin-700-normal.woff",
+	/**
+	 * Rufina has no Devanagari at all — every such codepoint mapped to .notdef
+	 * and rendered as tofu. Vesper Libre is a transitional Devanagari serif,
+	 * which sits closer to Rufina's contrast than a humanist face would.
+	 */
+	devanagari:
+		"node_modules/@fontsource/vesper-libre/files/vesper-libre-devanagari-400-normal.woff",
 	ui: "node_modules/@fontsource/elms-sans/files/elms-sans-latin-500-normal.woff",
 } as const;
 
+/**
+ * Satori falls back per glyph across the supplied fonts, so one line can mix
+ * scripts — common in Hindi lyrics — with no script detection needed here.
+ */
+const DISPLAY_STACK = "Rufina, Vesper Libre";
+
 async function loadFonts() {
-	const [display, displayBold, ui] = await Promise.all([
+	const [display, displayBold, devanagari, ui] = await Promise.all([
 		readFile(FONT_FILES.display),
 		readFile(FONT_FILES.displayBold),
+		readFile(FONT_FILES.devanagari),
 		readFile(FONT_FILES.ui),
 	]);
 
@@ -41,6 +55,12 @@ async function loadFonts() {
 			name: "Rufina",
 			data: displayBold,
 			weight: 700 as const,
+			style: "normal" as const,
+		},
+		{
+			name: "Vesper Libre",
+			data: devanagari,
+			weight: 400 as const,
 			style: "normal" as const,
 		},
 		{
@@ -105,7 +125,7 @@ export async function renderCard({
 						key={`${index}-${line}`}
 						style={{
 							display: "flex",
-							fontFamily: "Rufina",
+							fontFamily: DISPLAY_STACK,
 							fontSize: size,
 							lineHeight: leading,
 							color: theme.ink,

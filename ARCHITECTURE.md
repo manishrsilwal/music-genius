@@ -130,6 +130,32 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-019 — Devanagari: Vesper Libre alongside Rufina
+**Decided 2026-08-22.**
+
+Rufina has **no Devanagari coverage whatsoever** — every such codepoint maps to
+`.notdef`, so Hindi lyrics exported as a card of tofu boxes. OD-017 had called
+this "sizes imprecisely", which badly understated it.
+
+Vesper Libre (transitional Devanagari serif) is the companion face. Transitional
+sits closer to Rufina's contrast than a humanist face would, so Devanagari and
+Latin cards read as the same product.
+
+**No script detection is needed.** Satori falls back per glyph across the fonts
+supplied to it, so `fontFamily: "Rufina, Vesper Libre"` handles a line like
+`दिल में hope है still` correctly — verified. The web font stack mirrors that
+order for the same reason.
+
+The reading view was also silently substituting a **system** Devanagari face,
+so the page and the exported card did not match each other. `styles.css` now
+loads Vesper Libre explicitly.
+
+Card metrics cover both faces. Combining marks (nuqta, some matras) carry a
+real advance of 0 and contribute nothing, which is correct. Conjunct ligatures
+render narrower than the sum of their parts, so the table slightly
+over-estimates Devanagari — erring toward type a little small rather than type
+that overflows.
+
 ### D-018 — Lyric Card typography: measured, not estimated
 **Decided 2026-08-22.** `satori` + `@resvg/resvg-js`, 1080² PNG.
 
@@ -400,7 +426,8 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-011 | Playback state store — React context vs TanStack Store | §3.2/§3.3 | Auto-scroll couples playback time to canvas |
 | OD-014 | Genius rate limits are undocumented | §3.1 | Cached per artist+title for 30d. Watch for 429s |
 | OD-016 | LRCLIB uploads sometimes set artistName equal to trackName | §3.1 | Mitigated by ranking well-tagged entries higher; underlying data still wrong |
-| OD-017 | Card metrics cover printable ASCII only; other scripts use the mean advance | §3.4 | Non-Latin lyrics may size imprecisely. Revisit if the catalogue demands it |
+| OD-017 | Scripts beyond Latin and Devanagari still have no face — Arabic, Bengali, Tamil, CJK would render as tofu | §3.4 | Same class of bug as D-019. Needs a face per script the catalogue serves |
+| OD-019 | Devanagari cards fill only ~half the measure, since line-count caps size before width binds | §3.4 | Design call: fill the measure, or keep scale consistent across scripts |
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
 | OD-013 | "Today's Deep Dives" curation — which tracks, refreshed how | §3.1 | Needs OD-003/OD-004 for pre-generated backstories |
 

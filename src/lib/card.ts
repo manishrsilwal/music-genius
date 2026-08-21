@@ -8,7 +8,7 @@
 
 import { converter, formatHex } from "culori";
 
-import { FALLBACK_ADVANCE, RUFINA_ADVANCE } from "./card-metrics";
+import { FALLBACK_ADVANCE, GLYPH_ADVANCE } from "./card-metrics";
 import type { Palette } from "./types";
 
 const toRgb = converter("rgb");
@@ -106,9 +106,12 @@ function extractHue(oklch: string): number {
  * at 64px and orphaned a word onto a fourth line, destroying exactly the line
  * structure the card exists to preserve.
  *
- * Widths come from Rufina's real advance table rather than an assumed average.
- * The first attempt guessed 0.46em; the true mean is 0.535em, which is why it
- * still wrapped. Measuring is not optional for this.
+ * Widths come from the faces' real advance tables rather than an assumed
+ * average. The first attempt guessed 0.46em; Rufina's true mean is 0.535em,
+ * which is why it still wrapped. Measuring is not optional for this.
+ *
+ * The table covers Latin (Rufina) and Devanagari (Vesper Libre), because a
+ * lyric line can mix both and Satori falls back per glyph.
  *
  * The same table runs in the browser preview and the server render, so the
  * preview cannot drift from the exported file (D-018).
@@ -130,7 +133,7 @@ const FIT_MARGIN = 0.97;
 /** Width of `text` at 1px, in em units. */
 export function measureEm(text: string): number {
 	let total = 0;
-	for (const char of text) total += RUFINA_ADVANCE[char] ?? FALLBACK_ADVANCE;
+	for (const char of text) total += GLYPH_ADVANCE[char] ?? FALLBACK_ADVANCE;
 	return total;
 }
 
