@@ -3,6 +3,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
+	Link,
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
@@ -40,6 +41,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 		],
 	}),
 	shellComponent: RootDocument,
+	/**
+	 * Without this, TanStack Router falls back to a bare <p>Not Found</p> for
+	 * any unmatched URL — and warns about it on every boot.
+	 */
+	notFoundComponent: NotFound,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -65,5 +71,25 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<Scripts />
 			</body>
 		</html>
+	);
+}
+
+function NotFound() {
+	return (
+		<main className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
+			<p className="text-micro uppercase tracking-label text-ink-faint">404</p>
+			<h1 className="mt-6 font-display text-display leading-display text-ink">
+				Nothing here
+			</h1>
+			<p className="mt-4 text-lead text-ink-muted">
+				That page doesn't exist. The songs are this way.
+			</p>
+			<Link
+				to="/"
+				className="mt-8 text-caption uppercase tracking-label text-accent"
+			>
+				Back to search
+			</Link>
+		</main>
 	);
 }

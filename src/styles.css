@@ -46,7 +46,10 @@
   /* --- Typefaces (D-005) --------------------------------------------------
      Rufina: display only — 400/700, NO italic. Faux-oblique is forbidden.
      Elms Sans: UI chrome — variable 100–900, real italic. */
-  --font-display: "Rufina", ui-serif, Georgia, "Times New Roman", serif;
+  /* Vesper Libre sits after Rufina: Latin resolves to Rufina, and Devanagari —
+     which Rufina lacks entirely — falls through to Vesper Libre per glyph, the
+     same order the card renderer uses (D-019). */
+  --font-display: "Rufina", "Vesper Libre", ui-serif, Georgia, "Times New Roman", serif;
   --font-ui: "Elms Sans Variable", "Elms Sans", ui-sans-serif, system-ui, sans-serif;
 
   /* --- Fluid type scale ---------------------------------------------------
