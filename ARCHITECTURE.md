@@ -6,7 +6,7 @@ logged here with its rationale and its rejected alternatives.
 **Rule:** nothing is decided by assumption. Anything unresolved lives in
 [Deferred Decisions](#deferred-decisions) until explicitly ruled on.
 
-- **Status:** Block 2 complete — visual layer verified against live Genius and real album art
+- **Status:** Block 3 complete — Lyric Card export shipping; selection → composer → PNG verified
 - **Last updated:** 2026-08-21
 - **Source of truth:** `prd-doc/Typographic_Lyrical_Explorer_PRD_v2.pdf` (v2.0)
 
@@ -129,6 +129,43 @@ Switching target later must be a one-file change per subsystem.
 
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
+
+### D-018 — Lyric Card typography: measured, not estimated
+**Decided 2026-08-22.** `satori` + `@resvg/resvg-js`, 1080² PNG.
+
+Three failures found by *looking at the output*, each of which produced a
+successful build:
+
+1. **Satori ignores `\n`.** Passing a multi-line string reflowed the lyric into
+   continuous prose. Lyric line breaks are semantic — the line structure *is*
+   the writing — so every line is now its own element.
+2. **Satori has no OKLCH support.** It rendered `oklch()` as black, silently,
+   producing an entirely black card. All card colours are now converted to sRGB
+   hex at the boundary. We still author in OKLCH, because perceptual lightness
+   is what keeps treatments legible across every hue.
+3. **Estimated glyph widths were wrong.** Sizing type by line count alone
+   overflowed the card and orphaned a word onto a fourth line. An assumed
+   0.46em average was the second wrong answer; Rufina's true mean is 0.535em.
+
+Type is now sized from Rufina's **real advance widths**, extracted into
+`src/lib/card-metrics.ts` by `scripts/generate-card-metrics.ts`. The table is
+embedded rather than parsed at runtime so the browser preview and the server
+render use identical maths — the preview cannot drift from the exported file.
+A 3% fit margin absorbs Satori's kerning, which our plain-advance sum does not
+model.
+
+The preview sizes type in **`cqw`** units against a `container-type: inline-size`
+box. A percentage `font-size` would have resolved against the parent font size
+rather than the container width, and the preview would not have matched.
+
+**Selection snaps to whole lines.** The reader drags across characters, but a
+card is built from lines, so we collect every line *element* the range touches
+and take those lines whole. Long-press produces a native selection too, so
+touch needs no separate path.
+
+**Fonts:** Satori accepts TTF/OTF/WOFF but **not woff2**. Rufina ships `.woff`;
+`@fontsource-variable/elms-sans` is woff2-only, so the non-variable
+`@fontsource/elms-sans` was added for its `.woff` build.
 
 ### D-017 — Progressive loading: lyrics first, visuals streamed
 **Decided 2026-08-22.**
@@ -362,7 +399,9 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-010 | Testing strategy — none scaffolded | Quality | No runner installed; `--no-examples` skipped test setup |
 | OD-011 | Playback state store — React context vs TanStack Store | §3.2/§3.3 | Auto-scroll couples playback time to canvas |
 | OD-014 | Genius rate limits are undocumented | §3.1 | Cached per artist+title for 30d. Watch for 429s |
-| OD-016 | LRCLIB uploads sometimes set artistName equal to trackName, losing the real artist | §3.1 | Mitigated by ranking well-tagged entries higher; the underlying data is still wrong |
+| OD-016 | LRCLIB uploads sometimes set artistName equal to trackName | §3.1 | Mitigated by ranking well-tagged entries higher; underlying data still wrong |
+| OD-017 | Card metrics cover printable ASCII only; other scripts use the mean advance | §3.4 | Non-Latin lyrics may size imprecisely. Revisit if the catalogue demands it |
+| OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
 | OD-013 | "Today's Deep Dives" curation — which tracks, refreshed how | §3.1 | Needs OD-003/OD-004 for pre-generated backstories |
 
 ### OD-002 is a product risk, not just a technical one

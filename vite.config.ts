@@ -8,6 +8,12 @@ import { defineConfig } from "vite";
 
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
+	// @resvg/resvg-js ships a native .node binary. Vite's dependency optimiser
+	// tries to parse it as JavaScript and dies ("stream did not contain valid
+	// UTF-8"), so it must stay external on every path. See ARCHITECTURE.md D-009
+	// — this is precisely the cost of the native rasteriser.
+	optimizeDeps: { exclude: ["@resvg/resvg-js"] },
+	ssr: { external: ["@resvg/resvg-js"] },
 	css: {
 		preprocessorOptions: {
 			scss: {
@@ -19,7 +25,7 @@ const config = defineConfig({
 	},
 	plugins: [
 		devtools(),
-		nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+		nitro({ rollupConfig: { external: [/^@sentry\//, /^@resvg\//] } }),
 		tailwindcss(),
 		tanstackStart(),
 		viteReact(),

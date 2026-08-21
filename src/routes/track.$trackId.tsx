@@ -6,6 +6,7 @@ import {
 	notFound,
 } from "@tanstack/react-router";
 
+import { CardAffordance } from "@/features/lyric-card/components/card-affordance";
 import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
 import { PaletteStyle } from "@/features/scrollytelling/components/palette-style";
 import { TrackHero } from "@/features/scrollytelling/components/track-hero";
@@ -71,6 +72,27 @@ function TrackPage() {
 
 			<TrackHero track={track} visuals={visuals} />
 			<LyricCanvas stanzas={track.stanzas} />
+
+			{/* Selection → card (PRD §3.4). The palette streams in with the
+			    artwork, so card treatments pick up the track's hue once it lands. */}
+			<Await
+				promise={visuals}
+				fallback={
+					<CardAffordance
+						title={track.title}
+						artist={track.artist}
+						palette={null}
+					/>
+				}
+			>
+				{({ palette }) => (
+					<CardAffordance
+						title={track.title}
+						artist={track.artist}
+						palette={palette}
+					/>
+				)}
+			</Await>
 
 			<footer className="pb-32 text-center">
 				<Link

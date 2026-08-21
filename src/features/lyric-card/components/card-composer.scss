@@ -1,0 +1,102 @@
+@use "styles/mixins" as m;
+
+// The Lyric Card composer (PRD §3.4). "A lightweight canvas" — a focused
+// overlay, not a full page.
+
+.composer {
+	position: fixed;
+	inset: 0;
+	z-index: 60;
+	display: grid;
+	place-items: center;
+	padding: 1.5rem;
+
+	&__scrim {
+		position: absolute;
+		inset: 0;
+		background: oklch(0.08 0.01 265 / 0.72);
+		backdrop-filter: blur(8px);
+	}
+
+	&__panel {
+		position: relative;
+		display: grid;
+		gap: 1.75rem;
+		width: min(30rem, 100%);
+		max-height: 100%;
+		overflow-y: auto;
+		padding: 1.75rem;
+		border-radius: var(--radius-sheet);
+		background: var(--color-surface);
+		border: 1px solid var(--color-hairline);
+	}
+
+	// Preview mirrors the exported card exactly: same gradient strings, same
+	// type scale, expressed as a ratio of the 1080px render (D-018).
+	// container-type lets the preview size type in cqw — percentages of the
+	// preview's own width. A percentage font-size would resolve against the
+	// PARENT font size instead, and the preview would not match the export.
+	&__preview {
+		container-type: inline-size;
+		aspect-ratio: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 9.63cqw; // 104 / 1080
+		border-radius: 0.75rem;
+		overflow: hidden;
+	}
+
+	&__line {
+		font-family: var(--font-display);
+		display: block;
+	}
+
+	&__credit {
+		font-family: var(--font-ui);
+		text-transform: uppercase;
+		font-size: 2.22cqw; // 24 / 1080
+		letter-spacing: 0.315cqw; // 3.4 / 1080
+	}
+
+	&__themes {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 0.5rem;
+	}
+
+	&__swatch {
+		aspect-ratio: 1;
+		border-radius: 0.625rem;
+		border: 2px solid transparent;
+		cursor: pointer;
+		transition: border-color 0.22s var(--ease-editorial);
+
+		&[aria-pressed="true"] {
+			border-color: var(--color-ink);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: 0.75rem;
+	}
+}
+
+// Selection tooltip — the entry point into all of the above.
+.card-tip {
+	position: fixed;
+	z-index: 50;
+	transform: translate(-50%, -100%);
+	@include m.glass;
+	border-radius: 999px;
+	cursor: pointer;
+	white-space: nowrap;
+	font-family: var(--font-ui);
+	color: var(--color-ink);
+	background: var(--color-surface-raised);
+}

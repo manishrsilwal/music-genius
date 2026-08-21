@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiArtworkRouteImport } from './routes/api/artwork'
+import { Route as ApiCardRouteImport } from './routes/api/card'
 import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as ApiTrackRouteImport } from './routes/api/track'
 import { Route as TrackTrackIdRouteImport } from './routes/track.$trackId'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const ApiArtworkRoute = ApiArtworkRouteImport.update({
   id: '/api/artwork',
   path: '/api/artwork',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCardRoute = ApiCardRouteImport.update({
+  id: '/api/card',
+  path: '/api/card',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSearchRoute = ApiSearchRouteImport.update({
@@ -44,6 +50,7 @@ const TrackTrackIdRoute = TrackTrackIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/artwork': typeof ApiArtworkRoute
+  '/api/card': typeof ApiCardRoute
   '/api/search': typeof ApiSearchRoute
   '/api/track': typeof ApiTrackRoute
   '/track/$trackId': typeof TrackTrackIdRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/artwork': typeof ApiArtworkRoute
+  '/api/card': typeof ApiCardRoute
   '/api/search': typeof ApiSearchRoute
   '/api/track': typeof ApiTrackRoute
   '/track/$trackId': typeof TrackTrackIdRoute
@@ -59,6 +67,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/artwork': typeof ApiArtworkRoute
+  '/api/card': typeof ApiCardRoute
   '/api/search': typeof ApiSearchRoute
   '/api/track': typeof ApiTrackRoute
   '/track/$trackId': typeof TrackTrackIdRoute
@@ -66,13 +75,25 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/api/artwork' | '/api/search' | '/api/track' | '/track/$trackId'
+    | '/'
+    | '/api/artwork'
+    | '/api/card'
+    | '/api/search'
+    | '/api/track'
+    | '/track/$trackId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/artwork' | '/api/search' | '/api/track' | '/track/$trackId'
+  to:
+    | '/'
+    | '/api/artwork'
+    | '/api/card'
+    | '/api/search'
+    | '/api/track'
+    | '/track/$trackId'
   id:
     | '__root__'
     | '/'
     | '/api/artwork'
+    | '/api/card'
     | '/api/search'
     | '/api/track'
     | '/track/$trackId'
@@ -81,6 +102,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiArtworkRoute: typeof ApiArtworkRoute
+  ApiCardRoute: typeof ApiCardRoute
   ApiSearchRoute: typeof ApiSearchRoute
   ApiTrackRoute: typeof ApiTrackRoute
   TrackTrackIdRoute: typeof TrackTrackIdRoute
@@ -100,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/api/artwork'
       fullPath: '/api/artwork'
       preLoaderRoute: typeof ApiArtworkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/card': {
+      id: '/api/card'
+      path: '/api/card'
+      fullPath: '/api/card'
+      preLoaderRoute: typeof ApiCardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/search': {
@@ -129,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiArtworkRoute: ApiArtworkRoute,
+  ApiCardRoute: ApiCardRoute,
   ApiSearchRoute: ApiSearchRoute,
   ApiTrackRoute: ApiTrackRoute,
   TrackTrackIdRoute: TrackTrackIdRoute,
