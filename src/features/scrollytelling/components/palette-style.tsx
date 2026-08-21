@@ -34,11 +34,9 @@ export function PaletteStyle({
 	const selector = `[data-track-scope="${scope.replace(/[^a-zA-Z0-9_-]/g, "")}"]`;
 
 	return (
-		// biome-ignore lint/security/noDangerouslySetInnerHtml: values are regex-validated above
-		<style
-			dangerouslySetInnerHTML={{
-				__html: `${selector}{--track-accent:${accent};--track-accent-soft:${accentSoft};--track-glow:${glow};}`,
-			}}
-		/>
+		// Text children rather than dangerouslySetInnerHTML: React supports it
+		// for <style>, and it keeps this component free of an XSS-shaped API
+		// even though the values above are already regex-validated.
+		<style>{`${selector}{--track-accent:${accent};--track-accent-soft:${accentSoft};--track-glow:${glow};}`}</style>
 	);
 }

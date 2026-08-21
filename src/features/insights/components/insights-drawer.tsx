@@ -123,7 +123,6 @@ export function InsightsDrawer({
 						{...motionProps}
 					>
 						{/* The only drag surface, so the body below stays scrollable. */}
-						{/* biome-ignore lint/a11y/noStaticElementInteractions: drag affordance; Escape and the button both close */}
 						<div
 							className="drawer-sheet__grip"
 							onPointerDown={(event) => dragControls.start(event)}
