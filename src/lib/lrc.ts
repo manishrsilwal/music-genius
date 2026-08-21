@@ -105,13 +105,69 @@ function withClosedEndTimes(stanzas: Stanza[]): Stanza[] {
 	});
 }
 
+/**
+ * Above this average, the file plainly is not delimited into sections — it is
+ * one long run of timed lines with a single trailing blank, if any.
+ */
+const UNDELIMITED_LINES_PER_STANZA = 8;
+
+/**
+ * A pause this long between sung lines is a section break in practice: an
+ * instrumental bar, a turnaround, a breath before the next verse.
+ */
+const GAP_SPLIT_SECONDS = 5;
+
+/**
+ * Recover section breaks from timing when the file has no blank lines.
+ *
+ * Plenty of LRCLIB uploads are a single undelimited run — "Choo Lo" arrives as
+ * 38 lines in one 187-second block. Left alone that is one enormous stanza:
+ * the scroll-spy has a single target, so the focus effect does nothing and
+ * auto-scroll has nowhere to go.
+ *
+ * Applied ONLY as a fallback. Files that do delimit themselves are left alone,
+ * because splitting those on timing would cut across the writer's own sections.
+ */
+function splitOnGaps(lines: LyricLine[]): Stanza[] {
+	const groups: LyricLine[][] = [];
+	let current: LyricLine[] = [];
+
+	for (const [index, line] of lines.entries()) {
+		const previous = lines[index - 1];
+		const gap =
+			previous?.time != null && line.time != null
+				? line.time - previous.time
+				: 0;
+
+		if (current.length > 0 && gap > GAP_SPLIT_SECONDS) {
+			groups.push(current);
+			current = [];
+		}
+		current.push(line);
+	}
+	if (current.length > 0) groups.push(current);
+
+	return groups.flatMap((group) => toStanzas(group));
+}
+
 /** Build stanzas from whichever lyric form the track actually has. */
 export function buildStanzas(input: {
 	syncedLyrics: string | null;
 	plainLyrics: string | null;
 }): { stanzas: Stanza[]; synced: boolean } {
 	if (input.syncedLyrics) {
-		const stanzas = toStanzas(parseSyncedLyrics(input.syncedLyrics));
+		const lines = parseSyncedLyrics(input.syncedLyrics);
+		let stanzas = toStanzas(lines);
+
+		const sung = lines.filter((line) => line.text !== "");
+		if (
+			stanzas.length > 0 &&
+			sung.length / stanzas.length > UNDELIMITED_LINES_PER_STANZA
+		) {
+			const bySplit = splitOnGaps(sung);
+			if (bySplit.length > stanzas.length) stanzas = renumber(bySplit);
+		}
+
 		if (stanzas.length > 0) return { stanzas, synced: true };
 	}
 
@@ -126,6 +182,11 @@ export function buildStanzas(input: {
 	return { stanzas: [], synced: false };
 }
 
+/** Stanza ids are positional, so regrouping has to reissue them. */
+function renumber(stanzas: Stanza[]): Stanza[] {
+	return stanzas.map((stanza, index) => ({ ...stanza, id: `stanza-${index}` }));
+}
+
 /** Index of the stanza active at `seconds`, or -1. Used by auto-scroll (PRD §3.2). */
 export function stanzaIndexAt(stanzas: Stanza[], seconds: number): number {
 	for (let i = stanzas.length - 1; i >= 0; i--) {
@@ -133,4 +194,45 @@ export function stanzaIndexAt(stanzas: Stanza[], seconds: number): number {
 		if (stanza?.startTime != null && seconds >= stanza.startTime) return i;
 	}
 	return -1;
+}
+
+/**
+ * Where the song is, to the line (PRD §3.2).
+ *
+ * Auto-scroll used to track the stanza, which lurched: stanzas run 30–70
+ * seconds, so a six-minute song scrolled eight times. Worse, an LRC file with
+ * no blank lines collapsed to a single stanza and the page never moved at all.
+ * Following the line makes the scroll continuous and works regardless of how
+ * the file is delimited.
+ *
+ * Stanza opacity stays stanza-level — that is PRD §3.3's focus effect, a
+ * different concern from keeping pace with the audio.
+ */
+export interface LinePosition {
+	stanzaIndex: number;
+	lineIndex: number;
+	/** Matches the key the canvas registers its line elements under. */
+	key: string;
+}
+
+export function lineKey(stanzaIndex: number, lineIndex: number): string {
+	return `${stanzaIndex}:${lineIndex}`;
+}
+
+export function linePositionAt(
+	stanzas: Stanza[],
+	seconds: number,
+): LinePosition | null {
+	for (let s = stanzas.length - 1; s >= 0; s--) {
+		const stanza = stanzas[s];
+		if (!stanza) continue;
+
+		for (let l = stanza.lines.length - 1; l >= 0; l--) {
+			const line = stanza.lines[l];
+			if (line?.time != null && seconds >= line.time) {
+				return { stanzaIndex: s, lineIndex: l, key: lineKey(s, l) };
+			}
+		}
+	}
+	return null;
 }

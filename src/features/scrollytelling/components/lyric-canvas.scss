@@ -49,6 +49,18 @@ $stanza-gap-lg: 4.5rem;
 
 	&__line {
 		display: block;
+		transition: color 0.32s var(--ease-editorial);
+
+		// The line currently being sung (PRD §3.2). Deliberately understated:
+		// the stanza fade is already carrying the focus, and a second loud
+		// signal would fight it. This only has to make the sync legible.
+		&[data-sung] {
+			color: var(--track-accent);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
 	}
 
 	// An annotated phrase (PRD §3.3). Applied to inline spans later, once

@@ -8,9 +8,13 @@
 
 import { cached, TTL } from "../lib/cache";
 import type { Insight, Stanza } from "../lib/types";
+import { initCache } from "./cache/index.server";
 import { features } from "./env";
 import { generateInsight } from "./providers/gemini.server";
 import { gatherSources } from "./providers/search.server";
+
+// Select the cache backend before any read-through runs (OD-001).
+initCache();
 
 /** Insights are expensive and stable; hold them as long as the lyrics. */
 const INSIGHT_TTL = TTL.track;

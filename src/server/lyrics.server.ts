@@ -17,8 +17,12 @@
 import { cached, TTL } from "../lib/cache";
 import { fetchTrack, searchTracks } from "../lib/clients/lrclib";
 import type { Track, TrackSummary, TrackVisuals } from "../lib/types";
+import { initCache } from "./cache/index.server";
 import { findSong } from "./genius.server";
 import { extractPalette } from "./palette.server";
+
+// Select the cache backend before any read-through runs (OD-001).
+initCache();
 
 const EMPTY_VISUALS: TrackVisuals = {
 	artwork: null,

@@ -131,6 +131,56 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-025 — Auto-scroll follows the line, not the stanza
+**Fixed 2026-08-22.** Reported as "auto sync is not working correctly".
+
+Two distinct faults, both real:
+
+1. **Undelimited files never scrolled at all.** Many LRCLIB uploads carry no
+   blank lines, so `toStanzas` produced a single stanza. "Choo Lo" arrived as
+   38 lines in one 187-second block: one scroll target, so the page moved once
+   and then never again, and the §3.3 focus effect had nothing to contrast.
+2. **Stanza-level sync lurched even on good files.** Stanzas run 30–71
+   seconds, so Bohemian Rhapsody scrolled 8 times across 354 seconds. That is
+   not "perfectly in sync" (PRD §3.2); it is a jump every minute.
+
+| Track | Stanzas before | after | Longest stanza |
+|---|---|---|---|
+| Choo Lo | **1** | 7 | 187s → 32s |
+| Bohemian Rhapsody | 8 | 8 | 71s (unchanged) |
+| Karma Police | 7 | 7 | 38s (unchanged) |
+
+**Fix 1 — sync at line level.** `linePositionAt` resolves the exact line, and
+the canvas scrolls to that element. Choo Lo goes from 1 scroll target to 38.
+Opacity stays stanza-level: that is PRD §3.3's focus effect, a different
+concern from keeping pace with audio. The sung line takes the track accent —
+understated, since the stanza fade already carries the focus.
+
+**Fix 2 — recover sections from timing.** When a file averages more than 8
+sung lines per stanza it plainly is not delimited, so stanzas are re-split on
+gaps over 5 seconds — a pause that long is an instrumental bar or a breath
+before the next verse. Applied **only** as a fallback: files that delimit
+themselves are left alone, because splitting those on timing would cut across
+the writer's own sections. Verified against four tracks; only the undelimited
+one changed.
+
+### D-024 — Cache: Upstash Redis, degrading to memory
+**Decided 2026-08-22.** Resolves OD-001.
+
+HTTP-based rather than a TCP client, so it runs on Node, Bun, Vercel and
+Workers alike — which is what lets D-009 keep the deployment target open.
+
+Every Redis failure degrades to a **miss**, never an error. A cache that can
+take the page down is worse than no cache: lyrics are always re-fetchable from
+LRCLIB, so the correct response to an outage is to be slow, not broken.
+
+Without credentials the app still runs on the in-memory adapter and **logs a
+warning at startup** saying plainly that it is per-process, does not survive a
+restart, and is unsuitable for production. The previous silence there was the
+real risk — it would have deployed looking fine.
+
+Keys are namespaced `tle:` so a shared instance cannot collide.
+
 ### D-023 — Tests for the heuristics, verified by mutation
 **Decided 2026-08-22.** Vitest, scoped to pure logic.
 
@@ -543,7 +593,7 @@ Open. **To be ruled on explicitly — never assumed.**
 
 | ID | Decision | Blocks | Notes |
 |---|---|---|---|
-| OD-001 | Cache backend concrete impl | `/api/track` | Follows D-009. Upstash Redis likely (HTTP ⇒ runtime-agnostic) |
+
 
 
 | OD-004 | Search API: Tavily vs Google | `/api/insights` | |

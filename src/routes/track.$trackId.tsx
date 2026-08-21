@@ -6,13 +6,13 @@ import {
 	notFound,
 } from "@tanstack/react-router";
 import { useState } from "react";
-
 import { InsightsAffordance } from "@/features/insights/components/insights-affordance";
 import { CardAffordance } from "@/features/lyric-card/components/card-affordance";
 import { PlaybackBar } from "@/features/playback/components/playback-bar";
 import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
 import { PaletteStyle } from "@/features/scrollytelling/components/palette-style";
 import { TrackHero } from "@/features/scrollytelling/components/track-hero";
+import type { LinePosition } from "@/lib/lrc";
 import { getTrackFn, getTrackVisualsFn } from "@/server/lyrics.functions";
 
 export const Route = createFileRoute("/track/$trackId")({
@@ -65,7 +65,7 @@ export const Route = createFileRoute("/track/$trackId")({
 function TrackPage() {
 	const { track, visuals } = Route.useLoaderData();
 	const [drawerOpen, setDrawerOpen] = useState(false);
-	const [syncIndex, setSyncIndex] = useState<number | null>(null);
+	const [syncPosition, setSyncPosition] = useState<LinePosition | null>(null);
 
 	return (
 		<article
@@ -80,7 +80,7 @@ function TrackPage() {
 			</Await>
 
 			<TrackHero track={track} visuals={visuals} />
-			<LyricCanvas stanzas={track.stanzas} syncIndex={syncIndex} />
+			<LyricCanvas stanzas={track.stanzas} syncPosition={syncPosition} />
 
 			{/* Selection → card (PRD §3.4). The palette streams in with the
 			    artwork, so card treatments pick up the track's hue once it lands. */}
@@ -113,7 +113,7 @@ function TrackPage() {
 							title={track.title}
 							stanzas={track.stanzas}
 							synced={track.synced}
-							onSyncIndexChange={setSyncIndex}
+							onSyncChange={setSyncPosition}
 						/>
 					) : null
 				}

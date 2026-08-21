@@ -59,7 +59,22 @@ export function createMemoryCache(maxEntries = 500): CacheAdapter {
 
 let adapter: CacheAdapter | null = null;
 
-/** Process-wide cache. Swap the constructor here when OD-001 is resolved. */
+/**
+ * Process-wide cache.
+ *
+ * Resolved once, lazily, so the adapter is chosen after the environment is
+ * loaded. The in-memory implementation is the fallback, not the default: it is
+ * per-process, so it neither survives a restart nor is shared between
+ * serverless instances, which makes PRD §5's sub-500ms target unreachable with
+ * it in place.
+ *
+ * The import is dynamic so the Redis client never enters a bundle that has no
+ * credentials to use it with.
+ */
+export function setCacheAdapter(next: CacheAdapter): void {
+	adapter = next;
+}
+
 export function getCache(): CacheAdapter {
 	if (!adapter) adapter = createMemoryCache();
 	return adapter;

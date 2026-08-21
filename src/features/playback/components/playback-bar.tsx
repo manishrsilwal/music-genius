@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
 
-import { stanzaIndexAt } from "@/lib/lrc";
+import { type LinePosition, linePositionAt } from "@/lib/lrc";
 import { riseVariants, transition } from "@/lib/motion";
 import type { Stanza } from "@/lib/types";
 
@@ -20,14 +20,14 @@ export function PlaybackBar({
 	title,
 	stanzas,
 	synced,
-	onSyncIndexChange,
+	onSyncChange,
 }: {
 	videoId: string;
 	title: string;
 	stanzas: Stanza[];
 	/** Without timestamps there is nothing to sync to — audio still plays. */
 	synced: boolean;
-	onSyncIndexChange: (index: number | null) => void;
+	onSyncChange: (position: LinePosition | null) => void;
 }) {
 	const mountRef = useRef<HTMLDivElement>(null);
 	const { ready, playing, currentTime, toggle } = useYouTubePlayer(
@@ -38,17 +38,24 @@ export function PlaybackBar({
 	const syncing = synced && playing;
 	const { manual, resume } = useManualOverride(syncing);
 
-	// Derived, then pushed up. Recomputed each poll tick; stanzaIndexAt is a
-	// backwards scan over a handful of entries, so this is cheap.
-	const index = syncing && !manual ? stanzaIndexAt(stanzas, currentTime) : -1;
-	const reported = index >= 0 ? index : null;
+	// Derived, then pushed up. Recomputed each poll tick; linePositionAt is a
+	// backwards scan over a few dozen entries, so this is cheap.
+	const position =
+		syncing && !manual ? linePositionAt(stanzas, currentTime) : null;
+
+	// The parent only cares when the line changes, so compare on the key rather
+	// than the object — a fresh object every tick would re-fire the effect.
+	const reportedKey = position?.key ?? null;
 
 	// Reported from an effect, never during render. React state must not be
 	// pushed to a parent mid-render, and the effect also gives us the
 	// change-only behaviour for free.
+	const latest = useRef<LinePosition | null>(null);
+	latest.current = position;
+
 	useEffect(() => {
-		onSyncIndexChange(reported);
-	}, [reported, onSyncIndexChange]);
+		onSyncChange(latest.current);
+	}, [reportedKey, onSyncChange]);
 
 	const status = !ready
 		? "Loading"

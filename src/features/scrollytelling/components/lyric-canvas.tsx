@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from "motion/react";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
+import { type LinePosition, lineKey } from "@/lib/lrc";
 import { stanzaVariants } from "@/lib/motion";
 import type { Stanza } from "@/lib/types";
 
@@ -10,13 +11,11 @@ import "./lyric-canvas.scss";
 interface LyricCanvasProps {
 	stanzas: Stanza[];
 	/**
-	 * Stanza the audio is currently on (PRD §3.2). When set, it overrides the
-	 * scroll-spy and the canvas scrolls itself to keep up. Null means the
-	 * reader is driving.
+	 * Where the audio is, to the line (PRD §3.2). When set it overrides the
+	 * scroll-spy and the canvas keeps pace with the song. Null means the reader
+	 * is driving.
 	 */
-	syncIndex?: number | null;
-	/** Notifies the page which stanza is centred, for future audio sync (PRD §3.2). */
-	onActiveChange?: (index: number) => void;
+	syncPosition?: LinePosition | null;
 }
 
 /**
@@ -24,39 +23,55 @@ interface LyricCanvasProps {
  *
  * The stanza at the centre of the viewport is fully opaque; every other stanza
  * falls to 20%. Opacity values come from lib/motion.ts — never inline.
+ *
+ * Two granularities on purpose: opacity is per stanza, because that is the
+ * unit of reading attention, while auto-scroll follows the individual line,
+ * because that is what keeps pace with the audio. Scrolling per stanza lurched
+ * — stanzas run 30–70 seconds — and did nothing at all on the many LRC files
+ * that carry no blank lines and so collapse to a single stanza.
  */
-export function LyricCanvas({ stanzas, syncIndex = null }: LyricCanvasProps) {
-	const {
-		activeIndex: spyIndex,
-		register,
-		elements,
-	} = useScrollSpy(stanzas.length);
+export function LyricCanvas({
+	stanzas,
+	syncPosition = null,
+}: LyricCanvasProps) {
+	const { activeIndex: spyIndex, register } = useScrollSpy(stanzas.length);
 	const prefersReducedMotion = useReducedMotion();
 
-	// Audio wins when it is driving; otherwise the reader's position does.
-	const activeIndex = syncIndex ?? spyIndex;
+	const lineElements = useRef<Map<string, HTMLElement>>(new Map());
 
-	// Keep the sung stanza in the centre of the viewport. Reduced motion still
-	// tracks the song — it jumps rather than glides (D-004).
+	const registerLine = useCallback(
+		(key: string) => (element: HTMLElement | null) => {
+			if (element) lineElements.current.set(key, element);
+			else lineElements.current.delete(key);
+		},
+		[],
+	);
+
+	// Audio wins while it is driving; otherwise the reader's position does.
+	const activeIndex = syncPosition ? syncPosition.stanzaIndex : spyIndex;
+	const syncKey = syncPosition?.key ?? null;
+
+	// Keep the line being sung in the middle of the viewport. Reduced motion
+	// still follows the song — it jumps rather than glides (D-004).
 	useEffect(() => {
-		if (syncIndex === null) return;
-		const element = elements.current.get(syncIndex);
+		if (!syncKey) return;
+		const element = lineElements.current.get(syncKey);
 		if (!element) return;
 
 		element.scrollIntoView({
 			behavior: prefersReducedMotion ? "auto" : "smooth",
 			block: "center",
 		});
-	}, [syncIndex, elements, prefersReducedMotion]);
+	}, [syncKey, prefersReducedMotion]);
 
 	return (
 		<div className="canvas">
-			{stanzas.map((stanza, index) => {
-				const isActive = index === activeIndex;
+			{stanzas.map((stanza, stanzaIndex) => {
+				const isActive = stanzaIndex === activeIndex;
 				return (
 					<motion.p
 						key={stanza.id}
-						ref={register(index)}
+						ref={register(stanzaIndex)}
 						className="canvas__stanza text-ink"
 						data-active={isActive}
 						variants={stanzaVariants}
@@ -64,17 +79,22 @@ export function LyricCanvas({ stanzas, syncIndex = null }: LyricCanvasProps) {
 						animate={isActive ? "active" : "idle"}
 						transition={prefersReducedMotion ? { duration: 0 } : undefined}
 					>
-						{stanza.lines.map((line, lineIndex) => (
-							<span
-								// Lyrics legitimately repeat lines, so text alone is not a key.
-								// Stanza content is static and never reorders, so the index is stable.
-								// biome-ignore lint/suspicious/noArrayIndexKey: stable, non-reordering list
-								key={`${stanza.id}-${lineIndex}`}
-								className="canvas__line"
-							>
-								{line.text}
-							</span>
-						))}
+						{stanza.lines.map((line, lineIndex) => {
+							const key = lineKey(stanzaIndex, lineIndex);
+							return (
+								<span
+									// Lyrics legitimately repeat lines, so text alone is not a
+									// key. Stanza content is static and never reorders, so the
+									// index is stable.
+									key={key}
+									ref={registerLine(key)}
+									className="canvas__line"
+									data-sung={key === syncKey || undefined}
+								>
+									{line.text}
+								</span>
+							);
+						})}
 					</motion.p>
 				);
 			})}

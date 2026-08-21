@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
 	buildStanzas,
+	lineKey,
+	linePositionAt,
 	parseSyncedLyrics,
 	stanzaIndexAt,
 	toStanzas,
@@ -155,5 +157,91 @@ describe("stanzaIndexAt", () => {
 	it("returns -1 for unsynced stanzas", () => {
 		const plain = buildStanzas({ syncedLyrics: null, plainLyrics: "a\nb" });
 		expect(stanzaIndexAt(plain.stanzas, 10)).toBe(-1);
+	});
+});
+
+describe("undelimited files (gap-based fallback)", () => {
+	/**
+	 * Many LRCLIB uploads carry no blank lines at all. Left alone they collapse
+	 * to one enormous stanza: the scroll-spy gets a single target, the focus
+	 * effect does nothing, and auto-scroll never moves. "Choo Lo" arrives this
+	 * way — 38 lines in one 187-second block.
+	 */
+	const undelimited = Array.from({ length: 24 }, (_, i) => {
+		// Three-second lines, with a six-second break every six lines.
+		const time = i * 3 + Math.floor(i / 6) * 6;
+		return `[00:${String(time).padStart(2, "0")}.00] line ${i}`;
+	}).join("\n");
+
+	it("splits an undelimited run on timing", () => {
+		const { stanzas } = buildStanzas({
+			syncedLyrics: undelimited,
+			plainLyrics: null,
+		});
+		expect(stanzas.length).toBeGreaterThan(1);
+	});
+
+	it("leaves a properly delimited file alone", () => {
+		const delimited = [
+			"[00:00.00] a",
+			"[00:03.00] b",
+			"[00:06.00] ",
+			"[00:20.00] c",
+			"[00:23.00] d",
+		].join("\n");
+		const { stanzas } = buildStanzas({
+			syncedLyrics: delimited,
+			plainLyrics: null,
+		});
+		// The 14s gap would split further, but the file delimits itself.
+		expect(stanzas).toHaveLength(2);
+	});
+
+	it("keeps stanza ids unique after regrouping", () => {
+		const { stanzas } = buildStanzas({
+			syncedLyrics: undelimited,
+			plainLyrics: null,
+		});
+		expect(new Set(stanzas.map((s) => s.id)).size).toBe(stanzas.length);
+	});
+});
+
+describe("linePositionAt", () => {
+	const { stanzas } = buildStanzas({
+		syncedLyrics: [
+			"[00:00.00] a",
+			"[00:05.00] b",
+			"[00:10.00] ",
+			"[00:20.00] c",
+		].join("\n"),
+		plainLyrics: null,
+	});
+
+	it("returns null before the first line", () => {
+		const later = buildStanzas({
+			syncedLyrics: "[00:30.00] x",
+			plainLyrics: null,
+		});
+		expect(linePositionAt(later.stanzas, 5)).toBeNull();
+	});
+
+	it("resolves to the line, not just the stanza", () => {
+		expect(linePositionAt(stanzas, 0)?.key).toBe(lineKey(0, 0));
+		expect(linePositionAt(stanzas, 6)?.key).toBe(lineKey(0, 1));
+	});
+
+	it("advances across stanza boundaries", () => {
+		const position = linePositionAt(stanzas, 25);
+		expect(position?.stanzaIndex).toBe(1);
+		expect(position?.lineIndex).toBe(0);
+	});
+
+	it("moves far more often than stanza-level sync did", () => {
+		// The regression this guards: stanza-level sync scrolled 8 times across
+		// a 6-minute song, and not at all on an undelimited file.
+		const keys = new Set<string>();
+		for (let t = 0; t < 30; t++)
+			keys.add(linePositionAt(stanzas, t)?.key ?? "none");
+		expect(keys.size).toBeGreaterThan(2);
 	});
 });

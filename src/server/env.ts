@@ -27,6 +27,15 @@ export const env = {
 	 */
 	geminiModel: read("GEMINI_MODEL") ?? "gemini-2.5-flash",
 
+	/**
+	 * Upstash Redis — the production cache (OD-001).
+	 *
+	 * HTTP-based rather than a TCP client, so it works on every runtime,
+	 * including Workers. That keeps the deployment target deferred (D-009).
+	 */
+	upstashUrl: read("UPSTASH_REDIS_REST_URL"),
+	upstashToken: read("UPSTASH_REDIS_REST_TOKEN"),
+
 	/** Tavily — web grounding for the sources gallery (OD-004). */
 	tavilyApiKey: read("TAVILY_API_KEY"),
 } as const;
@@ -35,6 +44,11 @@ export const env = {
 export const features = {
 	get artwork(): boolean {
 		return Boolean(env.geniusAccessToken);
+	},
+
+	/** A durable cache. Without it we fall back to a per-process map. */
+	get persistentCache(): boolean {
+		return Boolean(env.upstashUrl && env.upstashToken);
 	},
 
 	/** The drawer needs an LLM at minimum. */
