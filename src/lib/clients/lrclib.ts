@@ -140,7 +140,7 @@ function toTrack(raw: LrclibRecord): Track {
 		syncedLyrics: raw.syncedLyrics,
 		plainLyrics: raw.plainLyrics,
 	});
-	return { ...toSummary(raw), stanzas, synced };
+	return { ...toSummary(raw), stanzas, synced, artwork: null };
 }
 
 /**

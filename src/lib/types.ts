@@ -22,6 +22,19 @@ export interface Stanza {
 	endTime: number | null;
 }
 
+/**
+ * Album art, sourced from Genius (OD-005). Null whenever no token is
+ * configured or no confident match was found — a wrong hero image is worse
+ * than no hero image.
+ */
+export interface Artwork {
+	full: string;
+	thumbnail: string;
+	geniusId: number;
+	/** 0–1 match confidence. Retained so bad matches are diagnosable. */
+	matchScore: number;
+}
+
 /** Search-result shape: enough to render an autocomplete row, nothing more. */
 export interface TrackSummary {
 	id: string;
@@ -36,6 +49,7 @@ export interface TrackSummary {
 
 export interface Track extends TrackSummary {
 	stanzas: Stanza[];
+	artwork: Artwork | null;
 	/** True when timestamps are present and auto-scroll is possible (PRD §3.2). */
 	synced: boolean;
 }
