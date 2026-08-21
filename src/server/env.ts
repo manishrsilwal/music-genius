@@ -25,7 +25,7 @@ export const env = {
 	 * Model names churn fast, so this is configurable rather than pinned in
 	 * code. Override when a newer or cheaper model is available.
 	 */
-	geminiModel: read("GEMINI_MODEL") ?? "gemini-2.5-flash",
+	geminiModel: read("GEMINI_MODEL") ?? "gemini-3.5-flash",
 
 	/**
 	 * Upstash Redis — the production cache (OD-001).

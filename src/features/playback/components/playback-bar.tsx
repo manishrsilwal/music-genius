@@ -53,6 +53,10 @@ export function PlaybackBar({
 	const latest = useRef<LinePosition | null>(null);
 	latest.current = position;
 
+	// The effect reads `latest.current`, a ref, so `reportedKey` is a trigger
+	// rather than a read. It is what gives the effect its change-only
+	// behaviour; removing it would report once and then go silent.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: trigger, not a read
 	useEffect(() => {
 		onSyncChange(latest.current);
 	}, [reportedKey, onSyncChange]);

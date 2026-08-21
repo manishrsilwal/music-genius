@@ -18,9 +18,20 @@ const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const SCHEMA = {
 	type: "object",
 	properties: {
+		/**
+		 * An array, not a newline-delimited string. Asked for prose, the model
+		 * returns one unbroken block roughly two thirds of the time — a
+		 * 1400-character wall in the drawer's marquee slot. Making paragraphs
+		 * structural rather than typographic is enforced by the schema instead
+		 * of hoped for in the prompt, the same reasoning as `sourceIndex`.
+		 */
 		synthesis: {
-			type: "string",
-			description: "Two or three paragraphs on what the song is about.",
+			type: "array",
+			items: { type: "string" },
+			minItems: 2,
+			maxItems: 3,
+			description:
+				"Two or three paragraphs. Each array element is one paragraph; do not include newlines inside an element.",
 		},
 		quote: {
 			type: "object",
@@ -42,7 +53,7 @@ interface GeminiResponse {
 }
 
 interface ModelOutput {
-	synthesis?: string;
+	synthesis?: string[];
 	quote?: { text?: string; attribution?: string; sourceIndex?: number } | null;
 }
 
@@ -70,6 +81,9 @@ Write a synthesis of two or three short paragraphs explaining what this song is
 about — its story, its context, what the writer was reaching for. Address the
 reader as an intelligent adult. No hedging, no "this song appears to", no
 restating the lyrics back at them.
+
+Return the paragraphs as separate array elements. Each element is one paragraph
+of plain prose — no newlines inside an element, no markdown, no numbering.
 
 QUOTE RULES — these are absolute:
 - Only include a quote if it appears VERBATIM in the numbered sources above.
@@ -130,12 +144,18 @@ export async function generateInsight(args: {
 		if (!raw) return null;
 
 		const parsed = JSON.parse(raw) as ModelOutput;
-		const synthesis = parsed.synthesis?.trim();
+		// Joined here rather than carried through `Insight`: the drawer already
+		// splits on blank lines, and keeping the wire shape a string leaves
+		// every cached entry valid. See ARCHITECTURE.md D-029.
+		const synthesis = (parsed.synthesis ?? [])
+			.map((paragraph) => paragraph.trim())
+			.filter(Boolean)
+			.join("\n\n");
 		if (!synthesis) return null;
 
 		return {
 			synthesis,
-			quote: validateQuote(parsed.quote, args.sources),
+			quote: validateQuote(parsed.quote, args.sources, args.excerpts),
 			sources: args.sources,
 			ungrounded: args.sources.length === 0,
 		};
@@ -152,9 +172,39 @@ export async function generateInsight(args: {
  * survives only if it names a source that actually exists. This is the last
  * line of defence against attributing invented words to a real person.
  */
-function validateQuote(
+/**
+ * Verbatim comparison, tolerant of typography but not of invention.
+ *
+ * Models routinely retype a genuine quote with straight apostrophes or
+ * collapsed whitespace, so a byte-exact check would discard real quotes far
+ * more often than fake ones. Folding quote marks, dashes, ellipses and
+ * whitespace keeps the gate aimed at fabrication rather than punctuation.
+ */
+function fold(value: string): string {
+	return value
+		.replace(/[\u2018\u2019\u201B\u2032]/g, "'")
+		.replace(/[\u201C\u201D\u201F\u2033]/g, '"')
+		.replace(/[\u2010-\u2015]/g, "-")
+		.replace(/\u2026/g, "...")
+		.replace(/\s+/g, " ")
+		.trim()
+		.toLowerCase();
+}
+
+export function containsQuote(excerpt: string, text: string): boolean {
+	const needle = fold(text)
+		.replace(/^["']|["']$/g, "")
+		.trim();
+	// Tavily excerpts are truncated to 1200 characters, so a long quote can be
+	// cut mid-sentence. Anything this short is not evidence of grounding.
+	if (needle.length < 12) return false;
+	return fold(excerpt).includes(needle);
+}
+
+export function validateQuote(
 	quote: ModelOutput["quote"],
 	sources: InsightSource[],
+	excerpts: string[],
 ): Insight["quote"] {
 	if (!quote?.text?.trim() || !quote.attribution?.trim()) return null;
 	if (sources.length === 0) return null;
@@ -162,6 +212,17 @@ function validateQuote(
 	const index = quote.sourceIndex;
 	if (typeof index !== "number" || index < 0 || index >= sources.length) {
 		console.warn("[gemini] discarded a quote citing a non-existent source");
+		return null;
+	}
+
+	// A valid index only proves the model pointed at a real source, not that it
+	// read one. Without this the prompt is the sole guard against a fabricated
+	// quote attributed to a real artist — the worst failure this product has.
+	const excerpt = excerpts[index];
+	if (!excerpt || !containsQuote(excerpt, quote.text)) {
+		console.warn(
+			`[gemini] discarded a quote absent from its cited source [${index}]`,
+		);
 		return null;
 	}
 

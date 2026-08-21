@@ -131,6 +131,54 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-030 — The quote gate verifies the text, not just the citation
+**Decided 2026-08-22.** `validateQuote` now requires the quote to appear in the
+excerpt it cites, not merely that `sourceIndex` is in range.
+
+The prompt has always demanded verbatim quotes, and the schema has always
+demanded a `sourceIndex`. Neither is enforcement: a model that invents a quote
+and points it at source 3 passed every check. The prompt was the only guard on
+the highest-stakes property in the product — a fabricated quote attributed to a
+real artist is worse than showing no quote at all.
+
+The comparison folds curly quotes, dashes, ellipses, case and whitespace before
+matching. Byte-exact was considered and rejected: models routinely retype a
+genuine quote with a straight apostrophe, so a strict check would discard real
+quotes far more often than fake ones, aiming the gate at punctuation instead of
+fabrication. Quotes shorter than 12 folded characters are refused outright —
+matching "the" against an excerpt is not evidence of grounding.
+
+Verified by mutation: removing the check fails 2 tests, removing apostrophe
+folding fails 1, removing the length floor fails 1.
+
+### D-029 — Synthesis paragraphs are structural, not typographic
+**Decided 2026-08-22.** Gemini returns `synthesis` as an array of paragraphs;
+`gemini.server.ts` joins them with blank lines at the boundary.
+
+Asked for "two or three short paragraphs" as a single string, the model returned
+one unbroken block in 4 of 6 sampled tracks — up to 1467 characters with no
+blank line in it. The drawer splits on `/\n{2,}/`, so it had nothing to split
+and rendered a wall of text in the Synthesis slot, which is the drawer's
+marquee. Making paragraphs a schema constraint rather than a prompt request
+fixed 6 of 6 in testing, the same reasoning that put `sourceIndex` in the schema.
+
+The join happens at the model boundary rather than carrying `string[]` through
+`Insight`. The wire shape, every cached entry, and `insights-content.tsx` are
+therefore untouched — the component already split on blank lines, it simply
+never had any to split.
+
+> **Model:** `GEMINI_MODEL` defaults to `gemini-3.5-flash`. `gemini-2.5-flash`
+> was retired for new API keys mid-2026 and returns 404 with a pointer to a
+> successor; the default was moved rather than pinned, and the variable stays
+> overridable. `gemini-3.6-flash` also works but averaged 11.9s against 6.5s,
+> outside the PRD §4 budget of 3–6s. The Pro tier returns 429 on a free key.
+
+> **Quota:** the free tier allows **20 generate-content requests per day**. The
+> 30-day cache absorbs repeat views, so this is workable in development, but it
+> is a **launch blocker**: 20 uncached tracks per day across all users, then the
+> drawer 502s. Resolve before deploy — either billing, or pre-warming the
+> curated catalogue into the cache. Tracked as OD-021.
+
 ### D-028 — Landing page sized for a doorway, not a poster
 **Fixed 2026-08-22.** Reported: "huge fonts, the user has to scroll first then
 answer the question."
@@ -698,6 +746,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-017 | Scripts beyond Latin and Devanagari still have no face — Arabic, Bengali, Tamil, CJK would render as tofu | §3.4 | Same class of bug as D-019. Needs a face per script the catalogue serves |
 
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
+| OD-021 | **Gemini free tier: 20 requests/day.** Launch blocker — needs billing or a pre-warmed catalogue | §3.5 | Accepted for development 2026-08-22 (D-029). Cache absorbs repeats, not first views |
 
 
 ### OD-002 is a product risk, not just a technical one
