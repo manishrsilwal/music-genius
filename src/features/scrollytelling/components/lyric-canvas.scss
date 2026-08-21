@@ -1,0 +1,60 @@
+@use "styles/mixins" as m;
+
+// Structural CSS only. Anything expressible as a Tailwind utility stays in the
+// JSX; this file holds what utilities can't say — the centred reading measure,
+// the stanza rhythm, and the scroll-spy states.
+// See ARCHITECTURE.md D-013.
+
+$stanza-gap: 3rem;
+$stanza-gap-lg: 4.5rem;
+
+.canvas {
+	display: flex;
+	flex-direction: column;
+	gap: $stanza-gap;
+
+	// Generous line height and a measure that keeps lyrics readable without
+	// letting long lines sprawl (PRD §3.3).
+	max-width: 34ch;
+	margin-inline: auto;
+	text-align: center;
+
+	@include m.from("md") {
+		gap: $stanza-gap-lg;
+		max-width: 42ch;
+	}
+
+	// The first and last stanzas must be able to reach the viewport centre,
+	// otherwise they can never become active.
+	padding-block: 45vh;
+
+	&__stanza {
+		font-family: var(--font-display);
+		font-size: var(--text-lyric);
+		line-height: var(--leading-lyric);
+		text-wrap: balance;
+
+		// Motion drives opacity, so this is only the pre-hydration value.
+		opacity: var(--stanza-opacity-idle);
+		transition: opacity 0.42s var(--ease-editorial);
+
+		&[data-active="true"] {
+			opacity: var(--stanza-opacity-active);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__line {
+		display: block;
+	}
+
+	// An annotated phrase (PRD §3.3). Applied to inline spans later, once
+	// Genius annotations land.
+	&__glow {
+		color: var(--track-accent);
+		text-shadow: 0 0 1.75rem var(--track-glow);
+	}
+}

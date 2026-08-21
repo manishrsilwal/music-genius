@@ -1,0 +1,75 @@
+@use "styles/mixins" as m;
+
+// The search field is the product's front door (PRD §3.1). Utilities handle
+// spacing and colour in the JSX; this file owns the glass treatment, the
+// results popover, and the states utilities can't express.
+
+.search {
+	position: relative;
+	width: 100%;
+
+	&__input {
+		width: 100%;
+		@include m.glass;
+		border-radius: var(--radius-card);
+		font-family: var(--font-ui);
+		color: var(--color-ink);
+		transition: border-color 0.22s var(--ease-editorial);
+
+		&::placeholder {
+			color: var(--color-ink-faint);
+		}
+
+		&:focus {
+			outline: none;
+			border-color: var(--track-accent);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__results {
+		position: absolute;
+		inset-inline: 0;
+		top: calc(100% + 0.75rem);
+		z-index: 20;
+		overflow: hidden;
+		border-radius: var(--radius-card);
+		@include m.glass;
+		background: var(--color-surface);
+	}
+
+	&__option {
+		display: flex;
+		width: 100%;
+		align-items: baseline;
+		gap: 0.75rem;
+		text-align: left;
+		cursor: pointer;
+		transition: background-color 0.12s var(--ease-editorial);
+
+		&:hover,
+		&[data-highlighted="true"] {
+			background: var(--color-surface-raised);
+		}
+
+		& + & {
+			border-top: 1px solid var(--color-hairline);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__title {
+		font-family: var(--font-display);
+		@include m.line-clamp(1);
+	}
+
+	&__artist {
+		@include m.line-clamp(1);
+	}
+}

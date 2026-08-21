@@ -1,81 +1,50 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
-import { riseVariants, staggerVariants, stanzaOpacity } from "@/lib/motion";
+import { SearchField } from "@/features/discovery/components/search-field";
+import { riseVariants, staggerVariants } from "@/lib/motion";
 
-export const Route = createFileRoute("/")({ component: Foundation });
+export const Route = createFileRoute("/")({ component: Discovery });
 
 /**
- * TEMPORARY — foundation smoke-test, not a design.
+ * Discovery (PRD §3.1).
  *
- * Exists so the type scale, both typefaces, the runtime accent channel, and
- * the motion primitives can be verified in the browser before feature work
- * begins. Replaced by "Today's Deep Dives" (PRD §3.1) in the next block.
+ * "Today's Deep Dives" needs pre-generated AI backstories, which are blocked on
+ * OD-003/OD-004. Search ships first; the curated grid lands beneath it.
  */
-function Foundation() {
+function Discovery() {
 	return (
 		<motion.main
-			className="mx-auto max-w-4xl px-6 py-24"
+			className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center px-6 py-24"
 			variants={staggerVariants}
 			initial="hidden"
 			animate="visible"
 		>
 			<motion.p
 				variants={riseVariants}
-				className="font-ui text-micro uppercase tracking-label text-ink-faint"
+				className="text-micro uppercase tracking-label text-ink-faint"
 			>
-				Foundation check
+				Typographic Lyrical Explorer
 			</motion.p>
 
 			<motion.h1
 				variants={riseVariants}
-				className="mt-6 font-display text-hero leading-hero tracking-hero text-ink"
+				className="mt-6 font-display text-display leading-display tracking-display text-ink"
 			>
-				Typographic
+				Read the words
 				<br />
-				Lyrical Explorer
+				properly.
 			</motion.h1>
 
 			<motion.p
 				variants={riseVariants}
-				className="mt-8 font-ui text-lead text-ink-muted"
+				className="mt-6 max-w-md text-lead text-ink-muted"
 			>
-				Rufina sets the display. Elms Sans carries the interface. The accent
-				below is driven by <code className="text-accent">--track-accent</code>,
-				the channel album-art extraction will repaint per track.
+				Lyrics set like an essay, not a listing. Search a track to begin.
 			</motion.p>
 
-			<motion.div variants={riseVariants} className="mt-14 space-y-3">
-				{["Fully opaque — the stanza in focus", "Faded to twenty percent"].map(
-					(line, i) => (
-						<p
-							key={line}
-							className="font-display text-lyric leading-lyric text-ink"
-							style={{
-								opacity: i === 0 ? stanzaOpacity.active : stanzaOpacity.idle,
-							}}
-						>
-							{line}
-						</p>
-					),
-				)}
-			</motion.div>
-
-			<motion.div
-				variants={riseVariants}
-				className="mt-14 flex items-center gap-4"
-			>
-				<span
-					className="inline-flex items-center rounded-card border px-5 py-3 font-ui text-caption backdrop-blur"
-					style={{
-						background: "var(--glass-bg)",
-						borderColor: "var(--glass-border)",
-						backdropFilter: "blur(var(--glass-blur))",
-					}}
-				>
-					Glass surface
-				</span>
-				<span className="size-10 rounded-full bg-accent" />
+			<motion.div variants={riseVariants} className="mt-12">
+				<SearchField />
 			</motion.div>
 		</motion.main>
 	);
