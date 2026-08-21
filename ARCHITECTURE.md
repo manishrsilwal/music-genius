@@ -130,6 +130,43 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-017 — Progressive loading: lyrics first, visuals streamed
+**Decided 2026-08-22.**
+
+Bundling artwork into the track response put the cold page at ~1.6s against
+PRD §5's sub-500ms target, and bundling thumbnails into search cost ~2s on
+every novel query — the opposite of "instant" (§3.1). Lyrics and visuals are
+now separate operations:
+
+| Operation | Path | Cold |
+|---|---|---|
+| `getTrack` | LRCLIB only | ~0.23s |
+| `getTrackVisuals` | Genius + image fetch + decode | ~0.8s |
+
+The track loader awaits the lyrics and returns the visuals promise unawaited,
+rendered through `<Await>`. Verified at the socket: first chunk carries the
+readable lyrics at **0.231s**, a second chunk delivers artwork and palette at
+~1.0s, `Transfer-Encoding: chunked`.
+
+This is the same two-speed pattern PRD §4 already prescribes for AI insights,
+applied one layer earlier.
+
+**Measurement note.** `curl`'s `time_starttransfer` reports completion here,
+not first byte, and initially made the streaming look broken. Only a raw socket
+read timing individual chunks showed the truth. `defer()` is used because it is
+the documented API and adds proper deferred-error serialisation — but it was
+*not* what fixed the latency; streaming already worked without it.
+
+**Palette application.** The palette arrives after first paint, so it is applied
+via a scoped `<style>` rule rather than an inline `style` prop — re-rendering
+the article to add one would remount the lyric canvas and lose the reader's
+scroll position. Values are regex-validated against culori's exact oklch output
+before injection.
+
+**Thumbnails** are fetched per row against `/api/artwork` and deduped by
+TanStack Query on artist+title, so the same recording resolves once across
+every search that surfaces it.
+
 ### D-016 — Palette extraction: server-side, cached with the track
 **Decided 2026-08-21.** `node-vibrant` + `culori`, both pure JS (no native
 binaries, so D-009's runtime-agnostic constraint holds).
@@ -325,7 +362,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-010 | Testing strategy — none scaffolded | Quality | No runner installed; `--no-examples` skipped test setup |
 | OD-011 | Playback state store — React context vs TanStack Store | §3.2/§3.3 | Auto-scroll couples playback time to canvas |
 | OD-014 | Genius rate limits are undocumented | §3.1 | Cached per artist+title for 30d. Watch for 429s |
-| OD-015 | **Cold-path latency.** Track page 1.6s cold / 8.9ms warm; search 2.07s cold. PRD §5 wants <500ms | §3.1/§4 | Artwork and palette are fetched serially *before* first byte. Needs a progressive strategy |
+| OD-016 | LRCLIB uploads sometimes set artistName equal to trackName, losing the real artist | §3.1 | Mitigated by ranking well-tagged entries higher; the underlying data is still wrong |
 | OD-013 | "Today's Deep Dives" curation — which tracks, refreshed how | §3.1 | Needs OD-003/OD-004 for pre-generated backstories |
 
 ### OD-002 is a product risk, not just a technical one

@@ -1,26 +1,42 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import {
+	Await,
+	createFileRoute,
+	defer,
+	Link,
+	notFound,
+} from "@tanstack/react-router";
 
 import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
+import { PaletteStyle } from "@/features/scrollytelling/components/palette-style";
 import { TrackHero } from "@/features/scrollytelling/components/track-hero";
-import { paletteStyle } from "@/lib/palette-style";
-import { getTrackFn } from "@/server/lyrics.functions";
+import { getTrackFn, getTrackVisualsFn } from "@/server/lyrics.functions";
 
 export const Route = createFileRoute("/track/$trackId")({
-	// Calls the server function directly. The loader is isomorphic, so it must
+	// Calls the server functions directly. The loader is isomorphic, so it must
 	// never fetch /api/track — see src/server/lyrics.server.ts.
 	loader: async ({ params }) => {
 		const track = await getTrackFn({ data: { id: params.trackId } });
 		if (!track) throw notFound();
-		return track;
+
+		// Deliberately NOT awaited (D-017). Artwork costs a Genius round-trip
+		// plus an image fetch and decode; the words ship without waiting and
+		// the visuals stream in behind them.
+		// defer() marks the promise so SSR does not await it before flushing.
+		// Without it the server blocks on artwork and the whole point is lost.
+		const visuals = defer(
+			getTrackVisualsFn({ data: { title: track.title, artist: track.artist } }),
+		);
+
+		return { track, visuals };
 	},
 	head: ({ loaderData }) =>
 		loaderData
 			? {
 					meta: [
-						{ title: `${loaderData.title} — ${loaderData.artist}` },
+						{ title: `${loaderData.track.title} — ${loaderData.track.artist}` },
 						{
 							name: "description",
-							content: `Read the lyrics to ${loaderData.title} by ${loaderData.artist}.`,
+							content: `Read the lyrics to ${loaderData.track.title} by ${loaderData.track.artist}.`,
 						},
 					],
 				}
@@ -43,16 +59,17 @@ export const Route = createFileRoute("/track/$trackId")({
 });
 
 function TrackPage() {
-	const track = Route.useLoaderData();
+	const { track, visuals } = Route.useLoaderData();
 
 	return (
-		// The palette is applied once, at the top of the subtree. Everything
-		// beneath inherits the track's accent through CSS custom properties.
-		<article
-			style={paletteStyle(track.palette)}
-			data-track-theme={track.palette ? "" : undefined}
-		>
-			<TrackHero track={track} />
+		<article data-track-scope={track.id}>
+			{/* Mounts alongside once the palette resolves, repainting every accent
+			    utility at once without disturbing anything already on screen. */}
+			<Await promise={visuals} fallback={null}>
+				{({ palette }) => <PaletteStyle palette={palette} scope={track.id} />}
+			</Await>
+
+			<TrackHero track={track} visuals={visuals} />
 			<LyricCanvas stanzas={track.stanzas} />
 
 			<footer className="pb-32 text-center">

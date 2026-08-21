@@ -59,12 +59,19 @@ export interface TrackSummary {
 	duration: number | null;
 	hasSyncedLyrics: boolean;
 	instrumental: boolean;
+}
+
+/**
+ * Everything derived from album art. Resolved separately from the lyrics and
+ * streamed in after them, so the words never wait on an image (D-017).
+ */
+export interface TrackVisuals {
 	artwork: Artwork | null;
+	palette: Palette | null;
 }
 
 export interface Track extends TrackSummary {
 	stanzas: Stanza[];
-	palette: Palette | null;
 	/** True when timestamps are present and auto-scroll is possible (PRD §3.2). */
 	synced: boolean;
 }

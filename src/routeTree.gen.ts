@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiArtworkRouteImport } from './routes/api/artwork'
 import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as ApiTrackRouteImport } from './routes/api/track'
 import { Route as TrackTrackIdRouteImport } from './routes/track.$trackId'
@@ -17,6 +18,11 @@ import { Route as TrackTrackIdRouteImport } from './routes/track.$trackId'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiArtworkRoute = ApiArtworkRouteImport.update({
+  id: '/api/artwork',
+  path: '/api/artwork',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSearchRoute = ApiSearchRouteImport.update({
@@ -37,12 +43,14 @@ const TrackTrackIdRoute = TrackTrackIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/artwork': typeof ApiArtworkRoute
   '/api/search': typeof ApiSearchRoute
   '/api/track': typeof ApiTrackRoute
   '/track/$trackId': typeof TrackTrackIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/artwork': typeof ApiArtworkRoute
   '/api/search': typeof ApiSearchRoute
   '/api/track': typeof ApiTrackRoute
   '/track/$trackId': typeof TrackTrackIdRoute
@@ -50,20 +58,29 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/artwork': typeof ApiArtworkRoute
   '/api/search': typeof ApiSearchRoute
   '/api/track': typeof ApiTrackRoute
   '/track/$trackId': typeof TrackTrackIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/search' | '/api/track' | '/track/$trackId'
+  fullPaths:
+    '/' | '/api/artwork' | '/api/search' | '/api/track' | '/track/$trackId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/search' | '/api/track' | '/track/$trackId'
-  id: '__root__' | '/' | '/api/search' | '/api/track' | '/track/$trackId'
+  to: '/' | '/api/artwork' | '/api/search' | '/api/track' | '/track/$trackId'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/artwork'
+    | '/api/search'
+    | '/api/track'
+    | '/track/$trackId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiArtworkRoute: typeof ApiArtworkRoute
   ApiSearchRoute: typeof ApiSearchRoute
   ApiTrackRoute: typeof ApiTrackRoute
   TrackTrackIdRoute: typeof TrackTrackIdRoute
@@ -76,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/artwork': {
+      id: '/api/artwork'
+      path: '/api/artwork'
+      fullPath: '/api/artwork'
+      preLoaderRoute: typeof ApiArtworkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/search': {
@@ -104,6 +128,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiArtworkRoute: ApiArtworkRoute,
   ApiSearchRoute: ApiSearchRoute,
   ApiTrackRoute: ApiTrackRoute,
   TrackTrackIdRoute: TrackTrackIdRoute,

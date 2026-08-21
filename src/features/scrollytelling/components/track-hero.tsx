@@ -1,19 +1,30 @@
+import { Await } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
 import { riseVariants, staggerVariants, transition } from "@/lib/motion";
-import type { Track } from "@/lib/types";
+import type { Track, TrackVisuals } from "@/lib/types";
 
 import "./track-hero.scss";
 
 /**
  * Immersive hero (PRD §3.2).
  *
- * The blurred album art is decorative — it carries no information the title and
- * artist below don't already state — so it is hidden from assistive tech.
- * Without artwork the hero degrades to pure typography on the canvas colour,
- * which is a deliberate fallback rather than a broken state.
+ * The type renders immediately; the album art streams in behind it (D-017).
+ * Because the art layer is absolutely positioned, arriving late costs no
+ * reflow — it fades in beneath type that has not moved.
+ *
+ * The art is decorative: it carries nothing the title and artist below don't
+ * already state, so it is hidden from assistive tech. With no artwork at all
+ * the hero is pure typography on the canvas colour, which is a deliberate
+ * fallback rather than a broken state.
  */
-export function TrackHero({ track }: { track: Track }) {
+export function TrackHero({
+	track,
+	visuals,
+}: {
+	track: Track;
+	visuals: Promise<TrackVisuals>;
+}) {
 	return (
 		<motion.header
 			className="hero flex min-h-dvh flex-col items-center justify-center px-6 text-center"
@@ -21,20 +32,30 @@ export function TrackHero({ track }: { track: Track }) {
 			initial="hidden"
 			animate="visible"
 		>
-			{track.artwork && (
-				<>
-					<div className="hero__art" aria-hidden="true">
-						<motion.img
-							src={track.artwork.full}
-							alt=""
-							initial={{ opacity: 0, scale: 1.35 }}
-							animate={{ opacity: 1, scale: 1.25 }}
-							transition={transition.cinematic}
-						/>
-					</div>
-					<div className="hero__veil" aria-hidden="true" />
-				</>
-			)}
+			<Await promise={visuals} fallback={null}>
+				{({ artwork }) =>
+					artwork ? (
+						<>
+							<div className="hero__art" aria-hidden="true">
+								<motion.img
+									src={artwork.full}
+									alt=""
+									initial={{ opacity: 0, scale: 1.35 }}
+									animate={{ opacity: 1, scale: 1.25 }}
+									transition={transition.cinematic}
+								/>
+							</div>
+							<motion.div
+								className="hero__veil"
+								aria-hidden="true"
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								transition={transition.cinematic}
+							/>
+						</>
+					) : null
+				}
+			</Await>
 
 			<motion.p
 				variants={riseVariants}

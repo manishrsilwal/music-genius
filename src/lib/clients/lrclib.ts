@@ -132,7 +132,6 @@ function toSummary(raw: LrclibRecord): TrackSummary {
 		duration: raw.duration,
 		hasSyncedLyrics: Boolean(raw.syncedLyrics),
 		instrumental: raw.instrumental,
-		artwork: null,
 	};
 }
 
@@ -141,7 +140,7 @@ function toTrack(raw: LrclibRecord): Track {
 		syncedLyrics: raw.syncedLyrics,
 		plainLyrics: raw.plainLyrics,
 	});
-	return { ...toSummary(raw), stanzas, synced, palette: null };
+	return { ...toSummary(raw), stanzas, synced };
 }
 
 /**
@@ -149,6 +148,16 @@ function toTrack(raw: LrclibRecord): Track {
  * recording; we keep the one most useful to us — synced lyrics first, then the
  * one with actual lyrics, then the longest (usually the least truncated).
  */
+/**
+ * Some uploads set artistName to the same string as trackName — LRCLIB returns
+ * a "Paranoid Android" whose artist is also "Paranoid Android". We cannot
+ * recover the real artist from that, but we can stop it outranking a
+ * correctly-tagged copy of the same recording.
+ */
+function isWellFormed(item: TrackSummary): boolean {
+	return item.artist.toLowerCase() !== item.title.toLowerCase();
+}
+
 function dedupe(summaries: TrackSummary[]): TrackSummary[] {
 	const best = new Map<string, TrackSummary>();
 
@@ -165,7 +174,14 @@ function dedupe(summaries: TrackSummary[]): TrackSummary[] {
 		if (better > 0) best.set(key, item);
 	}
 
-	return [...best.values()];
+	// Rank well-tagged entries above self-referential ones, then synced above
+	// unsynced. Stable within each tier, so LRCLIB's own ordering still shows
+	// through for entries of equal quality.
+	return [...best.values()].sort(
+		(a, b) =>
+			Number(isWellFormed(b)) - Number(isWellFormed(a)) ||
+			Number(b.hasSyncedLyrics) - Number(a.hasSyncedLyrics),
+	);
 }
 
 /* -------------------------------------------------------------------------

@@ -7,6 +7,7 @@ import { riseVariants, transition } from "@/lib/motion";
 import type { TrackSummary } from "@/lib/types";
 
 import { useDebounced } from "../hooks/use-debounced";
+import { ResultThumb } from "./result-thumb";
 import "./search-field.scss";
 
 /** Runs in the browser only, so a relative URL is safe here. */
@@ -126,16 +127,7 @@ export function SearchField() {
 									onClick={() => open(track)}
 									className="search__option px-5 py-4"
 								>
-									<span className="search__thumb">
-										{track.artwork && (
-											<img
-												src={track.artwork.thumbnail}
-												alt=""
-												loading="lazy"
-												decoding="async"
-											/>
-										)}
-									</span>
+									<ResultThumb title={track.title} artist={track.artist} />
 
 									<span className="search__meta">
 										<span className="search__title text-lead text-ink">

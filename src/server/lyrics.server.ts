@@ -8,53 +8,57 @@
  *   - src/server/lyrics.functions.ts  → server functions, for loaders
  *   - src/routes/api/*.ts             → HTTP routes, for the browser and
  *                                       any external caller (PRD §4)
+ *
+ * Lyrics and visuals are deliberately separate operations (D-017). Resolving
+ * artwork takes a Genius round-trip plus an image fetch and decode; making the
+ * words wait on that put the cold track page at 1.6s against a 500ms target.
  */
 
 import { cached, TTL } from "../lib/cache";
 import { fetchTrack, searchTracks } from "../lib/clients/lrclib";
-import type { Track, TrackSummary } from "../lib/types";
+import type { Track, TrackSummary, TrackVisuals } from "../lib/types";
 import { findArtwork } from "./genius.server";
 import { extractPalette } from "./palette.server";
 
+const EMPTY_VISUALS: TrackVisuals = { artwork: null, palette: null };
+
 /**
- * Artwork lookup, cached by name rather than by track id.
- *
- * Autocomplete needs a thumbnail per result, which would otherwise mean a
- * Genius call per keystroke per row. Keying on artist+title means the same
- * recording is looked up once across every search and every track page that
- * mentions it, and held for 30 days.
+ * Lyrics and metadata only — the fast path, and the one the reader is waiting
+ * for. PRD §4/§5: cached for 30 days, since lyrics effectively never change.
  */
-function getArtwork(title: string, artist: string) {
-	return cached(
-		`art:${artist.toLowerCase()}::${title.toLowerCase()}`,
-		TTL.track,
-		() => findArtwork(title, artist),
-	);
+export function getTrack(id: string): Promise<Track | null> {
+	return cached(`track:${id}`, TTL.track, () => fetchTrack(id));
 }
 
 /**
- * PRD §4/§5: lyrics must load in under 500ms, so this is cached for 30 days.
- * Currently backed by the in-memory dev adapter — see OD-001.
+ * Artwork and the palette derived from it — the slow path.
+ *
+ * Keyed by artist and title rather than track id, so the same recording is
+ * resolved once across every search result and track page that mentions it,
+ * regardless of which LRCLIB upload the reader happened to open.
  */
-export function getTrack(id: string): Promise<Track | null> {
-	return cached(`track:${id}`, TTL.track, async () => {
-		const track = await fetchTrack(id);
-		if (!track) return null;
+export function getTrackVisuals(
+	title: string,
+	artist: string,
+): Promise<TrackVisuals> {
+	const key = `visuals:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
-		// Artwork and palette are enhancements layered onto the lyrics, never
-		// dependencies of them. Both helpers swallow their own failures and
-		// return null, so a Genius outage costs the hero image and the accent
-		// colour — the words still render.
-		const artwork = await getArtwork(track.title, track.artist);
+	return cached(key, TTL.track, async () => {
+		const artwork = await findArtwork(title, artist);
+		if (!artwork) return EMPTY_VISUALS;
 
 		// Extracted from the thumbnail, not the full image: enough pixels for
 		// colour, a fraction of the bytes to fetch and decode (D-016).
-		const palette = artwork ? await extractPalette(artwork.thumbnail) : null;
-
-		return { ...track, artwork, palette };
+		const palette = await extractPalette(artwork.thumbnail);
+		return { artwork, palette };
 	});
 }
 
+/**
+ * Search returns immediately, with no artwork. Thumbnails are requested per
+ * row afterwards (PRD §3.1) — bundling them here cost 2s per novel query,
+ * which is the opposite of instant.
+ */
 export function searchLyrics(
 	query: string,
 	limit = 8,
@@ -62,18 +66,7 @@ export function searchLyrics(
 	const normalised = query.trim().toLowerCase();
 	if (normalised.length < 2) return Promise.resolve([]);
 
-	return cached(`search:${limit}:${normalised}`, TTL.search, async () => {
-		const results = await searchTracks(normalised, { limit });
-
-		// Thumbnails for the autocomplete (PRD §3.1). Fetched in parallel and
-		// individually cached, so a warm cache makes this free. Each lookup
-		// already swallows its own failures, so a Genius outage costs the
-		// thumbnails and leaves the results intact.
-		return Promise.all(
-			results.map(async (result) => ({
-				...result,
-				artwork: await getArtwork(result.title, result.artist),
-			})),
-		);
-	});
+	return cached(`search:${limit}:${normalised}`, TTL.search, () =>
+		searchTracks(normalised, { limit }),
+	);
 }

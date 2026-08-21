@@ -8,7 +8,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 
-import { getTrack, searchLyrics } from "./lyrics.server";
+import { getTrack, getTrackVisuals, searchLyrics } from "./lyrics.server";
 
 export const getTrackFn = createServerFn({ method: "GET" })
 	.validator((data: { id: string }) => {
@@ -24,3 +24,10 @@ export const searchLyricsFn = createServerFn({ method: "GET" })
 		limit: Math.min(Math.max(Number(data?.limit) || 8, 1), 20),
 	}))
 	.handler(({ data }) => searchLyrics(data.q, data.limit));
+
+export const getTrackVisualsFn = createServerFn({ method: "GET" })
+	.validator((data: { title: string; artist: string }) => ({
+		title: String(data?.title ?? "").trim(),
+		artist: String(data?.artist ?? "").trim(),
+	}))
+	.handler(({ data }) => getTrackVisuals(data.title, data.artist));
