@@ -6,7 +6,7 @@ logged here with its rationale and its rejected alternatives.
 **Rule:** nothing is decided by assumption. Anything unresolved lives in
 [Deferred Decisions](#deferred-decisions) until explicitly ruled on.
 
-- **Status:** Block 1 complete — search → track → read, verified end to end against live LRCLIB
+- **Status:** Block 2 — visual layer wired (Genius + palette); awaiting a token to verify against live artwork
 - **Last updated:** 2026-08-21
 - **Source of truth:** `prd-doc/Typographic_Lyrical_Explorer_PRD_v2.pdf` (v2.0)
 
@@ -129,6 +129,47 @@ Switching target later must be a one-file change per subsystem.
 
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
+
+### D-016 — Palette extraction: server-side, cached with the track
+**Decided 2026-08-21.** `node-vibrant` + `culori`, both pure JS (no native
+binaries, so D-009's runtime-agnostic constraint holds).
+
+`images.genius.com` sends `access-control-allow-origin: *`, so client-side
+canvas extraction was genuinely available. Server-side won on three counts:
+
+1. **No flash.** The palette ships inside the 30-day cached track, so the very
+   first paint is already themed. Client-side extraction paints the default
+   accent, then repaints once the image decodes — mid-hero-animation.
+2. **Paid once.** Extraction is ~57ms on a cold track, then never again.
+   Client-side repeats the work for every visitor.
+3. **Satori has no browser.** Lyric Cards and OG images (D-010) render
+   server-side. Client extraction would need a second implementation.
+
+Extraction runs on the ~300px thumbnail, not the full image: enough pixels for
+colour, a fraction of the bytes.
+
+**Readability normalisation.** A raw swatch cannot be trusted as an accent.
+Album art routinely yields near-black swatches that would be invisible on the
+`oklch(0.13)` canvas, or neon ones that vibrate against it. So we keep the
+artwork's *hue* — the part that reads as "this track's colour" — and clamp
+lightness and chroma into a legible band:
+
+| Constant | Value | Role |
+|---|---|---|
+| `ACCENT_LIGHTNESS` | 0.72 | `--track-accent` |
+| `SOFT_LIGHTNESS` | 0.62 | `--track-accent-soft` |
+| `GLOW_LIGHTNESS` | 0.78 | `--track-glow` (α 0.35) |
+| `MIN_CHROMA` | 0.09 | below this an accent reads as grey |
+| `MAX_CHROMA` | 0.19 | above this it reads as neon |
+| `ACHROMATIC_CHROMA` | 0.02 | below this the swatch is rejected outright |
+
+That last one fixes a real bug found in testing: a greyscale cover has zero
+chroma, so hue defaults to 0, and flooring the chroma invented a dull red that
+appears nowhere in the artwork. Achromatic swatches are now skipped, and a
+wholly achromatic cover falls back to the default accent.
+
+**These six numbers set the entire product's colour behaviour** and are the
+intended tuning surface.
 
 ### D-013 — Custom CSS: Sass, referencing tokens rather than `@apply`
 **Decided 2026-08-21.** `sass-embedded`. Tailwind entry stays `styles.css`.
@@ -283,7 +324,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-009 | Build-time env validation (`t3env` add-on) | API blocks | Attractive given 4+ secrets across OD-002..005 |
 | OD-010 | Testing strategy — none scaffolded | Quality | No runner installed; `--no-examples` skipped test setup |
 | OD-011 | Playback state store — React context vs TanStack Store | §3.2/§3.3 | Auto-scroll couples playback time to canvas |
-| OD-012 | Album art everywhere — hero blur, autocomplete thumbs, card gradients | §3.1/§3.2/§3.4 | All blocked on OD-005 (Genius). Shipping typographic-only until then |
+| OD-014 | Genius rate limits are undocumented; autocomplete does up to 8 artwork lookups per cold search | §3.1 | Mitigated by caching each lookup by artist+title for 30d. Watch for 429s |
 | OD-013 | "Today's Deep Dives" curation — which tracks, refreshed how | §3.1 | Needs OD-003/OD-004 for pre-generated backstories |
 
 ### OD-002 is a product risk, not just a technical one

@@ -35,6 +35,20 @@ export interface Artwork {
 	matchScore: number;
 }
 
+/**
+ * Accent palette derived from album art (PRD §3.2).
+ *
+ * Stored as ready-to-use OKLCH strings: the values are written straight into
+ * CSS custom properties, so no colour maths happens in the browser.
+ */
+export interface Palette {
+	accent: string;
+	accentSoft: string;
+	glow: string;
+	/** Source swatch before normalisation. Kept so bad results are diagnosable. */
+	sourceHex: string;
+}
+
 /** Search-result shape: enough to render an autocomplete row, nothing more. */
 export interface TrackSummary {
 	id: string;
@@ -45,11 +59,12 @@ export interface TrackSummary {
 	duration: number | null;
 	hasSyncedLyrics: boolean;
 	instrumental: boolean;
+	artwork: Artwork | null;
 }
 
 export interface Track extends TrackSummary {
 	stanzas: Stanza[];
-	artwork: Artwork | null;
+	palette: Palette | null;
 	/** True when timestamps are present and auto-scroll is possible (PRD §3.2). */
 	synced: boolean;
 }

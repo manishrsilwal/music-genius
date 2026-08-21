@@ -1,0 +1,49 @@
+@use "styles/mixins" as m;
+
+// The hero (PRD §3.2): full-bleed, heavily blurred, darkened album art behind
+// a massive serif title. Structure and the art treatment live here; spacing
+// and colour stay as Tailwind utilities in the JSX.
+
+.hero {
+	position: relative;
+	isolation: isolate;
+
+	&__art {
+		position: absolute;
+		inset: 0;
+		z-index: -2;
+		overflow: hidden;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+
+			// Blur samples beyond the element's edges, which would otherwise
+			// show as pale bands. Oversizing pushes those artefacts off-screen.
+			transform: scale(1.25);
+			filter: blur(72px) saturate(160%);
+		}
+	}
+
+	// Darkening veil. A gradient rather than a flat wash so the art stays
+	// legible at the top while the type below keeps full contrast.
+	&__veil {
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background:
+			radial-gradient(120% 80% at 50% 0%, transparent 0%, var(--color-canvas) 78%),
+			linear-gradient(to bottom, oklch(0.13 0.008 265 / 0.55), var(--color-canvas));
+	}
+
+	// Rufina has no italic and only two weights, so hierarchy here comes from
+	// scale and spacing rather than style (D-005).
+	&__title {
+		font-family: var(--font-display);
+		font-size: var(--text-hero);
+		line-height: var(--leading-hero);
+		letter-spacing: var(--tracking-hero);
+		text-wrap: balance;
+	}
+}

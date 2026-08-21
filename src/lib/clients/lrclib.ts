@@ -132,6 +132,7 @@ function toSummary(raw: LrclibRecord): TrackSummary {
 		duration: raw.duration,
 		hasSyncedLyrics: Boolean(raw.syncedLyrics),
 		instrumental: raw.instrumental,
+		artwork: null,
 	};
 }
 
@@ -140,7 +141,7 @@ function toTrack(raw: LrclibRecord): Track {
 		syncedLyrics: raw.syncedLyrics,
 		plainLyrics: raw.plainLyrics,
 	});
-	return { ...toSummary(raw), stanzas, synced, artwork: null };
+	return { ...toSummary(raw), stanzas, synced, palette: null };
 }
 
 /**

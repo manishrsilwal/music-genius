@@ -126,12 +126,26 @@ export function SearchField() {
 									onClick={() => open(track)}
 									className="search__option px-5 py-4"
 								>
-									<span className="search__title text-lead text-ink">
-										{track.title}
+									<span className="search__thumb">
+										{track.artwork && (
+											<img
+												src={track.artwork.thumbnail}
+												alt=""
+												loading="lazy"
+												decoding="async"
+											/>
+										)}
 									</span>
-									<span className="search__artist text-caption text-ink-muted">
-										{track.artist}
+
+									<span className="search__meta">
+										<span className="search__title text-lead text-ink">
+											{track.title}
+										</span>
+										<span className="search__artist text-caption text-ink-muted">
+											{track.artist}
+										</span>
 									</span>
+
 									<span className="ml-auto shrink-0 text-micro text-ink-faint">
 										{track.hasSyncedLyrics ? "Synced" : ""}{" "}
 										{formatDuration(track.duration)}

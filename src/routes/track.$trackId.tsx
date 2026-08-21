@@ -1,8 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { motion } from "motion/react";
 
 import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
-import { riseVariants, staggerVariants, transition } from "@/lib/motion";
+import { TrackHero } from "@/features/scrollytelling/components/track-hero";
+import { paletteStyle } from "@/lib/palette-style";
 import { getTrackFn } from "@/server/lyrics.functions";
 
 export const Route = createFileRoute("/track/$trackId")({
@@ -15,7 +15,15 @@ export const Route = createFileRoute("/track/$trackId")({
 	},
 	head: ({ loaderData }) =>
 		loaderData
-			? { meta: [{ title: `${loaderData.title} — ${loaderData.artist}` }] }
+			? {
+					meta: [
+						{ title: `${loaderData.title} — ${loaderData.artist}` },
+						{
+							name: "description",
+							content: `Read the lyrics to ${loaderData.title} by ${loaderData.artist}.`,
+						},
+					],
+				}
 			: { meta: [{ title: "Track not found" }] },
 	component: TrackPage,
 	notFoundComponent: () => (
@@ -38,41 +46,13 @@ function TrackPage() {
 	const track = Route.useLoaderData();
 
 	return (
-		<article>
-			{/*
-			  Hero (PRD §3.2). The full-bleed blurred album art needs the Genius
-			  API and is blocked on OD-005, so this is currently typographic only.
-			*/}
-			<motion.header
-				className="mx-auto flex min-h-dvh max-w-3xl flex-col items-center justify-center px-6 text-center"
-				variants={staggerVariants}
-				initial="hidden"
-				animate="visible"
-			>
-				<motion.p
-					variants={riseVariants}
-					className="text-micro uppercase tracking-label text-ink-faint"
-				>
-					{track.synced ? "Time-synced" : "Lyrics"}
-				</motion.p>
-
-				<motion.h1
-					variants={riseVariants}
-					transition={transition.cinematic}
-					className="mt-8 font-display text-hero leading-hero tracking-hero text-ink"
-				>
-					{track.title}
-				</motion.h1>
-
-				<motion.p
-					variants={riseVariants}
-					className="mt-8 text-lead text-ink-muted"
-				>
-					{track.artist}
-					{track.album ? ` · ${track.album}` : ""}
-				</motion.p>
-			</motion.header>
-
+		// The palette is applied once, at the top of the subtree. Everything
+		// beneath inherits the track's accent through CSS custom properties.
+		<article
+			style={paletteStyle(track.palette)}
+			data-track-theme={track.palette ? "" : undefined}
+		>
+			<TrackHero track={track} />
 			<LyricCanvas stanzas={track.stanzas} />
 
 			<footer className="pb-32 text-center">
