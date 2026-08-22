@@ -237,6 +237,19 @@ focus style, each falling back to a default outline that a dark glassmorphic
 surface all but swallows. `:where()` keeps specificity at zero, so a component
 that needs a different ring simply writes one and wins.
 
+### Reach for the platform control first
+
+A scrub track is an `<input type="range">`, not a styled `div` with pointer
+handlers. Drag, keyboard, focus and screen-reader semantics arrive correct and
+free; a rebuild is always worse. Style it through its pseudo-elements
+(`::-webkit-slider-runnable-track`, `::-moz-range-track`) and paint state into
+the track's own background from a custom property rather than adding a second
+element to keep in sync.
+
+**An invisible input never overhangs its container.** A control half-hanging
+above a bar pinned to the viewport floor swallows clicks meant for what is
+behind it.
+
 ### Touch targets
 
 **44px minimum.** WCAG 2.5.8 requires only 24px, which is too mean for a bar
@@ -345,6 +358,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-040** Docked bar gains a full-width scrub track, icon play/pause and a clock |
 | 2026-08-22 | **D-039** YouTube chrome suppressed via `controls: 0`; the player itself stays displayed |
 | 2026-08-22 | **D-038** Player opens in the hero, docks to a full-width sticky bar on scroll |
 | 2026-08-22 | **D-037** Hero title fitted to its own measured width, not just the viewport |

@@ -68,6 +68,109 @@
 		transition: none;
 	}
 
+	// ── The scrub track ────────────────────────────────────────────────────
+	// Full bleed across the very top edge of the docked bar, the way a music
+	// player's is (D-040). A real range input, so keyboard and screen-reader
+	// behaviour come from the platform rather than from us.
+	&__seek {
+		position: absolute;
+		inset-inline: 0;
+		top: 0;
+		width: 100%;
+		// The visible line is 3px; the input is taller so there is something
+		// to grab, and sized to sit inside the bar's own top padding. It is
+		// deliberately NOT centred on the top edge: half an invisible input
+		// hanging above a bar pinned to the viewport floor would swallow
+		// clicks meant for the lyrics behind it.
+		height: 0.75rem;
+		margin: 0;
+		appearance: none;
+		background: transparent;
+		cursor: pointer;
+
+		&:disabled {
+			cursor: default;
+			opacity: 0.4;
+		}
+
+		// The filled portion is painted on the track rather than with a second
+		// element, so there is nothing to keep in sync with the value.
+		@mixin seek-track {
+			height: 3px;
+			border-radius: 0;
+			background: linear-gradient(
+				to right,
+				var(--track-accent) var(--progress, 0%),
+				var(--color-hairline) var(--progress, 0%)
+			);
+		}
+
+		&::-webkit-slider-runnable-track {
+			@include seek-track;
+		}
+
+		&::-moz-range-track {
+			@include seek-track;
+		}
+
+		// Hidden until the reader reaches for it: a permanent dot on a hairline
+		// reads as an ornament, and the fill already shows the position.
+		@mixin seek-thumb {
+			width: 0.75rem;
+			height: 0.75rem;
+			border: 0;
+			border-radius: 50%;
+			background: var(--track-accent);
+			opacity: 0;
+			transition: opacity 0.18s var(--ease-editorial);
+		}
+
+		&::-webkit-slider-thumb {
+			appearance: none;
+			margin-top: calc((3px - 0.75rem) / 2);
+			@include seek-thumb;
+		}
+
+		&::-moz-range-thumb {
+			@include seek-thumb;
+		}
+
+		&:hover::-webkit-slider-thumb,
+		&:focus-visible::-webkit-slider-thumb,
+		&:active::-webkit-slider-thumb {
+			opacity: 1;
+		}
+
+		&:hover::-moz-range-thumb,
+		&:focus-visible::-moz-range-thumb,
+		&:active::-moz-range-thumb {
+			opacity: 1;
+		}
+
+		@include m.reduced-motion {
+			&::-webkit-slider-thumb,
+			&::-moz-range-thumb {
+				transition: none;
+			}
+		}
+	}
+
+	// Elapsed and total. Tabular figures so the layout does not twitch every
+	// second as the digits change width.
+	&__time {
+		flex: none;
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		font-variant-numeric: tabular-nums;
+		color: var(--color-ink-faint);
+
+		// The first thing to go on a narrow bar: the scrub track already shows
+		// the position, and the title matters more.
+		@include m.until("sm") {
+			display: none;
+		}
+	}
+
 	// ── The record ─────────────────────────────────────────────────────────
 	// Album art as a turntable: spinning means playing, stopped means paused.
 	// The state is legible before the word "Paused" is (D-036).
@@ -173,9 +276,36 @@
 		}
 	}
 
-	// Play/pause. The visual pill stays as it is; only the touch target grows.
+	// Play/pause. A mark rather than a word (D-040): "Play" set in the UI face
+	// read as a form control sitting inside a music player.
 	&__toggle {
 		@include m.tap-target;
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 50%;
+		border: 1px solid var(--color-hairline);
+		color: var(--color-ink);
+		cursor: pointer;
+		transition:
+			border-color 0.22s var(--ease-editorial),
+			color 0.22s var(--ease-editorial);
+
+		&:hover:not(:disabled) {
+			border-color: var(--track-accent);
+			color: var(--track-accent);
+		}
+
+		&:disabled {
+			opacity: 0.4;
+			cursor: default;
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
 	}
 
 	// Shown only once the reader has taken manual control.

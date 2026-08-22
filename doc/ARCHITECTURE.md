@@ -134,6 +134,41 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-040 — The docked bar is a player, not a form
+**Decided 2026-08-22.** Asked: a seekbar running left to right, and a play/pause
+icon rather than a button — "a proper music player vibe".
+
+**The scrub track is a real `<input type="range">`.** A styled `div` with
+pointer handlers would need drag, keyboard, focus and screen-reader behaviour
+rebuilt, and the rebuild is always worse than the platform's. It spans the full
+width, pinned to the top edge of the docked bar. The filled portion is painted
+into the track's own background from a `--progress` custom property, so there
+is no second element to keep in sync with the value.
+
+The thumb is hidden until hover, focus or drag. A permanent dot on a hairline
+reads as an ornament, and the fill already says where the song is.
+
+> **The input is not centred on the top edge.** Half of a 14px invisible input
+> hanging above a bar pinned to the viewport floor would swallow clicks meant
+> for the lyrics behind it. It sits *inside* the bar, sized to the bar's own
+> top padding, where the only thing it overlaps is the record — which is not
+> interactive.
+
+**Play/pause is a drawn mark.** "Play" set in the UI face read as a form
+control that had wandered into a music player. The triangle is nudged half a
+point right: a triangle centred on its bounding box reads as sitting left of
+centre inside a circle.
+
+**Elapsed and total** flank the title in tabular figures, so the layout does
+not twitch every second as digit widths change. They are `aria-hidden` — the
+range input already announces position through `aria-valuetext`, and a screen
+reader should not hear the time twice. They are the first thing to go below
+`sm`, where the track already shows the position and the title matters more.
+
+`formatTime` is tested against `NaN` and `Infinity`: the player reports `0`
+until it is ready and can report `NaN` between states, which is the difference
+between a clock and "NaN:aN" sitting in the bar.
+
 ### D-039 — Suppress the player's UI, never the player
 **Decided 2026-08-22.** Asked: hide the YouTube UI with CSS `display` or
 `visibility`, or switch to a YouTube Music API. Neither is available; a third

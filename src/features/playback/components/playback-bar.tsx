@@ -8,6 +8,8 @@ import type { Stanza } from "@/lib/types";
 import { useDocked } from "../hooks/use-docked";
 import { useManualOverride } from "../hooks/use-manual-override";
 import { useYouTubePlayer } from "../hooks/use-youtube-player";
+import { PauseIcon, PlayIcon } from "./player-icons";
+import { formatTime, Seekbar } from "./seekbar";
 import "./playback-bar.scss";
 
 /**
@@ -38,10 +40,8 @@ export function PlaybackBar({
 	const mountRef = useRef<HTMLDivElement>(null);
 	const sentinelRef = useRef<HTMLDivElement>(null);
 	const docked = useDocked(sentinelRef);
-	const { ready, playing, currentTime, toggle } = useYouTubePlayer(
-		videoId,
-		mountRef,
-	);
+	const { ready, playing, currentTime, duration, toggle, seek } =
+		useYouTubePlayer(videoId, mountRef);
 
 	const syncing = synced && playing;
 	const { manual, resume } = useManualOverride(syncing);
@@ -98,6 +98,16 @@ export function PlaybackBar({
 				animate="visible"
 				transition={transition.editorial}
 			>
+				{/* Full-bleed across the top edge when docked (D-040). */}
+				{docked && (
+					<Seekbar
+						currentTime={currentTime}
+						duration={duration}
+						disabled={!ready}
+						onSeek={seek}
+					/>
+				)}
+
 				{/*
 			  The record. Spins while the song plays and holds where it stopped
 			  when paused — the state is readable before the label is (D-036).
@@ -117,10 +127,18 @@ export function PlaybackBar({
 					onClick={toggle}
 					disabled={!ready}
 					aria-label={playing ? "Pause" : "Play"}
-					className="playback__toggle flex-none rounded-full border border-hairline px-4 py-2 font-ui text-caption text-ink disabled:opacity-50"
+					className="playback__toggle"
 				>
-					{playing ? "Pause" : "Play"}
+					{playing ? <PauseIcon /> : <PlayIcon />}
 				</button>
+
+				{/* Times are read from the seekbar's aria-valuetext, so these are
+				    decoration for the eye only. */}
+				{docked && (
+					<span className="playback__time" aria-hidden="true">
+						{formatTime(currentTime)}
+					</span>
+				)}
 
 				<span className="playback__meta">
 					<span className="playback__title text-caption text-ink">{title}</span>
@@ -131,6 +149,12 @@ export function PlaybackBar({
 						{notice ?? artist}
 					</span>
 				</span>
+
+				{docked && (
+					<span className="playback__time" aria-hidden="true">
+						{formatTime(duration)}
+					</span>
+				)}
 
 				{/*
 			  Visible by requirement, not by preference. YouTube's policies
