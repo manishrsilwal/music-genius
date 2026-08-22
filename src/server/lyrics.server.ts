@@ -68,9 +68,15 @@ export function getTrackVisuals(
 	title: string,
 	artist: string,
 ): Promise<TrackVisuals> {
-	// v2 alongside `genius:v2` — this wraps it, so bumping only the inner key
-	// would leave the stale outer entry serving the old empty result (D-049).
-	const key = `visuals:v2:${artist.toLowerCase()}::${title.toLowerCase()}`;
+	// v3: `Palette` gained the paper tokens (D-052), so every stored entry
+	// predates them — and `PaletteStyle` refuses a partial palette, meaning a
+	// stale entry silently renders the old untinted page with no error anywhere.
+	// Caught exactly this way; the checklist item earns its place.
+	//
+	// Still v-aligned with `genius:` beneath it: this wraps that, so bumping
+	// only the inner key would leave the stale outer entry serving the old
+	// result (D-049).
+	const key = `visuals:v3:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
 	return cached(key, TTL.track, async () => {
 		const { artwork, youtubeId } = await getGenius(title, artist);

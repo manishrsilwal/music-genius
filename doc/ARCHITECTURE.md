@@ -134,6 +134,67 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-052 — The page is printed in the record's ink
+**Decided 2026-08-22.** A second design pass, against the official
+`frontend-design` skill rather than the generic redesign checklist. It asks a
+harder question: not "is this polished" but "would this be mistaken for anyone
+else's".
+
+**The fingerprint.** That skill names the three looks generative design falls
+into regardless of subject. The second is *a near-black background with a
+single bright acid-green or vermilion accent*. Ours was
+`--color-canvas: oklch(0.13 0.008 265)` with `--track-accent: oklch(0.72 0.16
+32)`. That is the default, exactly.
+
+**The waste.** Palette extraction — the most distinctive thing this product
+does — wrote three variables: `--track-accent`, `--track-accent-soft`,
+`--track-glow`. Canvas, surfaces and hairlines were the same near-black at hue
+265 for every record ever opened. The record's colour was spent on chips and
+underlines while the page it sat on never moved.
+
+So the signature is the mechanic that already existed, carried the rest of the
+way: **the paper takes the record's hue, not just the marks.** `Palette` gains
+`canvas`, `surface`, `surfaceRaised` and `hairline`, and a track page is
+visibly that record's page.
+
+> **Tinting cannot change a contrast ratio.** OKLCH lightness is perceptual, so
+> the paper values reuse the default lightnesses verbatim — 0.13, 0.175, 0.225 —
+> and move only hue and chroma. Ink is untouched. `palette.test.ts` asserts the
+> lightness of all three surfaces across a saturated red, a saturated blue, a
+> pale wash and a muted earth tone.
+
+Surface chroma is capped near a seventh of an accent's, and taken as
+`min(cover, ceiling)` rather than clamped up: area multiplies chroma, so at
+accent strength the page would compete with the artwork in the hero instead of
+framing it — and a muted cover should tint less, not be pushed to a saturation
+its artwork never had.
+
+**Paper is set on `<body>`, not on the article.** Custom properties inherit
+downward and the page background is painted from body's own computed value, so
+tinting the article would repaint every panel inside it and leave the page
+behind them unchanged — the one combination that reads as a bug.
+`body:has([data-track-scope="…"])` scores (0,1,1) against the (0,1,0) that
+`@theme` emits at `:root`, so it wins on specificity rather than source order.
+That distinction matters: the rule mounts after first paint (D-017), and
+relying on order would make the result depend on where React placed it.
+
+**The default accent is brass**, `oklch(0.72 0.13 82)` — foil stamping on a
+sleeve, the label at the centre of a record. Drawn from the subject's own
+materials rather than picked off a palette, which is the whole complaint
+against vermilion. `FALLBACK_HUE` in `card.ts` moves with it, so an exported
+card and the page it came from cannot disagree about the product's colour.
+
+> **The cache caught me, exactly as documented.** The paper rule did not render
+> on first test: `Palette` had changed shape, `visuals:` still held pre-change
+> objects, and `PaletteStyle` refuses a partial palette — so a stale entry
+> rendered the old untinted page with no error anywhere. `visuals:v2` → `v3`.
+> This is the D-049 checklist item working on the person who wrote it.
+
+Rejected: warming the neutrals off 265 wholesale, and editorial furniture
+(drop caps, folios, running heads). The skill's own advice applies — spend
+boldness in one place and remove one accessory before leaving. The tinting is
+the one place.
+
 ### D-051 — Grain, tinted elevation, and the card as a social object
 **Decided 2026-08-22.** A design audit against the `redesign-existing-projects`
 checklist. Most of it already passed — the serif/sans pairing, the tinted

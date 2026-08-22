@@ -14,7 +14,7 @@
 	&__scrim {
 		position: absolute;
 		inset: 0;
-		background: oklch(0.08 0.01 265 / 0.72);
+		background: color-mix(in oklab, var(--color-canvas) 72%, transparent);
 		backdrop-filter: blur(8px);
 	}
 

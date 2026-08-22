@@ -47,6 +47,31 @@ const ACHROMATIC_CHROMA = 0.02;
 /** Selection-highlight alpha (PRD §3.4 uses this for the Lyric Card entry point). */
 const GLOW_ALPHA = 0.35;
 
+/* -------------------------------------------------------------------------
+   The paper (D-052)
+
+   Lightness values are copied verbatim from the default surfaces in
+   styles.css and must stay that way: OKLCH lightness is perceptual, so
+   holding it fixed while moving hue and chroma changes the colour of the page
+   without changing a single contrast ratio. Ink is unaffected either way.
+
+   Chroma is roughly a seventh of an accent's. A surface carries far more area
+   than a mark, and area multiplies chroma — at accent strength the page would
+   compete with the artwork sitting in the hero instead of framing it.
+   ---------------------------------------------------------------------- */
+const CANVAS_LIGHTNESS = 0.13;
+const SURFACE_LIGHTNESS = 0.175;
+const RAISED_LIGHTNESS = 0.225;
+
+/** Ceiling as well as a scale: a saturated cover must not shout through. */
+const SURFACE_CHROMA = 0.022;
+const RAISED_CHROMA = 0.026;
+
+/** Hairlines read as a tint of the paper, not as a grey drawn on top of it. */
+const HAIRLINE_LIGHTNESS = 0.62;
+const HAIRLINE_CHROMA = 0.03;
+const HAIRLINE_ALPHA = 0.16;
+
 const clamp = (value: number, min: number, max: number) =>
 	Math.min(Math.max(value, min), max);
 
@@ -60,7 +85,8 @@ const PREFERENCE = [
 	"DarkMuted",
 ] as const;
 
-function buildPalette(hex: string): Palette | null {
+/** Exported for tests: pure, and the contrast guarantee lives here (D-052). */
+export function buildPalette(hex: string): Palette | null {
 	const parsed = toOklch(hex);
 	if (!parsed) return null;
 	if ((parsed.c ?? 0) < ACHROMATIC_CHROMA) return null;
@@ -71,10 +97,26 @@ function buildPalette(hex: string): Palette | null {
 	const at = (lightness: number, alpha?: number) =>
 		formatCss({ mode: "oklch", l: lightness, c: chroma, h: hue, alpha });
 
+	/** Same hue, its own chroma — the paper, not the ink. */
+	const paper = (lightness: number, paperChroma: number, alpha?: number) =>
+		formatCss({
+			mode: "oklch",
+			l: lightness,
+			// `min`, so a low-chroma cover tints less rather than being pushed
+			// up to a saturation its artwork never had.
+			c: Math.min(chroma, paperChroma),
+			h: hue,
+			alpha,
+		});
+
 	return {
 		accent: at(ACCENT_LIGHTNESS),
 		accentSoft: at(SOFT_LIGHTNESS),
 		glow: at(GLOW_LIGHTNESS, GLOW_ALPHA),
+		canvas: paper(CANVAS_LIGHTNESS, SURFACE_CHROMA),
+		surface: paper(SURFACE_LIGHTNESS, SURFACE_CHROMA),
+		surfaceRaised: paper(RAISED_LIGHTNESS, RAISED_CHROMA),
+		hairline: paper(HAIRLINE_LIGHTNESS, HAIRLINE_CHROMA, HAIRLINE_ALPHA),
 		sourceHex: hex,
 	};
 }

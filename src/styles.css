@@ -27,9 +27,18 @@
    extracted palette still renders correctly.
    ------------------------------------------------------------------------ */
 :root {
-  --track-accent: oklch(0.72 0.16 32);
-  --track-accent-soft: oklch(0.62 0.11 32);
-  --track-glow: oklch(0.78 0.19 32 / 0.35);
+  /* Brass, not vermilion (D-052).
+     The old default was near-black plus a bright vermilion accent, which is
+     one of the three looks generative design falls into by default — arrived
+     at regardless of subject. Brass is drawn from this subject's own
+     materials: foil stamping on a sleeve, the label at the centre of a record.
+     Same lightness, marginally lower chroma.
+
+     Only ever seen when artwork is missing or wholly achromatic; a track with
+     a cover overwrites all three within a second of load. */
+  --track-accent: oklch(0.72 0.13 82);
+  --track-accent-soft: oklch(0.62 0.1 82);
+  --track-glow: oklch(0.78 0.15 82 / 0.35);
 
   /* Scroll-spy states (PRD §3.3). Mirrored in src/lib/motion.ts, which is the
      source of truth for JS-driven animation. Keep the two in sync. */
@@ -195,6 +204,11 @@
   body {
     margin: 0;
     background-color: var(--color-canvas);
+    /* The paper arrives after first paint (D-017, D-052), so the page changes
+       colour under a reader who is already reading. Slow enough to read as the
+       page settling rather than as a flash, and it inherits the global
+       reduced-motion override, which collapses it to an instant swap. */
+    transition: background-color 0.7s var(--ease-editorial);
     color: var(--color-ink);
     font-family: var(--font-ui);
     font-size: var(--text-body);

@@ -76,6 +76,27 @@ OKLCH throughout, for perceptually even lightness steps.
 --color-ink-faint       Labels, hints
 ```
 
+### The page is printed in the record's ink
+
+The extracted hue tints the paper — canvas, surfaces, hairlines — not only the
+marks (D-052). A track page should be recognisably that record's page before a
+single word is read.
+
+Two rules keep it from becoming a theme switcher:
+
+- **Lightness never moves.** Paper reuses the default lightnesses exactly and
+  changes only hue and chroma. OKLCH lightness is perceptual, so this is what
+  makes tinting incapable of changing a contrast ratio.
+- **Surfaces are a seventh of an accent's chroma, at most, and never more than
+  the cover actually had.** Area multiplies chroma. At mark strength the page
+  competes with the artwork it exists to frame, and a muted cover that got
+  pushed up to full saturation would be showing a colour the record does not
+  contain.
+
+The default, when a track has no usable artwork, is brass — foil on a sleeve,
+the label at the centre of a record. Not vermilion on near-black, which is a
+look generative design arrives at regardless of what it is designing.
+
 ### The accent is not a brand colour
 
 `--track-accent`, `--track-accent-soft` and `--track-glow` are **extracted from
@@ -470,6 +491,11 @@ Before shipping a component:
       they lose to Tailwind's own `:root` output whatever the specificity
       (D-003, D-051)
 - [ ] Every page has an `id="main"` landmark for the skip link (D-051)
+- [ ] A surface colour derived from artwork keeps the default's lightness and
+      moves only hue and chroma — otherwise it is a contrast change wearing a
+      palette's clothes (D-052)
+- [ ] A token that must reach the page background is set on `body`, not on a
+      subtree — custom properties inherit downward only (D-052)
 - [ ] A new route that can be shared carries `og:title`, `og:description` and
       an ABSOLUTE `og:image` — crawlers drop a relative one (D-051)
 
@@ -479,6 +505,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-052** The page takes the record's hue — paper as well as marks; default accent moves from vermilion to brass |
 | 2026-08-22 | **D-051** Film grain, tinted elevation, hero vignette, glass thickness; skip link, `prefers-contrast`, favicon and per-track social cards |
 | 2026-08-22 | **D-050** Drawer copy gains an explicit word budget; writing model swapped with no change to any output gate |
 | 2026-08-22 | **D-049** Channel-upload titles retried against Genius; all four cache keys versioned |

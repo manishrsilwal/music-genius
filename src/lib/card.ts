@@ -41,8 +41,12 @@ export interface CardTheme {
 	muted: string;
 }
 
-/** Default hue when a track has no palette (achromatic art, or no Genius match). */
-const FALLBACK_HUE = 32;
+/**
+ * Default hue when a track has no palette (achromatic art, or no Genius match).
+ * Brass, matching `--track-accent` in styles.css — an exported card and the
+ * page it came from must not disagree about the product's own colour (D-052).
+ */
+const FALLBACK_HUE = 82;
 
 /**
  * Four treatments derived from the track's own hue (PRD §3.4 "cinematic

@@ -45,6 +45,16 @@ export interface Palette {
 	accent: string;
 	accentSoft: string;
 	glow: string;
+	/**
+	 * The paper (D-052). The same hue as the accent at a fraction of the
+	 * chroma, so the whole page is printed in the record's ink rather than the
+	 * record only marking a neutral page. Lightness matches the default
+	 * surfaces exactly, so tinting can never change a contrast ratio.
+	 */
+	canvas: string;
+	surface: string;
+	surfaceRaised: string;
+	hairline: string;
 	/** Source swatch before normalisation. Kept so bad results are diagnosable. */
 	sourceHex: string;
 }
