@@ -134,6 +134,55 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-042 — CI runs the same command a person does
+**Decided 2026-08-22.** Resolves OD-025. A GitHub Actions workflow on every
+push to `main` and every pull request, running **`bun run verify`** — one
+script, which is also what to run locally.
+
+CI deliberately does not spell out its own sequence of steps. The moment the
+workflow's list and the developer's habit differ they drift, and a green tick
+stops meaning "this would pass on my machine". `verify` is
+`typecheck && check && test && build`, and both read it from `package.json`.
+
+**No secrets are configured, and none are needed.** Every integration in
+`src/server/env.ts` is optional by design (D-014), so the app builds and its
+tests pass with no keys at all — verified by hiding `.env` and running the
+full command. That is the same property that keeps the repo cloneable and
+reviewable without handing anyone credentials; CI is just the first consumer
+to depend on it.
+
+`--frozen-lockfile` so a dependency cannot resolve differently in CI than in
+the version that was reviewed. Concurrency is grouped by ref with
+`cancel-in-progress`, because nobody needs the answer to a superseded push.
+
+### D-041 — A dead end still looks like the product
+**Decided 2026-08-22.** Resolves OD-022. `errorComponent` on the root route
+and on the track route, plus a shared `RouteMessage` shell.
+
+No route had an error boundary. LRCLIB or Genius being unreachable is a normal
+Tuesday rather than an exception, and until now it fell through to the
+framework's default — a stack trace on an unstyled page. For a product whose
+entire premise is considered typography, that is the worst possible thing to
+show a reader.
+
+`RouteMessage` is one component rather than the three near-copies that had
+accumulated across the two not-found screens. It mirrors the track hero —
+kicker, display headline, lead, one way onward — because a reader who lands
+here has still landed somewhere.
+
+**Retry first.** `reset()` alone clears the boundary and immediately re-throws
+the cached failure; it is paired with `router.invalidate()` so the loaders
+actually re-run. The overwhelmingly likely cause is one request that failed
+once.
+
+> **The error message is rendered only under `import.meta.env.DEV`.** A reader
+> gains nothing from it, and a thrown error can carry a request URL or a
+> fragment of a key. Verified stripped from the production bundle, not merely
+> assumed to be.
+
+Verified by simulating LRCLIB being unreachable: the route returns 500 with
+the styled screen, the retry, and the cause shown in development only.
+
 ### D-040 — The docked bar is a player, not a form
 **Decided 2026-08-22.** Asked: a seekbar running left to right, and a play/pause
 icon rather than a button — "a proper music player vibe".
@@ -1095,10 +1144,8 @@ Open. **To be ruled on explicitly — never assumed.**
 
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
 | OD-021 | **Gemini free tier: 20 requests/day.** Launch blocker — needs billing or a pre-warmed catalogue | §3.5 | Accepted for development 2026-08-22 (D-029). Cache absorbs repeats, not first views |
-| OD-022 | No `errorComponent` on any route — a loader throw renders the framework default | Quality | LRCLIB or Genius being down is a normal Tuesday, not an exception |
 | OD-023 | PRD §3.3 annotated phrases are styled but never populated — Genius annotations are not fetched | §3.3 | The `.lyric__annotated` rule exists and nothing applies it |
 | OD-024 | No analytics, so none of the PRD §5 metrics can be measured | Metrics | Lyrics <500ms, 30% drawer engagement, 10% card export are all unobservable |
-| OD-025 | No CI — typecheck, Biome and tests run only when someone remembers | Quality | Everything needed already runs in one command |
 
 
 ### OD-002 is a product risk, not just a technical one

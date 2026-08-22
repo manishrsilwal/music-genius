@@ -1,0 +1,41 @@
+# Typecheck, lint, test and build on every push and pull request.
+#
+# Runs `bun run verify` — the same single command a person runs locally. CI
+# deliberately does not spell out its own sequence of steps: the moment the two
+# lists differ they drift, and CI stops meaning "this would pass on my machine".
+#
+# No secrets are needed. Every integration in src/server/env.ts is optional by
+# design (D-014), so the app builds and its tests pass with no keys at all —
+# which is what keeps the repo cloneable and reviewable without handing anyone
+# a set of credentials.
+name: Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push supersedes the run it interrupted; nobody needs the old answer.
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      # --frozen-lockfile, so a dependency cannot silently resolve to a
+      # different version in CI than the one that was reviewed.
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Verify
+        run: bun run verify

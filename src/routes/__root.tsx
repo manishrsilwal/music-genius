@@ -3,10 +3,11 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
-	Link,
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { RouteError } from "../components/route-error";
+import { RouteMessage } from "../components/route-message";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
 
@@ -46,6 +47,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 	 * any unmatched URL — and warns about it on every boot.
 	 */
 	notFoundComponent: NotFound,
+	/**
+	 * The backstop. Any route without its own boundary lands here rather than
+	 * on the framework's default, which is a stack trace on a white page
+	 * (D-041).
+	 */
+	errorComponent: RouteError,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -76,20 +83,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function NotFound() {
 	return (
-		<main className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
-			<p className="text-micro uppercase tracking-label text-ink-faint">404</p>
-			<h1 className="mt-6 font-display text-display leading-display text-ink">
-				Nothing here
-			</h1>
-			<p className="mt-4 text-lead text-ink-muted">
-				That page doesn't exist. The songs are this way.
-			</p>
-			<Link
-				to="/"
-				className="mt-8 text-caption uppercase tracking-label text-accent"
-			>
-				Back to search
-			</Link>
-		</main>
+		<RouteMessage
+			kicker="404"
+			title="Nothing here"
+			body="That page doesn't exist. The songs are this way."
+		/>
 	);
 }

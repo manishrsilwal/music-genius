@@ -6,6 +6,8 @@ import {
 	notFound,
 } from "@tanstack/react-router";
 import { useState } from "react";
+import { RouteError } from "@/components/route-error";
+import { RouteMessage } from "@/components/route-message";
 import { InsightsAffordance } from "@/features/insights/components/insights-affordance";
 import { CardAffordance } from "@/features/lyric-card/components/card-affordance";
 import { PlaybackBar } from "@/features/playback/components/playback-bar";
@@ -47,19 +49,18 @@ export const Route = createFileRoute("/track/$trackId")({
 			: { meta: [{ title: "Track not found" }] },
 	component: TrackPage,
 	notFoundComponent: () => (
-		<main className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
-			<h1 className="font-display text-display text-ink">Not in the library</h1>
-			<p className="mt-4 text-lead text-ink-muted">
-				LRCLIB has no lyrics for that track yet.
-			</p>
-			<Link
-				to="/"
-				className="mt-8 text-caption uppercase tracking-label text-accent"
-			>
-				Search again
-			</Link>
-		</main>
+		<RouteMessage
+			kicker="Not found"
+			title="Not in the library"
+			body="LRCLIB has no lyrics for that track yet."
+			action={{ to: "/", label: "Search again" }}
+		/>
 	),
+	/**
+	 * The track route reaches two services that are outside our control, so
+	 * this is the boundary most likely to be used (D-041).
+	 */
+	errorComponent: RouteError,
 });
 
 function TrackPage() {

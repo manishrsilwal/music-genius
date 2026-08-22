@@ -326,6 +326,15 @@ Interface copy addresses an intelligent adult.
   is shown — rather than quietly omitting the slot.
 - **Skipping is a real answer**, and is labelled as one: "Skip · show me anything".
 
+### Failure states are designed, not defaulted
+
+A 404, an unreachable service and an empty result are all screens a reader
+will see, so they are set like the rest of the product — `RouteMessage` gives
+them the hero's shape: kicker, display headline, lead, one way onward. Offer
+the action that most likely fixes it (retry, search again) rather than an
+apology. Never show a reader a stack trace, and never render an error's own
+message outside development: it can carry a request URL or part of a key.
+
 ### Editorial integrity is a design constraint
 
 A quote must appear verbatim in the source it cites, enforced in code and not
@@ -358,6 +367,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-041** Route error boundaries; a dead end is set like the rest of the product |
 | 2026-08-22 | **D-040** Docked bar gains a full-width scrub track, icon play/pause and a clock |
 | 2026-08-22 | **D-039** YouTube chrome suppressed via `controls: 0`; the player itself stays displayed |
 | 2026-08-22 | **D-038** Player opens in the hero, docks to a full-width sticky bar on scroll |

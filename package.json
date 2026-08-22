@@ -9,6 +9,8 @@
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
     "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "verify": "bun run typecheck && bun run check && bun run test && bun run build",
     "preview": "vite preview",
     "format": "biome format",
     "lint": "biome lint",
