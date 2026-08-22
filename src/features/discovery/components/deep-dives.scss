@@ -68,6 +68,44 @@
 		color: var(--color-ink-muted);
 		@include m.line-clamp(1);
 	}
+
+	// Why this song (D-045). Set below a rule rather than in a box: it is an
+	// aside from the curator, not a second piece of metadata competing with
+	// the title.
+	&__why {
+		padding-top: 0.75rem;
+		border-top: 1px solid var(--color-hairline);
+
+		// On the stacked mobile card the art sits beside the text, so the
+		// reason would be squeezed into a narrow column. It reads on its own
+		// row from `sm`, where the card is a column.
+		display: none;
+
+		@include m.from("sm") {
+			display: block;
+		}
+	}
+
+	&__why-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3rem;
+	}
+
+	&__why-tag {
+		font-family: var(--font-ui);
+		padding: 0.15rem 0.5rem;
+		border-radius: 999px;
+		border: 1px solid var(--track-accent);
+		color: var(--track-accent);
+		white-space: nowrap;
+	}
+
+	&__why-note {
+		font-family: var(--font-ui);
+		color: var(--color-ink-muted);
+		text-wrap: pretty;
+	}
 }
 
 // "People also like" — a longer, looser shelf beneath the headline picks.

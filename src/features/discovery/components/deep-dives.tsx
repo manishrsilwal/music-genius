@@ -2,7 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 
-import type { CuratedTrack } from "@/lib/deep-dives";
+import {
+	type CuratedTrack,
+	explainPick,
+	type Preferences,
+} from "@/lib/deep-dives";
 import { riseVariants, staggerVariants } from "@/lib/motion";
 import type { TrackVisuals } from "@/lib/types";
 
@@ -15,7 +19,13 @@ import "./deep-dives.scss";
  * come from the reader's stated preferences, or from the day's rotation when
  * they skipped the stepper.
  */
-export function DeepDives({ picks }: { picks: CuratedTrack[] }) {
+export function DeepDives({
+	picks,
+	preferences,
+}: {
+	picks: CuratedTrack[];
+	preferences: Preferences;
+}) {
 	return (
 		<motion.div
 			className="dives"
@@ -41,11 +51,49 @@ export function DeepDives({ picks }: { picks: CuratedTrack[] }) {
 							<span className="dives__artist mt-0.5 block text-caption">
 								{pick.artist}
 							</span>
+							<WhyThis pick={pick} preferences={preferences} />
 						</span>
 					</Link>
 				</motion.div>
 			))}
 		</motion.div>
+	);
+}
+
+/**
+ * Why this song, in the reader's own terms (D-045).
+ *
+ * Two halves: the axes that actually scored, read straight out of the picker,
+ * and the track's editorial note. When the reader skipped the stepper there
+ * are no axes, so it says the pick came from the day's rotation rather than
+ * claiming a reason it does not have.
+ */
+function WhyThis({
+	pick,
+	preferences,
+}: {
+	pick: CuratedTrack;
+	preferences: Preferences;
+}) {
+	const { matched, note } = explainPick(pick, preferences);
+
+	// Chips rather than a sentence. The three picks share identical reasons
+	// 42% of the time, and three repetitions of "For longing, the honesty and
+	// deep cuts" reads as a stutter — where repeated tags read as
+	// classification, which is what they are.
+	const reasons = matched.length > 0 ? matched : ["today's rotation"];
+
+	return (
+		<span className="dives__why mt-3 block">
+			<span className="dives__why-tags">
+				{reasons.map((reason) => (
+					<span key={reason} className="dives__why-tag text-micro">
+						{reason}
+					</span>
+				))}
+			</span>
+			<span className="dives__why-note mt-2 block text-caption">{note}</span>
+		</span>
 	);
 }
 

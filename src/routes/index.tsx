@@ -107,7 +107,7 @@ function Discovery() {
 									Change taste
 								</button>
 							</div>
-							<DeepDives picks={dives} />
+							<DeepDives picks={dives} preferences={preferences} />
 						</section>
 
 						<section>

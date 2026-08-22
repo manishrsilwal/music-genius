@@ -134,6 +134,56 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-045 — The recommendation explains itself, truthfully
+**Decided 2026-08-22.** Asked: explain why a song was recommended, from the
+reader's answers and the song's meaning.
+
+**The explanation is derived from the scoring, not written alongside it.**
+`explainPick` walks the same conditions as `score`, in the same weight order,
+so `matched` lists the axes that actually earned points. An explanation
+maintained separately would drift from the picker the first time a weight
+changed, and a reader would have no way to tell.
+
+**Gemini was considered and rejected.** The picker is a deterministic weighted
+score; a model asked to justify a pick never saw that scoring and would be
+inventing a plausible rationale after the fact. That is the same class of
+failure as an unsourced quote (D-021), on a feature whose entire value is
+being believable. It would also cost up to fifteen calls per visit against a
+twenty-per-day quota (OD-021) — exhausted by the second visitor.
+
+**The song half is written, not generated.** Every one of the 56 catalogue
+tracks now carries a `note`: one line on what the song *does*, present tense,
+no title-dropping. A test enforces that every note exists, clears twenty
+characters, and does not open by restating the title.
+
+> **Shown as chips, not a sentence.** Measured across 192 preference-and-seed
+> combinations, all three picks share identical reasons 42% of the time.
+> "For longing, the honesty and deep cuts" printed three times reads as a
+> stutter; the same words as tags read as classification, which is what they
+> are. A shelf-level line was rejected for the mirror reason — the reasons
+> differ between picks **58%** of the time, so one heading would be wrong more
+> often than right.
+
+> **No match is not a failure.** A reader who skipped the stepper sees
+> "today's rotation", because the pick genuinely came from the day's shuffle.
+> Claiming a reason there would be the lie this decision exists to avoid.
+
+Verified by mutation: claiming an unmatched mood fails 2 tests, blanking one
+note fails 1. Removing the `"surprise"` guard survives — an **equivalent
+mutant**, since a track's `familiarity` is typed to exclude `"surprise"`, so
+the comparison is already false. `score` carries the same defensive guard.
+
+### D-044 — The synthesis is set in the sans
+**Decided 2026-08-22.** Asked: use Elms Sans for the paragraph.
+
+The synthesis was set in Rufina. The display face is cut for headlines, and at
+`--text-lead` in a 30rem drawer it sets heavy and slows the line — the drawer
+is prose to be read at length, not a title.
+
+The quote was previously distinguished from the synthesis by a serif→sans
+shift. Now that both are sans, the accent rule and the attribution carry that
+job alone, which they already did most of.
+
 ### D-043 — Sources are a reference list, not a carousel
 **Fixed 2026-08-22.** Reported with a screenshot: a horizontal scrollbar in the
 insights panel, and an ask to find a sensible way to show this data.

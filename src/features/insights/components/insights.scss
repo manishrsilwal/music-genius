@@ -81,8 +81,11 @@
 		color: var(--color-ink-faint);
 	}
 
+	// Elms Sans, not Rufina. The synthesis is prose to be read at length in a
+	// narrow column, and the display face is cut for headlines — at reading
+	// size in a 30rem drawer it sets heavy and slows the line (D-044).
 	&__synthesis p {
-		font-family: var(--font-display);
+		font-family: var(--font-ui);
 		line-height: var(--leading-prose);
 		color: var(--color-ink);
 
@@ -92,8 +95,11 @@
 	}
 
 	// The Quote (PRD §3.5). Elms Sans italic, not Rufina: Rufina ships no
-	// italic and a synthesised oblique shears the letterforms (D-005). The
-	// serif→sans shift also marks this as a different voice from the song.
+	// italic and a synthesised oblique shears the letterforms (D-005).
+	//
+	// The quote used to be distinguished from the synthesis by a serif→sans
+	// shift. Now that both are set in the sans (D-044), the accent rule and
+	// the attribution carry that job on their own.
 	&__quote {
 		border-left: 2px solid var(--track-accent);
 		padding-left: 1.25rem;

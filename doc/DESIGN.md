@@ -18,7 +18,7 @@ Set in three faces, each with one job (D-005, D-019).
 |---|---|---|
 | **Rufina** | Display — hero, lyrics, titles | 400/700. **No italic exists.** Zero Devanagari coverage. |
 | **Vesper Libre** | Devanagari | Sits *after* Rufina in the stack, so Latin resolves to Rufina and Devanagari falls through per glyph. |
-| **Elms Sans** | UI chrome — labels, captions, buttons | Variable 100–900, real italic. |
+| **Elms Sans** | UI chrome, and long-form prose | Variable 100–900, real italic. Reading text is set here, not in the display face (D-044). |
 
 `font-synthesis: none` is set on every display element. Rufina ships no italic,
 and a browser-synthesised oblique shears the letterforms — a stray `<em>`
@@ -347,6 +347,17 @@ the action that most likely fixes it (retry, search again) rather than an
 apology. Never show a reader a stack trace, and never render an error's own
 message outside development: it can carry a request URL or part of a key.
 
+### Never explain a decision the explainer did not make
+
+When the interface says *why* something happened, derive that from the code
+that decided it. `explainPick` walks the same conditions as `score`, so the
+stated reason cannot drift from the real one. A model asked to justify a
+deterministic choice writes a plausible rationale it had no part in — the same
+failure as an unsourced quote, dressed as helpfulness.
+
+And when there is no reason, say so. "Today's rotation" is true; a
+manufactured reason is not.
+
 ### Editorial integrity is a design constraint
 
 A quote must appear verbatim in the source it cites, enforced in code and not
@@ -379,6 +390,8 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-045** Deep Dives explain themselves, from the real scoring plus a curated note |
+| 2026-08-22 | **D-044** Insights synthesis set in Elms Sans, not the display face |
 | 2026-08-22 | **D-043** Sources become a numbered reference list; the quote's citation is now followable |
 | 2026-08-22 | **D-041** Route error boundaries; a dead end is set like the rest of the product |
 | 2026-08-22 | **D-040** Docked bar gains a full-width scrub track, icon play/pause and a clock |

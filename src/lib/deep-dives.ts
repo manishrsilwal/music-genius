@@ -45,6 +45,13 @@ export interface CuratedTrack {
 	title: string;
 	artist: string;
 	lrclibId: string;
+	/**
+	 * One line on what this song does — the editorial half of "why this"
+	 * (D-045). Written, not generated: the picker is a scoring function, so a
+	 * model asked to justify a pick would be inventing a rationale it had no
+	 * part in. Present tense, no title-dropping, no hedging.
+	 */
+	note: string;
 	mood: Mood;
 	pull: Pull;
 	familiarity: Exclude<Familiarity, "surprise">;
@@ -57,6 +64,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Wish You Were Here",
 		artist: "Pink Floyd",
 		lrclibId: "33803465",
+		note: "A letter to someone who was there and not there, naming almost nothing directly.",
 		mood: "longing",
 		pull: "imagery",
 		familiarity: "canon",
@@ -67,6 +75,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Lag Ja Gale",
 		artist: "Lata Mangeshkar",
 		lrclibId: "23658883",
+		note: "Asks for one embrace on the grounds that this night may not come again.",
 		mood: "longing",
 		pull: "confession",
 		familiarity: "canon",
@@ -77,6 +86,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "In My Life",
 		artist: "The Beatles",
 		lrclibId: "36302255",
+		note: "Weighs everyone who came before against one person, and says so plainly.",
 		mood: "longing",
 		pull: "confession",
 		familiarity: "canon",
@@ -87,6 +97,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Tere Bina Zindagi Se",
 		artist: "Kishore Kumar",
 		lrclibId: "35243934",
+		note: "Two people agree that life apart is fine, and neither of them believes it.",
 		mood: "longing",
 		pull: "storytelling",
 		familiarity: "canon",
@@ -97,6 +108,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Nights",
 		artist: "Frank Ocean",
 		lrclibId: "31781093",
+		note: "Splits in half mid-song, the way a year does when everything changes.",
 		mood: "longing",
 		pull: "confession",
 		familiarity: "deep",
@@ -107,6 +119,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Choo Lo",
 		artist: "The Local Train",
 		lrclibId: "7036519",
+		note: "Asks to be held before the feeling passes, unsure the answer will come.",
 		mood: "longing",
 		pull: "confession",
 		familiarity: "deep",
@@ -117,6 +130,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Motion Sickness",
 		artist: "Phoebe Bridgers",
 		lrclibId: "11570429",
+		note: "Anger and affection for the same person, refusing to resolve into either.",
 		mood: "longing",
 		pull: "confession",
 		familiarity: "deep",
@@ -127,6 +141,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Agar Tum Saath Ho",
 		artist: "Arijit Singh",
 		lrclibId: "33945230",
+		note: "Two voices arguing about whether staying is love or damage.",
 		mood: "longing",
 		pull: "confession",
 		familiarity: "canon",
@@ -137,6 +152,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Zombie",
 		artist: "The Cranberries",
 		lrclibId: "35051290",
+		note: "Names a specific killing and refuses to let it become a metaphor.",
 		mood: "defiant",
 		pull: "storytelling",
 		familiarity: "canon",
@@ -147,6 +163,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Fight the Power",
 		artist: "Public Enemy",
 		lrclibId: "37063910",
+		note: "Stacks references until the argument becomes a sound you cannot ignore.",
 		mood: "defiant",
 		pull: "wordplay",
 		familiarity: "canon",
@@ -157,6 +174,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Bohemian Rhapsody",
 		artist: "Queen",
 		lrclibId: "30585262",
+		note: "A confession, a trial and a shrug, in six minutes and three keys.",
 		mood: "defiant",
 		pull: "storytelling",
 		familiarity: "canon",
@@ -167,6 +185,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Alright",
 		artist: "Kendrick Lamar",
 		lrclibId: "9500955",
+		note: "Holds a promise steady over evidence that it should not hold.",
 		mood: "defiant",
 		pull: "wordplay",
 		familiarity: "canon",
@@ -177,6 +196,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Seven Nation Army",
 		artist: "The White Stripes",
 		lrclibId: "32223262",
+		note: "One riff, and a man leaving town before he can be talked out of it.",
 		mood: "defiant",
 		pull: "storytelling",
 		familiarity: "canon",
@@ -187,6 +207,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Yeh Jo Des Hai Tera",
 		artist: "A.R. Rahman",
 		lrclibId: "34798363",
+		note: "Homesickness written as a country calling a person back.",
 		mood: "defiant",
 		pull: "confession",
 		familiarity: "canon",
@@ -197,6 +218,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Something",
 		artist: "The Beatles",
 		lrclibId: "36255521",
+		note: "Cannot say why, and makes the not-knowing the whole point.",
 		mood: "tender",
 		pull: "confession",
 		familiarity: "canon",
@@ -207,6 +229,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Wonderful Tonight",
 		artist: "Eric Clapton",
 		lrclibId: "15652449",
+		note: "An ordinary evening described so closely it becomes the reason.",
 		mood: "tender",
 		pull: "storytelling",
 		familiarity: "canon",
@@ -217,6 +240,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Kabhi Kabhie Mere Dil Mein",
 		artist: "Mukesh",
 		lrclibId: "8349033",
+		note: "A thought arriving unbidden that someone was made for you.",
 		mood: "tender",
 		pull: "imagery",
 		familiarity: "canon",
@@ -227,6 +251,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Chura Liya Hai Tumne",
 		artist: "Asha Bhosle",
 		lrclibId: "33926738",
+		note: "Playful theft as a love song, all lightness over real stakes.",
 		mood: "tender",
 		pull: "storytelling",
 		familiarity: "canon",
@@ -237,6 +262,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Holocene",
 		artist: "Bon Iver",
 		lrclibId: "23555615",
+		note: "Smallness offered as consolation rather than defeat.",
 		mood: "tender",
 		pull: "imagery",
 		familiarity: "deep",
@@ -247,6 +273,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "First Day of My Life",
 		artist: "Bright Eyes",
 		lrclibId: "17585749",
+		note: "Starts at the moment doubt ended, and stays there.",
 		mood: "tender",
 		pull: "confession",
 		familiarity: "deep",
@@ -257,6 +284,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Tum Se Hi",
 		artist: "Mohit Chauhan",
 		lrclibId: "34291699",
+		note: "Everything ordinary rerouted through one person.",
 		mood: "tender",
 		pull: "confession",
 		familiarity: "canon",
@@ -267,6 +295,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Raabta",
 		artist: "Arijit Singh",
 		lrclibId: "35784288",
+		note: "A pull older than the meeting, treated as fact rather than question.",
 		mood: "tender",
 		pull: "imagery",
 		familiarity: "canon",
@@ -277,6 +306,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Karma Police",
 		artist: "Radiohead",
 		lrclibId: "31503287",
+		note: "Petty grievance escalated into cosmic complaint, then abandoned.",
 		mood: "restless",
 		pull: "imagery",
 		familiarity: "canon",
@@ -287,6 +317,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Smells Like Teen Spirit",
 		artist: "Nirvana",
 		lrclibId: "31750367",
+		note: "Boredom and fury with nowhere to put either.",
 		mood: "restless",
 		pull: "wordplay",
 		familiarity: "canon",
@@ -297,6 +328,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Once in a Lifetime",
 		artist: "Talking Heads",
 		lrclibId: "9228305",
+		note: "A life examined mid-sentence by someone who did not choose it.",
 		mood: "restless",
 		pull: "wordplay",
 		familiarity: "deep",
@@ -307,6 +339,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Paranoid Android",
 		artist: "Radiohead",
 		lrclibId: "19998617",
+		note: "Four songs bolted together by the same disgust.",
 		mood: "restless",
 		pull: "imagery",
 		familiarity: "canon",
@@ -317,6 +350,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Blinding Lights",
 		artist: "The Weeknd",
 		lrclibId: "36523298",
+		note: "Driving at night to feel something, and calling it love.",
 		mood: "restless",
 		pull: "confession",
 		familiarity: "canon",
@@ -327,6 +361,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Redbone",
 		artist: "Childish Gambino",
 		lrclibId: "34264408",
+		note: "Suspicion set to a groove slow enough to sit inside.",
 		mood: "restless",
 		pull: "imagery",
 		familiarity: "canon",
@@ -337,6 +372,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Nadaan Parindey",
 		artist: "Mohit Chauhan",
 		lrclibId: "34060184",
+		note: "A bird told to go home, by someone who cannot.",
 		mood: "restless",
 		pull: "storytelling",
 		familiarity: "canon",
@@ -347,6 +383,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Ilahi",
 		artist: "Arijit Singh",
 		lrclibId: "35458952",
+		note: "Leaving as a prayer rather than an escape.",
 		mood: "restless",
 		pull: "storytelling",
 		familiarity: "canon",
@@ -357,6 +394,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Dil Se Re",
 		artist: "A.R. Rahman",
 		lrclibId: "33769880",
+		note: "Devotion pitched at the volume of a riot.",
 		mood: "restless",
 		pull: "imagery",
 		familiarity: "canon",
@@ -367,6 +405,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Teardrop",
 		artist: "Massive Attack",
 		lrclibId: "27327276",
+		note: "A heartbeat under a voice that never raises itself.",
 		mood: "longing",
 		pull: "imagery",
 		familiarity: "canon",
@@ -377,6 +416,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Creep",
 		artist: "Radiohead",
 		lrclibId: "27196790",
+		note: "Self-loathing said out loud, with no attempt to make it charming.",
 		mood: "longing",
 		pull: "confession",
 		familiarity: "canon",
@@ -387,6 +427,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Kun Faya Kun",
 		artist: "A.R. Rahman",
 		lrclibId: "35218012",
+		note: "Surrender described as the moment something begins.",
 		mood: "tender",
 		pull: "confession",
 		familiarity: "canon",
@@ -397,6 +438,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Ae Dil Hai Mushkil",
 		artist: "Arijit Singh",
 		lrclibId: "879427",
+		note: "Loving without return, argued as a position rather than a wound.",
 		mood: "longing",
 		pull: "wordplay",
 		familiarity: "canon",
@@ -407,6 +449,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Masakali",
 		artist: "Mohit Chauhan",
 		lrclibId: "34637618",
+		note: "A pigeon told to fly, meaning a girl told to.",
 		mood: "tender",
 		pull: "wordplay",
 		familiarity: "deep",
@@ -417,6 +460,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Roobaroo",
 		artist: "Naresh Iyer",
 		lrclibId: "7912114",
+		note: "Waking up treated as a political act.",
 		mood: "defiant",
 		pull: "imagery",
 		familiarity: "deep",
@@ -427,6 +471,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Khwaja Mere Khwaja",
 		artist: "A.R. Rahman",
 		lrclibId: "37323926",
+		note: "Devotion that circles rather than arrives.",
 		mood: "tender",
 		pull: "imagery",
 		familiarity: "canon",
@@ -437,6 +482,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Yeh Duniya Agar Mil Bhi Jaye",
 		artist: "Mohammed Rafi",
 		lrclibId: "31558586",
+		note: "Refuses a world it has already seen the workings of.",
 		mood: "defiant",
 		pull: "imagery",
 		familiarity: "deep",
@@ -447,6 +493,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Jinhe Naaz Hai Hind Par",
 		artist: "Mohammed Rafi",
 		lrclibId: "33605922",
+		note: "Asks the proud where exactly they are looking.",
 		mood: "defiant",
 		pull: "imagery",
 		familiarity: "deep",
@@ -457,6 +504,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Mera Joota Hai Japani",
 		artist: "Mukesh",
 		lrclibId: "34787788",
+		note: "Borrowed clothes, borrowed everything, and a heart that is not.",
 		mood: "defiant",
 		pull: "wordplay",
 		familiarity: "canon",
@@ -467,6 +515,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Musafir Hoon Yaaron",
 		artist: "Kishore Kumar",
 		lrclibId: "18472648",
+		note: "No house, no address, and no complaint about either.",
 		mood: "restless",
 		pull: "storytelling",
 		familiarity: "deep",
@@ -477,6 +526,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Zindagi Ka Safar",
 		artist: "Kishore Kumar",
 		lrclibId: "23929923",
+		note: "Notices that nobody comes back, and keeps walking.",
 		mood: "restless",
 		pull: "confession",
 		familiarity: "canon",
@@ -487,6 +537,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Aane Wala Pal",
 		artist: "Kishore Kumar",
 		lrclibId: "37924734",
+		note: "The moment is already gone. That is the whole song.",
 		mood: "restless",
 		pull: "confession",
 		familiarity: "canon",
@@ -497,6 +548,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Main Pal Do Pal Ka Shayar",
 		artist: "Mukesh",
 		lrclibId: "22267656",
+		note: "A poet measuring his own shelf life, out loud.",
 		mood: "restless",
 		pull: "confession",
 		familiarity: "deep",
@@ -507,6 +559,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "The Night We Met",
 		artist: "Lord Huron",
 		lrclibId: "34481607",
+		note: "Wants the meeting undone, not the love.",
 		mood: "longing",
 		pull: "confession",
 		familiarity: "deep",
@@ -517,6 +570,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Re: Stacks",
 		artist: "Bon Iver",
 		lrclibId: "22660720",
+		note: "Grief sorted slowly, the way you clear a room.",
 		mood: "longing",
 		pull: "imagery",
 		familiarity: "deep",
@@ -527,6 +581,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Casimir Pulaski Day",
 		artist: "Sufjan Stevens",
 		lrclibId: "16990543",
+		note: "A death told in small specific facts, faith included.",
 		mood: "tender",
 		pull: "storytelling",
 		familiarity: "deep",
@@ -537,6 +592,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "A Case of You",
 		artist: "Joni Mitchell",
 		lrclibId: "12937387",
+		note: "Love as something you could drink and still stand.",
 		mood: "longing",
 		pull: "imagery",
 		familiarity: "deep",
@@ -547,6 +603,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Pyramid Song",
 		artist: "Radiohead",
 		lrclibId: "25112927",
+		note: "Time collapsed, and everyone who ever was, at once.",
 		mood: "restless",
 		pull: "imagery",
 		familiarity: "deep",
@@ -557,6 +614,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "The Trapeze Swinger",
 		artist: "Iron and Wine",
 		lrclibId: "30010199",
+		note: "A list of things to remember, addressed to someone gone.",
 		mood: "longing",
 		pull: "storytelling",
 		familiarity: "deep",
@@ -567,6 +625,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Phir Le Aya Dil",
 		artist: "Arijit Singh",
 		lrclibId: "6827664",
+		note: "The heart keeps returning somewhere the person has left.",
 		mood: "longing",
 		pull: "imagery",
 		familiarity: "deep",
@@ -577,6 +636,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Iktara",
 		artist: "Kavita Seth",
 		lrclibId: "36067000",
+		note: "One string, one thought, repeated until it means something.",
 		mood: "tender",
 		pull: "imagery",
 		familiarity: "deep",
@@ -587,6 +647,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Naina Da Kya Kasoor",
 		artist: "Amit Trivedi",
 		lrclibId: "5452480",
+		note: "Blames the eyes to avoid blaming the self.",
 		mood: "restless",
 		pull: "wordplay",
 		familiarity: "deep",
@@ -597,6 +658,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Aaoge Jab Tum",
 		artist: "Ustad Rashid Khan",
 		lrclibId: "21638733",
+		note: "A house that only becomes one when someone arrives.",
 		mood: "tender",
 		pull: "confession",
 		familiarity: "deep",
@@ -607,6 +669,7 @@ export const CATALOGUE: CuratedTrack[] = [
 		title: "Zinda",
 		artist: "Siddharth Mahadevan",
 		lrclibId: "9211620",
+		note: "Being alive stated as a decision, repeatedly.",
 		mood: "defiant",
 		pull: "confession",
 		familiarity: "deep",
@@ -643,6 +706,70 @@ function score(track: CuratedTrack, preferences: Preferences): number {
 		total += 1.5;
 	}
 	return total;
+}
+
+/**
+ * Why this track was picked, in the reader's terms (D-045).
+ *
+ * Derived from `score` rather than described alongside it: `matched` lists the
+ * axes that actually earned points, so the stated reason is the real one. An
+ * explanation written independently of the scoring would drift from it the
+ * first time a weight changed, and a generated one would be inventing a
+ * rationale for a decision it had no part in.
+ *
+ * `matched` is empty when the reader skipped the stepper. That is not a
+ * failure — it means the pick came from the day's rotation, and the caller
+ * should say so rather than claim a reason.
+ */
+export interface Explanation {
+	/** Reader-facing labels for the axes that scored, strongest first. */
+	matched: string[];
+	/** The editorial line for this track. */
+	note: string;
+}
+
+const MOOD_LABEL: Record<Mood, string> = {
+	longing: "longing",
+	defiant: "something defiant",
+	tender: "something tender",
+	restless: "restlessness",
+};
+
+const PULL_LABEL: Record<Pull, string> = {
+	storytelling: "the story",
+	wordplay: "the craft",
+	confession: "the honesty",
+	imagery: "the imagery",
+};
+
+const FAMILIARITY_LABEL: Record<Exclude<Familiarity, "surprise">, string> = {
+	canon: "the canon",
+	deep: "deep cuts",
+};
+
+export function explainPick(
+	track: CuratedTrack,
+	preferences: Preferences,
+): Explanation {
+	const matched: string[] = [];
+
+	// Same conditions as `score`, in the same weight order, so the sentence
+	// cannot claim a reason the scoring did not use.
+	if (preferences.mood && track.mood === preferences.mood) {
+		matched.push(MOOD_LABEL[preferences.mood]);
+	}
+	if (preferences.pull && track.pull === preferences.pull) {
+		matched.push(PULL_LABEL[preferences.pull]);
+	}
+	if (
+		preferences.familiarity &&
+		preferences.familiarity !== "surprise" &&
+		track.familiarity === preferences.familiarity
+	) {
+		matched.push(FAMILIARITY_LABEL[preferences.familiarity]);
+	}
+
+	return { matched, note: track.note };
 }
 
 /** Deterministic shuffle, so a given day looks the same for every visitor. */

@@ -4,6 +4,8 @@ import {
 	ALSO_LIKED_COUNT,
 	CATALOGUE,
 	DEEP_DIVE_COUNT,
+	explainPick,
+	FAMILIARITIES,
 	MOODS,
 	type Preferences,
 	PULLS,
@@ -140,5 +142,85 @@ describe("pickAlsoLiked", () => {
 	it("still reaches beyond them, so it reads as a wander", () => {
 		const picks = pickAlsoLiked({ ...NONE, mood: "defiant" }, seed);
 		expect(new Set(picks.map((t) => t.mood)).size).toBeGreaterThan(1);
+	});
+});
+
+describe("explainPick", () => {
+	const track = CATALOGUE.find((t) => t.title === "Wish You Were Here");
+	if (!track) throw new Error("fixture track missing from the catalogue");
+
+	it("names only the axes that actually scored", () => {
+		const { matched } = explainPick(track, {
+			mood: "longing",
+			pull: "imagery",
+			familiarity: "canon",
+		});
+		expect(matched).toEqual(["longing", "the imagery", "the canon"]);
+	});
+
+	it("stays silent about an axis that did not match", () => {
+		const { matched } = explainPick(track, {
+			mood: "defiant",
+			pull: "imagery",
+			familiarity: null,
+		});
+		expect(matched).toEqual(["the imagery"]);
+	});
+
+	it("treats 'surprise me' as no reason, matching score()", () => {
+		const { matched } = explainPick(track, {
+			mood: null,
+			pull: null,
+			familiarity: "surprise",
+		});
+		expect(matched).toEqual([]);
+	});
+
+	it("returns no reasons when the stepper was skipped", () => {
+		expect(explainPick(track, NONE).matched).toEqual([]);
+	});
+
+	/**
+	 * The point of deriving the explanation from the same conditions as
+	 * `score`: a reason may never be claimed for a track the scoring did not
+	 * reward, and a rewarded track must always be able to say why.
+	 */
+	it("never claims a reason the scoring did not use", () => {
+		const preferenceSets: Preferences[] = [];
+		for (const mood of MOODS) {
+			for (const pull of PULLS) {
+				for (const familiarity of FAMILIARITIES) {
+					preferenceSets.push({ mood, pull, familiarity });
+				}
+			}
+		}
+
+		for (const preferences of preferenceSets) {
+			for (const candidate of CATALOGUE) {
+				const { matched } = explainPick(candidate, preferences);
+				const scored =
+					(preferences.mood === candidate.mood ? 1 : 0) +
+					(preferences.pull === candidate.pull ? 1 : 0) +
+					(preferences.familiarity !== "surprise" &&
+					preferences.familiarity === candidate.familiarity
+						? 1
+						: 0);
+				expect(
+					matched.length,
+					`${candidate.title} / ${preferences.mood}·${preferences.pull}·${preferences.familiarity}`,
+				).toBe(scored);
+			}
+		}
+	});
+
+	it("gives every track in the catalogue an editorial note", () => {
+		for (const candidate of CATALOGUE) {
+			expect(candidate.note.trim().length, candidate.title).toBeGreaterThan(20);
+			// A note that opens with the title is restating, not explaining.
+			expect(
+				candidate.note.toLowerCase().startsWith(candidate.title.toLowerCase()),
+				candidate.title,
+			).toBe(false);
+		}
 	});
 });
