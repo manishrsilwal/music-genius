@@ -134,6 +134,45 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-037 — The hero is sized to the title, not just the viewport
+**Fixed 2026-08-22.** Reported: "look at the space the title is taking, that's
+way too big."
+
+`--text-hero` is `clamp(3.25rem, 13vw, 11rem)`, which asks only how wide the
+*viewport* is. Every title therefore rendered at the same 176px cap, so
+"Creep" was a poster and "Phir Le Aya Dil" was two lines eating a third of the
+screen. "Main Pal Do Pal Ka Shayar" took three.
+
+The heading is now fitted to its own string: `100cqw / --title-em`, where
+`--title-em` is the title's width in em units. That value is **measured, not
+assumed** — it comes from `measureEm`, over the same Rufina and Vesper Libre
+advance table Satori renders cards from. Guessing an average advance is the
+mistake that orphaned words on the first lyric cards; Rufina's widths vary
+enough that equal character counts differ by 8%.
+
+| Title | em | Before | After | Lines |
+|---|---|---|---|---|
+| Creep | 2.80 | 176px | 176px | 1 → 1 |
+| Phir Le Aya Dil | 6.87 | 176px | 149px | 2 → 1 |
+| Wish You Were Here | 9.78 | 176px | 105px | 2 → 1 |
+| Main Pal Do Pal Ka Shayar | 12.14 | 176px | 84px | 3 → 1 |
+
+`min()` keeps the existing cap, so short titles are untouched. A 2.5rem floor
+means a very long title stops shrinking and wraps — wrapping is the graceful
+failure, unreadable type is not.
+
+> **`container-type` sits on a wrapper, not the heading.** An element cannot
+> query its own width, so `100cqw` inside the `h1` would resolve against some
+> ancestor. This is the same class of mistake as sizing the card preview in
+> percentages, where `font-size` resolved against the parent font size rather
+> than the container (D-018).
+
+**Also fixed: "Arijit Singh · Arijit Singh".** LRCLIB uploads routinely set
+`albumName` to the artist or the track name. Normalised at the client boundary
+in `meaningfulAlbum` rather than guarded in the hero, so every consumer —
+cards, meta tags, anything added later — gets it once. An album that only
+repeats what is already on screen carries nothing (OD-016).
+
 ### D-036 — The record leads; the player stays visible
 **Decided 2026-08-22.** Asked: drop the YouTube preview from the playback bar
 and use the album image instead — circular, spinning while playing, still when

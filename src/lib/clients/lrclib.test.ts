@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normaliseNames } from "./lrclib";
+import { meaningfulAlbum, normaliseNames } from "./lrclib";
 
 /**
  * LRCLIB metadata is user-contributed and frequently malformed. These cases
@@ -96,5 +96,46 @@ describe("normaliseNames", () => {
 			artistName: "Marquee Moon - Live",
 		});
 		expect(result).toEqual({ title: "Marquee Moon", artist: "Live" });
+	});
+});
+
+describe("meaningfulAlbum", () => {
+	it("keeps a real album name", () => {
+		expect(meaningfulAlbum("Barfi!", "Phir Le Aya Dil", "Arijit Singh")).toBe(
+			"Barfi!",
+		);
+	});
+
+	it("drops an album that only repeats the artist", () => {
+		// Rendered as-is this read "Arijit Singh · Arijit Singh".
+		expect(
+			meaningfulAlbum("Arijit Singh", "Phir Le Aya Dil", "Arijit Singh"),
+		).toBeNull();
+	});
+
+	it("drops an album that only repeats the title", () => {
+		expect(meaningfulAlbum("Creep", "Creep", "Radiohead")).toBeNull();
+	});
+
+	it("ignores case and surrounding whitespace when comparing", () => {
+		expect(
+			meaningfulAlbum("  arijit singh ", "Phir Le Aya Dil", "Arijit Singh"),
+		).toBeNull();
+	});
+
+	it("keeps an album that merely contains the artist's name", () => {
+		expect(
+			meaningfulAlbum(
+				"Arijit Singh - India Tour Hits",
+				"Phir Le Aya Dil",
+				"Arijit Singh",
+			),
+		).toBe("Arijit Singh - India Tour Hits");
+	});
+
+	it("treats blank and missing alike", () => {
+		expect(meaningfulAlbum("   ", "t", "a")).toBeNull();
+		expect(meaningfulAlbum(null, "t", "a")).toBeNull();
+		expect(meaningfulAlbum(undefined, "t", "a")).toBeNull();
 	});
 });

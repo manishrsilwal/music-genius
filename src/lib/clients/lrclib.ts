@@ -126,13 +126,32 @@ export function normaliseNames(raw: {
 	};
 }
 
+/**
+ * LRCLIB uploads routinely set `albumName` to the artist or the track name —
+ * a single-release upload where the field was filled in with whatever was to
+ * hand. Rendered as-is it reads "Arijit Singh · Arijit Singh". An album that
+ * only repeats what is already on screen carries nothing, so treat it as
+ * absent here rather than guarding at every place that shows it (OD-016).
+ */
+export function meaningfulAlbum(
+	album: string | null | undefined,
+	title: string,
+	artist: string,
+): string | null {
+	const value = clean(album);
+	if (!value) return null;
+	const fold = (text: string) => text.trim().toLowerCase();
+	if (fold(value) === fold(artist) || fold(value) === fold(title)) return null;
+	return value;
+}
+
 function toSummary(raw: LrclibRecord): TrackSummary {
 	const { title, artist } = normaliseNames(raw);
 	return {
 		id: String(raw.id),
 		title,
 		artist,
-		album: clean(raw.albumName) || null,
+		album: meaningfulAlbum(raw.albumName, title, artist),
 		duration: raw.duration,
 		hasSyncedLyrics: Boolean(raw.syncedLyrics),
 		instrumental: raw.instrumental,

@@ -37,13 +37,36 @@
 			linear-gradient(to bottom, oklch(0.13 0.008 265 / 0.55), var(--color-canvas));
 	}
 
+	// The measure the title is fitted against. `container-type` here rather
+	// than on the heading because an element cannot query its own width.
+	&__measure {
+		container-type: inline-size;
+		width: 100%;
+		max-width: 64rem;
+	}
+
 	// Rufina has no italic and only two weights, so hierarchy here comes from
 	// scale and spacing rather than style (D-005).
 	&__title {
 		font-family: var(--font-display);
-		font-size: var(--text-hero);
 		line-height: var(--leading-hero);
 		letter-spacing: var(--tracking-hero);
 		text-wrap: balance;
+
+		// Sized to the title, not just the viewport (D-037).
+		//
+		// `--text-hero` alone set every title at the same 11rem, so "Creep"
+		// was a poster and "Phir Le Aya Dil" was two lines eating a third of
+		// the screen. `100cqw / --title-em` is the exact size at which this
+		// particular string fits one line; `--title-em` comes from the real
+		// Rufina/Vesper advance table, so it is measured rather than assumed.
+		//
+		// `min` keeps the existing cap, so short titles are unchanged. The
+		// 2.5rem floor means a very long title stops shrinking and wraps
+		// instead — wrapping is the graceful failure, not tiny type.
+		font-size: min(
+			var(--text-hero),
+			max(2.5rem, calc(100cqw / var(--title-em, 8)))
+		);
 	}
 }

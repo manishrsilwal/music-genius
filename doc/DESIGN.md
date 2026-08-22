@@ -39,6 +39,13 @@ Fluid, `clamp()`-based, so nothing needs a breakpoint to stay readable.
 --text-micro     0.75rem                          Labels, status
 ```
 
+**Long strings are fitted, not just clamped.** A viewport-driven `clamp()`
+asks how wide the screen is, never how long the text is — so every hero title
+rendered at the same cap and long ones wrapped to two or three lines. Size
+display strings against their own measured width via `measureEm` and a
+`container-type` wrapper (D-037). Never assume an average glyph advance;
+Rufina varies by 8% across equal character counts.
+
 **A step is chosen for its role, not its size.** The landing hero uses a
 capped `clamp(2rem, 4.5vw, 3rem)` rather than `--text-display` because the
 first question has to sit above the fold — that is a page-specific size, not a
@@ -324,6 +331,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-037** Hero title fitted to its own measured width, not just the viewport |
 | 2026-08-22 | **D-036** Playback bar led by a spinning album record; player kept visible but quiet |
 | 2026-08-22 | **D-035** Focus ring written once as an opt-out; 44px tap targets via `tap-target` |
 | 2026-08-22 | **D-033** Layer scale and shared dock; fixes Discover/playback overlap, drawer covering the dock, and missing safe areas |

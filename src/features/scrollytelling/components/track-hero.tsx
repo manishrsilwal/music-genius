@@ -1,6 +1,8 @@
 import { Await } from "@tanstack/react-router";
 import { motion } from "motion/react";
+import type { CSSProperties } from "react";
 
+import { measureEm } from "@/lib/card";
 import { riseVariants, staggerVariants, transition } from "@/lib/motion";
 import type { Track, TrackVisuals } from "@/lib/types";
 
@@ -64,19 +66,32 @@ export function TrackHero({
 				{track.synced ? "Time-synced" : "Lyrics"}
 			</motion.p>
 
-			<motion.h1
-				variants={riseVariants}
-				transition={transition.cinematic}
-				className="hero__title mt-8 max-w-5xl text-ink"
-			>
-				{track.title}
-			</motion.h1>
+			{/*
+			  The measure the title is fitted against. A container rather than
+			  the heading itself: an element cannot query its own width (D-037).
+			*/}
+			<div className="hero__measure mt-8">
+				<motion.h1
+					variants={riseVariants}
+					transition={transition.cinematic}
+					className="hero__title text-ink"
+					// Real glyph advances, not an assumed average — the same
+					// table Satori renders cards from. Rufina's widths vary
+					// enough that "Creep" and "Nights" differ by 8% on equal
+					// character counts.
+					style={{ "--title-em": measureEm(track.title) } as CSSProperties}
+				>
+					{track.title}
+				</motion.h1>
+			</div>
 
 			<motion.p
 				variants={riseVariants}
 				className="mt-8 text-lead text-ink-muted"
 			>
 				{track.artist}
+				{/* Already null when it only repeats the artist or the title —
+				    normalised at the LRCLIB boundary, not guarded here. */}
 				{track.album ? ` · ${track.album}` : ""}
 			</motion.p>
 		</motion.header>
