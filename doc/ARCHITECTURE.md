@@ -134,6 +134,32 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-046 — Two labels that should have matched, and a reason nobody could see
+**Fixed 2026-08-22.** Reported: make "The Synthesis" and "The Sources" match,
+and — where is the explanation?
+
+**The labels.** Both carry the same two classes, so they should have been
+identical. `.insights__synthesis p` was a descendant selector, and the section
+label is itself a `<p>` inside that section: at (0,1,1) it beat
+`.insights__label` at (0,1,0) and overrode the label's colour with
+`--color-ink`. One label set in ink, the other in faint, from a rule that was
+never meant to touch either. The prose now has its own `__prose` class, so the
+paragraph styling can only reach paragraphs.
+
+> The general form: **a descendant selector claims everything of that element
+> type inside a region.** Scope prose styling to the prose, not to the section
+> that contains it.
+
+**The explanation.** It was rendered inside the card's text column and hidden
+below `sm`, because on a phone that column sits beside the artwork and there
+was no room. Hiding it there was the wrong answer to a layout problem — the
+reason a song was recommended is not a large-screen luxury.
+
+The card is now a column at every width, with the art and the name as a
+`__head` row inside it and the reason as a sibling beneath. It spans the whole
+card and shows everywhere. On a phone the head stays horizontal; from `sm` it
+becomes a portrait tile as before.
+
 ### D-045 — The recommendation explains itself, truthfully
 **Decided 2026-08-22.** Asked: explain why a song was recommended, from the
 reader's answers and the song's meaning.

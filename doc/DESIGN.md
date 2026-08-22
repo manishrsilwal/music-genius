@@ -381,6 +381,10 @@ Before shipping a component:
 - [ ] Display text sets `font-synthesis: none`
 - [ ] A control that can commit on tap does
 - [ ] `@apply` is never used in `.scss` — it silently no-ops (D-004)
+- [ ] Prose styling is scoped to the prose, not to the section around it — a
+      descendant selector claims every element of that type inside it (D-046)
+- [ ] Nothing meaningful is hidden below a breakpoint to solve a layout
+      problem; restructure instead (D-046)
 - [ ] The YouTube player is never hidden, faded, clipped or covered (D-036) —
       suppress its *chrome* with `controls: 0`, never the element (D-039)
 
@@ -390,6 +394,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-046** Section labels unified; "why this" shows at every width |
 | 2026-08-22 | **D-045** Deep Dives explain themselves, from the real scoring plus a curated note |
 | 2026-08-22 | **D-044** Insights synthesis set in Elms Sans, not the display face |
 | 2026-08-22 | **D-043** Sources become a numbered reference list; the quote's citation is now followable |

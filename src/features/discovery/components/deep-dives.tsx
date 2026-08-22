@@ -43,16 +43,26 @@ export function DeepDives({
 						params={{ trackId: pick.lrclibId }}
 						className="dives__card"
 					>
-						<DiveArt title={pick.title} artist={pick.artist} />
-						<span className="min-w-0">
-							<span className="dives__title text-lead text-ink">
-								{pick.title}
+						{/*
+						  The art and the name are one row on a phone and a
+						  column from `sm`. The reason sits OUTSIDE that row so
+						  it spans the whole card at every width — nested inside
+						  it, a phone squeezed it into the column beside the
+						  artwork (D-046).
+						*/}
+						<span className="dives__head">
+							<DiveArt title={pick.title} artist={pick.artist} />
+							<span className="min-w-0">
+								<span className="dives__title text-lead text-ink">
+									{pick.title}
+								</span>
+								<span className="dives__artist mt-0.5 block text-caption">
+									{pick.artist}
+								</span>
 							</span>
-							<span className="dives__artist mt-0.5 block text-caption">
-								{pick.artist}
-							</span>
-							<WhyThis pick={pick} preferences={preferences} />
 						</span>
+
+						<WhyThis pick={pick} preferences={preferences} />
 					</Link>
 				</motion.div>
 			))}
@@ -84,7 +94,7 @@ function WhyThis({
 	const reasons = matched.length > 0 ? matched : ["today's rotation"];
 
 	return (
-		<span className="dives__why mt-3 block">
+		<span className="dives__why block">
 			<span className="dives__why-tags">
 				{reasons.map((reason) => (
 					<span key={reason} className="dives__why-tag text-micro">

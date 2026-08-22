@@ -10,10 +10,12 @@
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
+	// A column at every width, so "why this" can span the card. The art and
+	// the name are the row inside it.
 	&__card {
 		display: flex;
+		flex-direction: column;
 		gap: 0.875rem;
-		align-items: center;
 		padding: 0.875rem;
 		border-radius: var(--radius-card);
 		border: 1px solid var(--color-hairline);
@@ -28,13 +30,25 @@
 		}
 
 		@include m.from("sm") {
-			flex-direction: column;
-			align-items: stretch;
 			gap: 1rem;
 		}
 
 		@include m.reduced-motion {
 			transition: none;
+		}
+	}
+
+	&__head {
+		display: flex;
+		align-items: center;
+		gap: 0.875rem;
+		min-width: 0;
+
+		// From `sm` the card is a portrait tile: art on top, name beneath.
+		@include m.from("sm") {
+			flex-direction: column;
+			align-items: stretch;
+			gap: 1rem;
 		}
 	}
 
@@ -75,15 +89,6 @@
 	&__why {
 		padding-top: 0.75rem;
 		border-top: 1px solid var(--color-hairline);
-
-		// On the stacked mobile card the art sits beside the text, so the
-		// reason would be squeezed into a narrow column. It reads on its own
-		// row from `sm`, where the card is a column.
-		display: none;
-
-		@include m.from("sm") {
-			display: block;
-		}
 	}
 
 	&__why-tags {

@@ -84,7 +84,12 @@
 	// Elms Sans, not Rufina. The synthesis is prose to be read at length in a
 	// narrow column, and the display face is cut for headlines — at reading
 	// size in a 30rem drawer it sets heavy and slows the line (D-044).
-	&__synthesis p {
+	//
+	// Scoped to `__prose` rather than written as `__synthesis p`. The section
+	// label is also a `<p>` inside that section, so the descendant selector
+	// matched it at (0,1,1) and beat `__label` at (0,1,0) — which is why "The
+	// Synthesis" set in ink while "The Sources" set in faint (D-046).
+	&__prose p {
 		font-family: var(--font-ui);
 		line-height: var(--leading-prose);
 		color: var(--color-ink);
