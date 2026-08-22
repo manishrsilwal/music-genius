@@ -336,7 +336,8 @@ Before shipping a component:
 - [ ] Display text sets `font-synthesis: none`
 - [ ] A control that can commit on tap does
 - [ ] `@apply` is never used in `.scss` — it silently no-ops (D-004)
-- [ ] The YouTube player is never hidden, faded, clipped or covered (D-036)
+- [ ] The YouTube player is never hidden, faded, clipped or covered (D-036) —
+      suppress its *chrome* with `controls: 0`, never the element (D-039)
 
 ---
 
@@ -344,6 +345,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-039** YouTube chrome suppressed via `controls: 0`; the player itself stays displayed |
 | 2026-08-22 | **D-038** Player opens in the hero, docks to a full-width sticky bar on scroll |
 | 2026-08-22 | **D-037** Hero title fitted to its own measured width, not just the viewport |
 | 2026-08-22 | **D-036** Playback bar led by a spinning album record; player kept visible but quiet |

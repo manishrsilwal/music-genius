@@ -24,9 +24,35 @@ interface YTPlayer {
 interface YTNamespace {
 	Player: new (
 		element: HTMLElement | string,
-		options: Record<string, unknown>,
+		options: PlayerOptions,
 	) => YTPlayer;
 	PlayerState: { PLAYING: number; PAUSED: number; ENDED: number };
+}
+
+/**
+ * Only the parameters we actually use, spelled out rather than left as
+ * `Record<string, unknown>`. A dead `modestbranding: 1` sat here unnoticed for
+ * as long as it took to read the docs — deprecated August 2023, no effect —
+ * because an index signature accepts anything (D-039).
+ */
+interface PlayerVars {
+	/** Inline playback on iOS rather than forced fullscreen. */
+	playsinline?: 0 | 1;
+	/** 0 limits end-of-video suggestions to the same channel. */
+	rel?: 0 | 1;
+	/** 0 removes the control bar, title overlay and centre play button. */
+	controls?: 0 | 1;
+	/** 3 hides annotations. */
+	iv_load_policy?: 1 | 3;
+}
+
+interface PlayerOptions {
+	videoId: string;
+	playerVars?: PlayerVars;
+	events?: {
+		onReady?: (event: { target: YTPlayer }) => void;
+		onStateChange?: (event: { data: number }) => void;
+	};
 }
 
 declare global {
@@ -100,7 +126,30 @@ export function useYouTubePlayer(
 
 			playerRef.current = new window.YT.Player(mountRef.current, {
 				videoId,
-				playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
+				/**
+				 * Suppressing the player's UI is not the same as suppressing
+				 * the player, and only the first is ours to do (D-039).
+				 *
+				 * `controls: 0` is an official parameter: it removes the
+				 * control bar, the title overlay and the large red play button
+				 * that competed with our own Play control. What remains is the
+				 * video image itself, still displayed — which is what III.I.9
+				 * requires. Hiding the element with CSS would not be a
+				 * different technique for the same thing; it would be the
+				 * violation.
+				 *
+				 * `modestbranding` was dropped: deprecated 15 August 2023 and
+				 * documented as having no effect, so we were passing a dead
+				 * parameter. `disablekb` is deliberately left at its default —
+				 * keyboard control of a focused player is an accessibility
+				 * feature, not chrome.
+				 */
+				playerVars: {
+					playsinline: 1,
+					rel: 0,
+					controls: 0,
+					iv_load_policy: 3,
+				},
 				events: {
 					onReady: (event: { target: YTPlayer }) => {
 						if (cancelled) return;

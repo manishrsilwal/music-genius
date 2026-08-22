@@ -134,6 +134,47 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-039 — Suppress the player's UI, never the player
+**Decided 2026-08-22.** Asked: hide the YouTube UI with CSS `display` or
+`visibility`, or switch to a YouTube Music API. Neither is available; a third
+route gets the same result.
+
+**CSS hiding is the violation, not a way around it.** III.I.9 forbids *"a
+player that is not displayed in the page, tab, or screen that the user is
+viewing."* `display: none`, `visibility: hidden`, `opacity: 0`, a zero size and
+covering the element are all forms of not being displayed. Changing the
+technique does not change what it is.
+
+**YouTube Music has no official API.** Every option is an unofficial library
+that, in its own words, *"emulates YouTube Music web client requests using the
+user's cookie data for authentication"*. Decisively, `ytmusicapi` **"does not
+support audio playback or streaming — it's purely for interacting with YouTube
+Music's data and account management."** It could not replace the IFrame player
+even if the terms were acceptable, and they are not.
+
+**What does work: the player's own parameters.** Suppressing the player's *UI*
+is not the same as suppressing the *player*, and the first is sanctioned:
+
+| Parameter | Effect |
+|---|---|
+| `controls: 0` | Removes the control bar, the title overlay and the large red centre play button that competed with our own Play control |
+| `iv_load_policy: 3` | Hides annotations |
+| `rel: 0` | Limits end-of-video suggestions to the same channel |
+| `playsinline: 1` | Inline playback on iOS rather than forced fullscreen |
+
+What remains is the video image, still displayed — which is what III.I.9 asks
+for. The bar now reads as a music player without any of the chrome that made
+it look like an embedded video.
+
+> **`modestbranding: 1` was being passed and doing nothing.** Deprecated on
+> 15 August 2023 and documented as having no effect. It survived because the
+> ambient type was `options: Record<string, unknown>`, which accepts any key.
+> `PlayerOptions` and `PlayerVars` are now spelled out, so the next dead
+> parameter fails the build rather than sitting there.
+
+> **`disablekb` is deliberately left at its default.** Keyboard control of a
+> focused player is an accessibility feature, not chrome.
+
 ### D-038 — The player opens in the hero, then docks full width
 **Decided 2026-08-22.** Asked: place the player in the hero on first load, and
 let it become a mini player once the reader scrolls — full-width and sticky
