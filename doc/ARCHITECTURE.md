@@ -134,6 +134,56 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-038 — The player opens in the hero, then docks full width
+**Decided 2026-08-22.** Asked: place the player in the hero on first load, and
+let it become a mini player once the reader scrolls — full-width and sticky
+across the bottom, as Genius does, rather than a pill in the corner.
+
+**One instance, two modes.** The bar is rendered inside the hero and stays
+mounted throughout; docking is a class change, never a remount. A remount
+would tear down the YouTube IFrame player and restart playback, which is the
+whole reason it is not portalled or rendered twice.
+
+- **In the hero** — a compact glass pill sized to its contents, sitting under
+  the artist line as part of the composition.
+- **Docked** — `position: fixed`, spanning the viewport at `bottom: 0`, square
+  cornered. Contents centre inside `--dock-measure` (72rem) so a wide display
+  does not strand the record at one edge and the player at the other.
+
+> **The threshold is read from a sentinel, never from the bar.** A bar that
+> goes `fixed` the moment it leaves the viewport is instantly back inside it,
+> which un-docks it, which takes it out again — a flip-flop at exactly the
+> scroll position where it switches. The sentinel is a zero-width element that
+> stretches to the slot's height and stays in flow, so nothing the bar does can
+> feed back into the decision.
+
+> **The slot keeps its height when the bar leaves it.** Otherwise docking
+> collapses the hero and yanks the page upward under a reader mid-scroll.
+
+> **`.hero` now carries `--layer-dock`.** It sets `isolation: isolate` to
+> contain the art's negative z-indexes, and that traps a `position: fixed`
+> descendant in the hero's stacking context — the docked bar would have painted
+> under the canvas that follows it. Naming the layer on the hero lifts both.
+> The hero and the canvas never overlap, so nothing else moves.
+
+**Consequences elsewhere.** The dock tokens lose their `md` override: the bar
+is full width at every breakpoint now, so `--dock-reach` is one value.
+`--discover-bottom` keys off `:has(.playback[data-docked])` rather than
+`:has(.playback)` — while the bar is still up in the hero the corner is free.
+With the drawer open on `lg`, the docked bar ends at the panel's edge via
+`inset-inline` instead of sliding sideways out from under it.
+
+**Also fixed: "Radiohead · Radiohead - Creep".** `meaningfulAlbum` rejected
+only whole-string matches against the artist or the title. LRCLIB's entry has
+`trackName: "Radiohead - Creep"` and `albumName: "Creep"`; once the title is
+normalised the album is an exact echo of it, and the joined form appears on
+other uploads. It now folds punctuation and spacing and rejects the artist,
+the title, and the two joined in either order.
+
+> Bracketed suffixes are deliberately **not** stripped. "(Redux)" and
+> "(Remastered)" name which recording this is, and hiding a real album is a
+> worse failure than showing a mildly redundant one.
+
 ### D-037 — The hero is sized to the title, not just the viewport
 **Fixed 2026-08-22.** Reported: "look at the space the title is taking, that's
 way too big."

@@ -79,7 +79,33 @@ function TrackPage() {
 				{({ palette }) => <PaletteStyle palette={palette} scope={track.id} />}
 			</Await>
 
-			<TrackHero track={track} visuals={visuals} />
+			{/*
+			  Playback (PRD §3.2). Placed inside the hero so it opens as part of
+			  the composition and docks to a full-width bar once the reader
+			  scrolls past it (D-038). Passed as a node rather than built by the
+			  hero, which has no business knowing about sync.
+			*/}
+			<TrackHero
+				track={track}
+				visuals={visuals}
+				player={
+					<Await promise={visuals} fallback={null}>
+						{({ youtubeId, artwork }) =>
+							youtubeId ? (
+								<PlaybackBar
+									videoId={youtubeId}
+									title={track.title}
+									artist={track.artist}
+									artwork={artwork?.thumbnail ?? null}
+									stanzas={track.stanzas}
+									synced={track.synced}
+									onSyncChange={setSyncPosition}
+								/>
+							) : null
+						}
+					</Await>
+				}
+			/>
 			<LyricCanvas stanzas={track.stanzas} syncPosition={syncPosition} />
 
 			{/* Selection → card (PRD §3.4). The palette streams in with the
@@ -101,24 +127,6 @@ function TrackPage() {
 						palette={palette}
 					/>
 				)}
-			</Await>
-
-			{/* Playback (PRD §3.2). The video id streams in with the visuals, so
-			    the bar appears once Genius has told us which video this is. */}
-			<Await promise={visuals} fallback={null}>
-				{({ youtubeId, artwork }) =>
-					youtubeId ? (
-						<PlaybackBar
-							videoId={youtubeId}
-							title={track.title}
-							artist={track.artist}
-							artwork={artwork?.thumbnail ?? null}
-							stanzas={track.stanzas}
-							synced={track.synced}
-							onSyncChange={setSyncPosition}
-						/>
-					) : null
-				}
 			</Await>
 
 			<InsightsAffordance trackId={track.id} onOpenChange={setDrawerOpen} />

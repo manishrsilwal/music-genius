@@ -62,12 +62,16 @@
      by construction. */
   --dock-inset: 1.5rem;
   --dock-gap: 0.75rem;
-  --dock-pad: 0.5rem;
-  --dock-height: 4.5rem;
+  --dock-pad: 0.625rem;
+  --dock-height: 4.75rem;
   /* Home indicator on iOS; 0 everywhere else. */
   --dock-safe: env(safe-area-inset-bottom, 0px);
-  /* How far up from the viewport floor the bar reaches. */
+  /* How far up from the viewport floor the docked bar reaches. One value at
+     every breakpoint now that it spans the full width (D-038). */
   --dock-reach: calc(var(--dock-height) + var(--dock-safe));
+  /* Widest the docked bar's contents run before they centre, so a full-width
+     bar does not strand its controls at opposite edges of a large display. */
+  --dock-measure: 72rem;
 
   /* --- Insights drawer (PRD §3.5) -----------------------------------------
      Shared by the panel itself, the canvas compression, and the dock offset,
@@ -76,14 +80,7 @@
   --drawer-sheet-height: 50dvh;
 }
 
-@media (min-width: 48rem) {
-  :root {
-    /* Detached and inset from the corner, so it reaches further up. */
-    --dock-height: 6rem;
-    --dock-pad: 0.75rem;
-    --dock-reach: calc(var(--dock-inset) + var(--dock-height));
-  }
-}
+
 
 @theme {
   /* --- Typefaces (D-005) --------------------------------------------------

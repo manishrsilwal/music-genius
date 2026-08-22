@@ -123,6 +123,27 @@ describe("meaningfulAlbum", () => {
 		).toBeNull();
 	});
 
+	it("drops an album that is just the artist and title joined", () => {
+		// Rendered as-is this read "Radiohead · Radiohead - Creep".
+		expect(
+			meaningfulAlbum("Radiohead - Creep", "Creep", "Radiohead"),
+		).toBeNull();
+		expect(
+			meaningfulAlbum("Creep - Radiohead", "Creep", "Radiohead"),
+		).toBeNull();
+		expect(
+			meaningfulAlbum("Radiohead: Creep", "Creep", "Radiohead"),
+		).toBeNull();
+	});
+
+	it("keeps a bracketed suffix, which names the recording", () => {
+		// "(Redux)" and "(Remastered)" say which version this is. Hiding a real
+		// album is a worse failure than showing a mildly redundant one.
+		expect(meaningfulAlbum("Creep (Remastered)", "Creep", "Radiohead")).toBe(
+			"Creep (Remastered)",
+		);
+	});
+
 	it("keeps an album that merely contains the artist's name", () => {
 		expect(
 			meaningfulAlbum(

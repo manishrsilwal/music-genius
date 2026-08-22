@@ -5,6 +5,7 @@ import { type LinePosition, linePositionAt } from "@/lib/lrc";
 import { riseVariants, transition } from "@/lib/motion";
 import type { Stanza } from "@/lib/types";
 
+import { useDocked } from "../hooks/use-docked";
 import { useManualOverride } from "../hooks/use-manual-override";
 import { useYouTubePlayer } from "../hooks/use-youtube-player";
 import "./playback-bar.scss";
@@ -35,6 +36,8 @@ export function PlaybackBar({
 	onSyncChange: (position: LinePosition | null) => void;
 }) {
 	const mountRef = useRef<HTMLDivElement>(null);
+	const sentinelRef = useRef<HTMLDivElement>(null);
+	const docked = useDocked(sentinelRef);
 	const { ready, playing, currentTime, toggle } = useYouTubePlayer(
 		videoId,
 		mountRef,
@@ -79,48 +82,57 @@ export function PlaybackBar({
 				: null;
 
 	return (
-		<motion.div
-			className="playback"
-			variants={riseVariants}
-			initial="hidden"
-			animate="visible"
-			transition={transition.editorial}
-		>
+		<div className="playback-slot">
 			{/*
+			  Stays in flow whatever the player does, so the dock threshold
+			  cannot oscillate. Also reserves the player's height, so docking
+			  does not collapse the hero and shift the page under the reader.
+			*/}
+			<div ref={sentinelRef} className="playback-slot__sentinel" />
+
+			<motion.div
+				className="playback"
+				data-docked={docked || undefined}
+				variants={riseVariants}
+				initial="hidden"
+				animate="visible"
+				transition={transition.editorial}
+			>
+				{/*
 			  The record. Spins while the song plays and holds where it stopped
 			  when paused — the state is readable before the label is (D-036).
 			  Decorative: the title beside it already names the track.
 			*/}
-			<div className="playback__record" data-spinning={playing || undefined}>
-				{artwork ? (
-					<img src={artwork} alt="" className="playback__art" />
-				) : (
-					<span className="playback__art playback__art--empty" />
-				)}
-				<span className="playback__spindle" />
-			</div>
+				<div className="playback__record" data-spinning={playing || undefined}>
+					{artwork ? (
+						<img src={artwork} alt="" className="playback__art" />
+					) : (
+						<span className="playback__art playback__art--empty" />
+					)}
+					<span className="playback__spindle" />
+				</div>
 
-			<button
-				type="button"
-				onClick={toggle}
-				disabled={!ready}
-				aria-label={playing ? "Pause" : "Play"}
-				className="playback__toggle flex-none rounded-full border border-hairline px-4 py-2 font-ui text-caption text-ink disabled:opacity-50"
-			>
-				{playing ? "Pause" : "Play"}
-			</button>
-
-			<span className="playback__meta">
-				<span className="playback__title text-caption text-ink">{title}</span>
-				<span
-					className="playback__status text-micro"
-					data-notice={notice ? "" : undefined}
+				<button
+					type="button"
+					onClick={toggle}
+					disabled={!ready}
+					aria-label={playing ? "Pause" : "Play"}
+					className="playback__toggle flex-none rounded-full border border-hairline px-4 py-2 font-ui text-caption text-ink disabled:opacity-50"
 				>
-					{notice ?? artist}
-				</span>
-			</span>
+					{playing ? "Pause" : "Play"}
+				</button>
 
-			{/*
+				<span className="playback__meta">
+					<span className="playback__title text-caption text-ink">{title}</span>
+					<span
+						className="playback__status text-micro"
+						data-notice={notice ? "" : undefined}
+					>
+						{notice ?? artist}
+					</span>
+				</span>
+
+				{/*
 			  Visible by requirement, not by preference. YouTube's policies
 			  forbid "a player that is not displayed in the page, tab, or screen
 			  that the user is viewing" (III.I.9) and forbid isolating the audio
@@ -128,19 +140,20 @@ export function PlaybackBar({
 			  record leads and the player is quiet — but it is genuinely on
 			  screen, never clipped, faded or covered (D-036).
 			*/}
-			<div className="playback__video">
-				<div ref={mountRef} />
-			</div>
+				<div className="playback__video">
+					<div ref={mountRef} />
+				</div>
 
-			{manual && syncing && (
-				<button
-					type="button"
-					onClick={resume}
-					className="playback__resume px-3 py-1.5 text-micro"
-				>
-					Resync
-				</button>
-			)}
-		</motion.div>
+				{manual && syncing && (
+					<button
+						type="button"
+						onClick={resume}
+						className="playback__resume px-3 py-1.5 text-micro"
+					>
+						Resync
+					</button>
+				)}
+			</motion.div>
+		</div>
 	);
 }

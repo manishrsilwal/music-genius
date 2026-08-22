@@ -7,34 +7,61 @@
 // screen that the user is viewing". So it is composed into the page rather
 // than tucked away — small, docked, and quiet enough to read past.
 
+// The player's place in the hero. Keeps its height whether or not the bar is
+// still in flow, so docking cannot collapse the hero and shift the page under
+// the reader mid-scroll.
+.playback-slot {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	min-height: var(--dock-height);
+	margin-top: 3rem;
+}
+
+// Zero-height and always in flow. The dock threshold is read from this, never
+// from the bar: a bar that goes fixed when it leaves the viewport is instantly
+// back inside it, which would un-dock it, which would take it out again.
+.playback-slot__sentinel {
+	flex: none;
+	width: 0;
+	// Stretches to the slot's height, so "not intersecting" means the whole
+	// slot has left the viewport rather than just its top edge.
+	align-self: stretch;
+}
+
 .playback {
-	position: fixed;
-	inset-inline: 0;
-	bottom: 0;
-	// One dock, shared with the Discover button. Neither may invent a corner
-	// or a layer of its own — see --dock-* and --layer-* in styles.css (D-033).
-	z-index: var(--layer-dock);
 	display: flex;
 	align-items: center;
 	gap: 1rem;
-	// Height is declared, not inherited from the video, so --dock-reach is
-	// true by construction and the button above can offset by it.
-	height: calc(var(--dock-height) + var(--dock-safe));
-	padding: var(--dock-pad) 1rem;
-	padding-bottom: calc(var(--dock-pad) + var(--dock-safe));
+	height: var(--dock-height);
+	padding: var(--dock-pad) 1.25rem;
 	@include m.glass;
-	border-inline: 0;
-	border-bottom: 0;
 	background: var(--color-surface);
-	transition: transform 0.42s var(--ease-editorial);
+	transition:
+		border-radius 0.32s var(--ease-editorial),
+		padding 0.32s var(--ease-editorial);
 
-	@include m.from("md") {
-		inset-inline: auto var(--dock-inset);
-		bottom: var(--dock-inset);
-		height: var(--dock-height);
-		padding-bottom: var(--dock-pad);
-		border-radius: var(--radius-card);
-		border: 1px solid var(--glass-border);
+	// ── In the hero ────────────────────────────────────────────────────────
+	// A compact pill sitting with the title and artist, sized to its contents
+	// rather than the viewport (D-038).
+	border-radius: 999px;
+
+	// ── Docked ─────────────────────────────────────────────────────────────
+	// Full width across the bottom once the hero has scrolled away. Contents
+	// centre inside --dock-measure so a wide display does not strand the
+	// record at one edge and the player at the other.
+	&[data-docked] {
+		position: fixed;
+		inset-inline: 0;
+		bottom: 0;
+		z-index: var(--layer-dock);
+		height: calc(var(--dock-height) + var(--dock-safe));
+		padding-block: var(--dock-pad);
+		padding-bottom: calc(var(--dock-pad) + var(--dock-safe));
+		padding-inline: max(1rem, calc((100vw - var(--dock-measure)) / 2));
+		border-radius: 0;
+		border-inline: 0;
+		border-bottom: 0;
 	}
 
 	@include m.reduced-motion {

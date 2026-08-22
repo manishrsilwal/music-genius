@@ -127,11 +127,16 @@ export function normaliseNames(raw: {
 }
 
 /**
- * LRCLIB uploads routinely set `albumName` to the artist or the track name —
- * a single-release upload where the field was filled in with whatever was to
- * hand. Rendered as-is it reads "Arijit Singh · Arijit Singh". An album that
- * only repeats what is already on screen carries nothing, so treat it as
- * absent here rather than guarding at every place that shows it (OD-016).
+ * LRCLIB uploads routinely fill `albumName` with whatever was to hand on a
+ * single-release upload: the artist, the track name, or the two joined —
+ * "Radiohead - Creep". Rendered as-is the subtitle reads
+ * "Radiohead · Radiohead - Creep". An album that only restates what is already
+ * on screen carries nothing, so treat it as absent here rather than guarding
+ * at every place that shows it (OD-016).
+ *
+ * Only whole-string matches are rejected. A genuine album that merely contains
+ * one of the names — "Arijit Singh - India Tour Hits" — is real information
+ * and is kept.
  */
 export function meaningfulAlbum(
 	album: string | null | undefined,
@@ -140,9 +145,29 @@ export function meaningfulAlbum(
 ): string | null {
 	const value = clean(album);
 	if (!value) return null;
-	const fold = (text: string) => text.trim().toLowerCase();
-	if (fold(value) === fold(artist) || fold(value) === fold(title)) return null;
-	return value;
+
+	// Punctuation and spacing only, so "Radiohead - Creep", "Radiohead: Creep"
+	// and "Radiohead  Creep" all fold together. Bracketed suffixes are left
+	// alone deliberately: "(Redux)" and "(Remastered)" say which recording this
+	// is, and hiding a real album is a worse failure than showing a mildly
+	// redundant one.
+	const fold = (text: string) =>
+		text
+			.toLowerCase()
+			.replace(/[^\p{L}\p{N}]+/gu, " ")
+			.trim();
+
+	const folded = fold(value);
+	if (!folded) return null;
+
+	const echoes = new Set([
+		fold(artist),
+		fold(title),
+		`${fold(artist)} ${fold(title)}`,
+		`${fold(title)} ${fold(artist)}`,
+	]);
+
+	return echoes.has(folded) ? null : value;
 }
 
 function toSummary(raw: LrclibRecord): TrackSummary {

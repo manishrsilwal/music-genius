@@ -1,6 +1,6 @@
 import { Await } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { measureEm } from "@/lib/card";
 import { riseVariants, staggerVariants, transition } from "@/lib/motion";
@@ -23,9 +23,12 @@ import "./track-hero.scss";
 export function TrackHero({
 	track,
 	visuals,
+	player,
 }: {
 	track: Track;
 	visuals: Promise<TrackVisuals>;
+	/** The playback bar, opening here before it docks (D-038). */
+	player?: ReactNode;
 }) {
 	return (
 		<motion.header
@@ -94,6 +97,8 @@ export function TrackHero({
 				    normalised at the LRCLIB boundary, not guarded here. */}
 				{track.album ? ` · ${track.album}` : ""}
 			</motion.p>
+
+			{player}
 		</motion.header>
 	);
 }

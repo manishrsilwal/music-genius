@@ -7,6 +7,12 @@
 .hero {
 	position: relative;
 	isolation: isolate;
+	// The docked player is `position: fixed` inside this element, and
+	// `isolation` traps it in the hero's stacking context. Naming the layer
+	// here lifts the whole hero — and therefore the bar — above the canvas
+	// that follows it, while staying below the drawer and the composer
+	// (D-038). The hero and the canvas never overlap, so nothing else moves.
+	z-index: var(--layer-dock);
 
 	&__art {
 		position: absolute;

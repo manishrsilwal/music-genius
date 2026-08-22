@@ -204,10 +204,10 @@
 
 	transition: padding-right 0.42s var(--ease-editorial);
 
-	// The bar owns the corner when it is on screen; the button stacks above
-	// it. Nothing is measured — --dock-reach is declared next to the height it
-	// describes (D-033).
-	&:has(.playback) {
+	// Only once the bar has DOCKED does it own the bottom edge. While it is
+	// still up in the hero the corner is free, so the button sits at its
+	// normal inset (D-038).
+	&:has(.playback[data-docked]) {
 		--discover-bottom: calc(var(--dock-reach) + var(--dock-gap));
 	}
 
@@ -219,9 +219,18 @@
 			// children ignore an ancestor's padding entirely. Without this the
 			// panel opened on top of the playback bar AND on top of the button
 			// that closes it, leaving Escape as the only way out (D-033).
-			.playback,
 			.discover {
 				transform: translateX(calc(var(--drawer-width) * -1));
+			}
+
+			// The docked bar spans the viewport, so it ends short of the panel
+			// rather than sliding sideways out from under it.
+			.playback[data-docked] {
+				inset-inline: 0 var(--drawer-width);
+				padding-inline: max(
+					1rem,
+					calc((100vw - var(--drawer-width) - var(--dock-measure)) / 2)
+				);
 			}
 		}
 
@@ -232,11 +241,11 @@
 		@include m.until("lg") {
 			--discover-bottom: calc(var(--drawer-sheet-height) + var(--dock-gap));
 
-			.playback {
+			.playback[data-docked] {
 				transform: translateY(calc(var(--drawer-sheet-height) * -1));
 			}
 
-			&:has(.playback) {
+			&:has(.playback[data-docked]) {
 				--discover-bottom: calc(
 					var(--drawer-sheet-height) + var(--dock-reach) + var(--dock-gap)
 				);

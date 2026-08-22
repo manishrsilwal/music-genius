@@ -108,6 +108,19 @@ z-indexes lived in five files, and the Discover button and the playback bar
 both claimed `right: 1.5rem; bottom: 1.5rem` — neither file knew the other
 existed, so the button rendered on top of the bar.
 
+### The player opens in the hero, then docks
+
+One instance, two modes — docking is a class change, never a remount, because
+a remount tears down the YouTube player and restarts playback. In the hero it
+is a compact pill; docked it spans the viewport at `bottom: 0` with contents
+centred inside `--dock-measure`.
+
+**Read a scroll threshold from a sentinel, never from the element that moves.**
+An element that goes `fixed` when it leaves the viewport is instantly back
+inside it, and flip-flops at the switch point. Keep a zero-width sentinel in
+flow, and reserve the moved element's height in its slot so the page does not
+jump under the reader.
+
 ### The dock is one thing, not two
 
 The bottom-right corner is a **single dock** shared by the playback bar and the
@@ -331,6 +344,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-038** Player opens in the hero, docks to a full-width sticky bar on scroll |
 | 2026-08-22 | **D-037** Hero title fitted to its own measured width, not just the viewport |
 | 2026-08-22 | **D-036** Playback bar led by a spinning album record; player kept visible but quiet |
 | 2026-08-22 | **D-035** Focus ring written once as an opt-out; 44px tap targets via `tap-target` |
