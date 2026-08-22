@@ -8,6 +8,8 @@
 
 import { createServerFn } from "@tanstack/react-start";
 
+import { normalisePreferences, type Preferences } from "../lib/deep-dives";
+
 import { getInsight } from "./insights.server";
 import { getTrack, getTrackVisuals, searchLyrics } from "./lyrics.server";
 
@@ -38,7 +40,12 @@ export const getTrackVisualsFn = createServerFn({ method: "GET" })
  * (PRD §4) — so this is never called from a loader.
  */
 export const getInsightFn = createServerFn({ method: "GET" })
-	.validator((data: { id: string }) => ({ id: String(data?.id ?? "").trim() }))
+	.validator((data: { id: string; preferences?: Preferences }) => ({
+		id: String(data?.id ?? "").trim(),
+		// Normalised here rather than trusted: this reaches a cache key, and
+		// the drawer is the only caller that has answers to send (D-047).
+		preferences: normalisePreferences(data?.preferences),
+	}))
 	.handler(async ({ data }) => {
 		const track = await getTrack(data.id);
 		if (!track) return null;
@@ -46,5 +53,6 @@ export const getInsightFn = createServerFn({ method: "GET" })
 			title: track.title,
 			artist: track.artist,
 			stanzas: track.stanzas,
+			preferences: data.preferences,
 		});
 	});

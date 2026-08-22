@@ -8,6 +8,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { TTL } from "@/lib/cache";
+import { parsePreferences } from "@/lib/deep-dives";
 import { features } from "@/server/env";
 import { getInsight } from "@/server/insights.server";
 import { getTrack } from "@/server/lyrics.server";
@@ -16,7 +17,8 @@ export const Route = createFileRoute("/api/insights")({
 	server: {
 		handlers: {
 			GET: async ({ request }) => {
-				const id = new URL(request.url).searchParams.get("id")?.trim();
+				const url = new URL(request.url);
+				const id = url.searchParams.get("id")?.trim();
 				if (!id) {
 					return Response.json(
 						{ error: "Missing `id` parameter" },
@@ -43,6 +45,10 @@ export const Route = createFileRoute("/api/insights")({
 						title: track.title,
 						artist: track.artist,
 						stanzas: track.stanzas,
+						// Validated against the enums, never taken as given: this
+						// reaches a cache key, and an unbounded value would let a
+						// caller mint entries against a 20-a-day quota (D-047).
+						preferences: parsePreferences(url.searchParams),
 					});
 
 					if (!insight) {

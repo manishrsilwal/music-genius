@@ -709,6 +709,69 @@ function score(track: CuratedTrack, preferences: Preferences): number {
 }
 
 /**
+ * A stable, compact identity for a set of answers (D-047).
+ *
+ * Becomes part of the insight cache key, so it must be deterministic and it
+ * must never contain anything the reader typed — hence fixed enum values in a
+ * fixed order rather than serialising the object.
+ */
+export function preferenceSignature(preferences: Preferences): string {
+	const { mood, pull, familiarity } = preferences;
+	if (!mood && !pull && !familiarity) return "none";
+	return [mood ?? "-", pull ?? "-", familiarity ?? "-"].join(".");
+}
+
+/**
+ * Coerce an untrusted object into `Preferences`, dropping anything not in the
+ * enums. Same reasoning as `parsePreferences`, for callers that already hold
+ * an object rather than a query string.
+ */
+export function normalisePreferences(value: unknown): Preferences {
+	const raw = (value ?? {}) as Record<string, unknown>;
+	const pick = <T extends string>(
+		name: string,
+		allowed: readonly T[],
+	): T | null => {
+		const candidate = raw[name];
+		return typeof candidate === "string" &&
+			(allowed as readonly string[]).includes(candidate)
+			? (candidate as T)
+			: null;
+	};
+
+	return {
+		mood: pick("mood", MOODS),
+		pull: pick("pull", PULLS),
+		familiarity: pick("familiarity", FAMILIARITIES),
+	};
+}
+
+/**
+ * Read answers off a query string, rejecting anything not in the enums.
+ *
+ * These arrive from the client and end up in a cache key, so an unvalidated
+ * value would let a caller mint unlimited cache entries — and each miss is a
+ * Gemini call against a 20-a-day quota (OD-021).
+ */
+export function parsePreferences(params: URLSearchParams): Preferences {
+	const pick = <T extends string>(
+		name: string,
+		allowed: readonly T[],
+	): T | null => {
+		const value = params.get(name);
+		return value && (allowed as readonly string[]).includes(value)
+			? (value as T)
+			: null;
+	};
+
+	return {
+		mood: pick("mood", MOODS),
+		pull: pick("pull", PULLS),
+		familiarity: pick("familiarity", FAMILIARITIES),
+	};
+}
+
+/**
  * Why this track was picked, in the reader's terms (D-045).
  *
  * Derived from `score` rather than described alongside it: `matched` lists the

@@ -7,6 +7,7 @@
  */
 
 import { cached, TTL } from "../lib/cache";
+import { type Preferences, preferenceSignature } from "../lib/deep-dives";
 import type { Insight, Stanza } from "../lib/types";
 import { initCache } from "./cache/index.server";
 import { features } from "./env";
@@ -30,14 +31,23 @@ export async function getInsight(args: {
 	title: string;
 	artist: string;
 	stanzas: Stanza[];
+	preferences: Preferences;
 }): Promise<Insight | null> {
 	if (!features.insights) return null;
+
+	const taste = preferenceSignature(args.preferences);
 
 	// Bumped whenever the stored shape or the gating rules change. Entries live
 	// for 30 days, so without this the reader would keep getting insights built
 	// under the old rules — including quotes that predate the verbatim gate
 	// (D-030) and sources with no thumbnail (D-031).
-	const key = `insight:v2:${args.artist.toLowerCase()}::${args.title.toLowerCase()}`;
+	//
+	// The signature is part of the key because the personal slot is written to
+	// the reader (D-047): two readers who answered differently must not share
+	// an insight. Readers who answered the same still do, and everyone who
+	// skipped the stepper shares the `none` entry — which is the common case
+	// and the cheapest one.
+	const key = `insight:v3:${taste}:${args.artist.toLowerCase()}::${args.title.toLowerCase()}`;
 
 	return cached(key, INSIGHT_TTL, async () => {
 		// Grounding first: the synthesis is materially better with sources, and
@@ -50,6 +60,7 @@ export async function getInsight(args: {
 			lyrics: toPlainLyrics(args.stanzas),
 			sources,
 			excerpts,
+			preferences: taste === "none" ? undefined : args.preferences,
 		});
 	});
 }

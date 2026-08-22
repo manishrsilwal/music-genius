@@ -46,6 +46,33 @@ export function InsightsContent({ insight }: { insight: Insight }) {
 				</div>
 			</section>
 
+			{/*
+			  The personal slot (D-047). Sits above the artist quote: it is the
+			  reason this reader is here, and the quote is context that follows.
+			  Every line has been verified verbatim against this track's lyrics
+			  server-side, so a reader who scrolls will find them.
+			*/}
+			{insight.resonance && (
+				<section className="insights__resonance">
+					<p className="insights__label text-micro">Why this, for you</p>
+					<ol className="insights__lines mt-4">
+						{insight.resonance.lines.map((line) => (
+							<li key={line} className="insights__line text-lead">
+								{line}
+							</li>
+						))}
+					</ol>
+					<div className="insights__prose mt-4 text-lead">
+						{insight.resonance.text
+							.split(/\n{2,}/)
+							.filter(Boolean)
+							.map((paragraph) => (
+								<p key={paragraph.slice(0, 40)}>{paragraph}</p>
+							))}
+					</div>
+				</section>
+			)}
+
 			{insight.quote && (
 				<figure className="insights__quote">
 					<blockquote className="text-lead">“{insight.quote.text}”</blockquote>

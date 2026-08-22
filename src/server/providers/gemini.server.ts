@@ -7,6 +7,14 @@
  */
 
 import type { Insight, InsightSource } from "../../lib/types";
+
+/** The subset of the reader's answers the model is told about (D-047). */
+export interface InsightPreferences {
+	mood: string | null;
+	pull: string | null;
+	familiarity: string | null;
+}
+
 import { env } from "../env";
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -43,6 +51,33 @@ const SCHEMA = {
 			},
 			required: ["text", "attribution", "sourceIndex"],
 		},
+		/**
+		 * The personal slot (D-047). Omitted entirely from the request when
+		 * the reader has stated nothing, so the model is never asked to write
+		 * to a person it knows nothing about.
+		 */
+		resonance: {
+			type: "object",
+			nullable: true,
+			properties: {
+				lines: {
+					type: "array",
+					items: { type: "string" },
+					minItems: 1,
+					maxItems: 3,
+					description:
+						"Lines copied EXACTLY from the lyrics above, character for character.",
+				},
+				text: {
+					type: "array",
+					items: { type: "string" },
+					minItems: 2,
+					maxItems: 3,
+					description: "Two or three short paragraphs addressed to the reader.",
+				},
+			},
+			required: ["lines", "text"],
+		},
 	},
 	required: ["synthesis"],
 } as const;
@@ -55,6 +90,30 @@ interface GeminiResponse {
 interface ModelOutput {
 	synthesis?: string[];
 	quote?: { text?: string; attribution?: string; sourceIndex?: number } | null;
+	resonance?: { lines?: string[]; text?: string[] } | null;
+}
+
+/**
+ * The reader's answers, as a sentence the model can write toward. Returns null
+ * when nothing was stated — in which case the personal slot is left out of the
+ * prompt entirely rather than asked for and discarded (D-047).
+ */
+function statedTaste(preferences?: InsightPreferences): string | null {
+	if (!preferences) return null;
+
+	const wants: string[] = [];
+	if (preferences.mood) wants.push(`a mood of ${preferences.mood}`);
+	if (preferences.pull)
+		wants.push(`writing that leads with ${preferences.pull}`);
+	if (preferences.familiarity && preferences.familiarity !== "surprise") {
+		wants.push(
+			preferences.familiarity === "canon"
+				? "songs worth rereading rather than obscurities"
+				: "deep cuts rather than the obvious choices",
+		);
+	}
+
+	return wants.length > 0 ? wants.join(", and ") : null;
 }
 
 function buildPrompt(args: {
@@ -62,6 +121,7 @@ function buildPrompt(args: {
 	artist: string;
 	lyrics: string;
 	excerpts: string[];
+	preferences?: InsightPreferences;
 }): string {
 	const { title, artist, lyrics, excerpts } = args;
 
@@ -69,6 +129,28 @@ function buildPrompt(args: {
 		excerpts.length > 0
 			? `\n\nSOURCES — each is numbered. Use ONLY these for factual claims.\n${excerpts.join("\n\n")}`
 			: "\n\nNo sources are available.";
+
+	const taste = statedTaste(args.preferences);
+	const personal = taste
+		? `
+
+THE READER told us what they are looking for: ${taste}.
+
+Write \`resonance\` for them, in the second person. Two or three short
+paragraphs. Find the place in THIS song where it does the thing they asked
+for, quote the lines that do it, and say what those lines are doing. Write as
+though handing the song to one person, not describing it to a room.
+
+- \`lines\` must be copied EXACTLY from the lyrics above, character for
+  character. Do not translate, tidy, retype from memory, or join two lines.
+- Choose one to three lines. Fewer and better beats more.
+- Do not restate their preference back at them as a label. Show the song
+  meeting it.
+- If this song genuinely does not do what they asked for, say so plainly and
+  say what it does instead. That is more useful than a stretch.`
+		: `
+
+The reader has stated no preferences, so return null for \`resonance\`.`;
 
 	return `You are writing editorial context for a premium lyrics reader.
 
@@ -91,7 +173,7 @@ QUOTE RULES — these are absolute:
 - Never invent, paraphrase, reconstruct, or "reasonably infer" a quote.
 - If no genuine quote from the artist or producer exists in the sources, return
   null for quote. Returning null is correct and expected; a fabricated quote
-  attributed to a real person is the worst possible failure here.`;
+  attributed to a real person is the worst possible failure here.${personal}`;
 }
 
 /**
@@ -104,6 +186,7 @@ export async function generateInsight(args: {
 	lyrics: string;
 	sources: InsightSource[];
 	excerpts: string[];
+	preferences?: InsightPreferences;
 }): Promise<Insight | null> {
 	if (!env.geminiApiKey) return null;
 
@@ -156,6 +239,7 @@ export async function generateInsight(args: {
 		return {
 			synthesis,
 			quote: validateQuote(parsed.quote, args.sources, args.excerpts),
+			resonance: validateResonance(parsed.resonance, args.lyrics),
 			sources: args.sources,
 			ungrounded: args.sources.length === 0,
 		};
@@ -199,6 +283,41 @@ export function containsQuote(excerpt: string, text: string): boolean {
 	// cut mid-sentence. Anything this short is not evidence of grounding.
 	if (needle.length < 12) return false;
 	return fold(excerpt).includes(needle);
+}
+
+/**
+ * The personal slot's gate (D-047).
+ *
+ * Every line must appear in the lyrics this song actually has. A model that
+ * paraphrases a lyric, translates it, or reconstructs it from memory produces
+ * something the reader will not find when they scroll — which quietly makes
+ * the whole drawer untrustworthy. One bad line discards the passage: a
+ * paragraph pointing at a line that is not there is worse than no paragraph.
+ */
+export function validateResonance(
+	resonance: ModelOutput["resonance"],
+	lyrics: string,
+): Insight["resonance"] {
+	const lines = (resonance?.lines ?? [])
+		.map((line) => line.trim())
+		.filter(Boolean);
+	const paragraphs = (resonance?.text ?? [])
+		.map((paragraph) => paragraph.trim())
+		.filter(Boolean);
+
+	if (lines.length === 0 || paragraphs.length === 0) return null;
+
+	const haystack = fold(lyrics);
+	for (const line of lines) {
+		// Short enough to match by accident is not evidence of anything.
+		const needle = fold(line);
+		if (needle.length < 8 || !haystack.includes(needle)) {
+			console.warn("[gemini] discarded resonance: a line is not in the lyrics");
+			return null;
+		}
+	}
+
+	return { lines, text: paragraphs.join("\n\n") };
 }
 
 export function validateQuote(

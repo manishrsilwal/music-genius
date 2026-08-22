@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import type { InsightSource } from "../../lib/types";
-import { containsQuote, validateQuote } from "./gemini.server";
+import {
+	containsQuote,
+	validateQuote,
+	validateResonance,
+} from "./gemini.server";
 
 /**
  * The quote gate is the single highest-stakes correctness property in the
@@ -134,6 +138,71 @@ describe("validateQuote", () => {
 				[],
 				[],
 			),
+		).toBeNull();
+	});
+});
+
+/**
+ * The personal slot points the reader back into the song, so a line that is
+ * not in the song is worse than no slot at all: they scroll, do not find it,
+ * and stop believing the rest of the drawer (D-047).
+ */
+describe("validateResonance", () => {
+	const LYRICS = [
+		"Choo lo, mujhe choo lo",
+		"Aankhein bandh karke",
+		"",
+		"Khada hoon aaj bhi wahin",
+		"Lagi teri hi aas hai",
+	].join("\n");
+
+	const text = ["You said you wanted longing.", "Here it is, plainly."];
+
+	it("keeps lines that appear in the lyrics", () => {
+		const result = validateResonance(
+			{ lines: ["Khada hoon aaj bhi wahin"], text },
+			LYRICS,
+		);
+		expect(result?.lines).toEqual(["Khada hoon aaj bhi wahin"]);
+		expect(result?.text).toBe(
+			"You said you wanted longing.\n\nHere it is, plainly.",
+		);
+	});
+
+	it("tolerates retyped punctuation and spacing", () => {
+		expect(
+			validateResonance({ lines: ["Choo lo,  mujhe  choo lo"], text }, LYRICS),
+		).not.toBeNull();
+	});
+
+	it("discards the whole passage when one line is invented", () => {
+		// The prose may be perfectly good; it is still pointing at nothing.
+		expect(
+			validateResonance(
+				{
+					lines: ["Khada hoon aaj bhi wahin", "I will wait forever here"],
+					text,
+				},
+				LYRICS,
+			),
+		).toBeNull();
+	});
+
+	it("discards a paraphrase of a real line", () => {
+		expect(
+			validateResonance({ lines: ["Touch me, just touch me"], text }, LYRICS),
+		).toBeNull();
+	});
+
+	it("refuses a fragment too short to mean anything", () => {
+		expect(validateResonance({ lines: ["hoon"], text }, LYRICS)).toBeNull();
+	});
+
+	it("returns null when there is nothing to show", () => {
+		expect(validateResonance(null, LYRICS)).toBeNull();
+		expect(validateResonance({ lines: [], text }, LYRICS)).toBeNull();
+		expect(
+			validateResonance({ lines: ["Aankhein bandh karke"], text: [] }, LYRICS),
 		).toBeNull();
 	});
 });

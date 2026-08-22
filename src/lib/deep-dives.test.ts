@@ -7,10 +7,13 @@ import {
 	explainPick,
 	FAMILIARITIES,
 	MOODS,
+	normalisePreferences,
 	type Preferences,
 	PULLS,
+	parsePreferences,
 	pickAlsoLiked,
 	pickDeepDives,
+	preferenceSignature,
 	seedFromDate,
 } from "./deep-dives";
 
@@ -222,5 +225,81 @@ describe("explainPick", () => {
 				candidate.title,
 			).toBe(false);
 		}
+	});
+});
+
+describe("preference plumbing", () => {
+	it("gives readers who answered the same the same signature", () => {
+		const a: Preferences = {
+			mood: "longing",
+			pull: "confession",
+			familiarity: "deep",
+		};
+		const b: Preferences = {
+			mood: "longing",
+			pull: "confession",
+			familiarity: "deep",
+		};
+		expect(preferenceSignature(a)).toBe(preferenceSignature(b));
+	});
+
+	it("separates readers who answered differently", () => {
+		expect(
+			preferenceSignature({ mood: "longing", pull: null, familiarity: null }),
+		).not.toBe(
+			preferenceSignature({ mood: "defiant", pull: null, familiarity: null }),
+		);
+	});
+
+	it("collapses every unanswered stepper onto one shared entry", () => {
+		// The common case, and the cheapest: it must not fragment the cache.
+		expect(
+			preferenceSignature({ mood: null, pull: null, familiarity: null }),
+		).toBe("none");
+	});
+
+	/**
+	 * The signature reaches a cache key, and every miss is a Gemini call
+	 * against a 20-a-day quota. An unbounded value would let a caller mint
+	 * entries at will (D-047).
+	 */
+	it("refuses anything outside the enums", () => {
+		const junk = new URLSearchParams({
+			mood: "../../evil",
+			pull: "<script>",
+			familiarity: "zzz",
+		});
+		expect(parsePreferences(junk)).toEqual({
+			mood: null,
+			pull: null,
+			familiarity: null,
+		});
+		expect(preferenceSignature(parsePreferences(junk))).toBe("none");
+	});
+
+	it("accepts every legitimate value", () => {
+		for (const mood of MOODS) {
+			for (const pull of PULLS) {
+				for (const familiarity of FAMILIARITIES) {
+					const params = new URLSearchParams({ mood, pull, familiarity });
+					expect(parsePreferences(params)).toEqual({ mood, pull, familiarity });
+				}
+			}
+		}
+	});
+
+	it("normalises an untrusted object the same way", () => {
+		expect(
+			normalisePreferences({ mood: "longing", pull: 42, familiarity: {} }),
+		).toEqual({
+			mood: "longing",
+			pull: null,
+			familiarity: null,
+		});
+		expect(normalisePreferences(undefined)).toEqual({
+			mood: null,
+			pull: null,
+			familiarity: null,
+		});
 	});
 });

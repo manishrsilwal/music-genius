@@ -100,10 +100,27 @@ export interface InsightQuote {
 	sourceIndex: number;
 }
 
+/**
+ * The personal slot: why this song meets what the reader said they wanted,
+ * pointing at the lines that do it (PRD §3.5, D-047).
+ */
+export interface InsightResonance {
+	/**
+	 * Lines quoted verbatim from this track's lyrics. Verified against them
+	 * server-side; a line the model invented is discarded along with the
+	 * passage, the same rule the artist quote lives under (D-030).
+	 */
+	lines: string[];
+	/** Addressed to the reader, in the second person. */
+	text: string;
+}
+
 export interface Insight {
 	synthesis: string;
 	quote: InsightQuote | null;
 	sources: InsightSource[];
+	/** Null when the reader has stated no preferences, or the lines failed. */
+	resonance: InsightResonance | null;
 	/** True when generated without web grounding — synthesis only, no quote. */
 	ungrounded: boolean;
 }

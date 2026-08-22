@@ -134,6 +134,61 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-047 — The drawer is written to the reader
+**Decided 2026-08-22.** Asked: put the explanation inside the song's page, in
+the Discover drawer, and make it personal — pointing at the lines in *this*
+song that meet what the reader said they wanted, at length rather than in a
+line.
+
+A new slot, **"Why this, for you"**, sits above the artist quote: it is the
+reason this reader is here, and the quote is context that follows.
+
+**This reverses part of D-045, deliberately.** There the argument against the
+model was that it would be justifying a decision it had no part in — the
+picker is a weighted score, and a rationale written afterwards is
+confabulation. Here the task is different: *"the reader is drawn to longing;
+show them where this song does that."* That is analysis grounded in the
+lyrics, not a post-hoc story about an algorithm. The shelf explanation stays
+derived from `score`; only the drawer, which is about the song rather than
+about the pick, is written by the model.
+
+**The lines are gated against the lyrics.** `validateResonance` requires every
+quoted line to appear in the track's own lyrics, folded for punctuation and
+spacing. One bad line discards the whole passage — a paragraph pointing at a
+line the reader will not find is worse than no paragraph, and it makes the
+rest of the drawer untrustworthy by association. Same rule as the artist
+quote (D-030), same reason.
+
+Verified by mutation: removing the lyrics check fails 3 tests, keeping the
+passage and dropping only the offending line fails 3, removing the length
+floor fails 1.
+
+> **The cache key now carries the answers.** `insight:v3:{signature}:…`. Two
+> readers who answered differently must not share a passage written to one of
+> them. Readers who answered the same still share, and everyone who skipped
+> the stepper shares the `none` entry — the common case, and the cheapest.
+>
+> The cost is real: OD-021's twenty-a-day quota no longer buys twenty *tracks*
+> but twenty *(track, answer-set)* pairs. Accepted knowingly; it makes the
+> launch blocker sharper, not new.
+
+> **The signature is validated against the enums at every entry point.** It
+> reaches a cache key, and every miss is a Gemini call, so an unbounded value
+> would let a caller mint entries at will. `parsePreferences` for query
+> strings and `normalisePreferences` for objects both drop anything not in
+> `MOODS`, `PULLS` or `FAMILIARITIES`. Verified live: junk falls back to
+> `none` rather than creating an entry.
+
+> **Nothing is asked for when nothing was answered.** The personal section is
+> left out of the prompt entirely rather than requested and discarded, so the
+> model is never asked to write to a person it knows nothing about. The
+> request also waits for `answered !== null`, so a generation is never spent
+> before localStorage has been read.
+
+The prompt instructs the model to say so plainly when a song does *not* do
+what the reader asked for. Observed working: asked for a deep cut, the note on
+"In My Life" opens by conceding it is "far from a hidden gem".
+
 ### D-046 — Two labels that should have matched, and a reason nobody could see
 **Fixed 2026-08-22.** Reported: make "The Synthesis" and "The Sources" match,
 and — where is the explanation?

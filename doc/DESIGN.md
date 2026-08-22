@@ -347,6 +347,14 @@ the action that most likely fixes it (retry, search again) rather than an
 apology. Never show a reader a stack trace, and never render an error's own
 message outside development: it can carry a request URL or part of a key.
 
+### Point at the song, and make sure it is there
+
+When the interface quotes the work back to the reader, the quote must be in
+the work. Every line in "Why this, for you" is verified against the track's
+own lyrics before it is shown, and one bad line discards the whole passage — a
+paragraph pointing at a line the reader will not find costs more than the
+paragraph was worth.
+
 ### Never explain a decision the explainer did not make
 
 When the interface says *why* something happened, derive that from the code
@@ -394,6 +402,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-047** "Why this, for you" in the drawer — personal, quoting verified lines |
 | 2026-08-22 | **D-046** Section labels unified; "why this" shows at every width |
 | 2026-08-22 | **D-045** Deep Dives explain themselves, from the real scoring plus a curated note |
 | 2026-08-22 | **D-044** Insights synthesis set in Elms Sans, not the display face |
