@@ -152,6 +152,59 @@ async function searchGenius(
  * Find artwork for a track. Returns null when there is no token, no match, or
  * the match is not confident enough to trust.
  */
+/** Index of the first " - " that is not inside brackets, or -1. */
+function topLevelSeparator(title: string): number {
+	let depth = 0;
+	for (let i = 0; i < title.length; i++) {
+		const char = title[i];
+		if (char === "(" || char === "[" || char === "{") depth++;
+		else if (char === ")" || char === "]" || char === "}")
+			depth = Math.max(0, depth - 1);
+		else if (depth === 0 && title.startsWith(" - ", i)) return i;
+	}
+	return -1;
+}
+
+/**
+ * Other readings of a badly-tagged entry, to be adjudicated by Genius rather
+ * than guessed at here (D-049).
+ *
+ * LRCLIB carries a lot of YouTube lyric-channel uploads: `trackName` is
+ * "Childish Gambino - Redbone" and `artistName` is the channel, "7clouds".
+ * `normaliseNames` cannot help — it only strips the artist it was *given*, and
+ * that artist appears nowhere in the title.
+ *
+ * Both orderings are offered because neither is reliably true: "Artist - Title"
+ * is the YouTube convention, "Title - Artist" is common in user uploads. The
+ * scoring decides; we only propose.
+ *
+ * Returns nothing when the recorded artist is one of the halves, since
+ * `normaliseNames` has already handled that and re-asking wastes a request
+ * against undocumented rate limits (OD-014).
+ */
+export function splitCandidates(
+	title: string,
+	artist: string,
+): Array<{ title: string; artist: string }> {
+	// Only a separator at the top level. "Come and Get Your Love (Single Edit -
+	// Audio)" would otherwise split inside the parenthetical and spend two
+	// requests on nonsense, against rate limits nobody has documented (OD-014).
+	const cut = topLevelSeparator(title);
+	if (cut < 0) return [];
+
+	const left = title.slice(0, cut).trim();
+	const right = title.slice(cut + 3).trim();
+	if (!left || !right) return [];
+
+	const fold = (value: string) => value.trim().toLowerCase();
+	if (fold(artist) === fold(left) || fold(artist) === fold(right)) return [];
+
+	return [
+		{ title: right, artist: left },
+		{ title: left, artist: right },
+	];
+}
+
 export async function findArtwork(
 	title: string,
 	artist: string,
@@ -159,21 +212,42 @@ export async function findArtwork(
 ): Promise<Artwork | null> {
 	if (!features.artwork) return null;
 
-	try {
-		const songs = await searchGenius(`${artist} ${title}`, signal);
-		if (songs.length === 0) return null;
+	async function attempt(
+		asTitle: string,
+		asArtist: string,
+	): Promise<{ song: GeniusSong; score: number } | null> {
+		const songs = await searchGenius(`${asArtist} ${asTitle}`, signal);
 
 		let best: GeniusSong | null = null;
 		let bestScore = 0;
 		for (const song of songs) {
-			const score = scoreHit(song, title, artist);
+			const score = scoreHit(song, asTitle, asArtist);
 			if (score > bestScore) {
 				bestScore = score;
 				best = song;
 			}
 		}
 
-		if (!best || bestScore < MATCH_THRESHOLD) return null;
+		return best ? { song: best, score: bestScore } : null;
+	}
+
+	try {
+		let hit = await attempt(title, artist);
+
+		// Only on failure, and only ever twice more. A miss here costs the
+		// reader the artwork AND the player, since the YouTube id rides along
+		// with the Genius match.
+		if (!hit || hit.score < MATCH_THRESHOLD) {
+			for (const candidate of splitCandidates(title, artist)) {
+				const retry = await attempt(candidate.title, candidate.artist);
+				if (retry && retry.score > (hit?.score ?? 0)) hit = retry;
+				if (hit && hit.score >= MATCH_THRESHOLD) break;
+			}
+		}
+
+		if (!hit || hit.score < MATCH_THRESHOLD) return null;
+		const best = hit.song;
+		const bestScore = hit.score;
 
 		const full = best.song_art_image_url ?? best.header_image_url;
 		if (!full) return null;

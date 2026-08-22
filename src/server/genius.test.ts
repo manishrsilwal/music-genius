@@ -5,6 +5,7 @@ import {
 	MATCH_THRESHOLD,
 	scoreNames,
 	similarity,
+	splitCandidates,
 } from "./genius.server";
 
 /**
@@ -147,5 +148,53 @@ describe("scoreNames", () => {
 			"Radiohead",
 		);
 		expect(good - bad).toBeGreaterThan(0.5);
+	});
+});
+
+/**
+ * LRCLIB carries a lot of YouTube lyric-channel uploads, where `trackName` is
+ * "Artist - Title" and `artistName` is the channel. `normaliseNames` cannot
+ * help: it only strips the artist it was given, and that artist appears
+ * nowhere in the title. A miss here costs the reader the artwork AND the
+ * player, since the YouTube id rides along with the Genius match (D-049).
+ */
+describe("splitCandidates", () => {
+	it("offers both readings of a channel upload", () => {
+		expect(splitCandidates("Childish Gambino - Redbone", "7clouds")).toEqual([
+			{ title: "Redbone", artist: "Childish Gambino" },
+			{ title: "Childish Gambino", artist: "Redbone" },
+		]);
+	});
+
+	it("stays out of the way when the recorded artist is one of the halves", () => {
+		// normaliseNames has already handled these; retrying spends a request
+		// on a question that was answered.
+		expect(splitCandidates("Queen - Bohemian Rhapsody", "Queen")).toEqual([]);
+		expect(splitCandidates("Bohemian Rhapsody - Queen", "queen")).toEqual([]);
+	});
+
+	it("ignores a separator inside brackets", () => {
+		expect(
+			splitCandidates(
+				"Come and Get Your Love (Single Edit - Audio)",
+				"Redbone",
+			),
+		).toEqual([]);
+		expect(
+			splitCandidates('Phir Le Aya Dil [Redux - From "Barfi!"]', "Pritam"),
+		).toEqual([]);
+	});
+
+	it("splits at the first top-level separator, not one nested before it", () => {
+		expect(splitCandidates("A (b - c) - Real Title", "channel")[0]).toEqual({
+			title: "Real Title",
+			artist: "A (b - c)",
+		});
+	});
+
+	it("returns nothing when there is no separator or a half is empty", () => {
+		expect(splitCandidates("Redbone", "Childish Gambino")).toEqual([]);
+		expect(splitCandidates(" - Redbone", "channel")).toEqual([]);
+		expect(splitCandidates("Redbone - ", "channel")).toEqual([]);
 	});
 });

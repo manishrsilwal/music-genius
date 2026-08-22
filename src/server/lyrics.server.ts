@@ -41,7 +41,7 @@ const EMPTY_VISUALS: TrackVisuals = {
  */
 function getGenius(title: string, artist: string) {
 	return cached(
-		`genius:${artist.toLowerCase()}::${title.toLowerCase()}`,
+		`genius:v2:${artist.toLowerCase()}::${title.toLowerCase()}`,
 		TTL.track,
 		() => findSong(title, artist),
 	);
@@ -52,7 +52,12 @@ function getGenius(title: string, artist: string) {
  * for. PRD §4/§5: cached for 30 days, since lyrics effectively never change.
  */
 export function getTrack(id: string): Promise<Track | null> {
-	return cached(`track:${id}`, TTL.track, () => fetchTrack(id));
+	// v2: `meaningfulAlbum` changed what a stored track looks like (D-043), and
+	// entries live for 30 days. Without a bump the reader keeps being served
+	// the pre-fix shape for every track they have already opened — which is
+	// exactly how "Arijit Singh · Arijit Singh" survived a fix that worked
+	// (D-049). Bump this whenever the parsed shape changes.
+	return cached(`track:v2:${id}`, TTL.track, () => fetchTrack(id));
 }
 
 /**
@@ -63,7 +68,9 @@ export function getTrackVisuals(
 	title: string,
 	artist: string,
 ): Promise<TrackVisuals> {
-	const key = `visuals:${artist.toLowerCase()}::${title.toLowerCase()}`;
+	// v2 alongside `genius:v2` — this wraps it, so bumping only the inner key
+	// would leave the stale outer entry serving the old empty result (D-049).
+	const key = `visuals:v2:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
 	return cached(key, TTL.track, async () => {
 		const { artwork, youtubeId } = await getGenius(title, artist);
@@ -88,7 +95,7 @@ export function searchLyrics(
 	const normalised = query.trim().toLowerCase();
 	if (normalised.length < 2) return Promise.resolve([]);
 
-	return cached(`search:${limit}:${normalised}`, TTL.search, () =>
+	return cached(`search:v2:${limit}:${normalised}`, TTL.search, () =>
 		searchTracks(normalised, { limit }),
 	);
 }

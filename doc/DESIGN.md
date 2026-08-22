@@ -402,6 +402,8 @@ Before shipping a component:
 - [ ] Display text sets `font-synthesis: none`
 - [ ] A control that can commit on tap does
 - [ ] `@apply` is never used in `.scss` — it silently no-ops (D-004)
+- [ ] A change to how data is parsed bumps the cache key that stores it, in the
+      same commit — otherwise 30-day entries keep serving the old bug (D-049)
 - [ ] Prose styling is scoped to the prose, not to the section around it — a
       descendant selector claims every element of that type inside it (D-046)
 - [ ] Nothing meaningful is hidden below a breakpoint to solve a layout
@@ -415,6 +417,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-049** Channel-upload titles retried against Genius; all four cache keys versioned |
 | 2026-08-22 | **D-048** Drawer measure fixed at 69 characters; one scroll owner; labels separate sections |
 | 2026-08-22 | **D-047** "Why this, for you" in the drawer — personal, quoting verified lines |
 | 2026-08-22 | **D-046** Section labels unified; "why this" shows at every width |

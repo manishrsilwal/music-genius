@@ -134,6 +134,55 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-049 — Channel uploads, and the caches that outlived their fixes
+**Fixed 2026-08-22.** Reported with a screenshot: no player on the track page.
+
+**Two faults, one screenshot.**
+
+**The player.** LRCLIB entry `34264408` is a YouTube lyric-channel upload:
+
+| field | value |
+|---|---|
+| `trackName` | `Childish Gambino - Redbone` |
+| `artistName` | `7clouds` — the channel, not the artist |
+| `albumName` | `Childish Gambino - Redbone` |
+
+Genius was therefore asked for *"Childish Gambino - Redbone" by "7clouds"*,
+scored below `MATCH_THRESHOLD`, and returned nothing. That costs the artwork
+**and the player**, because the YouTube id rides along with the Genius match
+(D-022). `normaliseNames` could not help: it strips the artist it was *given*,
+and that artist appears nowhere in the title.
+
+`findArtwork` now retries with the other readings of the title when the
+primary lookup misses. Both orderings are offered, because neither is reliably
+true — "Artist - Title" is the YouTube convention, "Title - Artist" is common
+in user uploads. **Genius adjudicates; we only propose.** For the reported
+track the retry scores `1.0` and yields `k49I5m1J6Is`, which resolves to
+*Redbone* by *Childish Gambino*.
+
+Bounded deliberately: only on failure, at most two extra requests, and only at
+a **top-level** separator. "Come and Get Your Love (Single Edit - Audio)"
+would otherwise split inside the parenthetical and spend two requests on
+nonsense against rate limits nobody has documented (OD-014). Candidates are
+also skipped when the recorded artist is already one of the halves, since
+`normaliseNames` has answered that.
+
+**The stale caches — the more embarrassing half.** The same screenshot showed
+`7clouds · Childish Gambino - Redbone`, an album echo that `meaningfulAlbum`
+already rejects. Tested directly, it returned `null`. The API returned the old
+value because **`track:` had been serving a 30-day entry parsed before the fix
+existed**.
+
+D-043 and D-047 both bumped the key they touched. Neither bumped `track:`,
+`visuals:` or `search:`, and `visuals:` wraps `genius:` — so bumping only the
+inner key would have left the outer entry still serving the old empty result.
+All four are now versioned.
+
+> **A fix to parsing is not deployed until the cache that stores its output is
+> versioned.** Thirty days is long enough that every reader who has opened a
+> track keeps the old bug while the new code sits in the repo looking correct.
+> Bump the key in the same commit as the parse change.
+
 ### D-048 — Two scrollbars, and type twice too large for its column
 **Fixed 2026-08-22.** Reported with a screenshot: two scrollbars against the
 right edge, an ask to find a better representation, and type large enough to
