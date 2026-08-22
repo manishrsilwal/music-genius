@@ -18,12 +18,17 @@ import "./playback-bar.scss";
 export function PlaybackBar({
 	videoId,
 	title,
+	artist,
+	artwork,
 	stanzas,
 	synced,
 	onSyncChange,
 }: {
 	videoId: string;
 	title: string;
+	artist: string;
+	/** Null until the Genius lookup streams in, or if it found nothing. */
+	artwork: string | null;
 	stanzas: Stanza[];
 	/** Without timestamps there is nothing to sync to — audio still plays. */
 	synced: boolean;
@@ -61,15 +66,17 @@ export function PlaybackBar({
 		onSyncChange(latest.current);
 	}, [reportedKey, onSyncChange]);
 
-	const status = !ready
+	// Only states the reader cannot already see. "Paused" duplicated the Play
+	// button sitting beside it, and "Following" restated the obvious while the
+	// canvas was visibly following; both crowded out the artist, which is what
+	// a now-playing line is actually for (D-036).
+	const notice = !ready
 		? "Loading"
-		: !playing
-			? "Paused"
-			: !synced
-				? "No timings"
-				: manual
-					? "Manual scroll"
-					: "Following";
+		: playing && !synced
+			? "No timings"
+			: playing && manual
+				? "Manual scroll"
+				: null;
 
 	return (
 		<motion.div
@@ -80,12 +87,17 @@ export function PlaybackBar({
 			transition={transition.editorial}
 		>
 			{/*
-			  Visible by requirement. YouTube's policies forbid a background
-			  player and forbid isolating the audio, so this is composed into
-			  the page rather than hidden (D-022).
+			  The record. Spins while the song plays and holds where it stopped
+			  when paused — the state is readable before the label is (D-036).
+			  Decorative: the title beside it already names the track.
 			*/}
-			<div className="playback__video">
-				<div ref={mountRef} />
+			<div className="playback__record" data-spinning={playing || undefined}>
+				{artwork ? (
+					<img src={artwork} alt="" className="playback__art" />
+				) : (
+					<span className="playback__art playback__art--empty" />
+				)}
+				<span className="playback__spindle" />
 			</div>
 
 			<button
@@ -100,8 +112,25 @@ export function PlaybackBar({
 
 			<span className="playback__meta">
 				<span className="playback__title text-caption text-ink">{title}</span>
-				<span className="playback__status text-micro">{status}</span>
+				<span
+					className="playback__status text-micro"
+					data-notice={notice ? "" : undefined}
+				>
+					{notice ?? artist}
+				</span>
 			</span>
+
+			{/*
+			  Visible by requirement, not by preference. YouTube's policies
+			  forbid "a player that is not displayed in the page, tab, or screen
+			  that the user is viewing" (III.I.9) and forbid isolating the audio
+			  from the video (III.I.7). No minimum size is specified, so the
+			  record leads and the player is quiet — but it is genuinely on
+			  screen, never clipped, faded or covered (D-036).
+			*/}
+			<div className="playback__video">
+				<div ref={mountRef} />
+			</div>
 
 			{manual && syncing && (
 				<button

@@ -106,11 +106,13 @@ function TrackPage() {
 			{/* Playback (PRD §3.2). The video id streams in with the visuals, so
 			    the bar appears once Genius has told us which video this is. */}
 			<Await promise={visuals} fallback={null}>
-				{({ youtubeId }) =>
+				{({ youtubeId, artwork }) =>
 					youtubeId ? (
 						<PlaybackBar
 							videoId={youtubeId}
 							title={track.title}
+							artist={track.artist}
+							artwork={artwork?.thumbnail ?? null}
 							stanzas={track.stanzas}
 							synced={track.synced}
 							onSyncChange={setSyncPosition}

@@ -134,6 +134,50 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-036 — The record leads; the player stays visible
+**Decided 2026-08-22.** Asked: drop the YouTube preview from the playback bar
+and use the album image instead — circular, spinning while playing, still when
+paused.
+
+The complaint was fair. The bar showed a raw YouTube poster frame: low
+resolution, the video's own title text baked into the image, and a large red
+play button competing with the actual Play control beside it.
+
+But removing the player is the one thing the policy names. Checked against the
+current text rather than the D-022 notes:
+
+| Section | Wording |
+|---|---|
+| III.I.9 | *"a player that is not displayed in the page, tab, or screen that the user is viewing"* |
+| III.I.7 | *"separate, isolate, or modify the audio or video components"* |
+| — | **No minimum size or visibility requirement is specified anywhere.** |
+
+That last line is the opening D-022 never explored. The policy requires the
+player to be *displayed*; it does not require it to be prominent. So the
+requested design is reachable without the exposure:
+
+- **Album art becomes the lead element** — a circular record at full dock
+  height, spinning on an 8s linear loop while playing.
+- **Pausing pauses the animation rather than resetting it**, so the disc holds
+  the angle it stopped at and play/pause reads as one continuous object rather
+  than two states.
+- **The player shrinks to roughly two thirds height** and moves to the trailing
+  edge. Genuinely on screen: never clipped, faded, covered or sized to nothing.
+
+> **Do not "tidy away" `.playback__video`.** Its size is a deliberate minimum,
+> not leftover styling. Hiding it — including with `opacity: 0`, a zero size,
+> or by covering it — is the III.I.9 violation this decision exists to avoid.
+> The rejected alternatives were "art only" and "reveal the player on tap";
+> both leave the player undisplayed *during playback*, which is exactly when
+> the clause bites.
+
+**Second line of the meta block now carries the artist.** It read "PAUSED",
+which duplicated the Play button immediately beside it, and "Following", which
+restated what the visibly-following canvas already showed. Notices are kept
+only for states the reader cannot otherwise see — Loading, No timings, Manual
+scroll — and those keep the uppercase label voice, tinted with the track
+accent. An artist name is not a label, so it sets in sentence case.
+
 ### D-035 — Focus and touch are platform rules, not component choices
 **Decided 2026-08-22.** A single `:focus-visible` rule in `@layer base`, and a
 `tap-target` mixin for controls whose padding cannot grow.

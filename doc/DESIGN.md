@@ -316,6 +316,7 @@ Before shipping a component:
 - [ ] Display text sets `font-synthesis: none`
 - [ ] A control that can commit on tap does
 - [ ] `@apply` is never used in `.scss` — it silently no-ops (D-004)
+- [ ] The YouTube player is never hidden, faded, clipped or covered (D-036)
 
 ---
 
@@ -323,6 +324,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-036** Playback bar led by a spinning album record; player kept visible but quiet |
 | 2026-08-22 | **D-035** Focus ring written once as an opt-out; 44px tap targets via `tap-target` |
 | 2026-08-22 | **D-033** Layer scale and shared dock; fixes Discover/playback overlap, drawer covering the dock, and missing safe areas |
 | 2026-08-22 | **D-032** Every stepper step advances on tap; mood single-select; `transition.dismiss` for `mode="wait"` exits |
