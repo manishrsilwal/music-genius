@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef } from "react";
 
 import { type LinePosition, lineKey } from "@/lib/lrc";
 import { stanzaVariants } from "@/lib/motion";
+import { detectLang } from "@/lib/script";
 import type { Stanza } from "@/lib/types";
 
 import { useScrollSpy } from "../hooks/use-scroll-spy";
@@ -64,8 +65,26 @@ export function LyricCanvas({
 		});
 	}, [syncKey, prefersReducedMotion]);
 
+	/*
+	 * Tell assistive technology what language it is looking at (D-053).
+	 *
+	 * The document is `lang="en"`, which is a lie for every non-Latin track —
+	 * and this product ships a Devanagari face specifically because it expects
+	 * those. A speech synthesiser given Devanagari under `lang="en"` produces
+	 * noise rather than accented Hindi.
+	 *
+	 * Detected from the words themselves rather than from LRCLIB metadata,
+	 * which carries no language field at all. Null for Latin scripts, where the
+	 * document's own lang is the better answer.
+	 */
+	const lang = detectLang(
+		stanzas
+			.flatMap((stanza) => stanza.lines.map((line) => line.text))
+			.join(" "),
+	);
+
 	return (
-		<div className="canvas">
+		<div className="canvas" lang={lang ?? undefined}>
 			{stanzas.map((stanza, stanzaIndex) => {
 				const isActive = stanzaIndex === activeIndex;
 				return (

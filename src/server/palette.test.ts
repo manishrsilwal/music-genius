@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildPalette } from "./palette.server";
+import { buildPalette, isAllowedArtworkUrl } from "./palette.server";
 
 /**
  * The paper's safety property (D-052).
@@ -105,5 +105,55 @@ describe("buildPalette — the paper", () => {
 
 	it("returns null for a string that is not a colour", () => {
 		expect(buildPalette("not a colour")).toBeNull();
+	});
+});
+
+/**
+ * The artwork URL is fetched by the server and arrives from an external API,
+ * which is the shape of an SSRF (D-053).
+ */
+describe("isAllowedArtworkUrl", () => {
+	it("accepts the Genius image hosts", () => {
+		expect(
+			isAllowedArtworkUrl("https://images.genius.com/abc.300x300x1.png"),
+		).toBe(true);
+		expect(isAllowedArtworkUrl("https://assets.genius.com/x.jpg")).toBe(true);
+	});
+
+	it("refuses cloud instance metadata", () => {
+		expect(
+			isAllowedArtworkUrl("http://169.254.169.254/latest/meta-data/"),
+		).toBe(false);
+		expect(isAllowedArtworkUrl("https://169.254.169.254/")).toBe(false);
+	});
+
+	it("refuses loopback and private addresses", () => {
+		expect(isAllowedArtworkUrl("http://localhost:6379/")).toBe(false);
+		expect(isAllowedArtworkUrl("https://127.0.0.1/x.png")).toBe(false);
+		expect(isAllowedArtworkUrl("https://10.0.0.5/x.png")).toBe(false);
+	});
+
+	it("refuses plaintext even from an allowed host", () => {
+		expect(isAllowedArtworkUrl("http://images.genius.com/x.png")).toBe(false);
+	});
+
+	it("is not fooled by a lookalike host", () => {
+		expect(isAllowedArtworkUrl("https://images.genius.com.evil.tld/x")).toBe(
+			false,
+		);
+		expect(isAllowedArtworkUrl("https://evil.tld/images.genius.com/x")).toBe(
+			false,
+		);
+		// Userinfo before an @ is the classic way to make a URL read as one host
+		// while resolving to another.
+		expect(isAllowedArtworkUrl("https://images.genius.com@evil.tld/x")).toBe(
+			false,
+		);
+	});
+
+	it("refuses other schemes outright", () => {
+		expect(isAllowedArtworkUrl("file:///etc/passwd")).toBe(false);
+		expect(isAllowedArtworkUrl("data:image/png;base64,AAAA")).toBe(false);
+		expect(isAllowedArtworkUrl("not a url")).toBe(false);
 	});
 });

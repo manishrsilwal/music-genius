@@ -95,13 +95,27 @@ export function SearchField() {
 				className="search__input px-5 py-4 text-lead"
 			/>
 
-			<p className="mt-3 h-5 text-micro uppercase tracking-label text-ink-faint">
+			{/*
+			  A status region, not decoration (D-053). The combobox itself is
+			  fully described, but "searching" and "search is unavailable" are
+			  state changes with no focus event behind them — unannounced, a
+			  screen reader user waits on a result that is never coming.
+
+			  `<output>` rather than a <p role="status">: it carries the status
+			  role natively, so the semantics survive anyone later editing the
+			  attributes off. `display: block` because <output> is inline and
+			  the reserved height would otherwise collapse.
+			*/}
+			<output
+				aria-live="polite"
+				className="mt-3 block h-5 text-micro uppercase tracking-label text-ink-faint"
+			>
 				{error
 					? "Search is unavailable right now"
 					: isFetching
 						? "Searching…"
 						: ""}
-			</p>
+			</output>
 
 			<AnimatePresence>
 				{isOpen && (

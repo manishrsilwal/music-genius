@@ -43,7 +43,14 @@
   /* Scroll-spy states (PRD §3.3). Mirrored in src/lib/motion.ts, which is the
      source of truth for JS-driven animation. Keep the two in sync. */
   --stanza-opacity-active: 1;
-  --stanza-opacity-idle: 0.2;
+  /* 0.38, not 0.2 (D-053). Composited over the canvas, 0.2 computes to a
+     1.68:1 contrast ratio — below even the 3:1 large-text floor, which makes
+     every line the reader is not currently on effectively unreadable rather
+     than merely quiet. 0.38 is the lowest value that clears it, at 3.28:1.
+     The active line is still five times brighter, so the focus effect
+     survives; what changes is that the verse can now be scanned without
+     scrolling through it. Mirrored in src/lib/motion.ts. */
+  --stanza-opacity-idle: 0.38;
 
   /* Glassmorphism (PRD §3.2) */
   --glass-bg: oklch(1 0 0 / 0.06);
@@ -163,7 +170,13 @@
 
   --color-ink: oklch(0.97 0.004 265);
   --color-ink-muted: oklch(0.74 0.009 265);
-  --color-ink-faint: oklch(0.55 0.011 265);
+  /* 0.61, not 0.55 (D-053). This colour carries `text-micro` — 12px section
+     labels, kickers, the playback clock — which is nowhere near large text, so
+     it needs the full 4.5:1. At 0.55 it measured 4.14 on the canvas, 3.91 on a
+     surface and 3.52 on a raised surface: three failures, the worst of them on
+     the busiest component. Solved against the WORST background, so it passes
+     everywhere it is used rather than only where it was checked. */
+  --color-ink-faint: oklch(0.61 0.011 265);
 
   /* --- Motion -------------------------------------------------------------
      Mirrored in src/lib/motion.ts for JS-driven animation. */
@@ -313,7 +326,7 @@
     --color-ink-faint: oklch(0.72 0.01 265);
     --color-hairline: oklch(1 0 0 / 0.22);
     --glass-border: oklch(1 0 0 / 0.3);
-    --stanza-opacity-idle: 0.42;
+    --stanza-opacity-idle: 0.55;
     --grain-opacity: 0;
   }
 }

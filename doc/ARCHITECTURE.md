@@ -134,6 +134,100 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-053 — What the checklists missed: contrast, focus, language, crawlers
+**Fixed 2026-08-22.** A deeper audit than D-051 and D-052, which both worked
+from design checklists. This one measured.
+
+**Two contrast failures, both computed rather than eyeballed.**
+
+`--color-ink-faint` carries `text-micro` — 12px section labels, kickers, the
+playback clock — which is nowhere near WCAG's large-text threshold, so it needs
+the full 4.5:1:
+
+| background | before | after |
+|---|---|---|
+| canvas | 4.14 **fail** | 5.31 pass |
+| surface | 3.91 **fail** | 5.00 pass |
+| surface-raised | 3.52 **fail** | 4.51 pass |
+
+Solved against the *worst* background rather than the one it was first checked
+on, so `0.55 → 0.61` passes everywhere the token is used.
+
+Worse, and easy to miss because it is a state rather than a colour: the
+scroll-spy dims inactive stanzas to `opacity: 0.2`. Composited over the canvas
+that is **1.68:1** — below even the 3:1 large-text floor, which made every line
+the reader was not currently on unreadable rather than merely quiet. That is
+most of the page, most of the time. `0.38` is the lowest value that clears it,
+at 3.28:1; the active line is still five times brighter, so the emphasis
+survives and the verse can now be scanned without scrolling through it.
+`prefers-contrast` idle rises 0.42 → 0.55 to keep a real gap above the new
+default.
+
+**The drawer had no focus management at all.** `focus()`, `inert` and
+`tabIndex` appeared nowhere in the codebase. A keyboard reader pressed
+"Discover the story", the panel opened behind them, and Tab carried on through
+the lyrics underneath — the content they asked for was unreachable. The panel
+now takes focus on open and hands it back on close, but only if focus is still
+inside it, so a reader who deliberately clicked elsewhere is not yanked back.
+
+The desktop panel also gains `role="dialog"` and `aria-modal`, because it locks
+the page behind it and therefore *is* modal. The mobile sheet deliberately
+leaves the lyrics scrollable (PRD §3.5) and so is deliberately **not** marked
+modal — one component, two honest sets of semantics.
+
+**`<html lang="en">` was a lie for every non-Latin track.** The product ships a
+Devanagari face precisely because it expects Hindi lyrics (D-019), then told
+every screen reader those lyrics were English — which makes a speech
+synthesiser produce noise rather than accented Hindi. `detectLang` reads the
+script off the words themselves, since LRCLIB carries no language field.
+
+> **Script is not language,** and the implementation says so. Devanagari carries
+> Hindi, Marathi and Nepali; the function returns the most widely read language
+> for a script and no more. Latin is deliberately absent — English, Spanish and
+> Turkish are indistinguishable by script, and guessing would trade a correct
+> default for a coin flip. A 20% share is required so a borrowed word cannot
+> flip the page.
+>
+> Japanese needed its own rule. Written prose is usually majority-Han with kana
+> carrying the particles, so picking the higher count returns Chinese. Kana are
+> exclusive to Japanese, so one settles it — caught by a test that failed
+> against my own comment claiming the opposite.
+
+**Crawlers.** No canonical, no robots, no sitemap, no structured data. A lyrics
+page is exactly what `MusicRecording` describes, and without it a search engine
+sees a headline and a wall of unattributed text.
+
+> The schema's `lyrics` property is deliberately **omitted**. The words are
+> LRCLIB's user-contributed transcriptions of someone else's copyrighted work;
+> displaying them to a reader who navigated here is the product, and publishing
+> the full text as machine-readable data for anyone to ingest is a different
+> act. `robots.txt` is a route, not a static file, because `Sitemap:` must be an
+> absolute URL and a relative one is ignored — the same trap as og:image in
+> D-051. The sitemap lists the 56 curated tracks, not everything LRCLIB holds:
+> those are millions of pages this product does not own.
+
+**One server-side fetch was unguarded.** `extractPalette` took a URL out of a
+Genius API response and fetched it from the server with no validation — the
+shape of an SSRF. A compromised or merely buggy upstream could have pointed it
+at `http://169.254.169.254/…` and had us read cloud instance metadata on its
+behalf. Now an allowlist of Genius image hosts plus https-only, because the set
+of addresses that must not be reachable is open-ended while the set of hosts
+that legitimately serve this artwork is small and known. Verified against five
+live lookups; all resolve to `images.genius.com`. It does not defeat DNS
+rebinding, which would need resolution-time checks the platform does not
+expose.
+
+Also: `aria-controls` on the trigger, a live region on its label (generation
+takes seconds — D-050 — and silence reads as breakage), `<output>` for the
+search status, and the drag grip hidden from assistive technology since it is a
+pointer affordance with no keyboard equivalent and Escape already closes.
+
+**Measured and left alone.** Client JS is 558 KB raw / ~180 KB gzipped, of
+which framer-motion is 147 KB raw / 47 KB gz on the landing route. Fonts are
+correctly subset — 10 `unicode-range` declarations, so the Devanagari faces are
+only fetched by a reader who needs them. Not worth trading for now; recorded so
+the next person does not re-measure it.
+
 ### D-052 — The page is printed in the record's ink
 **Decided 2026-08-22.** A second design pass, against the official
 `frontend-design` skill rather than the generic redesign checklist. It asks a
@@ -1583,6 +1677,8 @@ src/
 │       ├── insights.ts        # GET /api/insights?…               (deferred)
 │       ├── card.ts            # POST /api/card                    (PNG, §3.4)
 │       └── og.ts              # GET /api/og?trackId=              (social, D-051)
+│   ├── robots[.]txt.ts        # GET /robots.txt                   (D-053)
+│   └── sitemap[.]xml.ts       # GET /sitemap.xml — curated catalogue only
 ├── server/                    # server-only; never imported by the client
 │   ├── env.ts                 # the only reader of process.env (D-014)
 │   ├── lyrics.server.ts       # business logic + cache keys (D-014, D-017)
@@ -1610,6 +1706,7 @@ src/
 │   ├── cache.ts               # CacheAdapter + memory impl (D-009)
 │   ├── deep-dives.ts          # curated catalogue, scoring, explanations (D-045)
 │   ├── motion.ts              # easing, durations, variants (D-004)
+│   ├── script.ts              # script -> BCP-47 language guess (D-053)
 │   ├── card.ts / card-metrics.ts / og.ts   # card layout + rasterising (§3.4)
 │   └── clients/lrclib.ts      # LRCLIB + normalisation (D-015, D-043)
 ├── styles/                    # Sass partials (D-013)

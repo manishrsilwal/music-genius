@@ -122,6 +122,43 @@ export function buildPalette(hex: string): Palette | null {
 }
 
 /**
+ * Hosts we will fetch artwork from (D-053).
+ *
+ * This URL is not ours: it arrives in a Genius API response and is then
+ * fetched **by the server**, which is the shape of an SSRF. Genius is a
+ * reasonable upstream to trust, but "reasonable to trust" is not the same as
+ * "may direct our server at an arbitrary address" — a compromised or merely
+ * buggy upstream could return `http://169.254.169.254/…` and have us fetch
+ * cloud instance metadata on its behalf.
+ *
+ * An allowlist rather than a denylist of private ranges: the set of addresses
+ * that must not be reachable is open-ended and varies by host, while the set
+ * of hosts that legitimately serve Genius artwork is small and known.
+ *
+ * This does not defeat DNS rebinding, which would need resolution-time checks
+ * the platform does not expose here. It closes the case that actually exists.
+ */
+const ARTWORK_HOSTS = [
+	"images.genius.com",
+	"images.rapgenius.com",
+	"assets.genius.com",
+	"filepicker.genius.com",
+	"t2.genius.com",
+];
+
+export function isAllowedArtworkUrl(value: string): boolean {
+	let url: URL;
+	try {
+		url = new URL(value);
+	} catch {
+		return false;
+	}
+	// https only: plaintext would also expose the fetch to tampering in transit.
+	if (url.protocol !== "https:") return false;
+	return ARTWORK_HOSTS.includes(url.hostname.toLowerCase());
+}
+
+/**
  * Extract a palette from an image URL. Returns null on any failure — a missing
  * palette simply falls back to the default accent, so this can never take the
  * page down.
@@ -129,6 +166,11 @@ export function buildPalette(hex: string): Palette | null {
 export async function extractPalette(
 	imageUrl: string,
 ): Promise<Palette | null> {
+	if (!isAllowedArtworkUrl(imageUrl)) {
+		console.warn("[palette] refused artwork from an unexpected host");
+		return null;
+	}
+
 	try {
 		const response = await fetch(imageUrl, {
 			// The thumbnail is ~300px; enough for colour, cheap to decode.

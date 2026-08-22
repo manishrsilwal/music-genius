@@ -4,7 +4,7 @@ import {
 	useDragControls,
 	useReducedMotion,
 } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { transition } from "@/lib/motion";
 import type { Insight } from "@/lib/types";
@@ -15,6 +15,9 @@ import "./insights.scss";
 
 /** Matches the `lg` breakpoint in styles/_breakpoints.scss. */
 const DESKTOP = "(min-width: 64rem)";
+
+/** Ties the trigger to the region it opens, for assistive technology. */
+const PANEL_ID = "insights-panel";
 
 /** Drag further than this and the sheet closes (PRD §3.5, swipeable). */
 const DISMISS_DISTANCE = 110;
@@ -41,14 +44,26 @@ export function DiscoverButton({
 			data-state={state}
 			disabled={generating}
 			aria-expanded={open}
+			// Names the region this controls. `aria-expanded` alone says
+			// something opened without saying what (D-053).
+			aria-controls={PANEL_ID}
 			onClick={onToggle}
 			className="discover px-5 py-3 text-caption uppercase tracking-label"
 		>
-			{generating
-				? "Preparing the story"
-				: open
-					? "Close the story"
-					: "Discover the story"}
+			{/*
+			  The label changes while a request is in flight, but a disabled
+			  button is not announced when its text changes. `aria-live` on the
+			  label makes the wait audible instead of silent — the generation
+			  takes several seconds (D-050), which is long enough that silence
+			  reads as breakage.
+			*/}
+			<span aria-live="polite">
+				{generating
+					? "Preparing the story"
+					: open
+						? "Close the story"
+						: "Discover the story"}
+			</span>
 		</button>
 	);
 }
@@ -65,6 +80,7 @@ export function InsightsDrawer({
 	const isDesktop = useMediaQuery(DESKTOP);
 	const dragControls = useDragControls();
 	const prefersReducedMotion = useReducedMotion();
+	const panelRef = useRef<HTMLElement | null>(null);
 
 	useEffect(() => {
 		const onKey = (event: KeyboardEvent) => {
@@ -73,6 +89,34 @@ export function InsightsDrawer({
 		document.addEventListener("keydown", onKey);
 		return () => document.removeEventListener("keydown", onKey);
 	}, [onClose]);
+
+	/**
+	 * Move focus into the panel, and put it back when the panel goes (D-053).
+	 *
+	 * Without this a keyboard reader presses "Discover the story", the panel
+	 * opens behind them, and Tab carries on through the lyrics underneath —
+	 * the content they asked for is never reached. Returning focus matters as
+	 * much as moving it: landing at the top of the document after a close is
+	 * how a reader loses their place entirely.
+	 *
+	 * The panel itself takes focus rather than the first control inside it, so
+	 * a screen reader announces the region and its label before its contents.
+	 */
+	useEffect(() => {
+		if (!open) return;
+		const restoreTo = document.activeElement as HTMLElement | null;
+		panelRef.current?.focus();
+		return () => {
+			// Only if focus is still inside the panel. A reader who deliberately
+			// clicked elsewhere before closing should not be yanked back.
+			if (
+				restoreTo?.isConnected &&
+				panelRef.current?.contains(document.activeElement)
+			) {
+				restoreTo.focus();
+			}
+		};
+	}, [open]);
 
 	/**
 	 * One scroll owner at a time (D-048).
@@ -105,8 +149,17 @@ export function InsightsDrawer({
 				(isDesktop ? (
 					<motion.aside
 						key="panel"
+						ref={panelRef}
+						id={PANEL_ID}
 						className="drawer-panel"
 						aria-label="The story behind this song"
+						// Desktop locks the page behind it, so it behaves modally
+						// and must say so. The mobile sheet deliberately leaves
+						// the lyrics scrollable (PRD §3.5) and is therefore NOT
+						// modal — same component, honestly different semantics.
+						role="dialog"
+						aria-modal="true"
+						tabIndex={-1}
 						initial={{ x: "100%" }}
 						animate={{ x: 0 }}
 						exit={{ x: "100%" }}
@@ -118,8 +171,11 @@ export function InsightsDrawer({
 				) : (
 					<motion.aside
 						key="sheet"
+						ref={panelRef}
+						id={PANEL_ID}
 						className="drawer-sheet"
 						aria-label="The story behind this song"
+						tabIndex={-1}
 						initial={{ y: "100%" }}
 						animate={{ y: 0 }}
 						exit={{ y: "100%" }}
@@ -143,8 +199,15 @@ export function InsightsDrawer({
 						}}
 						{...motionProps}
 					>
-						{/* The only drag surface, so the body below stays scrollable. */}
+						{/*
+						  The only drag surface, so the body below stays scrollable.
+						  Hidden from assistive technology: it is a pointer
+						  affordance with no keyboard equivalent, and Escape
+						  already closes the sheet — announcing it would offer a
+						  control that cannot be operated.
+						*/}
 						<div
+							aria-hidden="true"
 							className="drawer-sheet__grip"
 							onPointerDown={(event) => dragControls.start(event)}
 						/>

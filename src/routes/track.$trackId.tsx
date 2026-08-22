@@ -47,11 +47,42 @@ export const Route = createFileRoute("/track/$trackId")({
 	head: ({ loaderData, params }) => {
 		if (!loaderData) return { meta: [{ title: "Track not found" }] };
 
-		const { title, artist } = loaderData.track;
+		const { title, artist, album, duration } = loaderData.track;
 		const heading = `${title} — ${artist}`;
 		const description = `Read the lyrics to ${title} by ${artist}.`;
+		const canonical = `${loaderData.origin}/track/${encodeURIComponent(params.trackId)}`;
+
+		/*
+		 * Structured data (D-053). A lyrics page is exactly what MusicRecording
+		 * describes, and without it a search engine sees a headline and a wall
+		 * of unattributed text.
+		 *
+		 * Deliberately WITHOUT the `lyrics` property, though the schema allows
+		 * it: the words are LRCLIB's user-contributed transcriptions of someone
+		 * else's copyrighted work. Displaying them for a reader who navigated
+		 * here is the product; serving the full text as machine-readable data
+		 * for anyone to ingest is a different act, and not one to take by
+		 * default.
+		 */
+		const jsonLd = {
+			"@context": "https://schema.org",
+			"@type": "MusicRecording",
+			name: title,
+			byArtist: { "@type": "MusicGroup", name: artist },
+			...(album ? { inAlbum: { "@type": "MusicAlbum", name: album } } : {}),
+			// ISO 8601. LRCLIB gives seconds, and omits it more often than not.
+			...(duration ? { duration: `PT${Math.round(duration)}S` } : {}),
+			url: canonical,
+		};
 
 		return {
+			scripts: [
+				{
+					type: "application/ld+json",
+					children: JSON.stringify(jsonLd),
+				},
+			],
+			links: [{ rel: "canonical", href: canonical }],
 			meta: [
 				{ title: heading },
 				{ name: "description", content: description },

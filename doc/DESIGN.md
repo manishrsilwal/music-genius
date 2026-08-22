@@ -402,6 +402,19 @@ Interface copy addresses an intelligent adult.
   is shown — rather than quietly omitting the slot.
 - **Skipping is a real answer**, and is labelled as one: "Skip · show me anything".
 
+### Contrast is computed, not judged
+
+Every ink/surface pair in this product has a measured ratio, and dimmed states
+are measured too — an opacity is a contrast change wearing different clothes.
+Composite it over the background it actually sits on before calling it quiet
+rather than unreadable (D-053).
+
+`--color-ink-faint` carries 12px labels, which are not large text, so it is
+solved against the *worst* background it appears on rather than the first one
+checked. Inactive lyric lines clear the large-text floor at 0.38; at the 0.2
+they used to sit at they measured 1.68:1, which is not de-emphasis, it is
+concealment.
+
 ### Failure states are designed, not defaulted
 
 A 404, an unreachable service and an empty result are all screens a reader
@@ -491,6 +504,16 @@ Before shipping a component:
       they lose to Tailwind's own `:root` output whatever the specificity
       (D-003, D-051)
 - [ ] Every page has an `id="main"` landmark for the skip link (D-051)
+- [ ] Any dimmed text state is composited and measured, not eyeballed — a
+      lowered opacity is a contrast change (D-053)
+- [ ] A panel that opens takes focus, and returns it on close only if focus is
+      still inside it (D-053)
+- [ ] A surface that locks the page behind it says `role="dialog"` and
+      `aria-modal`; one that does not, must not (D-053)
+- [ ] Content in a script the document is not declared in carries its own
+      `lang` (D-053)
+- [ ] State that changes with no focus event behind it lives in a live region
+      (D-053)
 - [ ] A surface colour derived from artwork keeps the default's lightness and
       moves only hue and chroma — otherwise it is a contrast change wearing a
       palette's clothes (D-052)
@@ -505,6 +528,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-053** Two measured contrast failures fixed; drawer focus management and dialog semantics; per-script `lang`; canonical, robots, sitemap, structured data; artwork fetch allowlisted |
 | 2026-08-22 | **D-052** The page takes the record's hue — paper as well as marks; default accent moves from vermilion to brass |
 | 2026-08-22 | **D-051** Film grain, tinted elevation, hero vignette, glass thickness; skip link, `prefers-contrast`, favicon and per-track social cards |
 | 2026-08-22 | **D-050** Drawer copy gains an explicit word budget; writing model swapped with no change to any output gate |
