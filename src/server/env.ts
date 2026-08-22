@@ -19,7 +19,15 @@ export const env = {
 	/** Genius API client access token — album art and metadata (OD-005). */
 	geniusAccessToken: read("GENIUS_ACCESS_TOKEN"),
 
-	/** Gemini — synthesis for the insights drawer (OD-003). */
+	/**
+	 * DeepSeek — the primary synthesis provider for the insights drawer
+	 * (OD-003, D-050). Metered rather than free-tiered, which is what makes
+	 * the drawer deployable at all; see OD-021.
+	 */
+	deepseekApiKey: read("DEEPSEEK_API_KEY"),
+	deepseekModel: read("DEEPSEEK_MODEL") ?? "deepseek-v4-flash",
+
+	/** Gemini — the fallback provider, used only when DeepSeek fails (D-050). */
 	geminiApiKey: read("GEMINI_API_KEY"),
 	/**
 	 * Model names churn fast, so this is configurable rather than pinned in
@@ -51,9 +59,9 @@ export const features = {
 		return Boolean(env.upstashUrl && env.upstashToken);
 	},
 
-	/** The drawer needs an LLM at minimum. */
+	/** The drawer needs an LLM at minimum — either provider will do (D-050). */
 	get insights(): boolean {
-		return Boolean(env.geminiApiKey);
+		return Boolean(env.deepseekApiKey || env.geminiApiKey);
 	},
 
 	/**

@@ -2,10 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import type { InsightSource } from "../../lib/types";
 import {
+	buildPrompt,
 	containsQuote,
+	type InsightRequest,
+	SHAPE_CONTRACT,
+	toInsight,
 	validateQuote,
 	validateResonance,
-} from "./gemini.server";
+} from "./insight";
 
 /**
  * The quote gate is the single highest-stakes correctness property in the
@@ -204,5 +208,129 @@ describe("validateResonance", () => {
 		expect(
 			validateResonance({ lines: ["Aankhein bandh karke"], text: [] }, LYRICS),
 		).toBeNull();
+	});
+});
+
+/**
+ * The shape gates (D-050).
+ *
+ * Gemini enforced the response schema at the API; DeepSeek cannot, so these
+ * cover the ways a model can now hand back something structurally wrong.
+ * Measured, DeepSeek returned a conforming `synthesis` array 0 times out of 8
+ * without the shape contract in the prompt — so this is a live failure mode,
+ * not a hypothetical one.
+ */
+describe("toInsight", () => {
+	const request: InsightRequest = {
+		title: "Fight the Power",
+		artist: "Public Enemy",
+		lyrics: "Got to give us what we want\nGot to give us what we need",
+		sources: [],
+		excerpts: [],
+	};
+
+	it("keeps a well-formed array of paragraphs", () => {
+		const insight = toInsight({ synthesis: ["First.", "Second."] }, request);
+		expect(insight?.synthesis).toBe("First.\n\nSecond.");
+	});
+
+	it("recovers paragraphs from a model that returned one string", () => {
+		const insight = toInsight(
+			{ synthesis: "First.\n\nSecond." } as never,
+			request,
+		);
+		expect(insight?.synthesis).toBe("First.\n\nSecond.");
+	});
+
+	it("drops non-string elements rather than rendering them", () => {
+		const insight = toInsight(
+			{ synthesis: ["First.", null, 42, "Second."] } as never,
+			request,
+		);
+		expect(insight?.synthesis).toBe("First.\n\nSecond.");
+	});
+
+	it("returns null when there is no usable prose", () => {
+		expect(toInsight({ synthesis: ["", "   "] }, request)).toBeNull();
+		expect(toInsight({}, request)).toBeNull();
+		expect(toInsight({ synthesis: null } as never, request)).toBeNull();
+	});
+
+	it("ignores keys the model invented", () => {
+		const insight = toInsight(
+			{ synthesis: ["First.", "Second."], summary: "extra" } as never,
+			request,
+		);
+		expect(insight).not.toBeNull();
+		expect(insight).not.toHaveProperty("summary");
+	});
+
+	it("marks an insight built without sources as ungrounded", () => {
+		expect(toInsight({ synthesis: ["a.", "b."] }, request)?.ungrounded).toBe(
+			true,
+		);
+	});
+
+	it("still runs the quote gate on a schemaless response", () => {
+		const insight = toInsight(
+			{
+				synthesis: ["First.", "Second."],
+				quote: {
+					text: "words nobody said",
+					attribution: "Chuck D",
+					sourceIndex: 0,
+				},
+			},
+			{ ...request, sources: [source("a")], excerpts: ["unrelated text"] },
+		);
+		expect(insight?.quote).toBeNull();
+	});
+});
+
+describe("buildPrompt", () => {
+	const request: InsightRequest = {
+		title: "Fight the Power",
+		artist: "Public Enemy",
+		lyrics: "Got to give us what we want",
+		sources: [],
+		excerpts: [],
+	};
+
+	it("states the shape only for providers that cannot enforce one", () => {
+		expect(buildPrompt(request, { describeShape: true })).toContain(
+			SHAPE_CONTRACT.trim(),
+		);
+		expect(buildPrompt(request, { describeShape: false })).not.toContain(
+			SHAPE_CONTRACT.trim(),
+		);
+	});
+
+	it("asks for no resonance when the reader stated nothing", () => {
+		expect(buildPrompt(request, { describeShape: false })).toContain(
+			"return null for `resonance`",
+		);
+	});
+
+	it("writes the reader's stated taste into the personal slot", () => {
+		const prompt = buildPrompt(
+			{
+				...request,
+				preferences: { mood: "longing", pull: "honesty", familiarity: null },
+			},
+			{ describeShape: false },
+		);
+		expect(prompt).toContain("a mood of longing");
+		expect(prompt).toContain("writing that leads with honesty");
+	});
+
+	it("does not ask for taste the reader never gave", () => {
+		const prompt = buildPrompt(
+			{
+				...request,
+				preferences: { mood: null, pull: null, familiarity: "surprise" },
+			},
+			{ describeShape: false },
+		);
+		expect(prompt).toContain("return null for `resonance`");
 	});
 });

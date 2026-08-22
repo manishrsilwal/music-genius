@@ -9,9 +9,9 @@ logged here with its rationale and its rejected alternatives.
 **Rule:** nothing is decided by assumption. Anything unresolved lives in
 [Deferred Decisions](#deferred-decisions) until explicitly ruled on.
 
-- **Status:** Block 5 — all PRD features implemented. Insights await a Gemini key to verify against real output
+- **Status:** Block 5 — all PRD features implemented. Insights run on DeepSeek, verified against live output (D-050)
 - **Previously:** Block 3 complete — Lyric Card export shipping; selection → composer → PNG verified
-- **Last updated:** 2026-08-21
+- **Last updated:** 2026-08-22
 - **Source of truth:** `prd-doc/Typographic_Lyrical_Explorer_PRD_v2.pdf` (v2.0)
 
 ---
@@ -133,6 +133,67 @@ Switching target later must be a one-file change per subsystem.
 
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
+
+### D-050 — DeepSeek primary, Gemini fallback, and the reasoning tax
+**Decided 2026-08-22.** Replaces Gemini as the drawer's writer (OD-003).
+
+Gemini's free tier allows 20 requests a day. Because the cache key includes the
+reader's taste signature (D-047), that is 20 *(track, answer-set)* pairs, not
+20 tracks — a third visitor with different answers could exhaust it on a single
+song. OD-021 called this a launch blocker and it was.
+
+DeepSeek is metered: **~$0.0001 an insight**, so $10 buys on the order of
+100,000 of them. That alone decides the provider.
+
+**What it costs us: no schema enforcement.** Gemini takes a `responseSchema`
+and guarantees the shape. DeepSeek's `response_format` accepts `json_object`
+only and rejects `json_schema` outright — *"This response_format type is
+unavailable now"*. That matters more than it sounds, because D-029 established
+that making paragraphs structural is the only reason the synthesis is not a
+wall of text.
+
+Measured over 8 runs of the real prompt, identical but for the shape contract:
+
+| | `synthesis` is a 2–3 element array | median latency |
+|---|---|---|
+| Shape described in prose only | **0/8** | 43.8s |
+| Shape described in the prompt | **8/8** | 19.4s |
+
+So the schema moves into the prompt (`SHAPE_CONTRACT`), and `toInsight` coerces
+rather than trusts — a bare string is split on blank lines, non-string elements
+are dropped. The verbatim gates are unchanged, because they never trusted the
+model in the first place. That is the payoff for having built them that way.
+
+**The reasoning tax.** The first sequential measurements were far worse than the
+concurrent ones: a median of 47s and a worst case of 59s, which the 25s timeout
+would have thrown away. The cause was visible in `usage`: 2,700–7,600
+*reasoning* tokens to produce 100–190 words of prose. `deepseek-v4-flash` is a
+reasoning model and was deliberating over a task with nothing to deliberate
+about — the song, the sources and the required shape are all given.
+
+| | reasoning tokens | median | gates passed |
+|---|---|---|---|
+| Default | 2,700–7,600 | 32.3s | 3/3 |
+| `reasoning_effort: "minimal"` | 2,700–5,100 | 25.1s | 3/3 |
+| `thinking: {type: "disabled"}` | **0** | **5.4s** | **8/8** |
+
+Thinking off is a **6× speedup and a ~7× cost reduction for no measured loss**
+on any gate — shape, verbatim lyrics, or grounded quote. `reasoning_effort`
+is not a substitute; it barely moved. The drawer lands at 5.4s median, inside
+PRD §4's 3–6s budget and level with the Gemini it replaces.
+
+**Why Gemini stays.** Not for quality — as a second failure domain. DeepSeek is
+one company in one region, and a silent drawer is a visible hole. The two are
+tried in sequence, not raced: the fallback covers an outage, and racing would
+double the spend on every cold insight to save time nobody is waiting on.
+
+The cost is one more adapter to keep in step, so the prompt and every gate moved
+into `providers/insight.ts`, which neither adapter can bypass. An adapter now
+chooses only *how* it talks to a model, never *what* it asks for or *which*
+answers get through. `gemini.server.ts` fell from 353 lines to 91.
+
+`insight:v3` → `v4`: the copy budget changes what gets written, and 30-day
+entries would otherwise keep serving the old length (the D-049 lesson).
 
 ### D-049 — Channel uploads, and the caches that outlived their fixes
 **Fixed 2026-08-22.** Reported with a screenshot: no player on the track page.
@@ -260,9 +321,13 @@ floor fails 1.
 > The cost is real: OD-021's twenty-a-day quota no longer buys twenty *tracks*
 > but twenty *(track, answer-set)* pairs. Accepted knowingly; it makes the
 > launch blocker sharper, not new.
+>
+> **Superseded by D-050.** The quota belonged to Gemini, which is now only the
+> fallback. On a metered provider the multiplier costs about a hundredth of a
+> cent per pair rather than a share of a hard daily cap.
 
 > **The signature is validated against the enums at every entry point.** It
-> reaches a cache key, and every miss is a Gemini call, so an unbounded value
+> reaches a cache key, and every miss is a paid model call, so an unbounded value
 > would let a caller mint entries at will. `parsePreferences` for query
 > strings and `normalisePreferences` for objects both drop anything not in
 > `MOODS`, `PULLS` or `FAMILIARITIES`. Verified live: junk falls back to
@@ -786,7 +851,8 @@ hides the element rather than showing a broken-image glyph.
 > for the paragraph join alone; these two changes altered the stored shape.
 
 > **Quota:** Tavily is on the Researcher plan — 1000 searches/month, and one
-> search per uncached track. Far less binding than Gemini's 20/day (OD-021).
+> search per uncached track. Since D-050 removed Gemini's 20/day ceiling, this
+> is now the binding limit on cold insights.
 
 ### D-030 — The quote gate verifies the text, not just the citation
 **Decided 2026-08-22.** `validateQuote` now requires the quote to appear in the
@@ -809,8 +875,14 @@ Verified by mutation: removing the check fails 2 tests, removing apostrophe
 folding fails 1, removing the length floor fails 1.
 
 ### D-029 — Synthesis paragraphs are structural, not typographic
-**Decided 2026-08-22.** Gemini returns `synthesis` as an array of paragraphs;
-`gemini.server.ts` joins them with blank lines at the boundary.
+**Decided 2026-08-22.** The model returns `synthesis` as an array of
+paragraphs, joined with blank lines at the provider boundary.
+
+> **Amended by D-050.** The join moved to `providers/insight.ts`, shared by both
+> providers. It also had to become defensive: DeepSeek cannot enforce the array,
+> so a bare string is split rather than assumed. The reason for the array is
+> unchanged and was re-confirmed on the new provider — without the shape stated,
+> `synthesis` came back as an array 0 times out of 8.
 
 Asked for "two or three short paragraphs" as a single string, the model returned
 one unbroken block in 4 of 6 sampled tracks — up to 1467 characters with no
@@ -829,12 +901,20 @@ never had any to split.
 > successor; the default was moved rather than pinned, and the variable stays
 > overridable. `gemini-3.6-flash` also works but averaged 11.9s against 6.5s,
 > outside the PRD §4 budget of 3–6s. The Pro tier returns 429 on a free key.
+>
+> Since D-050 the primary is `DEEPSEEK_MODEL`, defaulting to
+> `deepseek-v4-flash`. `deepseek-v4-pro` was measured and rejected: 54.2s median
+> against 19.4s, with no gain on any gate. Both variables stay overridable for
+> the same reason — model names churn, and being unable to change one without a
+> deploy is how the 2.5-flash retirement took the drawer down.
 
 > **Quota:** the free tier allows **20 generate-content requests per day**. The
 > 30-day cache absorbs repeat views, so this is workable in development, but it
 > is a **launch blocker**: 20 uncached tracks per day across all users, then the
 > drawer 502s. Resolve before deploy — either billing, or pre-warming the
 > curated catalogue into the cache. Tracked as OD-021.
+>
+> **Resolved by D-050** — a metered provider, not a pre-warm.
 
 ### D-028 — Landing page sized for a doorway, not a poster
 **Fixed 2026-08-22.** Reported: "huge fonts, the user has to scroll first then
@@ -1044,7 +1124,9 @@ than the `scroll` event: programmatic scrolling fires `scroll` too, so we would
 have spent our time cancelling ourselves.
 
 ### D-021 — Insights: no source, no quote
-**Decided 2026-08-22.** Gemini via REST (OD-003); Tavily for grounding (OD-004).
+**Decided 2026-08-22.** An LLM via REST (OD-003); Tavily for grounding
+(OD-004). The provider was Gemini; it is DeepSeek since D-050, and the gate
+below is provider-independent by construction.
 
 PRD §3.5 asks for "a highlighted pull-quote from the artist or producer", and
 the product promises context "directly from the original creators". An LLM
@@ -1359,7 +1441,11 @@ src/
 │       └── track.ts           # GET /api/track?id=
 ├── server/                    # server-only; never imported by the client
 │   ├── lyrics.server.ts       # business logic (D-014)
-│   └── lyrics.functions.ts    # createServerFn boundary for loaders
+│   ├── lyrics.functions.ts    # createServerFn boundary for loaders
+│   └── providers/
+│       ├── insight.ts         # prompt + every output gate, shared (D-050)
+│       ├── deepseek.server.ts # primary writer
+│       └── gemini.server.ts   # fallback writer
 ├── features/
 │   ├── discovery/             # search-field + use-debounced
 │   ├── scrollytelling/        # lyric-canvas + use-scroll-spy
@@ -1404,7 +1490,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-017 | Scripts beyond Latin and Devanagari still have no face — Arabic, Bengali, Tamil, CJK would render as tofu | §3.4 | Same class of bug as D-019. Needs a face per script the catalogue serves |
 
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
-| OD-021 | **Gemini free tier: 20 requests/day.** Launch blocker — needs billing or a pre-warmed catalogue | §3.5 | Accepted for development 2026-08-22 (D-029). Cache absorbs repeats, not first views |
+| OD-021 | ~~**Gemini free tier: 20 requests/day.** Launch blocker~~ | §3.5 | **Resolved 2026-08-22 (D-050).** DeepSeek is metered at ~$0.0001/insight; Gemini demoted to fallback, where the quota no longer gates anything |
 | OD-023 | PRD §3.3 annotated phrases are styled but never populated — Genius annotations are not fetched | §3.3 | The `.lyric__annotated` rule exists and nothing applies it |
 | OD-024 | No analytics, so none of the PRD §5 metrics can be measured | Metrics | Lyrics <500ms, 30% drawer engagement, 10% card export are all unobservable |
 
