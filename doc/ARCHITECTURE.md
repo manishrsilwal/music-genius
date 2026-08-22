@@ -134,6 +134,73 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-051 — Grain, tinted elevation, and the card as a social object
+**Decided 2026-08-22.** A design audit against the `redesign-existing-projects`
+checklist. Most of it already passed — the serif/sans pairing, the tinted
+off-black, the single runtime accent, one gray family, the `--layer-*` scale,
+the focus ring, `tabular-nums`, `text-wrap`. What follows is what it actually
+found.
+
+**Texture.** Every surface was flat. A flat dark field reads as a screen; a
+grained one reads as a printed page, which is the premise of the product. The
+grain is an `feTurbulence` data URI on `body::after` — no request, tiles
+seamlessly via `stitchTiles`, sharp at any density — held at `0.045` opacity,
+`position: fixed` so it belongs to the viewport rather than the document. Grain
+that scrolls with the page crawls, which is the one thing film grain must not
+do. It takes `--layer-grain: 70`, above modals, and is inert by construction.
+
+**Elevation was neutral black.** A pure-black shadow on a canvas tinted at hue
+265 desaturates whatever it falls on and reads as a grey object rather than as
+absence of light. Three tinted steps replace it, plus `--shadow-sheet`, which
+casts *upward* — the insights sheet is anchored to the bottom edge, and reusing
+the downward scale there lit it from below. Caught by reading the rule it
+replaced, not by looking at it.
+
+**Glass had no thickness.** A single flat 1px border renders a cut-out. Two
+insets — a sheen on the top edge, a shade inside the lower — render a pane.
+
+**The hero met the viewport edge at full strength**, so the artwork read as a
+photo pasted onto the page rather than printed on it. An elliptical corner
+vignette joins the existing veil stack; ellipse rather than circle so it tracks
+the aspect ratio instead of pinching on a wide display.
+
+**The real gap was social.** The product ships a Lyric Card rasteriser and had
+never wired it to sharing: no `og:image`, no `twitter:card`, no favicon, no
+`public/` directory at all. A shared track link previewed as a bare URL — a poor
+argument from a product whose whole claim is that lyrics deserve to be set
+properly.
+
+`/api/card` could not serve it: it is POST, because a six-line verse does not
+fit in a URL, and a crawler only ever issues a GET. So `/api/og?trackId=` is a
+second entry point onto the *same renderer* — the preview is the same object as
+the export, which is the point.
+
+> **og:image must be absolute.** The first version emitted
+> `/api/og?trackId=…` and would have shipped broken: crawlers drop a relative
+> og:image rather than resolving it against the page. `SITE_URL` is read
+> through `env.ts` like every other variable and reaches `head()` through the
+> loader — a server function rather than `import.meta.env`, because a second
+> mechanism for reading configuration costs more than one call on a
+> client-side navigation that nothing is waiting on. Unset, it degrades to a
+> relative URL: wrong for a crawler, correct in local development.
+
+**Accessibility.** A skip link (a track page is one long scroll of lyrics, and
+`<main>`/`<article>` had no id to skip to) and `prefers-contrast: more`, which
+lifts the two quietest inks, firms every hairline, and drops the grain to zero —
+texture costs contrast, and a reader asking for contrast should not pay for it.
+
+> The contrast block is **unlayered**, deliberately. `@theme` emits the same
+> custom properties into `:root` outside any cascade layer, and layered CSS
+> loses to unlayered CSS whatever the specificity — so inside `@layer base` the
+> override would have been silently dead. Verified in the compiled CSS: the
+> base value lands at byte 2,609 unlayered, the override at 26,649, also
+> unlayered and later. Same trap as D-003 and D-033.
+
+Rejected: warming the neutrals off hue 265, and adding editorial furniture
+(drop caps, folios, running heads). Both were offered and neither was taken —
+the palette is cool so album-derived accents stay dominant, and that reasoning
+still holds.
+
 ### D-050 — DeepSeek primary, Gemini fallback, and the reasoning tax
 **Decided 2026-08-22.** Replaces Gemini as the drawer's writer (OD-003).
 
@@ -1453,7 +1520,8 @@ src/
 │       ├── track.ts           # GET /api/track?id=
 │       ├── artwork.ts         # GET /api/artwork?title=&artist=   (per-row art)
 │       ├── insights.ts        # GET /api/insights?…               (deferred)
-│       └── card.ts            # GET /api/card?…                   (PNG, §3.4)
+│       ├── card.ts            # POST /api/card                    (PNG, §3.4)
+│       └── og.ts              # GET /api/og?trackId=              (social, D-051)
 ├── server/                    # server-only; never imported by the client
 │   ├── env.ts                 # the only reader of process.env (D-014)
 │   ├── lyrics.server.ts       # business logic + cache keys (D-014, D-017)
@@ -1486,8 +1554,13 @@ src/
 ├── styles/                    # Sass partials (D-013)
 │   ├── _breakpoints.scss      # mirrors Tailwind's screens
 │   └── _mixins.scss           # from() · reduced-motion · glass · line-clamp
-├── styles.css                 # Tailwind entry + token layer (D-003, D-033)
+├── styles.css                 # Tailwind entry + token layer (D-003, D-033, D-051)
 └── router.tsx
+```
+
+```
+public/
+└── favicon.svg                # the mark: a stanza, not a musical note (D-051)
 ```
 
 Import alias: `@/*` and `#/*` both resolve to `src/*` (scaffolder default; `@/*` preferred).
@@ -1515,6 +1588,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-017 | Scripts beyond Latin and Devanagari still have no face — Arabic, Bengali, Tamil, CJK would render as tofu | §3.4 | Same class of bug as D-019. Needs a face per script the catalogue serves |
 
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
+| OD-026 | **`og:image` picks the first four lines of a track.** For some songs that surfaces language that reads differently as a social preview than as a page a reader chose to open | §3.4 | Open — raised 2026-08-22 (D-051). Options: the hook rather than the opening, a curated line range, or accept it |
 | OD-021 | ~~**Gemini free tier: 20 requests/day.** Launch blocker~~ | §3.5 | **Resolved 2026-08-22 (D-050).** DeepSeek is metered at ~$0.0001/insight; Gemini demoted to fallback, where the quota no longer gates anything |
 | OD-023 | PRD §3.3 annotated phrases are styled but never populated — Genius annotations are not fetched | §3.3 | The `.lyric__annotated` rule exists and nothing applies it |
 | OD-024 | No analytics, so none of the PRD §5 metrics can be measured | Metrics | Lyrics <500ms, 30% drawer engagement, 10% card export are all unobservable |

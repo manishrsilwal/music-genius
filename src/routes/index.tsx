@@ -48,6 +48,7 @@ function Discovery() {
 
 	return (
 		<motion.main
+			id="main"
 			className="landing mx-auto w-full max-w-2xl px-6"
 			variants={staggerVariants}
 			initial="hidden"

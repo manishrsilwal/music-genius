@@ -38,7 +38,17 @@
 		position: absolute;
 		inset: 0;
 		z-index: var(--layer-hero-veil);
+		// Three layers, front to back. The corner vignette is the addition:
+		// without it the artwork meets the viewport edge at full strength and
+		// the hero reads as a photo pasted into a page rather than one printed
+		// on it. Ellipse rather than circle so it tracks the aspect ratio
+		// instead of pinching on a wide display.
 		background:
+			radial-gradient(
+				ellipse 78% 68% at 50% 42%,
+				transparent 0%,
+				oklch(0.08 0.012 265 / 0.55) 100%
+			),
 			radial-gradient(120% 80% at 50% 0%, transparent 0%, var(--color-canvas) 78%),
 			linear-gradient(to bottom, oklch(0.13 0.008 265 / 0.55), var(--color-canvas));
 	}

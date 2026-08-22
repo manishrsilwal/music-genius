@@ -33,12 +33,38 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			{
 				title: "Typographic Lyrical Explorer",
 			},
+			/*
+			 * Social cards (D-051). A shared link previously rendered as a bare
+			 * URL, which for a product whose whole argument is that lyrics
+			 * deserve to be set properly is the worst possible first
+			 * impression. Track routes override og:title, og:description and
+			 * og:image per song; these are the defaults for everything else.
+			 */
+			{ property: "og:type", content: "website" },
+			{ property: "og:site_name", content: "Typographic Lyrical Explorer" },
+			{ property: "og:title", content: "Typographic Lyrical Explorer" },
+			{
+				property: "og:description",
+				content:
+					"Lyrics as a premium editorial reading experience \u2014 synced, annotated, and beautifully set.",
+			},
+			{ name: "twitter:card", content: "summary_large_image" },
+			{
+				name: "theme-color",
+				content: "#191a20",
+			},
 		],
 		links: [
 			{
 				rel: "stylesheet",
 				href: appCss,
 			},
+			/*
+			 * SVG only, with no .ico fallback: every browser that can run this
+			 * app supports it, and an .ico would be a second asset carrying the
+			 * same mark at worse fidelity.
+			 */
+			{ rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
 		],
 	}),
 	shellComponent: RootDocument,
@@ -62,6 +88,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
+				{/*
+				 * First focusable thing on the page, before any chrome. A track
+				 * page is one long scroll of lyrics, so a keyboard reader who
+				 * had to tab past the search field, the dock and the drawer
+				 * affordance to reach the words would be paying for our layout.
+				 */}
+				<a href="#main" className="skip-link">
+					Skip to content
+				</a>
 				{children}
 				<TanStackDevtools
 					config={{

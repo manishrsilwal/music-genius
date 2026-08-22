@@ -16,6 +16,16 @@ function read(name: string): string | undefined {
 }
 
 export const env = {
+	/**
+	 * Public origin, e.g. https://lyrics.example.com — no trailing slash.
+	 *
+	 * Only social crawlers need it, but they need it absolutely: the Open Graph
+	 * spec requires og:image to be a full URL, and a relative one is silently
+	 * dropped rather than resolved (D-051). Undecided deployment target
+	 * (OD-007) is why this is configuration and not a constant.
+	 */
+	siteUrl: read("SITE_URL")?.replace(/\/+$/, ""),
+
 	/** Genius API client access token — album art and metadata (OD-005). */
 	geniusAccessToken: read("GENIUS_ACCESS_TOKEN"),
 

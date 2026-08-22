@@ -31,6 +31,10 @@
 	border: 1px solid var(--glass-border);
 	backdrop-filter: blur(var(--glass-blur));
 	-webkit-backdrop-filter: blur(var(--glass-blur));
+	// Real glass has thickness: light catches its top edge and the inside of
+	// its lower edge falls into shade. A single flat border renders a cut-out;
+	// these two insets render a pane.
+	box-shadow: var(--glass-sheen), var(--glass-inner);
 }
 
 /// Extend a control's touch target without changing how big it looks.

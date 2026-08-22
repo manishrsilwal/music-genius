@@ -27,7 +27,10 @@ export function RouteMessage({
 	const { to, label } = action ?? { to: "/", label: "Back to search" };
 
 	return (
-		<main className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center">
+		<main
+			id="main"
+			className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center"
+		>
 			<p className="text-micro uppercase tracking-label text-ink-faint">
 				{kicker}
 			</p>

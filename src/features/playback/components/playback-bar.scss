@@ -185,7 +185,7 @@
 		background: oklch(0.08 0 0);
 		box-shadow:
 			inset 0 0 0 1px var(--color-hairline),
-			0 0.25rem 1rem oklch(0 0 0 / 0.45);
+			var(--shadow-2);
 
 		// Paused holds the angle it stopped at rather than snapping to zero,
 		// so play/pause reads as one continuous object.

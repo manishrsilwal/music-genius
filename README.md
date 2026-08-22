@@ -29,6 +29,10 @@ AI-synthesized context, and beautifully set.
 | Tavily | web grounding; without it there is no quote, by design | optional |
 | Upstash Redis | shared cache; falls back to per-process memory | strongly advised |
 
+`SITE_URL` is configuration rather than a service: set it to the deployment's
+public origin so shared track links carry an absolute `og:image` and preview as
+a lyric card. Everything else works without it.
+
 ## Commands
 
 ```bash

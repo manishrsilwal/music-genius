@@ -320,6 +320,36 @@ Always pair `backdrop-filter` with `-webkit-backdrop-filter`; the mixin does.
 
 ---
 
+### Texture, and why the page is grained
+
+A flat dark field reads as a screen. A grained one reads as a printed page,
+which is the argument the whole product is making, so a fixed `feTurbulence`
+overlay sits above every surface at `0.045` opacity (D-051).
+
+Three things make it texture rather than an effect:
+
+- **Fixed, not scrolled.** Grain that moves with the document crawls. It
+  belongs to the viewport, the way grain belongs to the film rather than to
+  the scene.
+- **Faint.** By `0.12` the reader is looking at the grain instead of the words.
+- **Inert.** `pointer-events: none`, so sitting above modals costs nothing.
+
+It is set to zero under `prefers-contrast: more`. Texture costs contrast, and a
+reader who asked for contrast should not be paying for it.
+
+### Elevation is tinted, and has a direction
+
+Shadows carry the canvas hue, never neutral black — on a tinted canvas a black
+shadow desaturates what it falls on and reads as a grey object rather than as
+absence of light. Take a `--shadow-*` step; do not write one inline.
+
+Direction is part of the token. `--shadow-sheet` casts **upward**, because a
+surface anchored to the bottom edge throws its shadow onto what it covers.
+Reusing the downward scale there lights the sheet from below.
+
+Glass gets two insets, not one flat border: a sheen along the top edge and a
+shade inside the lower one. One border renders a cut-out; two render a pane.
+
 ## 7. Responsive
 
 Breakpoints mirror Tailwind's exactly, so Sass media queries and Tailwind
@@ -433,6 +463,15 @@ Before shipping a component:
       never a request for a length or a line break in prose (D-029, D-050)
 - [ ] A safeguard on model output is enforced in code, not in the prompt, and
       survives changing the model (D-030, D-050)
+- [ ] Shadows take a `--shadow-*` step and carry the canvas hue — never a
+      neutral black, and never one written inline (D-051)
+- [ ] A surface on the bottom edge casts its shadow upward (D-051)
+- [ ] Overrides of a `@theme` token are written UNLAYERED — inside `@layer`
+      they lose to Tailwind's own `:root` output whatever the specificity
+      (D-003, D-051)
+- [ ] Every page has an `id="main"` landmark for the skip link (D-051)
+- [ ] A new route that can be shared carries `og:title`, `og:description` and
+      an ABSOLUTE `og:image` — crawlers drop a relative one (D-051)
 
 ---
 
@@ -440,6 +479,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-051** Film grain, tinted elevation, hero vignette, glass thickness; skip link, `prefers-contrast`, favicon and per-track social cards |
 | 2026-08-22 | **D-050** Drawer copy gains an explicit word budget; writing model swapped with no change to any output gate |
 | 2026-08-22 | **D-049** Channel-upload titles retried against Genius; all four cache keys versioned |
 | 2026-08-22 | **D-048** Drawer measure fixed at 69 characters; one scroll owner; labels separate sections |
