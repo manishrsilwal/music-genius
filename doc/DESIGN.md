@@ -174,6 +174,18 @@ plainly out-specifies the one above:
 > creates a stacking context, so a drawer nested in the dock could never rise
 > above it. The dock and the overlays are siblings.
 
+### A reading column has one scroll axis
+
+Never put a horizontal scroller inside a vertical reading column. Two axes
+compete, and a carousel shows less of the set than a list does in the same
+height. Set `overflow-x: clip` on scroll containers — `clip`, not `hidden`, so
+the element cannot itself become a scroll container.
+
+**A bleed must have something to bleed into.** `margin-inline: -Npx` inside a
+container padded by exactly `N` makes the child wider than the content box; if
+that container scrolls on either axis, the other axis silently becomes `auto`
+and a scrollbar appears.
+
 ### Safe areas
 
 Anything touching the bottom edge adds `env(safe-area-inset-bottom, 0px)` —
@@ -367,6 +379,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-043** Sources become a numbered reference list; the quote's citation is now followable |
 | 2026-08-22 | **D-041** Route error boundaries; a dead end is set like the rest of the product |
 | 2026-08-22 | **D-040** Docked bar gains a full-width scrub track, icon play/pause and a clock |
 | 2026-08-22 | **D-039** YouTube chrome suppressed via `controls: 0`; the player itself stays displayed |

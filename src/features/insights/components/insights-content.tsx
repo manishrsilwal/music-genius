@@ -3,16 +3,32 @@ import type { SyntheticEvent } from "react";
 import type { Insight } from "@/lib/types";
 
 /**
- * The three slots from PRD §3.5 — the Synthesis, the Quote, the Source Gallery.
+ * The three slots from PRD §3.5 — the Synthesis, the Quote, the Sources.
  * Shared verbatim by the desktop panel and the mobile sheet, so the two can
  * never drift apart.
+ *
+ * The sources are a numbered reference list rather than the horizontal gallery
+ * the PRD describes (D-043). A carousel inside a 30rem reading panel puts two
+ * scroll axes in the reader's way, and the numbering earns its keep: the quote
+ * already carries a `sourceIndex`, so the citation becomes something the
+ * reader can follow instead of metadata only the code can see.
  */
+
 /**
  * Favicons and YouTube stills 404 often enough to matter. A broken-image glyph
- * in an editorial gallery is worse than no image at all, so drop it silently.
+ * beside a citation is worse than no image at all, so drop it silently.
  */
 function hide(event: SyntheticEvent<HTMLImageElement>) {
 	event.currentTarget.style.display = "none";
+}
+
+/** `https://www.theguardian.com/culture/...` → `theguardian.com`. */
+export function domainOf(url: string): string {
+	try {
+		return new URL(url).hostname.replace(/^www\./, "");
+	} catch {
+		return "";
+	}
 }
 
 export function InsightsContent({ insight }: { insight: Insight }) {
@@ -35,47 +51,70 @@ export function InsightsContent({ insight }: { insight: Insight }) {
 					<blockquote className="text-lead">“{insight.quote.text}”</blockquote>
 					<figcaption className="text-micro">
 						{insight.quote.attribution}
+						{/*
+						  The quote survived the verbatim gate against this exact
+						  source (D-030), so say which one. Previously the index
+						  was enforced in code and then thrown away.
+						*/}
+						<a
+							href={`#source-${insight.quote.sourceIndex}`}
+							className="insights__cite"
+						>
+							{insight.quote.sourceIndex + 1}
+						</a>
 					</figcaption>
 				</figure>
 			)}
 
 			{insight.sources.length > 0 && (
 				<section>
-					<p className="insights__label text-micro">The Source Gallery</p>
-					<div className="insights__sources mt-4">
-						{insight.sources.map((source) => (
-							<a
+					<p className="insights__label text-micro">The Sources</p>
+					{/* Numbered so the quote's citation points somewhere real. */}
+					<ol className="insights__sources mt-4">
+						{insight.sources.map((source, index) => (
+							<li
 								key={source.url}
-								href={source.url}
-								target="_blank"
-								rel="noreferrer noopener"
+								id={`source-${index}`}
 								className="insights__source"
 							>
-								{source.kind === "video" && source.thumbnail && (
-									<img
-										src={source.thumbnail}
-										alt=""
-										loading="lazy"
-										className="insights__source-still"
-										onError={hide}
-									/>
-								)}
-								<span className="insights__source-kind text-micro">
-									{source.kind === "article" && source.thumbnail && (
+								<a
+									href={source.url}
+									target="_blank"
+									rel="noreferrer noopener"
+									className="insights__source-link"
+								>
+									{source.kind === "video" && source.thumbnail ? (
 										<img
 											src={source.thumbnail}
 											alt=""
 											loading="lazy"
-											className="insights__source-mark"
+											className="insights__source-still"
 											onError={hide}
 										/>
-									)}
-									{source.kind === "video" ? "Video" : "Article"}
-								</span>
-								<span className="mt-2 block text-caption">{source.title}</span>
-							</a>
+									) : null}
+
+									<span className="insights__source-body">
+										<span className="insights__source-title text-caption">
+											{source.title}
+										</span>
+										<span className="insights__source-meta text-micro">
+											{source.kind === "article" && source.thumbnail ? (
+												<img
+													src={source.thumbnail}
+													alt=""
+													loading="lazy"
+													className="insights__source-mark"
+													onError={hide}
+												/>
+											) : null}
+											{domainOf(source.url)}
+											{source.kind === "video" ? " · Video" : ""}
+										</span>
+									</span>
+								</a>
+							</li>
 						))}
-					</div>
+					</ol>
 				</section>
 			)}
 

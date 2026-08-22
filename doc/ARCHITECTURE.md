@@ -134,6 +134,47 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-043 — Sources are a reference list, not a carousel
+**Fixed 2026-08-22.** Reported with a screenshot: a horizontal scrollbar in the
+insights panel, and an ask to find a sensible way to show this data.
+
+**The bug.** `.insights__sources` bled to the panel edges with
+`margin-inline: -1.75rem`, cancelling the panel's own `1.75rem` padding. That
+made it 3.5rem wider than the panel's content box — and because `.drawer-panel`
+sets `overflow-y: auto`, CSS computes the other axis from `visible` to `auto`,
+so the panel grew a horizontal scrollbar. The scrollbar in the screenshot
+starts at the panel's left edge, not the page's, which is the tell.
+
+**The redesign.** A horizontal, swipeable gallery is what PRD §3.5 asks for,
+and it is wrong here. Inside a 30rem reading column it puts a second scroll
+axis across a vertical one, gives each source a 13rem card for what is a link
+and a headline, and shows two or three sources at a time out of six.
+
+The sources are now a **numbered reference list**, which is what an editorial
+product does with its sources. The numbering is not decoration: the quote
+already carries a `sourceIndex`, enforced against the excerpt it cites
+(D-030), and that index was being validated in code and then thrown away. The
+citation is now a chip beside the attribution that links to `#source-N`, so a
+reader can follow the claim to its source — the thing the whole verbatim gate
+exists to make trustworthy.
+
+- Numbers come from a CSS counter, so the list cannot disagree with itself
+  about the order.
+- **Only videos get an image.** A favicon beside the domain is enough for an
+  article, and a column of near-identical og-images reads as noise.
+- The domain is shown, because "theguardian.com" tells a reader more about
+  whether to trust a claim than a headline does.
+
+> **This is a deliberate deviation from PRD §3.5**, which specifies "a
+> horizontal, swipeable gallery". The gallery suits a wide surface; the drawer
+> is a narrow column on both desktop and mobile. Flagged rather than silently
+> reinterpreted.
+
+> **Both scroll containers now set `overflow-x: clip`.** A reading column has
+> one scroll axis. `clip` rather than `hidden` so it cannot itself become a
+> scroll container, and so nothing added later can quietly widen it the way the
+> bleeding gallery did.
+
 ### D-042 — CI runs the same command a person does
 **Decided 2026-08-22.** Resolves OD-025. A GitHub Actions workflow on every
 push to `main` and every pull request, running **`bun run verify`** — one
