@@ -134,6 +134,75 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-054 — "Loading" was the only thing playback could ever say
+**Fixed 2026-08-22.** Reported with a screenshot: "Wish You Were Here" stuck on
+LOADING beside an empty black rectangle.
+
+**The player had no failure path at all.** `notice = !ready ? "Loading"`, and
+`ready` was set in exactly one place — `onReady`. There was no `onError`
+handler, no timeout on the API script, no timeout on the player, and no
+`unavailable` state anywhere. So *every* way this can fail rendered as a
+spinner that never resolves: a blocked script, a removed video, an embed the
+rights holder restricted, a dead connection. The reader is told the same thing
+in all of them, which is nothing.
+
+**The structural bug: React and the IFrame API both owned the same node.**
+
+`new YT.Player(el)` does not render *into* the element it is handed — it
+**replaces** it with an iframe, and `destroy()` then removes what it put there.
+The element passed was React-rendered:
+
+```tsx
+<div className="playback__video">
+  <div ref={mountRef} />        {/* React owns this; YouTube deletes it */}
+</div>
+```
+
+React keeps a reference to a node that is no longer in the document, and any
+remount builds the player against a detached element — so the iframe is never
+in the page and `onReady` never fires. A permanent "Loading" beside an empty
+black box is precisely what that looks like, which is precisely what was
+reported.
+
+`mountRef` is now a stable container React owns and never writes into; the node
+YouTube destroys is created imperatively inside it. The container is **never
+conditionally unmounted**, because tearing it down while the iframe is inside
+would restore the same conflict — instead the hook empties it on failure and
+`.playback__video:empty { display: none }` removes the black box.
+
+**What now happens instead:**
+
+| failure | before | after |
+|---|---|---|
+| API script blocked | hangs forever | 8s timeout, then a reason |
+| player never starts | hangs forever | 12s timeout, then a reason |
+| owner blocks embedding (101/150) | hangs forever | says so, offers the link |
+| video removed (100) | hangs forever | says so |
+| unknown code | hangs forever | "playback failed" |
+
+A failed `loadApi()` promise is no longer cached: one blocked request used to
+poison every later track in the session, since the module-level promise was
+kept whatever it settled to.
+
+Polling moved inside `onReady`. `YT.Player` methods are not callable before the
+player is ready, so `getCurrentTime()` was throwing on every 250ms tick from
+the moment the constructor returned.
+
+> **The fallback is a link, not a retry.** When the embed is refused the reader
+> still wants the song, and YouTube will play it on its own site — that is also
+> the outcome the rights holder chose. Retrying an embed the owner has
+> restricted would just fail again more slowly.
+
+**What could not be verified here.** No browser automation is available in this
+environment, so the fixes are reasoned from the API's documented behaviour and
+the screenshot, and the error-code mapping is unit-tested for totality — every
+code, documented or not, yields a sentence. Whether *this particular* video
+embeds is a decision on YouTube's side that cannot be read from the server: the
+embed page for a working track and this one are byte-identical on every
+playability field, both returning a generic `previewPlayabilityStatus: ERROR`
+to a non-browser client. If it turns out to be 101/150, the bar will now say so
+and offer the link, which is the correct outcome rather than a fix.
+
 ### D-053 — What the checklists missed: contrast, focus, language, crawlers
 **Fixed 2026-08-22.** A deeper audit than D-051 and D-052, which both worked
 from design checklists. This one measured.

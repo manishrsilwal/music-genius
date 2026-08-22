@@ -40,8 +40,17 @@ export function PlaybackBar({
 	const mountRef = useRef<HTMLDivElement>(null);
 	const sentinelRef = useRef<HTMLDivElement>(null);
 	const docked = useDocked(sentinelRef);
-	const { ready, playing, currentTime, duration, toggle, seek } =
-		useYouTubePlayer(videoId, mountRef);
+	const {
+		status,
+		ready,
+		reason,
+		playing,
+		currentTime,
+		duration,
+		toggle,
+		seek,
+	} = useYouTubePlayer(videoId, mountRef);
+	const unavailable = status === "unavailable";
 
 	const syncing = synced && playing;
 	const { manual, resume } = useManualOverride(syncing);
@@ -73,13 +82,18 @@ export function PlaybackBar({
 	// button sitting beside it, and "Following" restated the obvious while the
 	// canvas was visibly following; both crowded out the artist, which is what
 	// a now-playing line is actually for (D-036).
-	const notice = !ready
-		? "Loading"
-		: playing && !synced
-			? "No timings"
-			: playing && manual
-				? "Manual scroll"
-				: null;
+	// "Loading" is only honest while something is still happening. When
+	// playback has actually failed, say what failed — a spinner that never
+	// resolves is the one state that tells the reader nothing at all (D-054).
+	const notice = unavailable
+		? (reason ?? "Playback unavailable")
+		: !ready
+			? "Loading"
+			: playing && !synced
+				? "No timings"
+				: playing && manual
+					? "Manual scroll"
+					: null;
 
 	return (
 		<div className="playback-slot">
@@ -99,7 +113,7 @@ export function PlaybackBar({
 				transition={transition.editorial}
 			>
 				{/* Full-bleed across the top edge when docked (D-040). */}
-				{docked && (
+				{docked && !unavailable && (
 					<Seekbar
 						currentTime={currentTime}
 						duration={duration}
@@ -122,15 +136,17 @@ export function PlaybackBar({
 					<span className="playback__spindle" />
 				</div>
 
-				<button
-					type="button"
-					onClick={toggle}
-					disabled={!ready}
-					aria-label={playing ? "Pause" : "Play"}
-					className="playback__toggle"
-				>
-					{playing ? <PauseIcon /> : <PlayIcon />}
-				</button>
+				{!unavailable && (
+					<button
+						type="button"
+						onClick={toggle}
+						disabled={!ready}
+						aria-label={playing ? "Pause" : "Play"}
+						className="playback__toggle"
+					>
+						{playing ? <PauseIcon /> : <PlayIcon />}
+					</button>
+				)}
 
 				{/* Times are read from the seekbar's aria-valuetext, so these are
 				    decoration for the eye only. */}
@@ -164,9 +180,37 @@ export function PlaybackBar({
 			  record leads and the player is quiet — but it is genuinely on
 			  screen, never clipped, faded or covered (D-036).
 			*/}
-				<div className="playback__video">
-					<div ref={mountRef} />
-				</div>
+				{/*
+				  Once playback has failed there is no player to display, so the
+				  policy that requires it visible (D-036) no longer applies —
+				  and an empty black rectangle is worse than nothing: it reads
+				  as a broken image rather than as an absent feature. The link
+				  replaces it, because the reader came here for this song and
+				  YouTube will still play it on its own site.
+				*/}
+				{/*
+				  Always mounted, never conditional. Unmounting this while the
+				  API's iframe is inside it would put React and YouTube back to
+				  fighting over the same node — the bug this whole path exists
+				  to avoid (D-054). The hook empties it on failure and
+				  `:empty` hides it, so a dead player leaves no black box
+				  behind rather than a broken-looking rectangle.
+
+				  The ref is on the container itself: the hook creates and
+				  destroys the node inside it, so React must not render one.
+				*/}
+				<div ref={mountRef} className="playback__video" />
+
+				{unavailable && videoId && (
+					<a
+						href={`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="playback__elsewhere text-micro"
+					>
+						Watch on YouTube
+					</a>
+				)}
 
 				{manual && syncing && (
 					<button

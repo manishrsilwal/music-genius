@@ -52,7 +52,32 @@ interface PlayerOptions {
 	events?: {
 		onReady?: (event: { target: YTPlayer }) => void;
 		onStateChange?: (event: { data: number }) => void;
+		onError?: (event: { data: number }) => void;
 	};
+}
+
+/**
+ * The IFrame API's error codes. 101 and 150 are the same condition reported
+ * twice, and between them they are the common one: a rights holder who allows
+ * the video on youtube.com and nowhere else. Major-label official uploads are
+ * the usual case, which means the tracks most likely to be searched for are
+ * the most likely to fail.
+ */
+const YT_ERROR: Record<number, string> = {
+	2: "invalid video id",
+	5: "the player could not start",
+	100: "the video has been removed",
+	101: "the owner does not allow embedding",
+	150: "the owner does not allow embedding",
+};
+
+/**
+ * A code turned into something a reader can act on. Exported because this is
+ * the part worth testing: an unknown code must still produce a sentence, since
+ * the whole point is that no failure renders as an endless "Loading" (D-054).
+ */
+export function describeYouTubeError(code: number): string {
+	return YT_ERROR[code] ?? "playback failed";
 }
 
 declare global {
@@ -64,32 +89,83 @@ declare global {
 
 const API_SRC = "https://www.youtube.com/iframe_api";
 
+/**
+ * How long to wait for youtube.com to hand us a player before giving up.
+ *
+ * There has to be a limit. A tracker blocker, a corporate proxy or a plain bad
+ * connection leaves the script request hanging rather than failing, and a
+ * promise that never settles renders as "Loading" until the reader closes the
+ * tab. Generous enough to survive a slow phone; short enough to be an answer.
+ */
+const API_TIMEOUT_MS = 8_000;
+
+/**
+ * And for the player itself. The script can load while the player never
+ * initialises — an embed the owner has restricted sometimes reports nothing at
+ * all rather than firing `onError`.
+ */
+const READY_TIMEOUT_MS = 12_000;
+
 /** Resolves once the IFrame API is ready; shared across every mount. */
 let apiReady: Promise<void> | null = null;
 
 function loadApi(): Promise<void> {
 	if (apiReady) return apiReady;
 
-	apiReady = new Promise((resolve) => {
+	apiReady = new Promise<void>((resolve, reject) => {
 		if (window.YT?.Player) {
 			resolve();
 			return;
 		}
-		// The API calls this global exactly once when it finishes loading.
-		window.onYouTubeIframeAPIReady = () => resolve();
 
-		if (!document.querySelector(`script[src="${API_SRC}"]`)) {
+		const timer = setTimeout(
+			() => reject(new Error("timed out loading the YouTube API")),
+			API_TIMEOUT_MS,
+		);
+
+		// The API calls this global exactly once when it finishes loading.
+		window.onYouTubeIframeAPIReady = () => {
+			clearTimeout(timer);
+			resolve();
+		};
+
+		const existing = document.querySelector<HTMLScriptElement>(
+			`script[src="${API_SRC}"]`,
+		);
+		if (!existing) {
 			const script = document.createElement("script");
 			script.src = API_SRC;
+			// Fires when the request is blocked outright, which is the common
+			// case and the one that used to hang until the timeout.
+			script.onerror = () => {
+				clearTimeout(timer);
+				reject(new Error("the YouTube API could not be loaded"));
+			};
 			document.head.appendChild(script);
 		}
+	});
+
+	// A rejected promise must not be cached, or one blocked request would make
+	// every later track in the session fail instantly without retrying.
+	apiReady.catch(() => {
+		apiReady = null;
 	});
 
 	return apiReady;
 }
 
+/**
+ * `unavailable` is a real outcome, not an edge case (D-054). Playback depends
+ * on a third party that can refuse for reasons entirely outside this product,
+ * and the reader is owed an answer rather than a spinner.
+ */
+export type PlaybackStatus = "loading" | "ready" | "unavailable";
+
 export interface PlaybackState {
+	status: PlaybackStatus;
 	ready: boolean;
+	/** Why playback is unavailable, in words a reader can act on. Null until it is. */
+	reason: string | null;
 	playing: boolean;
 	/** Seconds. Polled, so treat as approximate. */
 	currentTime: number;
@@ -110,7 +186,8 @@ export function useYouTubePlayer(
 	mountRef: React.RefObject<HTMLDivElement | null>,
 ): PlaybackState {
 	const playerRef = useRef<YTPlayer | null>(null);
-	const [ready, setReady] = useState(false);
+	const [status, setStatus] = useState<PlaybackStatus>("loading");
+	const [reason, setReason] = useState<string | null>(null);
 	const [playing, setPlaying] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [duration, setDuration] = useState(0);
@@ -120,11 +197,64 @@ export function useYouTubePlayer(
 
 		let cancelled = false;
 		let poll: ReturnType<typeof setInterval> | undefined;
+		let readyTimer: ReturnType<typeof setTimeout> | undefined;
+
+		setStatus("loading");
+		setReason(null);
+
+		const fail = (why: string) => {
+			if (cancelled) return;
+			if (readyTimer) clearTimeout(readyTimer);
+			if (poll) clearInterval(poll);
+			console.warn(`[playback] ${why}`);
+			setStatus("unavailable");
+			setReason(why);
+
+			// Tear the dead player down and empty its container, so the box does
+			// not sit there black. Deferred, because `onError` calls this from
+			// inside the player's own event dispatch and destroying it there
+			// throws.
+			setTimeout(() => {
+				try {
+					playerRef.current?.destroy();
+				} catch {
+					// Never initialised; nothing to destroy.
+				}
+				playerRef.current = null;
+				mountRef.current?.replaceChildren();
+			}, 0);
+		};
 
 		loadApi().then(() => {
 			if (cancelled || !mountRef.current || !window.YT) return;
 
-			playerRef.current = new window.YT.Player(mountRef.current, {
+			/*
+			 * Hand YouTube a node React has never heard of (D-054).
+			 *
+			 * `new YT.Player(el)` does not render INTO the element it is given,
+			 * it REPLACES it with an iframe — and `destroy()` then removes what
+			 * it put there. Passing a React-rendered node means React and the
+			 * IFrame API both believe they own it: React holds a reference to a
+			 * node that is no longer in the document, and on any remount the
+			 * player is built against a detached element, so the iframe never
+			 * appears on the page and `onReady` never fires. A permanent
+			 * "Loading" with an empty black box is exactly what that looks
+			 * like.
+			 *
+			 * So `mountRef` is now a stable container React owns and never
+			 * touches, and the node YouTube destroys is created here.
+			 */
+			const host = document.createElement("div");
+			mountRef.current.replaceChildren(host);
+
+			// The script can load while the player never initialises. Without
+			// this the reader waits on something that is not coming.
+			readyTimer = setTimeout(
+				() => fail("the player did not start"),
+				READY_TIMEOUT_MS,
+			);
+
+			playerRef.current = new window.YT.Player(host, {
 				videoId,
 				/**
 				 * Suppressing the player's UI is not the same as suppressing
@@ -153,29 +283,51 @@ export function useYouTubePlayer(
 				events: {
 					onReady: (event: { target: YTPlayer }) => {
 						if (cancelled) return;
-						setReady(true);
+						if (readyTimer) clearTimeout(readyTimer);
+						setStatus("ready");
 						setDuration(event.target.getDuration());
+
+						// Started here, not beside the constructor. The methods on
+						// a YT.Player are not callable until it is ready, so
+						// polling early threw on every tick.
+						poll = setInterval(() => {
+							const player = playerRef.current;
+							if (!player) return;
+							try {
+								setCurrentTime(player.getCurrentTime());
+							} catch {
+								// The iframe can go away under us on navigation.
+							}
+						}, POLL_MS);
 					},
 					onStateChange: (event: { data: number }) => {
 						if (cancelled || !window.YT) return;
 						setPlaying(event.data === window.YT.PlayerState.PLAYING);
 					},
+					onError: (event: { data: number }) => {
+						fail(describeYouTubeError(event.data));
+					},
 				},
 			});
-
-			poll = setInterval(() => {
-				const player = playerRef.current;
-				if (!player) return;
-				setCurrentTime(player.getCurrentTime());
-			}, POLL_MS);
-		});
+		}, fail);
 
 		return () => {
 			cancelled = true;
 			if (poll) clearInterval(poll);
-			playerRef.current?.destroy();
+			if (readyTimer) clearTimeout(readyTimer);
+			try {
+				playerRef.current?.destroy();
+			} catch {
+				// `destroy` throws if the player never finished initialising,
+				// which is exactly the case this cleanup exists to handle.
+			}
 			playerRef.current = null;
-			setReady(false);
+			// Whatever the API left behind — an iframe, a half-built player, or
+			// nothing — the container goes back to empty so the next mount
+			// starts from a known state rather than from wreckage.
+			mountRef.current?.replaceChildren();
+			setStatus("loading");
+			setReason(null);
 			setPlaying(false);
 			setCurrentTime(0);
 		};
@@ -192,5 +344,14 @@ export function useYouTubePlayer(
 		playerRef.current?.seekTo(seconds, true);
 	}, []);
 
-	return { ready, playing, currentTime, duration, toggle, seek };
+	return {
+		status,
+		ready: status === "ready",
+		reason,
+		playing,
+		currentTime,
+		duration,
+		toggle,
+		seek,
+	};
 }

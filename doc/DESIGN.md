@@ -424,6 +424,18 @@ the action that most likely fixes it (retry, search again) rather than an
 apology. Never show a reader a stack trace, and never render an error's own
 message outside development: it can carry a request URL or part of a key.
 
+### A wait must be able to end
+
+Any state that says "loading" needs a path out of it — a timeout, an error
+handler, or both. A spinner with no failure path is not a loading state, it is
+a dead end that looks like progress, and it tells the reader strictly less than
+an error would (D-054).
+
+When something outside our control refuses — an embed a rights holder blocked,
+a service that is down — say which, and offer the nearest thing that still
+works. "Watch on YouTube" is a worse outcome than playing in place, and a far
+better one than a spinner.
+
 ### Point at the song, and make sure it is there
 
 When the interface quotes the work back to the reader, the quote must be in
@@ -514,6 +526,10 @@ Before shipping a component:
       `lang` (D-053)
 - [ ] State that changes with no focus event behind it lives in a live region
       (D-053)
+- [ ] Every "loading" state has a timeout and an error path — otherwise it is a
+      dead end that looks like progress (D-054)
+- [ ] A third-party embed is never handed a React-rendered node: it replaces
+      what it is given, and React will keep referencing the corpse (D-054)
 - [ ] A surface colour derived from artwork keeps the default's lightness and
       moves only hue and chroma — otherwise it is a contrast change wearing a
       palette's clothes (D-052)
@@ -528,6 +544,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-054** Playback gains real failure states, timeouts and a "Watch on YouTube" fallback; player no longer built on a React-owned node |
 | 2026-08-22 | **D-053** Two measured contrast failures fixed; drawer focus management and dialog semantics; per-script `lang`; canonical, robots, sitemap, structured data; artwork fetch allowlisted |
 | 2026-08-22 | **D-052** The page takes the record's hue — paper as well as marks; default accent moves from vermilion to brass |
 | 2026-08-22 | **D-051** Film grain, tinted elevation, hero vignette, glass thickness; skip link, `prefers-contrast`, favicon and per-track social cards |

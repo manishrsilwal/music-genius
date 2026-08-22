@@ -232,7 +232,41 @@
 	// the user is viewing"; no minimum size is specified, so it is quiet — but
 	// it must never be clipped to nothing, faded out, or covered. Do not
 	// "tidy" this away.
+	// Takes the place of the player when playback has failed (D-054). Sized to
+	// the row rather than to the video box it replaces: it is a way out, not a
+	// substitute for the thing that is missing.
+	&__elsewhere {
+		flex: none;
+		align-self: center;
+		padding: 0.4rem 0.75rem;
+		border-radius: 999px;
+		border: 1px solid var(--color-hairline);
+		color: var(--color-ink-muted);
+		font-family: var(--font-ui);
+		white-space: nowrap;
+		transition:
+			color 0.18s var(--ease-editorial),
+			border-color 0.18s var(--ease-editorial);
+		@include m.tap-target;
+
+		&:hover {
+			color: var(--color-ink);
+			border-color: var(--track-accent);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
 	&__video {
+		// Nothing inside means no player: a bare black rectangle reads as a
+		// broken image, where absence reads as a feature that is not available
+		// (D-054).
+		&:empty {
+			display: none;
+		}
+
 		flex: none;
 		margin-inline-start: auto;
 		height: calc((var(--dock-height) - var(--dock-pad) * 2) * 0.68);
