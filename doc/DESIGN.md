@@ -379,12 +379,31 @@ failure as an unsourced quote, dressed as helpfulness.
 And when there is no reason, say so. "Today's rotation" is true; a
 manufactured reason is not.
 
+### Generated copy is set to a measure, like any other copy
+
+A model with no length given will fill whatever it is offered — asked for the
+drawer's synthesis without a budget it ran to 218 words where 130 reads
+better. The drawer is a column beside the lyrics, not an essay, so the brief
+carries an explicit budget: 45–70 words per synthesis paragraph, 35–55 per
+resonance paragraph (D-050).
+
+Paragraphing is structural, never typographic. The model returns an array of
+paragraphs and the boundary joins them; it is never asked to place its own
+blank lines, because a model asked for prose returns one unbroken block about
+two thirds of the time (D-029). Where the provider cannot enforce that shape,
+it is stated in the brief and coerced on arrival — the layout does not get to
+depend on a model's good behaviour (D-050).
+
 ### Editorial integrity is a design constraint
 
 A quote must appear verbatim in the source it cites, enforced in code and not
 merely requested in the prompt (D-030). **A fabricated quote attributed to a
 real artist is worse than no quote at all**, so the Quote slot going dark is
 the correct outcome, not a failure to design around.
+
+These gates belong to the product, not to a vendor. When the writing model was
+swapped wholesale (D-050) not one of them changed, because none of them ever
+trusted the model — which is the test of whether a safeguard is real.
 
 ---
 
@@ -410,6 +429,10 @@ Before shipping a component:
       problem; restructure instead (D-046)
 - [ ] The YouTube player is never hidden, faded, clipped or covered (D-036) —
       suppress its *chrome* with `controls: 0`, never the element (D-039)
+- [ ] Prose asked of a model carries a word budget and a structural shape —
+      never a request for a length or a line break in prose (D-029, D-050)
+- [ ] A safeguard on model output is enforced in code, not in the prompt, and
+      survives changing the model (D-030, D-050)
 
 ---
 
@@ -417,6 +440,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-050** Drawer copy gains an explicit word budget; writing model swapped with no change to any output gate |
 | 2026-08-22 | **D-049** Channel-upload titles retried against Genius; all four cache keys versioned |
 | 2026-08-22 | **D-048** Drawer measure fixed at 69 characters; one scroll owner; labels separate sections |
 | 2026-08-22 | **D-047** "Why this, for you" in the drawer — personal, quoting verified lines |

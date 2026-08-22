@@ -195,6 +195,18 @@ answers get through. `gemini.server.ts` fell from 353 lines to 91.
 `insight:v3` → `v4`: the copy budget changes what gets written, and 30-day
 entries would otherwise keep serving the old length (the D-049 lesson).
 
+Verified by mutation after the move: neutering the resonance lyric check fails
+3 tests and the quote verbatim check 3, unchanged from before the refactor —
+the gates were carried across intact, not merely copied. Neutering the string
+coercion fails 1, which is the whole of its unique behaviour; the null and
+non-string-element paths are covered by other cases and are equivalent under
+that mutation.
+
+Verified live end-to-end: 6.2s, synthesis in 2 paragraphs, quote kept and
+grounded, resonance kept with both lines matching the lyrics. The fallback was
+exercised by pointing DeepSeek at an invalid key — it logged, fell through, and
+Gemini returned a 163-word insight.
+
 ### D-049 — Channel uploads, and the caches that outlived their fixes
 **Fixed 2026-08-22.** Reported with a screenshot: no player on the track page.
 
@@ -1433,35 +1445,48 @@ Feature-first. Routes stay thin; each feature owns its components, hooks, and mo
 ```
 src/
 ├── routes/
-│   ├── __root.tsx             # shell, head/meta
-│   ├── index.tsx              # discovery + search (§3.1)
-│   ├── track.$trackId.tsx     # hero + canvas (§3.2, §3.3)
+│   ├── __root.tsx             # shell, head/meta, errorComponent (D-039)
+│   ├── index.tsx              # discovery: stepper + search + shelves (§3.1)
+│   ├── track.$trackId.tsx     # hero + canvas + drawer (§3.2, §3.3, §3.5)
 │   └── api/
 │       ├── search.ts          # GET /api/search?q=
-│       └── track.ts           # GET /api/track?id=
+│       ├── track.ts           # GET /api/track?id=
+│       ├── artwork.ts         # GET /api/artwork?title=&artist=   (per-row art)
+│       ├── insights.ts        # GET /api/insights?…               (deferred)
+│       └── card.ts            # GET /api/card?…                   (PNG, §3.4)
 ├── server/                    # server-only; never imported by the client
-│   ├── lyrics.server.ts       # business logic (D-014)
+│   ├── env.ts                 # the only reader of process.env (D-014)
+│   ├── lyrics.server.ts       # business logic + cache keys (D-014, D-017)
 │   ├── lyrics.functions.ts    # createServerFn boundary for loaders
+│   ├── insights.server.ts     # orchestration + provider fallback (D-050)
+│   ├── genius.server.ts       # artwork, match scoring, youtube id (D-022)
+│   ├── palette.server.ts      # node-vibrant → OKLCH accents (D-016)
+│   ├── card.server.tsx        # Satori + resvg rasteriser (§3.4)
+│   ├── cache/                 # adapter selection: Upstash or memory (OD-001)
 │   └── providers/
 │       ├── insight.ts         # prompt + every output gate, shared (D-050)
 │       ├── deepseek.server.ts # primary writer
-│       └── gemini.server.ts   # fallback writer
-├── features/
-│   ├── discovery/             # search-field + use-debounced
-│   ├── scrollytelling/        # lyric-canvas + use-scroll-spy
-│   └── playback/ lyric-card/ insights/     # (empty)
-├── components/ui/
+│       ├── gemini.server.ts   # fallback writer
+│       └── search.server.ts   # Tavily grounding (OD-004)
+├── features/                  # each owns its components, hooks and .scss
+│   ├── discovery/             # stepper · search-field · deep-dives
+│   ├── scrollytelling/        # track-hero · lyric-canvas · scroll-spy
+│   ├── playback/              # playback-bar · seekbar · youtube player
+│   ├── insights/              # affordance · drawer · content
+│   └── lyric-card/            # line selection · composer (§3.4)
+├── components/                # route-message · route-error (D-039)
 ├── lib/
 │   ├── types.ts               # domain shapes (ours, not LRCLIB's)
 │   ├── lrc.ts                 # LRC parser → stanzas (pure, isomorphic)
 │   ├── cache.ts               # CacheAdapter + memory impl (D-009)
+│   ├── deep-dives.ts          # curated catalogue, scoring, explanations (D-045)
 │   ├── motion.ts              # easing, durations, variants (D-004)
-│   └── clients/lrclib.ts      # LRCLIB + normalisation (D-015)
+│   ├── card.ts / card-metrics.ts / og.ts   # card layout + rasterising (§3.4)
+│   └── clients/lrclib.ts      # LRCLIB + normalisation (D-015, D-043)
 ├── styles/                    # Sass partials (D-013)
 │   ├── _breakpoints.scss      # mirrors Tailwind's screens
 │   └── _mixins.scss           # from() · reduced-motion · glass · line-clamp
-├── hooks/
-├── styles.css                 # Tailwind entry + token layer (D-003)
+├── styles.css                 # Tailwind entry + token layer (D-003, D-033)
 └── router.tsx
 ```
 
