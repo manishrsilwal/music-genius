@@ -74,6 +74,27 @@ export function InsightsDrawer({
 		return () => document.removeEventListener("keydown", onKey);
 	}, [onClose]);
 
+	/**
+	 * One scroll owner at a time (D-048).
+	 *
+	 * The panel is its own scroll container and the page behind it kept
+	 * scrolling too, so both scrollbars sat against the right edge of the
+	 * viewport — reading as a rendering fault rather than as two regions.
+	 *
+	 * Desktop only. On mobile the sheet covers the bottom half by design and
+	 * the lyrics above it stay scrollable, which PRD §3.5 asks for explicitly.
+	 * `scrollbar-gutter: stable` on the document keeps the gutter reserved, so
+	 * locking does not shift the page sideways underneath the reader.
+	 */
+	useEffect(() => {
+		if (!open || !isDesktop) return;
+		const previous = document.body.style.overflow;
+		document.body.style.overflow = "hidden";
+		return () => {
+			document.body.style.overflow = previous;
+		};
+	}, [open, isDesktop]);
+
 	const motionProps = prefersReducedMotion
 		? { initial: false as const, transition: { duration: 0 } }
 		: {};

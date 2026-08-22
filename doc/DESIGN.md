@@ -39,6 +39,12 @@ Fluid, `clamp()`-based, so nothing needs a breakpoint to stay readable.
 --text-micro     0.75rem                          Labels, status
 ```
 
+**Set prose to a measure, not to a feeling.** 60–75 characters a line. Check
+it: `(column width − padding) ÷ (font-size × 0.5)`. The insights drawer ran at
+39 because `--text-lead` — a standfirst size — was doing the work of body
+text in a narrow column (D-048). Half a measure costs roughly twice the
+height for the same words.
+
 **Long strings are fitted, not just clamped.** A viewport-driven `clamp()`
 asks how wide the screen is, never how long the text is — so every hero title
 rendered at the same cap and long ones wrapped to two or three lines. Size
@@ -173,6 +179,13 @@ plainly out-specifies the one above:
 > **Never nest a `position: fixed` overlay inside another.** `position: fixed`
 > creates a stacking context, so a drawer nested in the dock could never rise
 > above it. The dock and the overlays are siblings.
+
+### One scroll owner at a time
+
+Two scroll containers whose bars land on the same viewport edge read as a
+rendering fault, not as two regions. When a full-height panel opens over the
+page, lock the document — and set `scrollbar-gutter: stable` so locking does
+not shift the layout sideways underneath the reader.
 
 ### A reading column has one scroll axis
 
@@ -402,6 +415,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | **D-048** Drawer measure fixed at 69 characters; one scroll owner; labels separate sections |
 | 2026-08-22 | **D-047** "Why this, for you" in the drawer — personal, quoting verified lines |
 | 2026-08-22 | **D-046** Section labels unified; "why this" shows at every width |
 | 2026-08-22 | **D-045** Deep Dives explain themselves, from the real scoring plus a curated note |

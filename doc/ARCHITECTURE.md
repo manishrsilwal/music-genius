@@ -134,6 +134,46 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-048 — Two scrollbars, and type twice too large for its column
+**Fixed 2026-08-22.** Reported with a screenshot: two scrollbars against the
+right edge, an ask to find a better representation, and type large enough to
+force the reader to scroll for everything.
+
+**The type was the root of it, and it is measurable.** The synthesis was set
+at `--text-lead` (up to 22px) in a 30rem panel, which is **39 characters to
+the line** against an editorial target of 60–75. Half a normal measure means
+roughly twice the height for the same words, which is what made the drawer
+read as a wall and scroll forever.
+
+Two changes, because neither alone reaches the target:
+
+| | Measure |
+|---|---|
+| 30rem @ 22px — before | 39 characters |
+| 30rem @ 16px | 53 |
+| **38rem @ 16px — now** | **69** |
+
+`--text-lead` is a size for a standfirst: one or two sentences introducing
+something. It is the wrong size for several hundred words in a column, and it
+stays on the pull-quote and the quoted lyric lines, where it belongs.
+
+**Two scrollbars.** The panel is its own scroll container and the page behind
+it kept scrolling too, so both bars sat against the same viewport edge and
+read as a rendering fault rather than as two regions. The document is now
+locked while the desktop panel is open, with `scrollbar-gutter: stable` on
+`html` so locking cannot shift the layout sideways under the reader.
+
+Desktop only. On mobile the sheet covers the bottom half by design and the
+lyrics above stay scrollable, which PRD §3.5 asks for explicitly.
+
+**Representation.** Four prose blocks 2.5rem apart read as one column that
+happens to have small grey headings in it. The first attempt put a hairline
+between sections — and needed `!important` to stop it doubling the personal
+slot's own card border, which is the tell that the approach was wrong. The
+section labels now carry the separation instead: accent-coloured and
+semibold. A label that announces itself is a better boundary than a rule, and
+it adds no chrome to a reading panel.
+
 ### D-047 — The drawer is written to the reader
 **Decided 2026-08-22.** Asked: put the explanation inside the song's page, in
 the Discover drawer, and make it personal — pointing at the lines in *this*

@@ -75,8 +75,13 @@
 
   /* --- Insights drawer (PRD §3.5) -----------------------------------------
      Shared by the panel itself, the canvas compression, and the dock offset,
-     so the three can never disagree about how wide the drawer is. */
-  --drawer-width: min(30rem, 34vw);
+     so the three can never disagree about how wide the drawer is.
+
+     38rem, not 30rem. At the old width the synthesis ran 39 characters to the
+     line against an editorial target of 60–75 — the type was nearly twice too
+     large for the column it sat in, which is what made the drawer read as a
+     wall and scroll forever (D-048). */
+  --drawer-width: min(38rem, 40vw);
   --drawer-sheet-height: 50dvh;
 }
 
@@ -156,6 +161,9 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    /* Reserve the scrollbar gutter permanently, so locking the page while the
+       insights panel is open cannot shift the layout sideways (D-048). */
+    scrollbar-gutter: stable;
   }
 
   body {

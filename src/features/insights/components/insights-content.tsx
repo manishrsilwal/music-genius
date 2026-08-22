@@ -36,7 +36,7 @@ export function InsightsContent({ insight }: { insight: Insight }) {
 		<div className="insights">
 			<section className="insights__synthesis">
 				<p className="insights__label text-micro">The Synthesis</p>
-				<div className="insights__prose mt-4 text-lead">
+				<div className="insights__prose mt-4">
 					{insight.synthesis
 						.split(/\n{2,}/)
 						.filter(Boolean)
@@ -62,7 +62,7 @@ export function InsightsContent({ insight }: { insight: Insight }) {
 							</li>
 						))}
 					</ol>
-					<div className="insights__prose mt-4 text-lead">
+					<div className="insights__prose mt-4">
 						{insight.resonance.text
 							.split(/\n{2,}/)
 							.filter(Boolean)

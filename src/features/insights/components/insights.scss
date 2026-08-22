@@ -71,14 +71,20 @@
 // ── Shared content ──────────────────────────────────────────────────────────
 .insights {
 	display: grid;
-	gap: 2.5rem;
+	gap: 2rem;
 	align-content: start;
 
+
+	// The section labels carry the separation. Four prose blocks at 2rem apart
+	// read as one column that happens to have small grey headings in it; a
+	// label that announces itself is a better boundary than a rule, and does
+	// not add chrome to a reading panel (D-048).
 	&__label {
 		font-family: var(--font-ui);
+		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: var(--tracking-label);
-		color: var(--color-ink-faint);
+		color: var(--track-accent);
 	}
 
 	// Elms Sans, not Rufina. The synthesis is prose to be read at length in a
@@ -91,6 +97,11 @@
 	// Synthesis" set in ink while "The Sources" set in faint (D-046).
 	&__prose p {
 		font-family: var(--font-ui);
+		// Body, not lead. `--text-lead` is a size for a standfirst — one or two
+		// sentences that introduce something — not for several hundred words in
+		// a column. Together with the wider panel this takes the measure from
+		// 39 characters a line to 69 (D-048).
+		font-size: var(--text-body);
 		line-height: var(--leading-prose);
 		color: var(--color-ink);
 
