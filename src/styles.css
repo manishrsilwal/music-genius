@@ -191,6 +191,58 @@
   src: url("../node_modules/@fontsource/noto-serif-kr/files/noto-serif-kr-korean-400-normal.woff2") format("woff2");
   unicode-range: U+1100-11FF, U+2E80-2EFF, U+3000-303F, U+3130-318F, U+3200-32FF, U+3400-4DBF, U+4E00-9FFF, U+A960-A97F, U+AC00-D7AF, U+D7B0-D7FF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF;
 }
+/* --- Metric-matched fallbacks (D-061) --------------------------------------
+   Regenerate with: bun run scripts/generate-font-fallbacks.ts
+
+   A webfont and the system face standing in for it while it loads are almost
+   never the same width. Measured: Rufina is 5.7% wider per character than
+   Georgia and 16.3% wider than Times New Roman, and its ascent is 0.945em
+   against Georgia's 0.756em. So when Rufina arrives, every line re-wraps AND
+   every line box changes height — on an 11rem hero that is a lurch, not a
+   settling. `font-display: swap` was already correct; it just guarantees the
+   swap happens, it does not make it quiet.
+
+   These scale a `local()` face to the webfont's own metrics, so the swap is
+   close to invisible. They cost nothing to fetch — the reader already has the
+   font. Where neither local face exists (most Linux, most Android) the rule
+   simply fails to match and the stack carries on to the generics, unadjusted,
+   exactly as before.
+
+   Latin-only unicode-range, and placed after the script companions in the
+   stack: Georgia covers Greek and Cyrillic, and without both guards it would
+   claim those before Noto Serif got the chance (D-057). */
+
+@font-face {
+  font-family: "Rufina Fallback Georgia";
+  src: local("Georgia");
+  size-adjust: 105.65%;
+  ascent-override: 89.45%;
+  descent-override: 27.45%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0100-02BA, U+2000-206F;
+}
+
+@font-face {
+  font-family: "Rufina Fallback Times";
+  src: local("Times New Roman");
+  size-adjust: 116.34%;
+  ascent-override: 81.23%;
+  descent-override: 24.93%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0100-02BA, U+2000-206F;
+}
+
+@font-face {
+  font-family: "Elms Sans Fallback";
+  src: local("Arial");
+  size-adjust: 111.68%;
+  ascent-override: 89.54%;
+  descent-override: 26.86%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0100-02BA, U+2000-206F;
+}
+
+
 
 /* ---------------------------------------------------------------------------
    Runtime-swappable channel
@@ -333,8 +385,11 @@
     "Noto Serif Gurmukhi", "Noto Serif Gujarati", "Noto Serif Tamil",
     "Noto Serif Telugu", "Noto Serif Kannada", "Noto Serif Malayalam",
     "Noto Serif Thai", "Noto Serif Hebrew", "Noto Serif", var(--font-cjk),
+    "Rufina Fallback Georgia", "Rufina Fallback Times",
     ui-serif, Georgia, "Times New Roman", serif;
-  --font-ui: "Elms Sans Variable", "Elms Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-ui:
+    "Elms Sans Variable", "Elms Sans", "Elms Sans Fallback", ui-sans-serif,
+    system-ui, sans-serif;
 
   /* --- Fluid type scale ---------------------------------------------------
      clamp() throughout: the hero must scale continuously, not step at
@@ -461,6 +516,16 @@
        focus included, now stops short of both. */
     scroll-padding-top: calc(var(--masthead-reach) + 1rem);
     scroll-padding-bottom: calc(var(--dock-reach) + var(--dock-inset));
+  }
+
+  /* A pointer on anything that responds to one (D-061).
+     `<button>` computes to `cursor: default`, so every button in this product
+     — the taste chips, the stepper cards, the dock's transport, the composer —
+     was telling the reader it was not clickable while behaving as though it
+     were. `<a href>` already gets this from the UA stylesheet; buttons never
+     have. `:disabled` is excluded, because there the arrow is the truth. */
+  :where(button, [role="button"], summary, label[for], select):not(:disabled) {
+    cursor: pointer;
   }
 
   body {

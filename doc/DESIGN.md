@@ -564,6 +564,24 @@ what they wanted met a blank field first and the mood chips only after scrolling
 past everything they could not use. Naming both at the moment of the choice
 costs one divider and removes the need to guess.
 
+### A swap is not free just because it is fast
+
+`font-display: swap` guarantees the reader sees words immediately. It says
+nothing about what happens when the real face arrives. Rufina is 16.3% wider per
+character than Times New Roman and sits on a taller ascent, so the moment it
+loaded, every line re-wrapped and every line box changed height — a lurch, on a
+product whose hero is set at 11rem.
+
+The fix is to make the stand-in wear the real face's measurements:
+`size-adjust` and the `*-override` descriptors, computed from both fonts rather
+than eyeballed. It costs nothing — the fallback is a font the reader already
+owns — and the numbers are generated, so changing a display face cannot leave a
+stale adjustment behind.
+
+The general rule: a placeholder should be the same *size* as the thing it is
+holding space for. That is the same instinct as reserving a skeleton's height,
+applied one level down, to the glyph.
+
 ## 9. Conventions checklist
 
 Before shipping a component:
@@ -659,6 +677,12 @@ Before shipping a component:
       it disappears when it is most needed (D-060)
 - [ ] An `aria-label` beside a visible label overrides it. Pick one (D-060)
 - [ ] A spacing number needed in two places is a token, not two numbers (D-060)
+- [ ] A webfont ships with a metric-matched `local()` fallback; `swap` alone
+      guarantees the jump, it does not soften it (D-061)
+- [ ] Anything that responds to a click shows a pointer. `<button>` does not get
+      one for free (D-061)
+- [ ] A generated design direction is evidence, not instruction. It does not
+      outrank a decision this project already reasoned through (D-061)
 
 ---
 
@@ -666,6 +690,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | **D-061** Metric-matched font fallbacks end the load-time reflow; buttons finally show a pointer |
 | 2026-08-23 | **D-060** Focus can no longer scroll under the fixed masthead or dock; the search field gains a real visible label |
 | 2026-08-23 | **D-059** A persistent masthead replaces a home link that was hidden on mobile and never actually fixed; search and mood offered together on the landing |
 | 2026-08-23 | **D-058** Lyric Card fixed in production builds; CJK card type measured at full width instead of overflowing; hero and lyrics agree on regional Han shapes |
