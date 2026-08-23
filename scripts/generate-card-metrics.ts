@@ -36,8 +36,8 @@ interface Source {
 
 const SOURCES: Source[] = [
 	{
-		// Latin display face.
-		path: "node_modules/@fontsource/rufina/files/rufina-latin-400-normal.woff",
+		// Latin display face (D-064).
+		path: "node_modules/@fontsource/fraunces/files/fraunces-latin-400-normal.woff",
 		ranges: [[0x20, 0x7e]],
 	},
 	{

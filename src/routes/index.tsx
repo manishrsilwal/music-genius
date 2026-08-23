@@ -62,8 +62,15 @@ function Discovery() {
 			  carries it on every page now (D-059), so repeating it directly
 			  beneath itself would just be the same words twice.
 			*/}
+			{/*
+			  Mixed on one line (D-064): a heavy geometric sans against the
+			  display serif's real italic, at the same size. The reference
+			  language gets its energy from that collision rather than from
+			  decoration, and it costs nothing but two spans.
+			*/}
 			<motion.h1 variants={riseVariants} className="landing__title text-ink">
-				Read the words properly.
+				<span className="landing__title-plain">Read the words</span>{" "}
+				<em className="landing__title-fancy">properly</em>
 			</motion.h1>
 
 			<AnimatePresence mode="wait">

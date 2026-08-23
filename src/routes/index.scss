@@ -22,14 +22,34 @@
 	}
 
 	&__title {
-		font-family: var(--font-display);
-		// Caps well below --text-display (5.5rem): this has to share the fold
-		// with three answer cards.
-		font-size: clamp(2rem, 4.5vw, 3rem);
-		line-height: 1.06;
-		letter-spacing: var(--tracking-display);
+		// Bigger than before (D-064). The old scale was set for a page that
+		// opened with three answer cards below the fold; the landing now opens
+		// with a statement and the type carries it.
+		font-size: clamp(2.75rem, 7vw, 4.75rem);
+		line-height: 0.98;
+		letter-spacing: -0.035em;
 		text-wrap: balance;
-		max-width: 12ch;
+		max-width: 14ch;
+	}
+
+	// The plain half: geometric sans, heavy, tight.
+	&__title-plain {
+		font-family: var(--font-ui);
+		font-weight: 700;
+	}
+
+	// The characterful half: the display serif's real italic, with Fraunces'
+	// SOFT and WONK axes pushed up. This is the one place the wonk is obvious,
+	// and it is why this face was chosen over another high-contrast serif.
+	&__title-fancy {
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-style: italic;
+		font-variation-settings:
+			"SOFT" 60,
+			"WONK" 1,
+			"opsz" 120;
+		color: var(--color-lime);
 	}
 }
 

@@ -4,10 +4,14 @@
  *   bun run scripts/generate-font-fallbacks.ts
  *
  * A webfont and the system face standing in for it while it loads are almost
- * never the same width. Rufina is 5.7% wider than Georgia and 16.3% wider than
- * Times New Roman per character, and its ascent is 0.945em against Georgia's
- * 0.756em — so when Rufina arrives, every line re-wraps and every line box
- * changes height. On an 11rem hero that is not a subtle settling, it is a lurch.
+ * never the same width, so when the real face arrives every line re-wraps and
+ * every line box changes height. On a hero set at display size that is a lurch,
+ * not a settling.
+ *
+ * Measured from the STATIC packages even though the browser is served the
+ * variable ones: opentype.js cannot parse woff2, and the variable builds ship
+ * nothing else. Weight 400 of the static cut is the same design, so the metrics
+ * are the metrics.
  *
  * `size-adjust` and the `*-override` descriptors let a `local()` fallback be
  * scaled to the webfont's own metrics, so the swap is close to invisible. The
@@ -88,13 +92,13 @@ function block(family: string, local: string, web: Metrics, fallback: Metrics) {
 
 const SYSTEM = "/System/Library/Fonts/Supplemental";
 
-const rufina = await measure(
-	"node_modules/@fontsource/rufina/files/rufina-latin-400-normal.woff",
-	"Rufina",
+const display = await measure(
+	"node_modules/@fontsource/fraunces/files/fraunces-latin-400-normal.woff",
+	"Fraunces",
 );
-const elms = await measure(
-	"node_modules/@fontsource/elms-sans/files/elms-sans-latin-400-normal.woff",
-	"Elms Sans",
+const ui = await measure(
+	"node_modules/@fontsource/outfit/files/outfit-latin-400-normal.woff",
+	"Outfit",
 );
 const georgia = await measure(`${SYSTEM}/Georgia.ttf`, "Georgia");
 const times = await measure(`${SYSTEM}/Times New Roman.ttf`, "Times New Roman");
@@ -102,16 +106,16 @@ const arial = await measure(`${SYSTEM}/Arial.ttf`, "Arial");
 
 console.log("/* Measured mismatch, before adjustment: */");
 for (const [web, fb] of [
-	[rufina, georgia],
-	[rufina, times],
-	[elms, arial],
+	[display, georgia],
+	[display, times],
+	[ui, arial],
 ] as const) {
 	const off = (web.avgWidth / fb.avgWidth - 1) * 100;
 	console.log(`/*   ${web.label} vs ${fb.label}: ${off.toFixed(1)}% wider */`);
 }
 console.log();
-console.log(block("Rufina Fallback Georgia", "Georgia", rufina, georgia));
+console.log(block("Display Fallback Georgia", "Georgia", display, georgia));
 console.log();
-console.log(block("Rufina Fallback Times", "Times New Roman", rufina, times));
+console.log(block("Display Fallback Times", "Times New Roman", display, times));
 console.log();
-console.log(block("Elms Sans Fallback", "Arial", elms, arial));
+console.log(block("UI Fallback", "Arial", ui, arial));

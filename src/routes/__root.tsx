@@ -6,6 +6,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Intro } from "@/components/intro";
 import { Masthead } from "@/components/masthead";
 import { RouteFocus } from "@/components/route-focus";
 import { RouteError } from "../components/route-error";
@@ -105,6 +106,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				  (D-059). After the skip link deliberately: a keyboard reader
 				  wants the words first, not the chrome.
 				*/}
+				{/* Server-rendered so it is on the first paint, and cleared by
+				    CSS so it cannot trap anyone if the bundle fails (D-064). */}
+				<Intro />
 				<Masthead />
 				{/* Focus follows the route, the way it would across documents
 				    (D-062). Renders nothing. */}

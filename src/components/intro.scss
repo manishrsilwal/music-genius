@@ -1,0 +1,100 @@
+@use "styles/mixins" as m;
+
+// The arrival moment (D-064).
+//
+// Every timing here is a CSS animation with `forwards`, so the overlay clears
+// itself even if the JavaScript never runs. React only decides whether to skip
+// it for a reader who has already been here this session.
+.intro {
+	position: fixed;
+	inset: 0;
+	z-index: var(--layer-intro);
+	display: grid;
+	place-items: center;
+	background: var(--color-canvas);
+
+	// Total: rules draw (0.55s) → wordmark (0.35s) → hold → lift.
+	animation: intro-lift 0.5s var(--ease-exit) 1.15s forwards;
+
+	&__inner {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.25rem;
+	}
+
+	&__mark {
+		fill: var(--color-ink);
+		overflow: visible;
+	}
+
+	// Drawn, not faded. `transform-box: fill-box` makes the origin the rect's
+	// own box rather than the SVG's, so each rule grows from its left edge —
+	// the direction writing goes.
+	&__rule {
+		transform-box: fill-box;
+		transform-origin: left center;
+		scale: 0 1;
+		animation: intro-draw 0.42s var(--ease-entrance) forwards;
+
+		&--2 {
+			animation-delay: 0.1s;
+		}
+
+		// The third rule is the accent, as it is in the masthead — the one
+		// coloured thing in the whole sequence.
+		&--3 {
+			fill: var(--color-lime);
+			animation-delay: 0.2s;
+		}
+	}
+
+	&__word {
+		margin: 0;
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		font-weight: 500;
+		letter-spacing: var(--tracking-label);
+		text-transform: uppercase;
+		color: var(--color-ink-muted);
+		opacity: 0;
+		animation: intro-word 0.4s var(--ease-entrance) 0.45s forwards;
+	}
+}
+
+@keyframes intro-draw {
+	to {
+		scale: 1 1;
+	}
+}
+
+@keyframes intro-word {
+	to {
+		opacity: 1;
+	}
+}
+
+// Lifts rather than fades: the overlay moves up and out, so the page beneath
+// reads as having been there all along rather than as having replaced it.
+@keyframes intro-lift {
+	to {
+		opacity: 0;
+		transform: translateY(-1.5%);
+		visibility: hidden;
+	}
+}
+
+// Seen already this session — remove it with no animation at all. Set by React
+// in an effect, on <html>, so it wins wherever this component is mounted.
+:root[data-intro="seen"] .intro {
+	display: none;
+}
+
+// An intro is the most skippable thing on the page. Under reduced motion it
+// does not play at all; there is no "gentler" version of a splash screen worth
+// showing to someone who asked for less movement.
+@include m.reduced-motion {
+	.intro {
+		display: none;
+	}
+}

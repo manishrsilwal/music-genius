@@ -14,16 +14,19 @@ export const FONT_DIR = "node_modules/@fontsource";
  * Always loaded: Latin display, Latin UI, and the bold cut the title uses.
  */
 export const BASE_FONTS = {
-	display: `${FONT_DIR}/rufina/files/rufina-latin-400-normal.woff`,
-	displayBold: `${FONT_DIR}/rufina/files/rufina-latin-700-normal.woff`,
-	ui: `${FONT_DIR}/elms-sans/files/elms-sans-latin-500-normal.woff`,
+	// The STATIC cut, not the variable one the browser gets: satori parses
+	// woff and ttf, never woff2, and the variable builds ship nothing else
+	// (D-064).
+	display: `${FONT_DIR}/fraunces/files/fraunces-latin-400-normal.woff`,
+	displayBold: `${FONT_DIR}/fraunces/files/fraunces-latin-700-normal.woff`,
+	ui: `${FONT_DIR}/outfit/files/outfit-latin-500-normal.woff`,
 } as const;
 
 /**
  * One companion face per script, keyed by the family name Satori will be asked
  * for (D-019, extended in D-057).
  *
- * Rufina covers latin and latin-ext and nothing else. On the web an uncovered
+ * The display face covers latin and latin-ext and nothing else. On the web an uncovered
  * script at least reaches the OS; Satori has no system fonts, so anything
  * missing here rendered as literal tofu boxes on the exported card — verified
  * by rendering one before this change.
@@ -43,7 +46,8 @@ export const SCRIPT_FONTS: Record<string, string> = {
 	"Noto Serif Malayalam": `${FONT_DIR}/noto-serif-malayalam/files/noto-serif-malayalam-malayalam-400-normal.woff`,
 	"Noto Serif Thai": `${FONT_DIR}/noto-serif-thai/files/noto-serif-thai-thai-400-normal.woff`,
 	"Noto Serif Hebrew": `${FONT_DIR}/noto-serif-hebrew/files/noto-serif-hebrew-hebrew-400-normal.woff`,
-	// Cyrillic and Greek: Rufina stops at latin-ext, so these were tofu too.
+	// Cyrillic and Greek: the display face stops at latin-ext, so these were
+	// tofu too.
 	"Noto Serif": `${FONT_DIR}/noto-serif/files/noto-serif-cyrillic-400-normal.woff`,
 	"Noto Serif Greek": `${FONT_DIR}/noto-serif/files/noto-serif-greek-400-normal.woff`,
 };

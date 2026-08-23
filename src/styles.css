@@ -8,23 +8,29 @@
 
 @import "tailwindcss";
 
-/* Self-hosted (D-005). Rufina's own `400.css`/`700.css` carry per-subset
-   unicode-range, so the browser fetches latin or latin-ext on demand. */
-@import "@fontsource/rufina/400.css";
-@import "@fontsource/rufina/700.css";
-@import "@fontsource-variable/elms-sans/wght.css";
-@import "@fontsource-variable/elms-sans/wght-italic.css";
+/* Self-hosted (D-005). The variable packages carry per-subset unicode-range,
+   so the browser fetches latin or latin-ext on demand. */
+/* Fraunces for display, Outfit for everything else (D-064).
+   Fraunces is loaded with ALL its axes — opsz, SOFT and WONK, not just weight
+   — because those are the point: the softness and the deliberate wonkiness are
+   what make it playful rather than another high-contrast serif. 121KB for the
+   face that carries the identity.
+   Outfit is a geometric sans at 32KB. Neither is Inter, Poppins or Space
+   Grotesk, which is where this brief usually lands by default. */
+@import "@fontsource-variable/fraunces/full.css";
+@import "@fontsource-variable/fraunces/full-italic.css";
+@import "@fontsource-variable/outfit/wght.css";
 
 /* --- Script companions (D-057) ---------------------------------------------
-   Rufina covers latin and latin-ext and nothing else, so every other script
-   fell through to whatever the OS happened to have — and on the exported card,
+   The display face covers latin and latin-ext and nothing else, so every other
+   script fell through to whatever the OS happened to have — and on the exported card,
    which has no system fonts at all, to literal tofu boxes.
 
    These are declared by hand rather than imported, because fontsource's
    per-subset stylesheets (`amiri/arabic-400.css` and friends) ship NO
    unicode-range. Without one the browser cannot know a face is irrelevant
-   until it has downloaded it, so a single stray character Rufina lacks could
-   pull a megabyte of Korean onto an English page. The whole-package
+   until it has downloaded it, so a single stray character the display face
+   lacks could pull a megabyte of Korean onto an English page. The whole-package
    `400.css` files do carry ranges, but at ~100KB of render-blocking CSS each
    for the CJK three — paid by every reader, including the ones who only ever
    open Latin tracks. Declaring the faces here costs a few hundred bytes and
@@ -135,9 +141,9 @@
   unicode-range: U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
 }
 
-/* Rufina stops at latin-ext, so Cyrillic and Greek were tofu too — a gap
-   OD-017 never listed, found by reading Rufina's own unicode-range rather
-   than trusting the register. */
+/* The display face stops at latin-ext, so Cyrillic and Greek were tofu too — a
+   gap OD-017 never listed, found by reading its unicode-range rather than
+   trusting the register. */
 @font-face {
   font-family: "Noto Serif";
   font-style: normal;
@@ -195,12 +201,14 @@
    Regenerate with: bun run scripts/generate-font-fallbacks.ts
 
    A webfont and the system face standing in for it while it loads are almost
-   never the same width. Measured: Rufina is 5.7% wider per character than
-   Georgia and 16.3% wider than Times New Roman, and its ascent is 0.945em
-   against Georgia's 0.756em. So when Rufina arrives, every line re-wraps AND
-   every line box changes height — on an 11rem hero that is a lurch, not a
-   settling. `font-display: swap` was already correct; it just guarantees the
-   swap happens, it does not make it quiet.
+   never the same width. Measured for the new faces (D-064): Fraunces is 6.0%
+   wider per character than Georgia and 16.7% wider than Times New Roman.
+   Outfit lands 0.3% off Arial, which is close enough that the adjustment is
+   almost a no-op — kept anyway, so the pair cannot drift apart silently.
+
+   Without them the display face arriving re-wraps every line and changes every
+   line box's height, which at hero size is a lurch rather than a settling.
+   `font-display: swap` guarantees the swap happens; it does not make it quiet.
 
    These scale a `local()` face to the webfont's own metrics, so the swap is
    close to invisible. They cost nothing to fetch — the reader already has the
@@ -213,31 +221,31 @@
    claim those before Noto Serif got the chance (D-057). */
 
 @font-face {
-  font-family: "Rufina Fallback Georgia";
+  font-family: "Display Fallback Georgia";
   src: local("Georgia");
-  size-adjust: 105.65%;
-  ascent-override: 89.45%;
-  descent-override: 27.45%;
+  size-adjust: 106.01%;
+  ascent-override: 92.25%;
+  descent-override: 24.05%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0100-02BA, U+2000-206F;
 }
 
 @font-face {
-  font-family: "Rufina Fallback Times";
+  font-family: "Display Fallback Times";
   src: local("Times New Roman");
-  size-adjust: 116.34%;
-  ascent-override: 81.23%;
-  descent-override: 24.93%;
+  size-adjust: 116.74%;
+  ascent-override: 83.78%;
+  descent-override: 21.84%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0100-02BA, U+2000-206F;
 }
 
 @font-face {
-  font-family: "Elms Sans Fallback";
+  font-family: "UI Fallback";
   src: local("Arial");
-  size-adjust: 111.68%;
-  ascent-override: 89.54%;
-  descent-override: 26.86%;
+  size-adjust: 100.28%;
+  ascent-override: 99.72%;
+  descent-override: 25.93%;
   line-gap-override: 0%;
   unicode-range: U+0000-00FF, U+0100-02BA, U+2000-206F;
 }
@@ -260,9 +268,9 @@
 
      Only ever seen when artwork is missing or wholly achromatic; a track with
      a cover overwrites all three within a second of load. */
-  --track-accent: oklch(0.72 0.13 82);
-  --track-accent-soft: oklch(0.62 0.1 82);
-  --track-glow: oklch(0.78 0.15 82 / 0.35);
+  --track-accent: oklch(0.921 0.222 128.1);
+  --track-accent-soft: oklch(0.82 0.19 128.1);
+  --track-glow: oklch(0.921 0.222 128.1 / 0.35);
 
   /* Scroll-spy states (PRD §3.3). Mirrored in src/lib/motion.ts, which is the
      source of truth for JS-driven animation. Keep the two in sync. */
@@ -323,6 +331,9 @@
      of the whole image, not of one panel. Inert by construction
      (pointer-events: none), so nothing below it loses a click. */
   --layer-grain: 70;
+  /* Above everything, including the grain — an intro that something else
+     paints over is not an intro (D-064). */
+  --layer-intro: 90;
 
   /* --- The dock (D-033) ---------------------------------------------------
      The playback bar and the Discover button share the bottom-right corner.
@@ -370,10 +381,10 @@
 
 @theme {
   /* --- Typefaces (D-005) --------------------------------------------------
-     Rufina: display only — 400/700, NO italic. Faux-oblique is forbidden.
-     Elms Sans: UI chrome — variable 100–900, real italic. */
-  /* Rufina first, then one companion per script (D-019, extended in D-057).
-     Latin resolves to Rufina; every other script falls through per glyph to
+     Fraunces: display — variable 100–900 with opsz/SOFT/WONK, real italic.
+     Outfit: UI chrome — variable geometric sans. */
+  /* Display face first, then one companion per script (D-019, D-057).
+     Latin resolves to Fraunces; every other script falls through per glyph to
      the one face that declares its range, so a mixed line like
      `दिल में hope है still` sets correctly without any script detection. The
      ranges are disjoint, so the order among the companions does not matter —
@@ -381,15 +392,14 @@
      variable resolved by language below rather than a face named here.
      The card renderer builds the same stack (D-057). */
   --font-display:
-    "Rufina", "Vesper Libre", "Amiri", "Noto Serif Bengali",
+    "Fraunces Variable", "Vesper Libre", "Amiri", "Noto Serif Bengali",
     "Noto Serif Gurmukhi", "Noto Serif Gujarati", "Noto Serif Tamil",
     "Noto Serif Telugu", "Noto Serif Kannada", "Noto Serif Malayalam",
     "Noto Serif Thai", "Noto Serif Hebrew", "Noto Serif", var(--font-cjk),
-    "Rufina Fallback Georgia", "Rufina Fallback Times",
+    "Display Fallback Georgia", "Display Fallback Times",
     ui-serif, Georgia, "Times New Roman", serif;
   --font-ui:
-    "Elms Sans Variable", "Elms Sans", "Elms Sans Fallback", ui-sans-serif,
-    system-ui, sans-serif;
+    "Outfit Variable", "UI Fallback", ui-sans-serif, system-ui, sans-serif;
 
   /* --- Fluid type scale ---------------------------------------------------
      clamp() throughout: the hero must scale continuously, not step at
@@ -412,23 +422,35 @@
   --tracking-display: -0.02em;
   --tracking-label: 0.14em;
 
-  /* --- Palette ------------------------------------------------------------
+  /* --- Palette (D-064) -----------------------------------------------------
      OKLCH for perceptually even steps — matters when stanzas fade between
-     opacity states and must not shift hue. */
-  --color-canvas: oklch(0.13 0.008 265);
-  --color-surface: oklch(0.175 0.011 265);
-  --color-surface-raised: oklch(0.225 0.013 265);
-  --color-hairline: oklch(1 0 0 / 0.09);
+     opacity states and must not shift hue.
 
-  --color-ink: oklch(0.97 0.004 265);
-  --color-ink-muted: oklch(0.74 0.009 265);
-  /* 0.61, not 0.55 (D-053). This colour carries `text-micro` — 12px section
-     labels, kickers, the playback clock — which is nowhere near large text, so
-     it needs the full 4.5:1. At 0.55 it measured 4.14 on the canvas, 3.91 on a
-     surface and 3.52 on a raised surface: three failures, the worst of them on
-     the busiest component. Solved against the WORST background, so it passes
-     everywhere it is used rather than only where it was checked. */
-  --color-ink-faint: oklch(0.61 0.011 265);
+     Electric blue, cream, lime and sun. Every pair below was MEASURED, not
+     picked: cream on blue 6.75:1, lime on blue 5.91:1, sun on blue 4.93:1,
+     ink on lime 15.72:1. The muted tone is 80% cream at 4.86:1 — 76% is where
+     it stops clearing 4.5, so this carries headroom rather than sitting on the
+     line.
+
+     Two grounds, deliberately. `--color-canvas` is the brand: the landing,
+     search, chrome, cards, loader. `--color-reading` is where a full lyric is
+     set, and it stays quiet — long-form text on a saturated ground is
+     genuinely tiring, and this product's whole claim is that the words deserve
+     to be read. The playful world frames the reading; it does not invade it. */
+  --color-canvas: oklch(0.478 0.238 265.4);
+  --color-surface: oklch(0.53 0.225 265.4);
+  --color-surface-raised: oklch(0.585 0.21 265.4);
+  --color-hairline: oklch(1 0 0 / 0.22);
+
+
+
+  --color-ink: oklch(0.982 0.015 77.1);
+  --color-ink-muted: oklch(0.875 0.032 279.8);
+  /* The same discipline as D-053, re-measured for the new ground. This carries
+     `text-micro` — 12px labels, kickers, the clock — which is nowhere near
+     large text, so it needs the full 4.5:1 against the WORST background it
+     lands on, which is now `--color-surface-raised`, not the canvas. */
+  --color-ink-faint: oklch(0.875 0.032 279.8);
 
   /* --- Motion -------------------------------------------------------------
      Mirrored in src/lib/motion.ts for JS-driven animation. */
@@ -436,8 +458,12 @@
   --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
 
-  --radius-card: 1.25rem;
-  --radius-sheet: 1.75rem;
+  /* Rounder than before, and a full pill for controls. The reference language
+     is soft and friendly; a 2px radius reads as software, a pill reads as a
+     thing you want to press. */
+  --radius-card: 1.75rem;
+  --radius-sheet: 2.25rem;
+  --radius-pill: 999px;
 }
 
 /* --- CJK face, selected by content language (D-057) ------------------------
@@ -481,6 +507,26 @@
   --font-cjk: "Noto Serif KR";
 }
 
+
+/* Brand accents (D-064).
+   `@theme static`, NOT plain `@theme`. Tailwind v4 tree-shakes theme tokens it
+   cannot see used, and these are referenced only from .scss — which Tailwind
+   does not scan. Declared the ordinary way they were silently dropped from the
+   build, and `color: var(--color-lime)` resolved to nothing: the headline
+   rendered cream and looked like a styling bug rather than a missing token.
+   `static` forces emission whether a utility uses them or not.
+
+   Lime is the primary accent — it is what the eye goes to. Sun is the
+   secondary, for warmth, and never does the same job as lime in one view. */
+@theme static {
+  --color-lime: oklch(0.921 0.222 128.1);
+  --color-sun: oklch(0.879 0.162 90.9);
+  /* For text ON lime or sun, where cream would vanish. Measured at 15.72:1
+     over lime and 13.11:1 over sun. */
+  --color-on-bright: oklch(0.177 0.034 269.6);
+  --color-canvas-deep: oklch(0.375 0.2 265.6);
+  --color-reading: oklch(0.155 0.03 265);
+}
 
 /* Runtime-resolved tokens. `inline` makes utilities reference the value
    directly rather than a frozen theme var, so repainting --track-accent
@@ -537,6 +583,18 @@
     cursor: pointer;
   }
 
+  /* The track page reads, the rest of the product sells (D-064).
+     `body:has()` rather than a class on the article, because the page
+     background paints from body's own computed value — a token set on a
+     descendant never reaches it, which is the trap D-052 documented. The
+     palette engine then repaints this per track, exactly as before. */
+  body:has(.track-shell) {
+    --color-canvas: var(--color-reading);
+    --color-surface: oklch(0.205 0.032 265);
+    --color-surface-raised: oklch(0.25 0.035 265);
+    --color-hairline: oklch(1 0 0 / 0.12);
+  }
+
   body {
     margin: 0;
     background-color: var(--color-canvas);
@@ -554,8 +612,11 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Rufina ships no italic (D-005). Refuse synthesis explicitly so a stray
-     <em> inside a lyric can never shear the letterforms. */
+  /* Fraunces ships a REAL italic, and it is loaded (D-064) — so unlike the
+     face this replaced, <em> inside a lyric now sets correctly rather than
+     being refused. Synthesis stays off: the browser must use the drawn italic
+     or nothing, never a sheared upright. The same rule, for the opposite
+     reason. */
   .font-display,
   [class*="font-display"] {
     font-synthesis: none;

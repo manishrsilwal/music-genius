@@ -699,6 +699,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | **D-064** New direction: electric blue, Fraunces + Outfit, lime accent; reading canvas kept calm; session intro; one-tap escape from the stepper |
 | 2026-08-24 | **D-063** The landing now says a reader can search or start from a mood, instead of only implying it |
 | 2026-08-24 | **D-062** Focus follows route changes; slow actions announce themselves; systematic pass over 122 stack rules and 119 guidelines |
 | 2026-08-23 | **D-061** Metric-matched font fallbacks end the load-time reflow; buttons finally show a pointer |

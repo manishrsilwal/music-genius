@@ -136,13 +136,37 @@ export function PreferenceStepper({
 							))}
 					</div>
 
-					<div className="flex items-center gap-4">
+					<div className="stepper__escapes">
 						<button
 							type="button"
 							className="stepper__skip text-micro"
 							onClick={() => go(draft)}
 						>
-							{step === STEPS - 1 ? "Skip · show me anything" : "Skip this"}
+							{step === STEPS - 1 ? "Skip this one" : "Skip this one"}
+						</button>
+
+						{/*
+						  One escape, not three (D-064).
+
+						  Skipping used to mean answering "skip" once per step, so a
+						  reader who did not want to answer at all still had to work
+						  through the whole flow to reach a search field. Three
+						  dismissals is not an escape hatch, it is the same wizard with
+						  different buttons.
+
+						  This ends the stepper outright with whatever has been
+						  answered so far — which is a real answer, since an unanswered
+						  axis simply carries no weight in the ranking. It is styled as
+						  a genuine alternative rather than as fine print, because for
+						  a reader who arrived with a song in mind it is the ONLY thing
+						  on this screen they want.
+						*/}
+						<button
+							type="button"
+							className="stepper__bail"
+							onClick={() => onComplete(draft)}
+						>
+							Skip all — just let me search
 						</button>
 					</div>
 				</motion.div>

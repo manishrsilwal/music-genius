@@ -134,6 +134,67 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-064 — A new visual direction: electric, playful, and still readable
+**Built 2026-08-24.** A deliberate reversal of D-005, D-019 and D-052, asked for
+explicitly: a brighter, friendlier product aimed at a younger audience, with
+reference images supplied.
+
+**Three decisions were put to the reader before any code changed**, because
+this replaces a design system rather than extending one. The references were
+two *different* styles — one bright playful-maximalist, one dark cinematic
+gradient — and the choice between them changes everything downstream.
+
+**Direction: bright pop.** Electric blue ground, cream ink, lime primary and sun
+secondary. Every pair measured rather than picked: cream on blue 6.75:1, lime on
+blue 5.91:1, sun on blue 4.93:1, ink on lime 15.72:1. The muted tone is 80%
+cream at 4.86:1 — 76% is where it stops clearing 4.5, so it carries headroom
+instead of sitting on the line.
+
+**The reading canvas stays calm**, and that is a product decision, not a
+compromise. Long-form text on a saturated ground is tiring, and this product's
+entire claim is that lyrics deserve to be read properly. So `--color-canvas` is
+the brand and `--color-reading` is where a lyric is set, scoped by
+`body:has(.track-shell)` — on `body`, because the page background paints from
+body's own computed value and a token set on a descendant never reaches it,
+which is the trap D-052 documented. The palette engine still repaints per track,
+which is exactly where that work belongs.
+
+**Type: Fraunces + Outfit.** Fraunces is loaded with all four axes — opsz, SOFT
+and WONK — because those are the point: the headline's "properly" is set in its
+real italic with the wonk pushed up, and that single word carries most of the
+personality. Outfit is a geometric sans at 32KB. Neither is Inter, Poppins nor
+Space Grotesk, which is where this brief usually lands.
+
+> The infrastructure built over the last two days paid for itself here.
+> Swapping the display face meant regenerating card metrics and the
+> metric-matched fallbacks — both are generators now, so it was two commands
+> rather than two days. The twelve script companion faces were untouched:
+> they are functional coverage, not style, and a redesign has no business
+> removing Tamil support.
+
+**A Tailwind v4 trap, worth recording.** `@theme` tree-shakes tokens it cannot
+see used, and the brand accents are referenced only from `.scss`, which Tailwind
+does not scan. Declared the ordinary way they were silently dropped from the
+build and `color: var(--color-lime)` resolved to nothing — the headline rendered
+cream and looked like a styling mistake rather than a missing token. They are
+now in an `@theme static` block, which emits regardless of use.
+
+**Skipping the stepper was three dismissals, not an escape.** "Skip" answered
+one step at a time, so a reader who did not want to answer at all still had to
+work through the whole flow to reach a search field. That is the same wizard
+with different buttons. There is now a single control that ends it outright —
+styled as a real alternative rather than as fine print, because for a reader who
+arrived with a song in mind it is the only thing on that screen they want.
+
+**The intro is server-rendered and cleared by CSS**, not by React. If it waited
+for hydration it would flash in *after* the page, which is the opposite of an
+intro; and if a JS-driven overlay outlived a failed bundle it would lock the
+reader out entirely. The animation that removes it is pure CSS with `forwards`
+fill, so the page frees itself whatever happens. React's only job is the one
+thing CSS cannot know — whether this reader has already seen it this session.
+Under reduced motion it does not play at all: there is no gentler version of a
+splash screen worth showing to someone who asked for less movement.
+
 ### D-063 — The landing showed the choice without ever making it
 **Built 2026-08-24.** Closes the entry-flow request from D-059, which had
 drifted.

@@ -1,7 +1,7 @@
 /**
  * Lyric Card rendering (PRD §3.4, ARCHITECTURE.md D-010).
  *
- * Satori performs real text shaping from the Rufina font binary — true kerning
+ * Satori performs real text shaping from the display font binary — true kerning
  * and ligatures, crisp at any resolution. This is why the card is rendered
  * server-side rather than with html2canvas, which rasterises the DOM
  * approximately and would ship a typography product with bad typography.
@@ -29,7 +29,7 @@ import {
  * ordering among companions is irrelevant because their scripts are disjoint;
  * the CJK face is appended per render, since that one is not.
  */
-const DISPLAY_STACK = ["Rufina", ...Object.keys(SCRIPT_FONTS)].join(", ");
+const DISPLAY_STACK = ["Fraunces", ...Object.keys(SCRIPT_FONTS)].join(", ");
 
 type LoadedFont = {
 	name: string;
@@ -55,10 +55,10 @@ async function loadFonts(): Promise<LoadedFont[]> {
 	);
 
 	return [
-		{ name: "Rufina", data: display, weight: 400, style: "normal" },
-		{ name: "Rufina", data: displayBold, weight: 700, style: "normal" },
+		{ name: "Fraunces", data: display, weight: 400, style: "normal" },
+		{ name: "Fraunces", data: displayBold, weight: 700, style: "normal" },
 		...scripts,
-		{ name: "Elms Sans", data: ui, weight: 500, style: "normal" },
+		{ name: "Outfit", data: ui, weight: 500, style: "normal" },
 	];
 }
 
@@ -164,7 +164,7 @@ export async function renderCard({
 			<div
 				style={{
 					display: "flex",
-					fontFamily: "Elms Sans",
+					fontFamily: "Outfit",
 					fontSize: 24,
 					letterSpacing: 3.4,
 					textTransform: "uppercase",
