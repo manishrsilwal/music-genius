@@ -36,6 +36,16 @@
 // The two ways in (D-059). One section, so the choice reads as a choice
 // rather than as two unrelated blocks that happen to be adjacent.
 .entry {
+	// Sits above the field's own label, so it needs to read as the section's
+	// opening line rather than as helper text belonging to the input.
+	&__lead {
+		// Enough air to read as the section's opening line. At 1.25rem it sat
+		// on top of the field's own label and the two read as one block.
+		margin-bottom: 1.9rem;
+		max-width: 46ch;
+		text-wrap: pretty;
+	}
+
 	&__or {
 		display: flex;
 		align-items: center;

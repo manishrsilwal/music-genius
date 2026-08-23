@@ -688,6 +688,10 @@ Before shipping a component:
 - [ ] `disabled` says unavailable; `aria-busy` says working. A slow action needs
       both (D-062)
 - [ ] Every inline SVG carries width and height as well as CSS size (D-062)
+- [ ] A screen offering two routes says so in words; a divider and two labels
+      only read as a choice to someone already looking for one (D-063)
+- [ ] Read the whole screen for the same sentence written twice — a new line of
+      copy often duplicates one already below it (D-063)
 
 ---
 
@@ -695,6 +699,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | **D-063** The landing now says a reader can search or start from a mood, instead of only implying it |
 | 2026-08-24 | **D-062** Focus follows route changes; slow actions announce themselves; systematic pass over 122 stack rules and 119 guidelines |
 | 2026-08-23 | **D-061** Metric-matched font fallbacks end the load-time reflow; buttons finally show a pointer |
 | 2026-08-23 | **D-060** Focus can no longer scroll under the fixed masthead or dock; the search field gains a real visible label |

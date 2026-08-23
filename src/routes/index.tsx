@@ -116,8 +116,25 @@ function Discovery() {
 						  not stop being true on the second visit.
 						*/}
 						<section className="entry">
-							{/* The field carries its own visible label now (D-060), so
-							    there is no heading here to duplicate it. */}
+							{/*
+							  Names both routes in a sentence (D-063).
+							
+							  The section already showed the choice — a labelled field, a
+							  ruled "or", labelled chips — but never said it. Structure
+							  reads as a choice only to someone already looking for one;
+							  a reader who does not have a song in mind sees a search box
+							  and assumes that is the product. One line costs nothing and
+							  removes the guess.
+							
+							  Not a heading: the field owns the only heading-shaped thing
+							  here, its own visible label (D-060), and a second one above
+							  it would compete for the same job.
+							*/}
+							<p className="entry__lead text-caption text-ink-muted">
+								Two ways in — look up a song you already love, or tell us how
+								you want to feel and we will choose.
+							</p>
+
 							<SearchField />
 
 							<p className="entry__or" aria-hidden="true">
@@ -127,9 +144,11 @@ function Discovery() {
 							<h2 className="mb-1 text-micro uppercase tracking-label text-ink-faint">
 								Start from a mood
 							</h2>
+							{/* The lead above already makes the offer; repeating "tell us
+							    how you want to feel" here was the same sentence twice on
+							    one screen. What is left is the part the lead does not say. */}
 							<p className="mb-3 text-caption text-ink-faint">
-								Tell us how you want to feel and we will pick. Change any answer
-								without starting over.
+								Change any answer without starting over.
 							</p>
 							<TasteChips
 								preferences={preferences}

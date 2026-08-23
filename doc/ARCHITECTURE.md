@@ -134,6 +134,45 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-063 — The landing showed the choice without ever making it
+**Built 2026-08-24.** Closes the entry-flow request from D-059, which had
+drifted.
+
+The ask was to tell a reader they can either pick a mood or just search. D-059
+built the structure for that — a labelled field, a ruled "or", labelled chips —
+and then D-060 removed the heading that framed the search half ("Know the
+song?") because the field gained its own visible label and two heading-shaped
+things above one input compete.
+
+That fix was right and the framing was collateral. What survived reads as a
+choice **only to a reader already looking for one**; someone with no song in
+mind sees a search box and reasonably concludes that is the product. Structure
+implies; it does not tell.
+
+One line above the field now names both routes. Not a heading — the field owns
+the only heading-shaped element here — and set at a 46ch measure so it reads as
+the section's opening sentence rather than as helper text belonging to the
+input.
+
+> Writing it surfaced a duplicate: the new lead offered to "tell us how you want
+> to feel", and the mood description below said "Tell us how you want to feel
+> and we will pick" — the same sentence twice on one screen. The description is
+> now only the part the lead does not cover.
+
+**Verified by rendering it**, which needed a harness. The landing's discovery
+state is unreachable in a headless capture: it renders only after hydration
+reads `localStorage`, and a fresh profile has no preferences, so the page shows
+the stepper instead. A temporary same-origin page reproducing the section's
+markup against the built stylesheets gave a real render of the CSS.
+
+> Two false readings came out of that harness before it was trustworthy, both
+> worth remembering. Component SCSS is code-split into a route chunk, so linking
+> only `styles.css` renders the section unstyled and invites "fixes" to CSS that
+> was never loaded. And the harness pinned hashed stylesheet filenames, which
+> change on every build — so an edit appeared to have no effect while the page
+> was quietly loading a 404. The apparent cramping that prompted a spacing change
+> was that 404, not the spacing.
+
 ### D-062 — The rest of the audit: 122 stack rules and 119 guidelines
 **Built 2026-08-24.** Completes the `ui-ux-pro-max` pass. D-061 acted on about
 ten guidelines found by ad-hoc query; this is the systematic read — every rule
