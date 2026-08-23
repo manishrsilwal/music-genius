@@ -21,6 +21,10 @@
 	// The hero is full-bleed artwork and the landing is flat canvas, so the
 	// mark cannot rely on either. Glass reads on both, and is the surface
 	// treatment the rest of the chrome already uses.
+	// Fixed, so the height the rest of the layout compensates for is known
+	// rather than measured. --masthead-height is the contract (D-060).
+	min-height: var(--masthead-height);
+
 	@include m.glass;
 	@include m.tap-target;
 

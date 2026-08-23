@@ -287,6 +287,17 @@
   /* How far up from the viewport floor the docked bar reaches. One value at
      every breakpoint now that it spans the full width (D-038). */
   --dock-reach: calc(var(--dock-height) + var(--dock-safe));
+
+  /* How far the fixed masthead reaches down the page (D-060): its own height,
+     the top inset it sits at, and the notch. One token, because two things
+     need it and they must not drift — the landing's top padding, so the
+     headline is not sat on, and `scroll-padding-top`, so a focused element
+     never scrolls underneath it. */
+  --masthead-height: 2.75rem;
+  --masthead-reach: calc(
+    var(--masthead-height) + var(--dock-inset) * 0.75 +
+      env(safe-area-inset-top, 0px)
+  );
   /* Widest the docked bar's contents run before they centre, so a full-width
      bar does not strand its controls at opposite edges of a large display. */
   --dock-measure: 72rem;
@@ -440,6 +451,16 @@
     /* Reserve the scrollbar gutter permanently, so locking the page while the
        insights panel is open cannot shift the layout sideways (D-048). */
     scrollbar-gutter: stable;
+
+    /* WCAG 2.2 AA, Focus Not Obscured (D-060).
+       This product fixes chrome to BOTH edges — the masthead on top, the
+       player dock and the Discover button on the bottom — and a track page is
+       one very long scroll. Without this, tabbing through the lyrics scrolls
+       the focused line to the exact viewport edge a fixed bar is covering, and
+       the reader loses the thing they are on. Anything the browser scrolls to,
+       focus included, now stops short of both. */
+    scroll-padding-top: calc(var(--masthead-reach) + 1rem);
+    scroll-padding-bottom: calc(var(--dock-reach) + var(--dock-inset));
   }
 
   body {

@@ -116,9 +116,8 @@ function Discovery() {
 						  not stop being true on the second visit.
 						*/}
 						<section className="entry">
-							<h2 className="mb-2 text-micro uppercase tracking-label text-ink-faint">
-								Know the song?
-							</h2>
+							{/* The field carries its own visible label now (D-060), so
+							    there is no heading here to duplicate it. */}
 							<SearchField />
 
 							<p className="entry__or" aria-hidden="true">

@@ -653,6 +653,12 @@ Before shipping a component:
       and looked correct at scroll 0 (D-059)
 - [ ] Where a screen offers two routes to the same goal, both are visible at the
       moment of choosing (D-059)
+- [ ] Chrome fixed to an edge is matched by `scroll-padding` on that edge, from
+      the same token — otherwise focus scrolls underneath it (D-060)
+- [ ] Every input has a visible label. A placeholder is a hint, not a label, and
+      it disappears when it is most needed (D-060)
+- [ ] An `aria-label` beside a visible label overrides it. Pick one (D-060)
+- [ ] A spacing number needed in two places is a token, not two numbers (D-060)
 
 ---
 
@@ -660,6 +666,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | **D-060** Focus can no longer scroll under the fixed masthead or dock; the search field gains a real visible label |
 | 2026-08-23 | **D-059** A persistent masthead replaces a home link that was hidden on mobile and never actually fixed; search and mood offered together on the landing |
 | 2026-08-23 | **D-058** Lyric Card fixed in production builds; CJK card type measured at full width instead of overflowing; hero and lyrics agree on regional Han shapes |
 | 2026-08-23 | **D-057** Twelve script faces added — Arabic, Tamil, Thai, Hebrew, CJK and more; Cyrillic and Greek were broken too; CJK chosen by language, not by glyph |

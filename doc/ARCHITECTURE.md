@@ -134,6 +134,44 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-060 — Two accessibility faults the new chrome made worse
+**Built 2026-08-23.** From a `ui-ux-pro-max` audit of the D-059 work.
+
+**Keyboard focus could be scrolled under the fixed chrome.** WCAG 2.2 AA
+*Focus Not Obscured (Minimum)*. This product now fixes chrome to **both** edges
+— the masthead on top, the player dock and the Discover button on the bottom —
+and a track page is one very long scroll. Tabbing through it scrolls the focused
+element to the exact viewport edge a bar is covering, and the reader loses the
+thing they are on. There was no `scroll-padding` anywhere in the stylesheet.
+
+`html` now sets `scroll-padding-top` and `scroll-padding-bottom` from the same
+tokens the bars are positioned with, so anything the browser scrolls to — focus
+included — stops short of both.
+
+> `--masthead-reach` exists so the number is stated once. Two things need it:
+> the landing's top padding, so the headline is not sat on, and the
+> scroll-padding. Typed separately they drift, and the drift is invisible until
+> someone tabs into the top of a page.
+
+**The search field had no visible label** — a placeholder plus an `aria-label`,
+which is the flagged anti-pattern rather than a substitute. The placeholder
+vanishes the moment the reader starts typing, which is exactly when a reminder
+of what the field does becomes useful.
+
+It now carries a real `<label>`, owned by the component rather than by the page
+that happens to render it. The `aria-label` is **removed**, not kept alongside:
+an `aria-label` overrides a visible label, so leaving both means the invisible
+one wins and the two can silently disagree.
+
+> The text is "Search for a song", not the section framing "Know the song?".
+> The visible label is now the accessible name, so it has to read sensibly out
+> of context — a question does not.
+
+Already correct, and checked rather than assumed: the mark is `aria-hidden`
+inside a control with its own accessible name; touch targets clear 44×44 via
+`tap-target`; reduced motion is handled globally; loading states use stable
+skeletons with a live region.
+
 ### D-059 — There was no way home, and the link that was supposed to be one never worked
 **Built 2026-08-23.** Raised by the reader: "it is hard to go to the homepage
 from inside the lyrical page."

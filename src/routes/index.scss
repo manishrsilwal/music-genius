@@ -12,11 +12,13 @@
 // where a hero belongs.
 .landing {
 	// Top padding clears the fixed masthead (D-059), which is out of flow and
-	// would otherwise sit on the headline.
-	padding-block: 5.5rem 5rem;
+	// would otherwise sit on the headline. Derived from the masthead's own
+	// reach rather than typed as a number, so the two cannot drift apart
+	// (D-060).
+	padding-block: calc(var(--masthead-reach) + 1.75rem) 5rem;
 
 	@include m.from("md") {
-		padding-block: 6.5rem 6rem;
+		padding-block: calc(var(--masthead-reach) + 2.75rem) 6rem;
 	}
 
 	&__title {

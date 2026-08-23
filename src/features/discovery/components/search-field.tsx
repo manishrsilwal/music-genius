@@ -39,6 +39,7 @@ export function SearchField() {
 	const [highlighted, setHighlighted] = useState(0);
 	const navigate = useNavigate();
 	const listId = useId();
+	const inputId = useId();
 	const optionId = (index: number) => `${listId}-option-${index}`;
 
 	const debounced = useDebounced(term);
@@ -91,11 +92,30 @@ export function SearchField() {
 	return (
 		<div className="search">
 			{/*
+			  A visible label, not a placeholder standing in for one (D-060).
+			  The field previously carried a placeholder plus an aria-label,
+			  which leaves a sighted reader with nothing once they start typing
+			  — the placeholder disappears exactly when the reminder of what the
+			  field is for becomes useful.
+
+			  It is also the accessible name now, so the text has to read
+			  sensibly out of context: "Search for a song" does, where the
+			  section framing it answers ("Know the song?") would not.
+			*/}
+			<label
+				htmlFor={inputId}
+				className="mb-2 block text-micro uppercase tracking-label text-ink-faint"
+			>
+				Search for a song
+			</label>
+
+			{/*
 			  "any" names the reach. The shelves are 59 tracks chosen by hand;
 			  this field is everything LRCLIB holds, and nothing on the page
 			  said so (D-056).
 			*/}
 			<input
+				id={inputId}
 				type="search"
 				role="combobox"
 				value={term}
@@ -105,7 +125,6 @@ export function SearchField() {
 				}}
 				onKeyDown={onKeyDown}
 				placeholder="Search any song or artist"
-				aria-label="Search lyrics"
 				aria-expanded={isOpen}
 				aria-controls={listId}
 				aria-autocomplete="list"
