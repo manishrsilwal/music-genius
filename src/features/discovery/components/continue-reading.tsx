@@ -74,7 +74,15 @@ export function ContinueReading({
 							aria-label={`Remove ${entry.title} from continue reading`}
 							className="recent__remove"
 						>
-							<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+							<svg
+								viewBox="0 0 16 16"
+								// Intrinsic size, not just CSS: an SVG without one lays out
+								// at the default 300x150 until the stylesheet resolves it.
+								width="12"
+								height="12"
+								aria-hidden="true"
+								focusable="false"
+							>
 								<path
 									d="M4 4l8 8M12 4l-8 8"
 									stroke="currentColor"

@@ -43,6 +43,11 @@ export function DiscoverButton({
 			type="button"
 			data-state={state}
 			disabled={generating}
+			// Disabling says the control is unavailable; it does not say why
+			// (D-062). A screen reader reaching a dead button during a
+			// multi-second synthesis has no way to know work is under way —
+			// the visible label changes, but nothing announces it.
+			aria-busy={generating}
 			aria-expanded={open}
 			// Names the region this controls. `aria-expanded` alone says
 			// something opened without saying what (D-053).

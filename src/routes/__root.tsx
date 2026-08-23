@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Masthead } from "@/components/masthead";
+import { RouteFocus } from "@/components/route-focus";
 import { RouteError } from "../components/route-error";
 import { RouteMessage } from "../components/route-message";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
@@ -105,6 +106,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				  wants the words first, not the chrome.
 				*/}
 				<Masthead />
+				{/* Focus follows the route, the way it would across documents
+				    (D-062). Renders nothing. */}
+				<RouteFocus />
 				{children}
 				<TanStackDevtools
 					config={{

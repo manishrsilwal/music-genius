@@ -134,6 +134,60 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-062 — The rest of the audit: 122 stack rules and 119 guidelines
+**Built 2026-08-24.** Completes the `ui-ux-pro-max` pass. D-061 acted on about
+ten guidelines found by ad-hoc query; this is the systematic read — every rule
+in `react`, `html-tailwind` and the full guideline set, checked against the
+code rather than sampled.
+
+**Focus never moved on a route change.** In a multi-page site the browser does
+this for free: a new document resets focus and the page is announced. A
+client-side router does neither. The link the reader activated unmounts, focus
+falls back to `<body>`, and nothing is said — so a screen reader user who opens
+a track hears silence, and a keyboard user's next Tab starts from the top of the
+document rather than from where they arrived.
+
+`RouteFocus` moves focus into `#main` on each change. That landmark already
+exists on every route as the skip link's target (D-053), so this reuses it
+rather than inventing one.
+
+> Three details that are the whole difference between fixing this and breaking
+> something else. It skips the first render, where the browser already has focus
+> right and stealing it would fight the skip link. It uses `preventScroll`,
+> because the router restores scroll position and focusing the top of the region
+> would otherwise yank a returning reader back up the page. And it compares the
+> previous path to the current one, so a re-render reporting the same route does
+> not throw the reader to the top — which also makes `pathname` a value the
+> effect reads rather than a dependency it merely lists, the thing Biome
+> correctly objected to.
+
+**Disabled was doing the work of busy.** `aria-busy` appeared zero times. The
+drawer's trigger and the card composer's download both disable during a
+multi-second server operation, and the visible label changes — but a screen
+reader reaching a dead button was told only that it was unavailable, which reads
+as broken rather than working.
+
+**Two SVGs had no intrinsic size**, so they laid out at the SVG default of
+300×150 until the stylesheet resolved them. On the masthead — a fixed element —
+that briefly covers the corner of the page.
+
+**Checked and already correct.** Recorded so the next pass does not repeat the
+work: React 19.2.8 clears the RSC security floor; no `forwardRef` in new code;
+the three array-index keys are all fixed, non-reordering lists; no context
+providers to memoise; images reserve space through a fixed box or
+`aspect-ratio`; `min-w-0` is used where flex children hold unpredictable text;
+no class tokens built by interpolation; `scrollRestoration` is on; exits already
+run shorter than entrances; the clock uses tabular figures; body type is 18px so
+iOS will not auto-zoom the search field; `dvh` rather than `vh`; heading order
+is h1→h2 with no skips; and the z-index scale is tokenised.
+
+**Rejected, with reasons.** `touch-action: manipulation` — the 300ms tap delay
+it addresses is already gone on any browser honouring `width=device-width`.
+Preloading Rufina — tempting, but D-061's metric-matched fallback already makes
+the swap quiet, and a preload would compete with the artwork preload that the
+hero actually waits on. `staggerChildren` at 60ms against a suggested 30–50ms:
+the pacing is deliberate and documented, not an oversight.
+
 ### D-061 — The typeface arrived and the page jumped
 **Built 2026-08-23.** From a full `ui-ux-pro-max` pass over the app.
 
@@ -2202,7 +2256,7 @@ src/
 │   ├── playback/              # playback-bar · seekbar · youtube player
 │   ├── insights/              # affordance · drawer · content
 │   └── lyric-card/            # line selection · composer (§3.4)
-├── components/                # route-message · route-error (D-039)
+├── components/                # masthead (D-059) · route-focus (D-062) · route-message · route-error
 ├── lib/
 │   ├── types.ts               # domain shapes (ours, not LRCLIB's)
 │   ├── lrc.ts                 # LRC parser → stanzas (pure, isomorphic)

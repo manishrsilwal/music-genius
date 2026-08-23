@@ -45,6 +45,12 @@ export function Masthead() {
 			<svg
 				className="masthead__mark"
 				viewBox="0 0 16 16"
+				// Intrinsic size as well as the CSS one (D-062). Without it the
+				// mark lays out at the SVG default of 300x150 until the stylesheet
+				// resolves, which on a fixed element means it briefly covers the
+				// corner of the page it sits on.
+				width="14"
+				height="14"
 				aria-hidden="true"
 				focusable="false"
 			>

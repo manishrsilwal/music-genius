@@ -683,6 +683,11 @@ Before shipping a component:
       one for free (D-061)
 - [ ] A generated design direction is evidence, not instruction. It does not
       outrank a decision this project already reasoned through (D-061)
+- [ ] A client-side route change moves focus to the main landmark — the browser
+      does this across documents and a router does not (D-062)
+- [ ] `disabled` says unavailable; `aria-busy` says working. A slow action needs
+      both (D-062)
+- [ ] Every inline SVG carries width and height as well as CSS size (D-062)
 
 ---
 
@@ -690,6 +695,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | **D-062** Focus follows route changes; slow actions announce themselves; systematic pass over 122 stack rules and 119 guidelines |
 | 2026-08-23 | **D-061** Metric-matched font fallbacks end the load-time reflow; buttons finally show a pointer |
 | 2026-08-23 | **D-060** Focus can no longer scroll under the fixed masthead or dock; the search field gains a real visible label |
 | 2026-08-23 | **D-059** A persistent masthead replaces a home link that was hidden on mobile and never actually fixed; search and mood offered together on the landing |

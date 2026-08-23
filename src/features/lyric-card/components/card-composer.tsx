@@ -165,6 +165,9 @@ export function CardComposer({
 						type="button"
 						onClick={download}
 						disabled={busy}
+						// Rendering a card is a server round-trip through satori and
+						// a rasteriser. Disabled alone reads as "broken" (D-062).
+						aria-busy={busy}
 						className="flex-1 rounded-card bg-accent px-5 py-3 font-ui text-caption uppercase tracking-label text-canvas disabled:opacity-60"
 					>
 						{busy ? "Rendering…" : "Download card"}

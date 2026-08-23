@@ -518,6 +518,15 @@
     scroll-padding-bottom: calc(var(--dock-reach) + var(--dock-inset));
   }
 
+  /* A programmatically focused landmark must not draw a focus ring (D-062).
+     `#main` is given tabindex="-1" on route change so focus can be moved into
+     it; that is a scripted hand-off, not a control the reader selected, and
+     ringing it would suggest something is interactive when nothing is. Applies
+     only to -1, so every genuine tab stop keeps its indicator. */
+  [tabindex="-1"]:focus {
+    outline: none;
+  }
+
   /* A pointer on anything that responds to one (D-061).
      `<button>` computes to `cursor: default`, so every button in this product
      — the taste chips, the stepper cards, the dock's transport, the composer —
