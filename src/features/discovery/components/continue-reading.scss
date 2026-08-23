@@ -1,0 +1,84 @@
+@use "styles/mixins" as m;
+
+// Continue reading (D-056).
+//
+// Deliberately the quietest shelf on the page. A Deep Dive card argues for a
+// track the reader has never heard of and needs the room to do it; this is a
+// door back to something they already chose, and only has to be findable.
+.recent {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.25rem;
+
+	&__row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		border-radius: 0.5rem;
+		transition: background-color 0.18s var(--ease-editorial);
+
+		&:hover {
+			background: var(--color-surface);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__link {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: baseline;
+		gap: 0.625rem;
+		padding: 0.5rem 0.25rem 0.5rem 0.5rem;
+	}
+
+	&__title {
+		font-family: var(--font-display);
+		color: var(--color-ink);
+		@include m.line-clamp(1);
+	}
+
+	&__artist {
+		font-family: var(--font-ui);
+		color: var(--color-ink-faint);
+		margin-inline-start: auto;
+		flex: none;
+		@include m.line-clamp(1);
+	}
+
+	// Visible at all times rather than on hover: hover-only controls do not
+	// exist on a touch screen, and this is the only way to drop one row.
+	&__remove {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		margin-inline-end: 0.25rem;
+		border-radius: 50%;
+		color: var(--color-ink-faint);
+		transition:
+			color 0.18s var(--ease-editorial),
+			background-color 0.18s var(--ease-editorial);
+		@include m.tap-target;
+
+		svg {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+
+		&:hover {
+			color: var(--color-ink);
+			background: var(--color-surface-raised);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+}

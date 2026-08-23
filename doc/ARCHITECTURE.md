@@ -134,6 +134,74 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-056 — The landing treated every visit as a first visit
+**Built 2026-08-23.** The entry-flow rework, approved from a written proposal.
+The track page is deliberately untouched apart from one link.
+
+**What the audit found**, by reading the code rather than by judgement:
+
+| | evidence |
+|---|---|
+| Nothing is remembered | `tle:preferences` was the only key in the codebase |
+| An empty search says nothing | `isOpen = enabled && results.length > 0` |
+| The way out is at the bottom | the sole exit link lived in the track footer |
+| Taste is all-or-nothing | `reset()` cleared all three answers |
+| Two doors, one visible | 59 curated tracks vs all of LRCLIB, undistinguished |
+
+**The change in one sentence: the landing should differ on the second visit.**
+A reader on their twentieth visit saw exactly what they saw on their first,
+minus the questions.
+
+**Continue reading.** Track id, title and artist, newest first, capped at five,
+in the reader's own browser. Recorded when the page opens — not when they
+scroll, not when they finish: someone who opened a song and left still wants to
+find it again.
+
+> **No scroll position, deliberately.** Lyric lines reflow with viewport width
+> and with the drawer open, so a stored offset points somewhere else on the
+> next visit — and being returned to roughly-but-not-quite where you left off
+> is worse than starting at the top of a page you chose to reopen.
+>
+> Storage is parsed, never trusted, by the same rule as the preference
+> signature (D-047): it is user-writable and survives across versions of this
+> code. Incomplete rows are dropped rather than repaired, duplicate ids are
+> collapsed (two rows with one key breaks React), and the cap is enforced on
+> **read** as well as write, since an older build could have stored more.
+
+**Per-row removal, not only a bulk clear.** What someone has read is personal,
+and taking one thing off the shelf should not cost them the rest of it. The
+control is always visible rather than revealed on hover — a hover-only control
+does not exist on a touch screen, and this is the only way to drop a row.
+
+**The shelf renders nothing when empty.** A first visit is exactly as it was.
+An empty shelf explaining what would eventually appear there is chrome charging
+rent for a feature the reader has not used.
+
+**Taste chips replace "Change taste".** Editing one axis used to mean
+re-answering all three. The chips also make the answers *visible* — after the
+stepper closed they were invisible, so the cards said "for longing, the
+honesty" with nothing on the page confirming that is what the reader asked for.
+The stepper itself is unchanged: it answers the PRD's "a blank search bar is
+intimidating" and does it well. The problem was never the first visit.
+
+**The empty search state introduced a bug I had to fix in the same pass.**
+Opening the panel with zero results meant `onKeyDown` still ran its arrow
+handling, and `(i + 1) % 0` is `NaN` — with `aria-activedescendant` pointing at
+a row that does not exist. The guard now tests rows rather than the panel, and
+Escape is handled before it so clearing the field still works.
+
+**The way home** takes `--discover-bottom`, the offset the shell already
+resolves for everything on the bottom edge, so it rises with the docked bar and
+the drawer sheet without knowing anything about either. Left edge: the right is
+the Discover button's, and two things in one corner is precisely what D-033
+was about. Hidden below `sm`, where the bar and the button already crowd that
+edge — the footer link is still there, so nothing is lost.
+
+**Copy.** Both doors now say what they are. Three picks out of a hand-built
+catalogue is an editorial claim, and unlabelled it read as the whole of a thin
+library; the search field says "any song or artist" because it reaches
+everything LRCLIB holds and nothing on the page said so.
+
 ### D-055 — The player did not exist for the first four seconds
 **Fixed 2026-08-23.** Reported as: tracks the reader has not opened before
 struggle to show the player. Uncached tracks, so this was the cold path.

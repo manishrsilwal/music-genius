@@ -21,20 +21,20 @@ import "./preference-stepper.scss";
  * Skipping is a real answer — an unanswered axis simply carries no weight.
  */
 
-interface Option<T> {
+export interface Option<T> {
 	value: T;
 	label: string;
 	hint: string;
 }
 
-const MOOD_OPTIONS: Option<Mood>[] = [
+export const MOOD_OPTIONS: Option<Mood>[] = [
 	{ value: "longing", label: "Longing", hint: "Distance, memory, ache" },
 	{ value: "defiant", label: "Defiant", hint: "Anger with somewhere to go" },
 	{ value: "tender", label: "Tender", hint: "Quiet, close, unguarded" },
 	{ value: "restless", label: "Restless", hint: "Motion, nerve, escape" },
 ];
 
-const PULL_OPTIONS: Option<Pull>[] = [
+export const PULL_OPTIONS: Option<Pull>[] = [
 	{
 		value: "storytelling",
 		label: "The story",
@@ -53,7 +53,7 @@ const PULL_OPTIONS: Option<Pull>[] = [
 	{ value: "imagery", label: "The imagery", hint: "Pictures over statements" },
 ];
 
-const FAMILIARITY_OPTIONS: Option<Familiarity>[] = [
+export const FAMILIARITY_OPTIONS: Option<Familiarity>[] = [
 	{ value: "canon", label: "The canon", hint: "Songs worth rereading" },
 	{ value: "deep", label: "Deep cuts", hint: "Things you may not know" },
 	{ value: "surprise", label: "Surprise me", hint: "No preference" },

@@ -102,3 +102,17 @@
 		@include m.line-clamp(1);
 	}
 }
+
+// The panel now opens to report an empty result as well as to list matches
+// (D-056). Set as a statement, not as a disabled row: nothing here is
+// selectable, so it takes no hover, no highlight and no option semantics.
+.search__empty {
+	display: block;
+	border-radius: inherit;
+	cursor: default;
+
+	p {
+		margin: 0;
+		text-wrap: pretty;
+	}
+}

@@ -52,14 +52,30 @@ export function SearchField() {
 	});
 
 	const results = data ?? [];
-	const isOpen = enabled && results.length > 0;
+	/*
+	 * The panel opens whenever there is something to say, which now includes
+	 * having nothing to show (D-056). It used to open only on results, so a
+	 * query that matched nothing produced silence — no message, no sign the
+	 * search had even run. A reader cannot tell a miss from a broken field.
+	 */
+	const settled = enabled && !isFetching && !error;
+	const empty = settled && results.length === 0;
+	const isOpen = (enabled && results.length > 0) || empty;
 
 	const open = (track: TrackSummary) => {
 		navigate({ to: "/track/$trackId", params: { trackId: track.id } });
 	};
 
 	const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-		if (!isOpen) return;
+		// Guards on rows, not on the panel. Since D-056 the panel also opens to
+		// say there is nothing — and arrowing through zero results computes
+		// `% 0`, which is NaN, and points `aria-activedescendant` at a row that
+		// does not exist. Escape still has to work, so it is handled first.
+		if (event.key === "Escape") {
+			setTerm("");
+			return;
+		}
+		if (results.length === 0) return;
 		if (event.key === "ArrowDown") {
 			event.preventDefault();
 			setHighlighted((i) => (i + 1) % results.length);
@@ -69,13 +85,16 @@ export function SearchField() {
 		} else if (event.key === "Enter") {
 			const choice = results[highlighted];
 			if (choice) open(choice);
-		} else if (event.key === "Escape") {
-			setTerm("");
 		}
 	};
 
 	return (
 		<div className="search">
+			{/*
+			  "any" names the reach. The shelves are 59 tracks chosen by hand;
+			  this field is everything LRCLIB holds, and nothing on the page
+			  said so (D-056).
+			*/}
 			<input
 				type="search"
 				role="combobox"
@@ -85,12 +104,15 @@ export function SearchField() {
 					setHighlighted(0);
 				}}
 				onKeyDown={onKeyDown}
-				placeholder="Search a song or an artist"
+				placeholder="Search any song or artist"
 				aria-label="Search lyrics"
 				aria-expanded={isOpen}
 				aria-controls={listId}
 				aria-autocomplete="list"
-				aria-activedescendant={isOpen ? optionId(highlighted) : undefined}
+				// Only when a row actually exists to point at (D-056).
+				aria-activedescendant={
+					results.length > 0 ? optionId(highlighted) : undefined
+				}
 				autoComplete="off"
 				className="search__input px-5 py-4 text-lead"
 			/>
@@ -129,36 +151,54 @@ export function SearchField() {
 						exit="hidden"
 						transition={transition.quick}
 					>
-						{results.map((track, index) => (
-							<li key={track.id} role="none">
-								<button
-									type="button"
-									id={optionId(index)}
-									role="option"
-									aria-selected={index === highlighted}
-									data-highlighted={index === highlighted}
-									onMouseEnter={() => setHighlighted(index)}
-									onClick={() => open(track)}
-									className="search__option px-5 py-4"
-								>
-									<ResultThumb title={track.title} artist={track.artist} />
-
-									<span className="search__meta">
-										<span className="search__title text-lead text-ink">
-											{track.title}
-										</span>
-										<span className="search__artist text-caption text-ink-muted">
-											{track.artist}
-										</span>
-									</span>
-
-									<span className="ml-auto shrink-0 text-micro text-ink-faint">
-										{track.hasSyncedLyrics ? "Synced" : ""}{" "}
-										{formatDuration(track.duration)}
-									</span>
-								</button>
+						{empty ? (
+							<li className="search__empty px-5 py-5">
+								<p className="text-caption text-ink">
+									Nothing matching “{debounced.trim()}”
+								</p>
+								<p className="mt-1 text-micro text-ink-faint">
+									{/*
+									  Names the likeliest cause rather than
+									  apologising. LRCLIB is user-contributed, so a
+									  miss is usually a spelling or an upload nobody
+									  has made — not a fault the reader can see.
+									*/}
+									Lyrics here are contributed by listeners, so a song can be
+									missing entirely. Try the artist’s name, or fewer words.
+								</p>
 							</li>
-						))}
+						) : (
+							results.map((track, index) => (
+								<li key={track.id} role="none">
+									<button
+										type="button"
+										id={optionId(index)}
+										role="option"
+										aria-selected={index === highlighted}
+										data-highlighted={index === highlighted}
+										onMouseEnter={() => setHighlighted(index)}
+										onClick={() => open(track)}
+										className="search__option px-5 py-4"
+									>
+										<ResultThumb title={track.title} artist={track.artist} />
+
+										<span className="search__meta">
+											<span className="search__title text-lead text-ink">
+												{track.title}
+											</span>
+											<span className="search__artist text-caption text-ink-muted">
+												{track.artist}
+											</span>
+										</span>
+
+										<span className="ml-auto shrink-0 text-micro text-ink-faint">
+											{track.hasSyncedLyrics ? "Synced" : ""}{" "}
+											{formatDuration(track.duration)}
+										</span>
+									</button>
+								</li>
+							))
+						)}
 					</motion.ul>
 				)}
 			</AnimatePresence>

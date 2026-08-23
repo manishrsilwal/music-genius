@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo } from "react";
-
+import { ContinueReading } from "@/features/discovery/components/continue-reading";
 import {
 	AlsoLiked,
 	DeepDives,
 } from "@/features/discovery/components/deep-dives";
 import { PreferenceStepper } from "@/features/discovery/components/preference-stepper";
 import { SearchField } from "@/features/discovery/components/search-field";
+import { TasteChips } from "@/features/discovery/components/taste-chips";
+import { useHistory } from "@/features/discovery/hooks/use-history";
 import { usePreferences } from "@/features/discovery/hooks/use-preferences";
 import { pickAlsoLiked, pickDeepDives, seedFromDate } from "@/lib/deep-dives";
 import { riseVariants, staggerVariants, transition } from "@/lib/motion";
@@ -35,6 +37,7 @@ export const Route = createFileRoute("/")({
 function Discovery() {
 	const { today } = Route.useLoaderData();
 	const { preferences, answered, save, reset } = usePreferences();
+	const { entries, remove, clear } = useHistory();
 
 	const seed = seedFromDate(today);
 	const dives = useMemo(
@@ -93,28 +96,58 @@ function Discovery() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={transition.editorial}
 					>
+						{/*
+						  Above the search field (D-056). A reader who has been here
+						  before is likelier to be resuming than starting, and putting
+						  the shelf below the field would make them look past the
+						  thing they came back for.
+						*/}
+						<ContinueReading
+							entries={entries}
+							onRemove={remove}
+							onClear={clear}
+						/>
+
 						<SearchField />
 
 						<section>
-							<div className="mb-4 flex items-baseline justify-between gap-4">
-								<h2 className="text-micro uppercase tracking-label text-ink-faint">
-									Today's Deep Dives
-								</h2>
-								<button
-									type="button"
-									onClick={reset}
-									className="text-micro uppercase tracking-label text-ink-faint hover:text-ink-muted"
-								>
-									Change taste
-								</button>
+							<h2 className="mb-1 text-micro uppercase tracking-label text-ink-faint">
+								Today's Deep Dives
+							</h2>
+							{/*
+							  Says what the shelf is, which the label alone did not.
+							  Three picks out of a hand-built catalogue is an
+							  editorial claim; unlabelled it reads as the whole of
+							  a thin library (D-056).
+							*/}
+							<p className="mb-4 text-caption text-ink-faint">
+								Three from a catalogue we chose by hand, matched to your answers
+								and rotated daily.
+							</p>
+
+							{/*
+							  Replaces a "Change taste" button that wiped all three
+							  answers to alter one. Also the only place the reader
+							  can see what they said (D-056).
+							*/}
+							<div className="mb-4">
+								<TasteChips
+									preferences={preferences}
+									onChange={save}
+									onStartOver={reset}
+								/>
 							</div>
+
 							<DeepDives picks={dives} preferences={preferences} />
 						</section>
 
 						<section>
-							<h2 className="mb-3 text-micro uppercase tracking-label text-ink-faint">
+							<h2 className="mb-1 text-micro uppercase tracking-label text-ink-faint">
 								People also like
 							</h2>
+							<p className="mb-3 text-caption text-ink-faint">
+								More from the same catalogue, ranked further down your answers.
+							</p>
 							<AlsoLiked picks={also} />
 						</section>
 					</motion.div>

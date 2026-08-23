@@ -424,6 +424,22 @@ the action that most likely fixes it (retry, search again) rather than an
 apology. Never show a reader a stack trace, and never render an error's own
 message outside development: it can carry a request URL or part of a key.
 
+### A returning reader is not a new one
+
+The second visit should not look like the first. A page whose only state is
+"has answered the questions" tells a reader who has been here twenty times that
+it has never met them (D-056).
+
+Two rules keep that from becoming clutter:
+
+- **A personal shelf renders nothing when it is empty.** An empty state
+  explaining what would eventually appear there is chrome charging rent for a
+  feature the reader has not used.
+- **Anything remembered can be forgotten, per item.** Reading history is
+  personal; removing one row must not cost the reader the rest, and the control
+  is always visible, because a hover-only control does not exist on a touch
+  screen.
+
 ### Structure arrives before content
 
 A component that depends on slow data renders its own shape immediately and
@@ -546,6 +562,12 @@ Before shipping a component:
       `fallback={null}` for something the layout is built around (D-055)
 - [ ] Data on different timescales gets different promises (D-055)
 - [ ] "Empty" and "still loading" never share a message (D-055)
+- [ ] A list that can render zero rows still guards its keyboard handler — the
+      panel being open is not proof there is anything to arrow through (D-056)
+- [ ] Anything read back from storage is parsed and bounded, never trusted:
+      it is user-writable and outlives the code that wrote it (D-047, D-056)
+- [ ] A control on the bottom edge takes the dock's resolved offset rather than
+      computing its own (D-033, D-056)
 - [ ] A surface colour derived from artwork keeps the default's lightness and
       moves only hue and chroma — otherwise it is a contrast change wearing a
       palette's clothes (D-052)
@@ -560,6 +582,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | **D-056** Entry flow: continue reading, search empty state, taste chips in place of a full reset, a persistent way home |
 | 2026-08-23 | **D-055** Player mounts on first paint instead of after 4s; media lookup split from artwork; empty and loading states separated |
 | 2026-08-22 | **D-054** Playback gains real failure states, timeouts and a "Watch on YouTube" fallback; player no longer built on a React-owned node |
 | 2026-08-22 | **D-053** Two measured contrast failures fixed; drawer focus management and dialog semantics; per-script `lang`; canonical, robots, sitemap, structured data; artwork fetch allowlisted |
