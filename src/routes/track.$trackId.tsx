@@ -273,24 +273,6 @@ function TrackPage() {
 					</Await>
 				}
 			/>
-			{/*
-			  A persistent way out (D-056). Takes the dock's own bottom offset,
-			  so it rises with the docked bar and the drawer without repeating
-			  their logic.
-			*/}
-			<Link to="/" className="track-home text-micro uppercase tracking-label">
-				<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-					<path
-						d="M7.5 2L3.5 6l4 4"
-						stroke="currentColor"
-						strokeWidth="1.5"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						fill="none"
-					/>
-				</svg>
-				All songs
-			</Link>
 
 			<LyricCanvas stanzas={track.stanzas} syncPosition={syncPosition} />
 

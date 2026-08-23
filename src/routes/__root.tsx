@@ -6,6 +6,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Masthead } from "@/components/masthead";
 import { RouteError } from "../components/route-error";
 import { RouteMessage } from "../components/route-message";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
@@ -97,6 +98,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<a href="#main" className="skip-link">
 					Skip to content
 				</a>
+				{/*
+				  Rendered here rather than per route, so the way home is in the
+				  same place on every page and cannot go missing on one of them
+				  (D-059). After the skip link deliberately: a keyboard reader
+				  wants the words first, not the chrome.
+				*/}
+				<Masthead />
 				{children}
 				<TanStackDevtools
 					config={{

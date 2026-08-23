@@ -11,10 +11,12 @@
 // than a poster. The track page still carries the full display scale, which is
 // where a hero belongs.
 .landing {
-	padding-block: 3.5rem 5rem;
+	// Top padding clears the fixed masthead (D-059), which is out of flow and
+	// would otherwise sit on the headline.
+	padding-block: 5.5rem 5rem;
 
 	@include m.from("md") {
-		padding-block: 5rem 6rem;
+		padding-block: 6.5rem 6rem;
 	}
 
 	&__title {
@@ -26,5 +28,31 @@
 		letter-spacing: var(--tracking-display);
 		text-wrap: balance;
 		max-width: 12ch;
+	}
+}
+
+// The two ways in (D-059). One section, so the choice reads as a choice
+// rather than as two unrelated blocks that happen to be adjacent.
+.entry {
+	&__or {
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		margin-block: 1.5rem;
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		letter-spacing: var(--tracking-label);
+		text-transform: uppercase;
+		color: var(--color-ink-faint);
+
+		// Rules either side, so "or" reads as a fork in the path rather than as
+		// a word someone left on the page.
+		&::before,
+		&::after {
+			content: "";
+			flex: 1;
+			height: 1px;
+			background: var(--color-hairline, oklch(1 0 0 / 0.12));
+		}
 	}
 }

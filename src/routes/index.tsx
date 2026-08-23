@@ -57,17 +57,12 @@ function Discovery() {
 			initial="hidden"
 			animate="visible"
 		>
-			<motion.p
-				variants={riseVariants}
-				className="text-micro uppercase tracking-label text-ink-faint"
-			>
-				Typographic Lyrical Explorer
-			</motion.p>
-
-			<motion.h1
-				variants={riseVariants}
-				className="landing__title mt-3 text-ink"
-			>
+			{/*
+			  The product name was an eyebrow here and nowhere else. The masthead
+			  carries it on every page now (D-059), so repeating it directly
+			  beneath itself would just be the same words twice.
+			*/}
+			<motion.h1 variants={riseVariants} className="landing__title text-ink">
 				Read the words properly.
 			</motion.h1>
 
@@ -108,7 +103,41 @@ function Discovery() {
 							onClear={clear}
 						/>
 
-						<SearchField />
+						{/*
+						  The two ways in, presented together (D-059).
+						
+						  They used to sit at opposite ends of the page: the field
+						  here, the mood chips far below inside Deep Dives. A reader
+						  who did not have a song in mind had no way of knowing the
+						  second route existed without scrolling past the thing they
+						  could not use. Naming both at the moment of the choice is
+						  the whole point — the PRD's own reasoning for the stepper
+						  is that "a blank search bar is intimidating", and that does
+						  not stop being true on the second visit.
+						*/}
+						<section className="entry">
+							<h2 className="mb-2 text-micro uppercase tracking-label text-ink-faint">
+								Know the song?
+							</h2>
+							<SearchField />
+
+							<p className="entry__or" aria-hidden="true">
+								or
+							</p>
+
+							<h2 className="mb-1 text-micro uppercase tracking-label text-ink-faint">
+								Start from a mood
+							</h2>
+							<p className="mb-3 text-caption text-ink-faint">
+								Tell us how you want to feel and we will pick. Change any answer
+								without starting over.
+							</p>
+							<TasteChips
+								preferences={preferences}
+								onChange={save}
+								onStartOver={reset}
+							/>
+						</section>
 
 						<section>
 							<h2 className="mb-1 text-micro uppercase tracking-label text-ink-faint">
@@ -124,19 +153,6 @@ function Discovery() {
 								Three from a catalogue we chose by hand, matched to your answers
 								and rotated daily.
 							</p>
-
-							{/*
-							  Replaces a "Change taste" button that wiped all three
-							  answers to alter one. Also the only place the reader
-							  can see what they said (D-056).
-							*/}
-							<div className="mb-4">
-								<TasteChips
-									preferences={preferences}
-									onChange={save}
-									onStartOver={reset}
-								/>
-							</div>
 
 							<DeepDives picks={dives} preferences={preferences} />
 						</section>

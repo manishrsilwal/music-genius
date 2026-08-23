@@ -539,6 +539,31 @@ cannot be dismissed without being downloaded first, so a single stray character
 can pull a megabyte of Korean onto an English page. Declaring the range is what
 makes "only load what this page needs" true rather than assumed.
 
+### A way home is not a link, it is a fixture
+
+The product had a "persistent way out" that was hidden on phones and, because a
+mixin quietly overrode its `position`, scrolled away on everything else. Both
+faults read as present in the source and as working in a screenshot taken at the
+top of the page.
+
+So the rule is structural rather than visual: the way home is rendered once, in
+the root document, and every route gets it in the same place without opting in.
+A page cannot forget to include it, and there is no breakpoint at which it is
+absent — below `sm` the wordmark drops and the mark stays, because the half that
+survives should be the half that still functions at 16px.
+
+The mark is three rules of unequal length: a stanza, which is the one shape this
+product is about. It is the only element on screen the record does not repaint —
+an identity that changes colour per page stops being one.
+
+### Offer both doors in the same breath
+
+A reader arrives either knowing the song or not. The landing had a route for
+each and put them at opposite ends of the page, so the reader who did not know
+what they wanted met a blank field first and the mood chips only after scrolling
+past everything they could not use. Naming both at the moment of the choice
+costs one divider and removes the need to guess.
+
 ## 9. Conventions checklist
 
 Before shipping a component:
@@ -619,6 +644,15 @@ Before shipping a component:
       full-width character measured as half-width overflows the frame (D-058)
 - [ ] `lang` asserts what a run of text IS; a typeface choice about the page
       uses its own attribute. Do not overload one for the other (D-058)
+- [ ] Navigation that must always be reachable is rendered once at the root, not
+      per route — a page cannot then forget it (D-059)
+- [ ] A responsive rule drops the ornament, never the function: hide the
+      wordmark, keep the link (D-059)
+- [ ] A longhand set before a mixin can be overridden BY that mixin. Check the
+      compiled rule, not the source — `position: fixed` lost to `tap-target`
+      and looked correct at scroll 0 (D-059)
+- [ ] Where a screen offers two routes to the same goal, both are visible at the
+      moment of choosing (D-059)
 
 ---
 
@@ -626,6 +660,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | **D-059** A persistent masthead replaces a home link that was hidden on mobile and never actually fixed; search and mood offered together on the landing |
 | 2026-08-23 | **D-058** Lyric Card fixed in production builds; CJK card type measured at full width instead of overflowing; hero and lyrics agree on regional Han shapes |
 | 2026-08-23 | **D-057** Twelve script faces added — Arabic, Tamil, Thai, Hebrew, CJK and more; Cyrillic and Greek were broken too; CJK chosen by language, not by glyph |
 | 2026-08-23 | **D-056** Entry flow: continue reading, search empty state, taste chips in place of a full reset, a persistent way home |

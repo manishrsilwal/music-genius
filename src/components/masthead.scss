@@ -1,0 +1,94 @@
+@use "styles/mixins" as m;
+
+// The persistent way home (D-059). Fixed, so it survives the track page's one
+// long scroll — a mark that scrolls away is not a way home.
+.masthead {
+	z-index: var(--layer-masthead);
+	top: calc(var(--dock-inset) * 0.75 + env(safe-area-inset-top, 0px));
+	left: var(--dock-inset);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.5rem 0.85rem;
+	border-radius: 999px;
+	font-family: var(--font-ui);
+	font-size: var(--text-micro);
+	letter-spacing: var(--tracking-label);
+	text-transform: uppercase;
+	color: var(--color-ink-muted);
+	transition: color 0.18s var(--ease-editorial);
+
+	// The hero is full-bleed artwork and the landing is flat canvas, so the
+	// mark cannot rely on either. Glass reads on both, and is the surface
+	// treatment the rest of the chrome already uses.
+	@include m.glass;
+	@include m.tap-target;
+
+	// AFTER the mixins, not before. `tap-target` sets `position: relative` to
+	// anchor its hit-area pseudo-element, so declaring `fixed` first loses to
+	// it — silently, and invisibly at scroll 0. `.track-home` had exactly this
+	// ordering, which is why the "persistent way out" shipped in D-056 scrolled
+	// away with the hero and left no way home at all. `fixed` establishes a
+	// containing block just as `relative` does, so the pseudo still anchors
+	// correctly.
+	position: fixed;
+
+	&:hover,
+	&:focus-visible {
+		color: var(--color-ink);
+	}
+
+	// Gives under the press, matching the answer cards. Same restraint: 0.985,
+	// not a bounce.
+	&:active {
+		transform: scale(0.985);
+	}
+
+	// Already home. Still a link — going home from home is a harmless no-op and
+	// removing it would make the mark inconsistent between pages — but a screen
+	// reader should not be told there is somewhere to go.
+	&[aria-current="page"] {
+		color: var(--color-ink);
+	}
+
+	&__mark {
+		width: 0.85rem;
+		height: 0.85rem;
+		flex: none;
+		fill: currentColor;
+	}
+
+	// Brass, and deliberately constant. `--track-accent` resolves to the :root
+	// default here because the masthead sits outside `[data-track-scope]` — the
+	// mark is the one thing on screen the record does not repaint. A logo that
+	// changes colour per page is not a logo.
+	&__accent {
+		fill: var(--track-accent);
+	}
+
+	&__word {
+		white-space: nowrap;
+	}
+
+	// Below `sm` the mark carries the identity alone. The wordmark is what
+	// gets dropped, NOT the link — the old `.track-home` dropped the whole
+	// element here, which left a phone reader with no way back at all.
+	@include m.until("sm") {
+		gap: 0;
+		padding: 0.5rem;
+
+		// Safe to remove outright rather than hide visually: the link carries
+		// its own aria-label, so the accessible name does not depend on this.
+		.masthead__word {
+			display: none;
+		}
+	}
+
+	@include m.reduced-motion {
+		transition: none;
+
+		&:active {
+			transform: none;
+		}
+	}
+}

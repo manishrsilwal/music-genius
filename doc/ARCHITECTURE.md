@@ -134,6 +134,62 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-059 — There was no way home, and the link that was supposed to be one never worked
+**Built 2026-08-23.** Raised by the reader: "it is hard to go to the homepage
+from inside the lyrical page."
+
+Correct, and worse than reported. D-056 shipped `.track-home` as "a persistent
+way out". It was neither persistent nor available:
+
+- **It was `display: none` below `sm`.** On a phone, a reader who opened a track
+  had no way back to the catalogue at all beyond the browser's back button.
+- **It was never actually fixed.** `position: fixed` was declared *before*
+  `@include m.tap-target`, and that mixin sets `position: relative` to anchor
+  its hit-area pseudo-element. The mixin won. The element computed to
+  `relative`, sat in flow, and scrolled away with the hero — invisible as a bug,
+  because at scroll offset 0 the two look identical.
+
+> A silent-failure shape worth remembering: a longhand property overridden by a
+> mixin included after it. Nothing warns, and the wrong result is correct-looking
+> in the one state you screenshot. Found by reading the compiled rule rather
+> than the source.
+
+**The replacement is a masthead**, rendered once in the root document so every
+route carries it in the same place. A way home that exists on some pages and not
+others is not navigation; it is a link the reader has to re-find.
+
+**The mark is three rules of unequal length** — a stanza, drawn rather than set.
+It holds at 16px, which is what lets the compact form survive on the narrow
+screens where the old link vanished: below `sm` the wordmark drops and the mark
+does not, the reverse of the old behaviour.
+
+> The mark is brass and does **not** follow the track. It is the one element
+> outside `[data-track-scope]`, so the cascade does this anyway — but stated in
+> both files, because an identity that repaints per record stops working as an
+> identity, and the "fix" of pulling it into the scope would look like a
+> correction.
+
+**The two ways in are now presented together.** The search field and the mood
+chips sat at opposite ends of the landing — field near the top, chips buried
+inside the Deep Dives section. A reader without a song in mind had no way to
+know the second route existed without scrolling past the thing they could not
+use. Both are now one `.entry` section under the headline, split by a ruled
+"or". The PRD's reasoning for the stepper — "a blank search bar is
+intimidating" — does not stop applying on the second visit.
+
+**The landing's eyebrow is gone.** It read "Typographic Lyrical Explorer"; the
+masthead now carries the product name on every page, and repeating it directly
+beneath itself was the same words twice.
+
+> **Naming note:** the visible wordmark is "Lyrical Explorer". The full
+> "Typographic Lyrical Explorer" remains the product name in `<title>`, the PRD
+> and these docs. If the shorter form should not be the public name, the
+> wordmark is one string in `masthead.tsx`.
+
+Verified in the built server: the mark renders on `/`, on a track page and on
+the 404; `aria-current="page"` appears only on the landing; at a 390px viewport
+the mark is present where the old link rendered nothing.
+
 ### D-058 — The card was broken in production, and CJK broke it further
 **Built 2026-08-23.** Resolves OD-027. Three faults, found by verifying D-057
 rather than by trusting it.

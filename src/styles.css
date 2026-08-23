@@ -260,6 +260,10 @@
   --layer-hero-veil: -1;
   --layer-autocomplete: 20;
   --layer-dock: 35;
+  /* Above the hero (which is --layer-dock) so the mark stays legible over
+     full-bleed artwork, below --layer-overlay so the drawer and the composer
+     still cover it (D-059). */
+  --layer-masthead: 40;
   --layer-overlay: 45;
   --layer-tooltip: 50;
   --layer-modal: 60;
