@@ -18,7 +18,7 @@ import { cached, TTL } from "../lib/cache";
 import { fetchTrack, searchTracks } from "../lib/clients/lrclib";
 import type { Track, TrackSummary, TrackVisuals } from "../lib/types";
 import { initCache } from "./cache/index.server";
-import { findSong } from "./genius.server";
+import { findArtwork, findPlayback } from "./genius.server";
 import { extractPalette } from "./palette.server";
 
 // Select the cache backend before any read-through runs (OD-001).
@@ -27,7 +27,6 @@ initCache();
 const EMPTY_VISUALS: TrackVisuals = {
 	artwork: null,
 	palette: null,
-	youtubeId: null,
 };
 
 /**
@@ -40,10 +39,12 @@ const EMPTY_VISUALS: TrackVisuals = {
  * for playback (D-022), so both come from a single cached lookup.
  */
 function getGenius(title: string, artist: string) {
+	// v3: the search half only now. The media lookup moved to its own key so
+	// artwork stops waiting behind it (D-055).
 	return cached(
-		`genius:v2:${artist.toLowerCase()}::${title.toLowerCase()}`,
+		`genius:v3:${artist.toLowerCase()}::${title.toLowerCase()}`,
 		TTL.track,
-		() => findSong(title, artist),
+		() => findArtwork(title, artist),
 	);
 }
 
@@ -61,31 +62,50 @@ export function getTrack(id: string): Promise<Track | null> {
 }
 
 /**
- * Artwork, palette and playback source — the slow path, streamed in behind the
- * lyrics (D-017).
+ * Artwork and palette — streamed in behind the lyrics (D-017).
  */
 export function getTrackVisuals(
 	title: string,
 	artist: string,
 ): Promise<TrackVisuals> {
-	// v3: `Palette` gained the paper tokens (D-052), so every stored entry
-	// predates them — and `PaletteStyle` refuses a partial palette, meaning a
-	// stale entry silently renders the old untinted page with no error anywhere.
-	// Caught exactly this way; the checklist item earns its place.
-	//
-	// Still v-aligned with `genius:` beneath it: this wraps that, so bumping
-	// only the inner key would leave the stale outer entry serving the old
-	// result (D-049).
-	const key = `visuals:v3:${artist.toLowerCase()}::${title.toLowerCase()}`;
+	// v4 alongside `genius:v3` — this wraps it, so bumping only the inner key
+	// would leave the stale outer entry serving the old result (D-049). The
+	// shape changed too: `youtubeId` left for `getTrackPlayback` (D-055).
+	const key = `visuals:v4:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
 	return cached(key, TTL.track, async () => {
-		const { artwork, youtubeId } = await getGenius(title, artist);
-		if (!artwork) return { ...EMPTY_VISUALS, youtubeId };
+		const artwork = await getGenius(title, artist);
+		if (!artwork) return EMPTY_VISUALS;
 
 		// Extracted from the thumbnail, not the full image: enough pixels for
 		// colour, a fraction of the bytes to fetch and decode (D-016).
 		const palette = await extractPalette(artwork.thumbnail);
-		return { artwork, palette, youtubeId };
+		return { artwork, palette };
+	});
+}
+
+/**
+ * The playback source, on its own timeline (D-055).
+ *
+ * A second operation rather than a field on the visuals, for exactly the
+ * reason lyrics and visuals were split in D-017: it is three times slower than
+ * everything it used to travel with. Genius `/search` answers in ~0.85s;
+ * `/songs/{id}` takes ~2.4s to return 120 KB of which we read one field.
+ * Bundled, the artwork and palette waited behind it and the reader watched an
+ * empty hero for three seconds.
+ */
+export function getTrackPlayback(
+	title: string,
+	artist: string,
+): Promise<{ youtubeId: string | null }> {
+	const key = `playback:v1:${artist.toLowerCase()}::${title.toLowerCase()}`;
+
+	return cached(key, TTL.track, async () => {
+		// Shares the `genius:` entry with the visuals, so the search half is
+		// paid for once even though both operations need it.
+		const artwork = await getGenius(title, artist);
+		if (!artwork) return { youtubeId: null };
+		return { youtubeId: await findPlayback(artwork.geniusId) };
 	});
 }
 

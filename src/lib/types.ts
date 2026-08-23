@@ -78,10 +78,17 @@ export interface TrackSummary {
 export interface TrackVisuals {
 	artwork: Artwork | null;
 	palette: Palette | null;
+}
+
+/**
+ * The playback source, resolved separately from the visuals (D-055) because
+ * the Genius call behind it is ~3x slower than everything else on the page.
+ */
+export interface TrackPlayback {
 	/**
-	 * YouTube video id for playback (PRD §3.2). Sourced from Genius rather than
-	 * the YouTube Data API, whose search quota would cap us at ~100 tracks a
-	 * day. Null when Genius knows no video.
+	 * YouTube video id (PRD §3.2). Sourced from Genius rather than the YouTube
+	 * Data API, whose search quota would cap us at ~100 tracks a day. Null when
+	 * Genius knows no video for this song — a real outcome, not a failure.
 	 */
 	youtubeId: string | null;
 }

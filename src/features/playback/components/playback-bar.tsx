@@ -20,6 +20,7 @@ import "./playback-bar.scss";
  */
 export function PlaybackBar({
 	videoId,
+	resolving,
 	title,
 	artist,
 	artwork,
@@ -27,7 +28,14 @@ export function PlaybackBar({
 	synced,
 	onSyncChange,
 }: {
-	videoId: string;
+	/** Null while the lookup is still running, and null if it found nothing. */
+	videoId: string | null;
+	/**
+	 * Which of those two a null `videoId` means. Without it the bar cannot tell
+	 * "still looking" from "looked, and there is no recording" — and would have
+	 * to show the same message for a wait that ends and one that never does.
+	 */
+	resolving: boolean;
 	title: string;
 	artist: string;
 	/** Null until the Genius lookup streams in, or if it found nothing. */
@@ -50,7 +58,11 @@ export function PlaybackBar({
 		toggle,
 		seek,
 	} = useYouTubePlayer(videoId, mountRef);
-	const unavailable = status === "unavailable";
+	// Three ways there is no player, and the reader is owed a different
+	// sentence for each (D-055).
+	const searching = resolving && !videoId;
+	const noRecording = !resolving && !videoId;
+	const unavailable = status === "unavailable" || noRecording;
 
 	const syncing = synced && playing;
 	const { manual, resume } = useManualOverride(syncing);
@@ -85,15 +97,19 @@ export function PlaybackBar({
 	// "Loading" is only honest while something is still happening. When
 	// playback has actually failed, say what failed — a spinner that never
 	// resolves is the one state that tells the reader nothing at all (D-054).
-	const notice = unavailable
-		? (reason ?? "Playback unavailable")
-		: !ready
-			? "Loading"
-			: playing && !synced
-				? "No timings"
-				: playing && manual
-					? "Manual scroll"
-					: null;
+	const notice = searching
+		? "Finding the recording"
+		: noRecording
+			? "No recording found"
+			: status === "unavailable"
+				? (reason ?? "Playback unavailable")
+				: !ready
+					? "Loading"
+					: playing && !synced
+						? "No timings"
+						: playing && manual
+							? "Manual scroll"
+							: null;
 
 	return (
 		<div className="playback-slot">
@@ -201,16 +217,32 @@ export function PlaybackBar({
 				*/}
 				<div ref={mountRef} className="playback__video" />
 
-				{unavailable && videoId && (
-					<a
-						href={`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="playback__elsewhere text-micro"
-					>
-						Watch on YouTube
-					</a>
-				)}
+				{/*
+				  A way out of every dead end. With an id we know exactly which
+				  video the reader wanted; without one, Genius simply has no
+				  recording for this song, and a search is the honest next step
+				  rather than a link we cannot honour (D-055).
+				*/}
+				{unavailable &&
+					(videoId ? (
+						<a
+							href={`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="playback__elsewhere text-micro"
+						>
+							Watch on YouTube
+						</a>
+					) : (
+						<a
+							href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${artist} ${title}`)}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="playback__elsewhere text-micro"
+						>
+							Find it on YouTube
+						</a>
+					))}
 
 				{manual && syncing && (
 					<button

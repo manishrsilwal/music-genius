@@ -15,9 +15,11 @@ import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
 import { PaletteStyle } from "@/features/scrollytelling/components/palette-style";
 import { TrackHero } from "@/features/scrollytelling/components/track-hero";
 import type { LinePosition } from "@/lib/lrc";
+import type { Track, TrackVisuals } from "@/lib/types";
 import {
 	getSiteOriginFn,
 	getTrackFn,
+	getTrackPlaybackFn,
 	getTrackVisualsFn,
 } from "@/server/lyrics.functions";
 
@@ -42,7 +44,16 @@ export const Route = createFileRoute("/track/$trackId")({
 			getTrackVisualsFn({ data: { title: track.title, artist: track.artist } }),
 		);
 
-		return { track, visuals, origin };
+		// Deferred separately from the visuals (D-055). Genius `/songs/{id}` is
+		// ~3x slower than the search behind the artwork, so one shared promise
+		// made the whole hero wait on the slowest thing in it.
+		const playback = defer(
+			getTrackPlaybackFn({
+				data: { title: track.title, artist: track.artist },
+			}),
+		);
+
+		return { track, visuals, playback, origin };
 	},
 	head: ({ loaderData, params }) => {
 		if (!loaderData) return { meta: [{ title: "Track not found" }] };
@@ -129,8 +140,47 @@ export const Route = createFileRoute("/track/$trackId")({
 	errorComponent: RouteError,
 });
 
+/**
+ * The bar, with artwork resolved on its own promise (D-055).
+ *
+ * Split out so the playback `<Await>` does not nest a second one inline in
+ * both of its branches — where the two copies would be free to drift apart.
+ */
+function StreamingPlaybackBar({
+	track,
+	visuals,
+	videoId,
+	resolving,
+	onSyncChange,
+}: {
+	track: Track;
+	visuals: Promise<TrackVisuals>;
+	videoId: string | null;
+	resolving: boolean;
+	onSyncChange: (position: LinePosition | null) => void;
+}) {
+	const bar = (artwork: string | null) => (
+		<PlaybackBar
+			videoId={videoId}
+			resolving={resolving}
+			title={track.title}
+			artist={track.artist}
+			artwork={artwork}
+			stanzas={track.stanzas}
+			synced={track.synced}
+			onSyncChange={onSyncChange}
+		/>
+	);
+
+	return (
+		<Await promise={visuals} fallback={bar(null)}>
+			{({ artwork }) => bar(artwork?.thumbnail ?? null)}
+		</Await>
+	);
+}
+
 function TrackPage() {
-	const { track, visuals } = Route.useLoaderData();
+	const { track, visuals, playback } = Route.useLoaderData();
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [syncPosition, setSyncPosition] = useState<LinePosition | null>(null);
 
@@ -156,21 +206,42 @@ function TrackPage() {
 			<TrackHero
 				track={track}
 				visuals={visuals}
+				/*
+				 * The bar mounts on the first paint, not when the data arrives
+				 * (D-055).
+				 *
+				 * It used to sit behind `<Await fallback={null}>`, so on an
+				 * uncached track — every track the reader has not opened before
+				 * — there was no player in the document at all for three to
+				 * four seconds, and then one appeared and shoved the page down.
+				 * That reads as broken, and was.
+				 *
+				 * Now it renders immediately in a resolving state and fills in
+				 * as each half lands: artwork at about a second, video id at
+				 * three.
+				 */
 				player={
-					<Await promise={visuals} fallback={null}>
-						{({ youtubeId, artwork }) =>
-							youtubeId ? (
-								<PlaybackBar
-									videoId={youtubeId}
-									title={track.title}
-									artist={track.artist}
-									artwork={artwork?.thumbnail ?? null}
-									stanzas={track.stanzas}
-									synced={track.synced}
-									onSyncChange={setSyncPosition}
-								/>
-							) : null
+					<Await
+						promise={playback}
+						fallback={
+							<StreamingPlaybackBar
+								track={track}
+								visuals={visuals}
+								videoId={null}
+								resolving
+								onSyncChange={setSyncPosition}
+							/>
 						}
+					>
+						{({ youtubeId }) => (
+							<StreamingPlaybackBar
+								track={track}
+								visuals={visuals}
+								videoId={youtubeId}
+								resolving={false}
+								onSyncChange={setSyncPosition}
+							/>
+						)}
 					</Await>
 				}
 			/>

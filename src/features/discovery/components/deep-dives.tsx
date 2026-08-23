@@ -114,8 +114,7 @@ function DiveArt({ title, artist }: { title: string; artist: string }) {
 		queryFn: async ({ signal }): Promise<TrackVisuals> => {
 			const query = `title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`;
 			const response = await fetch(`/api/artwork?${query}`, { signal });
-			if (!response.ok)
-				return { artwork: null, palette: null, youtubeId: null };
+			if (!response.ok) return { artwork: null, palette: null };
 			return response.json();
 		},
 		staleTime: Number.POSITIVE_INFINITY,

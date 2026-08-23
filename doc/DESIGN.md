@@ -424,6 +424,18 @@ the action that most likely fixes it (retry, search again) rather than an
 apology. Never show a reader a stack trace, and never render an error's own
 message outside development: it can carry a request URL or part of a key.
 
+### Structure arrives before content
+
+A component that depends on slow data renders its own shape immediately and
+fills in — it does not wait behind a `null` fallback and then appear (D-055).
+An element that pops into a settled layout costs the reader their place, and
+for the seconds before it arrives the feature simply does not exist as far as
+they can tell.
+
+The corollary: a deferred promise gets its own `<Await>` per timescale. Bundling
+a one-second fetch with a three-second one means the reader waits three seconds
+for both.
+
 ### A wait must be able to end
 
 Any state that says "loading" needs a path out of it — a timeout, an error
@@ -530,6 +542,10 @@ Before shipping a component:
       dead end that looks like progress (D-054)
 - [ ] A third-party embed is never handed a React-rendered node: it replaces
       what it is given, and React will keep referencing the corpse (D-054)
+- [ ] A component behind deferred data renders its shell immediately — never
+      `fallback={null}` for something the layout is built around (D-055)
+- [ ] Data on different timescales gets different promises (D-055)
+- [ ] "Empty" and "still loading" never share a message (D-055)
 - [ ] A surface colour derived from artwork keeps the default's lightness and
       moves only hue and chroma — otherwise it is a contrast change wearing a
       palette's clothes (D-052)
@@ -544,6 +560,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | **D-055** Player mounts on first paint instead of after 4s; media lookup split from artwork; empty and loading states separated |
 | 2026-08-22 | **D-054** Playback gains real failure states, timeouts and a "Watch on YouTube" fallback; player no longer built on a React-owned node |
 | 2026-08-22 | **D-053** Two measured contrast failures fixed; drawer focus management and dialog semantics; per-script `lang`; canonical, robots, sitemap, structured data; artwork fetch allowlisted |
 | 2026-08-22 | **D-052** The page takes the record's hue — paper as well as marks; default accent moves from vermilion to brass |

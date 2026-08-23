@@ -13,7 +13,12 @@ import { normalisePreferences, type Preferences } from "../lib/deep-dives";
 import { env } from "./env";
 
 import { getInsight } from "./insights.server";
-import { getTrack, getTrackVisuals, searchLyrics } from "./lyrics.server";
+import {
+	getTrack,
+	getTrackPlayback,
+	getTrackVisuals,
+	searchLyrics,
+} from "./lyrics.server";
 
 export const getTrackFn = createServerFn({ method: "GET" })
 	.validator((data: { id: string }) => {
@@ -52,6 +57,18 @@ export const getTrackVisualsFn = createServerFn({ method: "GET" })
 		artist: String(data?.artist ?? "").trim(),
 	}))
 	.handler(({ data }) => getTrackVisuals(data.title, data.artist));
+
+/**
+ * Separate from the visuals so the two stream independently (D-055). The
+ * artwork lands in about a second; this one takes three, and used to hold the
+ * artwork hostage for the difference.
+ */
+export const getTrackPlaybackFn = createServerFn({ method: "GET" })
+	.validator((data: { title: string; artist: string }) => ({
+		title: String(data?.title ?? "").trim(),
+		artist: String(data?.artist ?? "").trim(),
+	}))
+	.handler(({ data }) => getTrackPlayback(data.title, data.artist));
 
 /**
  * Insights are requested on demand — the reader presses "Discover the Story"

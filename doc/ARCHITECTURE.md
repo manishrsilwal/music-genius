@@ -134,6 +134,70 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-055 — The player did not exist for the first four seconds
+**Fixed 2026-08-23.** Reported as: tracks the reader has not opened before
+struggle to show the player. Uncached tracks, so this was the cold path.
+
+**The player was not slow. It was absent.** It sat behind
+`<Await promise={visuals} fallback={null}>`, and `null` is the whole story:
+until the Genius chain settled there was no bar in the document at all. Then it
+appeared and pushed the page down. Measured cold, that wait was **3.0–4.4s**.
+
+**Where the time went.** Genius, entirely — the palette costs 40–285ms. And
+within Genius, one call dominates:
+
+| call | time | payload |
+|---|---|---|
+| `/search` | ~0.85s | 18 KB |
+| `/songs/{id}` | **~2.4s** | **120 KB** |
+
+`/songs/{id}` returns the full song object — description, annotations, ad
+configuration — and we read **one field** from it, `media`. `text_format` does
+not shrink it; measured at 118 KB against 120.
+
+So the media lookup is now its own operation on its own cache key, for exactly
+the reason D-017 split lyrics from visuals: it is three times slower than
+everything it was travelling with, and bundling made the fast thing wait for
+the slow one. `getTrackVisuals` keeps artwork and palette; `getTrackPlayback`
+carries the video id. Both share the `genius:` search entry, so the search half
+is still paid for once.
+
+**And the bar now mounts on the first paint**, in a resolving state, filling in
+as each half lands. Measured on the production build, cold:
+
+| | before | after |
+|---|---|---|
+| player UI in the document | 3.3–4.9s | **0.34–0.64s** |
+| artwork | 3.3–4.9s | **1.35–2.29s** |
+| video id | 3.3–4.9s | 3.29–4.86s |
+
+> **The dev server does not stream, and that cost an hour.** Probed over a raw
+> socket, `vite dev` returns first byte and last byte at the same instant —
+> 3.04s, whole document at once — which reads exactly like `defer()` being
+> broken. It is not: the production build streams first byte at 0.3s and
+> appends each promise as it settles. Measure streaming against `.output`, not
+> against dev.
+>
+> A second trap in the same session: `node .output/server/index.mjs` does
+> **not** read `.env` the way `bun` does. The first production run had no
+> Genius token, so `features.artwork` was false, no upstream call was made, and
+> the timings looked wonderful. Load the env explicitly before believing a
+> production measurement.
+
+**A null video id is now a sentence, not an absence.** Genius does not know a
+video for every song — "Nights" by Frank Ocean, for one. That used to render
+nothing whatsoever. The bar now distinguishes three cases it previously
+collapsed into one: *Finding the recording* while the lookup runs, *No
+recording found* when it returns empty, and the failure reasons from D-054 when
+playback itself breaks. The first offers nothing, because waiting is correct;
+the other two offer a link out.
+
+`findSong` and `GeniusResult` were removed rather than left beside the split —
+a second path that nothing calls is a second path free to drift.
+
+Cache keys: `genius:v2` → `v3` (search half only now), `visuals:v3` → `v4`
+(shape changed), and a new `playback:v1`.
+
 ### D-054 — "Loading" was the only thing playback could ever say
 **Fixed 2026-08-22.** Reported with a screenshot: "Wish You Were Here" stuck on
 LOADING beside an empty black rectangle.

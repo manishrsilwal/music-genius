@@ -300,38 +300,32 @@ async function fetchSong(
 	return payload.response?.song ?? null;
 }
 
-export interface GeniusResult {
-	artwork: Artwork | null;
-	/** YouTube video id for playback, when Genius knows one. */
-	youtubeId: string | null;
-}
-
 /**
- * One Genius lookup serving both the visual layer and playback.
+ * The YouTube id alone, given a Genius song id (D-055).
  *
- * The search response carries artwork but not media, so a confident match
- * costs a second request to /songs/{id}. Both are cached together for 30 days.
+ * Split out because it is the expensive half by a wide margin. Measured:
+ * `/search` returns 18 KB in ~0.85s, while `/songs/{id}` returns **120 KB in
+ * ~2.4s** — a full song object carrying description, annotations and ad
+ * configuration, of which we read exactly one field. `text_format` does not
+ * shrink it; measured at 118 KB against 120.
+ *
+ * Keeping the two together meant the artwork, which is ready in under a
+ * second, waited three seconds behind the media lookup before anything reached
+ * the reader.
  */
-export async function findSong(
-	title: string,
-	artist: string,
+export async function findPlayback(
+	geniusId: number,
 	signal?: AbortSignal,
-): Promise<GeniusResult> {
-	const artwork = await findArtwork(title, artist, signal);
-	if (!artwork) return { artwork: null, youtubeId: null };
-
+): Promise<string | null> {
 	try {
-		const song = await fetchSong(artwork.geniusId, signal);
+		const song = await fetchSong(geniusId, signal);
 		const media = (song?.media ?? []).find(
 			(entry) => entry.provider === "youtube" && entry.url,
 		);
-		return {
-			artwork,
-			youtubeId: media?.url ? toVideoId(media.url) : null,
-		};
+		return media?.url ? toVideoId(media.url) : null;
 	} catch (error) {
 		// Playback is an enhancement; never let it cost us the artwork.
 		console.warn("[genius] media lookup failed", error);
-		return { artwork, youtubeId: null };
+		return null;
 	}
 }
