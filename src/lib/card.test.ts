@@ -41,6 +41,53 @@ describe("measureEm", () => {
 	});
 });
 
+describe("measureEm — full-width scripts (D-057)", () => {
+	it("measures CJK at full width, not at the Latin mean", () => {
+		// The bug this guards: CJK was absent from the table, so it fell through
+		// to FALLBACK_ADVANCE — the mean of a mostly-Latin face, roughly half a
+		// full-width character. The card then sized type to fit a line twice as
+		// wide as it thought, and satori wrapped it off the bottom of the image.
+		const han = "月亮代表我的心";
+		expect(measureEm(han)).toBeCloseTo(han.length, 5);
+	});
+
+	it("measures kana and CJK punctuation at full width too", () => {
+		expect(measureEm("ひらがな")).toBeCloseTo(4, 5);
+		expect(measureEm("カタカナ")).toBeCloseTo(4, 5);
+		expect(measureEm("、。")).toBeCloseTo(2, 5);
+	});
+
+	it("measures Hangul slightly narrower — that face really is 0.966em", () => {
+		const hangul = "보고싶다";
+		const width = measureEm(hangul);
+		expect(width).toBeLessThan(hangul.length);
+		expect(width).toBeCloseTo(hangul.length * 0.966, 5);
+	});
+
+	it("keeps a CJK line inside the card", () => {
+		// Four lines of Japanese, the shape an og:image takes.
+		const lines = [
+			"君とのラブストーリー",
+			"それは予想通り",
+			"いざ始まればひとり芝居だ",
+			"ずっとそばにいたって",
+		];
+		const { widthOk, heightOk } = fits(lines);
+		expect(widthOk).toBe(true);
+		expect(heightOk).toBe(true);
+	});
+
+	it("gives the new companion scripts real widths, not the fallback", () => {
+		// Each of these is now in the generated table; if a face were dropped
+		// from the generator they would collapse onto FALLBACK_ADVANCE and
+		// measure identically, which is the regression worth catching.
+		const samples = ["த", "ب", "ব", "ਗ", "ક", "త", "ಕ", "മ", "ก", "א", "ч", "α"];
+		const widths = samples.map((char) => measureEm(char));
+		expect(new Set(widths).size).toBeGreaterThan(6);
+		for (const width of widths) expect(width).toBeGreaterThan(0);
+	});
+});
+
 describe("cardTypeScale", () => {
 	it("never overflows the measure, whatever the content", () => {
 		const cases: string[][] = [

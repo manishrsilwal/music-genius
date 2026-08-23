@@ -8,7 +8,13 @@
 
 import { converter, formatHex } from "culori";
 
-import { FALLBACK_ADVANCE, GLYPH_ADVANCE } from "./card-metrics";
+import {
+	FALLBACK_ADVANCE,
+	FULLWIDTH_ADVANCE_JP,
+	FULLWIDTH_ADVANCE_KR,
+	FULLWIDTH_ADVANCE_SC,
+	GLYPH_ADVANCE,
+} from "./card-metrics";
 import type { Palette } from "./types";
 
 const toRgb = converter("rgb");
@@ -147,10 +153,56 @@ const FIT_MARGIN = 0.97;
 /** Loosest leading we ever apply — used for the height bound so it always holds. */
 const LEADING_MAX = 1.42;
 
+/**
+ * Advance of one character, in em (D-057).
+ *
+ * CJK is answered by range rather than by table. Every glyph in a Noto CJK
+ * face carries the same advance — verified across 21k codepoints per face, and
+ * the generator refuses to emit a constant if that stops being true — so three
+ * numbers replace ~25,000 entries.
+ *
+ * This matters more than it sounds. Before it, CJK fell through to
+ * FALLBACK_ADVANCE, the mean of a mostly-Latin table, and a full-width
+ * character was measured at roughly half its real width. The card sized its
+ * type to fit a line that was actually twice as wide, satori wrapped it, and
+ * the words ran off the bottom of the image — which nobody saw while those
+ * same characters were still rendering as tofu.
+ */
+function advanceOf(char: string): number {
+	const known = GLYPH_ADVANCE[char];
+	if (known !== undefined) return known;
+
+	const cp = char.codePointAt(0) ?? 0;
+
+	// Hangul syllables and jamo. Narrower than the ideographs, and measured
+	// from a face that carries no Hanja at all.
+	if ((cp >= 0xac00 && cp <= 0xd7a3) || (cp >= 0x1100 && cp <= 0x11ff)) {
+		return FULLWIDTH_ADVANCE_KR;
+	}
+
+	// Kana, CJK ideographs, CJK punctuation, fullwidth forms. JP and SC agree
+	// on 1em, so either constant is the same answer; JP is named for the
+	// default face and SC referenced so the pair cannot silently diverge.
+	if (
+		(cp >= 0x3000 && cp <= 0x30ff) ||
+		(cp >= 0x3130 && cp <= 0x318f) ||
+		(cp >= 0x3400 && cp <= 0x4dbf) ||
+		(cp >= 0x4e00 && cp <= 0x9fff) ||
+		(cp >= 0xf900 && cp <= 0xfaff) ||
+		(cp >= 0xfe30 && cp <= 0xfe4f) ||
+		(cp >= 0xff00 && cp <= 0xff60) ||
+		(cp >= 0xffe0 && cp <= 0xffe6)
+	) {
+		return Math.max(FULLWIDTH_ADVANCE_JP, FULLWIDTH_ADVANCE_SC);
+	}
+
+	return FALLBACK_ADVANCE;
+}
+
 /** Width of `text` at 1px, in em units. */
 export function measureEm(text: string): number {
 	let total = 0;
-	for (const char of text) total += GLYPH_ADVANCE[char] ?? FALLBACK_ADVANCE;
+	for (const char of text) total += advanceOf(char);
 	return total;
 }
 

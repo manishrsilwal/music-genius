@@ -615,6 +615,10 @@ Before shipping a component:
 - [ ] A hand-typed asset path is asserted against the filesystem in a test; it
       fails otherwise only in production, for the reader least likely to say so
       (D-057)
+- [ ] Type sized from measured advances covers the script being set — a
+      full-width character measured as half-width overflows the frame (D-058)
+- [ ] `lang` asserts what a run of text IS; a typeface choice about the page
+      uses its own attribute. Do not overload one for the other (D-058)
 
 ---
 
@@ -622,6 +626,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | **D-058** Lyric Card fixed in production builds; CJK card type measured at full width instead of overflowing; hero and lyrics agree on regional Han shapes |
 | 2026-08-23 | **D-057** Twelve script faces added — Arabic, Tamil, Thai, Hebrew, CJK and more; Cyrillic and Greek were broken too; CJK chosen by language, not by glyph |
 | 2026-08-23 | **D-056** Entry flow: continue reading, search empty state, taste chips in place of a full reset, a persistent way home |
 | 2026-08-23 | **D-055** Player mounts on first paint instead of after 4s; media lookup split from artwork; empty and loading states separated |

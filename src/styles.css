@@ -391,20 +391,23 @@
    ambiguous, and `zh` is the answer detectLang gives it, which the second rule
    then honours.
 
-   Known boundary: text outside the canvas — the hero title, the credit line —
-   inherits the :root default, so a Han title on a Chinese track is set in
-   Japanese shapes. LRCLIB metadata is romanised often enough that this is rare,
-   and fixing it properly means labelling the language above the canvas, which
-   the deferred load currently prevents. */
+   `[data-script]` covers the rest of the page. `lang` lives on the canvas
+   because that is the only element it is true of — a hero title is usually
+   romanised, and asserting Japanese over "Pretender · OFFICIAL HIGE DANDISM"
+   would have a screen reader read the credit line in the wrong voice. The
+   typeface is a separate claim from the language, so it gets a separate
+   attribute, set on the track shell where it reaches hero and canvas alike. */
 :root {
   --font-cjk: "Noto Serif JP";
 }
 
-:lang(zh) {
+:lang(zh),
+[data-script="zh"] {
   --font-cjk: "Noto Serif SC";
 }
 
-:lang(ko) {
+:lang(ko),
+[data-script="ko"] {
   --font-cjk: "Noto Serif KR";
 }
 

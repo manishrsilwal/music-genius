@@ -134,6 +134,63 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-058 — The card was broken in production, and CJK broke it further
+**Built 2026-08-23.** Resolves OD-027. Three faults, found by verifying D-057
+rather than by trusting it.
+
+**The Lyric Card never worked in a production build.** `harfbuzzjs` — satori's
+text shaper — is an Emscripten module that reads `__dirname` to find `hb.wasm`
+beside itself. Bundled into ESM there is no `__dirname`, so it threw at import
+and took `/api/card` and `/api/og` down with it. Pre-existing, and confirmed so:
+reproduced at HEAD on plain Latin text before any of D-057 was applied. It only
+ever worked under `vite dev`, which is where it had been tested.
+
+Fixed by externalising it, the same treatment `@resvg/resvg-js` already gets
+(OD-018). A `__dirname` shim would only move the failure — the value has to
+resolve to the package's own directory or the `.wasm` is not found either.
+
+> This is the second time a native or wasm dependency has had to leave the
+> bundle. Both are now in one place in `vite.config.ts` with the reason
+> attached. A deployment target still has to ship `node_modules` for them.
+
+**CJK then overflowed the card.** `measureEm` looked characters up in the
+generated advance table and fell back to `FALLBACK_ADVANCE` — the mean of a
+mostly-Latin face, about 0.56em — for anything missing. A full-width character
+is 1em, so a Japanese line measured at roughly half its real width, the card
+sized its type to fit a line twice as wide as it thought, and satori wrapped the
+words off the bottom of the image. Invisible until D-057, because those same
+characters were rendering as tofu boxes.
+
+CJK is answered by range rather than enumerated: every glyph in a Noto CJK face
+carries one advance — measured across 21k codepoints per face, 1em in JP and SC,
+0.966em in KR — so three constants replace ~25,000 table entries. The generator
+emits them from the measurement and **throws if a face stops being uniform**,
+so the shortcut cannot quietly outlive its justification.
+
+> Measuring also turned up that the Korean subset carries **no Hanja at all** —
+> 21,058 of 32,324 sampled codepoints absent. Korean lyrics rarely use it, and
+> the stack degrades to a system serif rather than to tofu, but the CSS range
+> says more than the font delivers.
+
+The twelve companion scripts were added to the generated table properly, so a
+Tamil or Arabic card is sized from real advances instead of the Latin mean —
+the same fault D-018 fixed for Devanagari, reintroduced for every script D-057
+added. Arabic is over-estimated, because the cmap gives the isolated form and
+joined medial forms are narrower; that errs toward type slightly too small,
+which is the safe direction.
+
+**The hero no longer disagrees with the lyrics.** D-057 left a known boundary:
+text outside the canvas inherited the default CJK face, so a Han title on a
+Chinese track was set in Japanese shapes. The track shell now carries
+`data-script`, resolved from the lyrics.
+
+> Deliberately **not** `lang`. The two are different claims. `lang="ja"` over a
+> hero reading "Pretender · OFFICIAL HIGE DANDISM" is false — LRCLIB metadata is
+> usually romanised — and a screen reader would voice the credit line in the
+> wrong language. So `lang` stays on the canvas where it is true (D-053), and
+> the typeface, which is an editorial choice about the whole page rather than an
+> assertion about a run of text, gets its own attribute.
+
 ### D-057 — Twelve scripts had no typeface, and two of them were not on the list
 **Built 2026-08-23.** Resolves OD-017.
 
@@ -2039,7 +2096,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-017 | ~~Scripts beyond Latin and Devanagari still have no face~~ | §3.4 | **Resolved 2026-08-23 (D-057).** Twelve faces added, plus Cyrillic and Greek, which this entry never listed |
 
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
-| OD-027 | **The Lyric Card is broken in the production build.** `harfbuzzjs` — satori's shaper — is bundled as ESM but calls `__dirname`, so it throws at import and `/api/card` and `/api/og` both 500 | Deploy | Open — found 2026-08-23. Pre-existing: reproduced at HEAD on plain Latin text before D-057. Works under `vite dev`. Same family as OD-018; likely externalise, or shim `__dirname` |
+| OD-027 | ~~The Lyric Card is broken in the production build~~ | Deploy | **Resolved 2026-08-23 (D-058).** `harfbuzzjs` externalised alongside `@resvg`; `/api/card` and `/api/og` verified 200 in the built server |
 | OD-026 | **`og:image` picks the first four lines of a track.** For some songs that surfaces language that reads differently as a social preview than as a page a reader chose to open | §3.4 | Open — raised 2026-08-22 (D-051). Options: the hook rather than the opening, a curated line range, or accept it |
 | OD-021 | ~~**Gemini free tier: 20 requests/day.** Launch blocker~~ | §3.5 | **Resolved 2026-08-22 (D-050).** DeepSeek is metered at ~$0.0001/insight; Gemini demoted to fallback, where the quota no longer gates anything |
 | OD-023 | PRD §3.3 annotated phrases are styled but never populated — Genius annotations are not fetched | §3.3 | The `.lyric__annotated` rule exists and nothing applies it |

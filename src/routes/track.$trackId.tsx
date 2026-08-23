@@ -16,6 +16,7 @@ import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
 import { PaletteStyle } from "@/features/scrollytelling/components/palette-style";
 import { TrackHero } from "@/features/scrollytelling/components/track-hero";
 import type { LinePosition } from "@/lib/lrc";
+import { detectLang } from "@/lib/script";
 import type { Track, TrackVisuals } from "@/lib/types";
 import {
 	getSiteOriginFn,
@@ -193,11 +194,29 @@ function TrackPage() {
 		artist: track.artist,
 	});
 
+	/*
+	 * Which regional Han shapes this page should use (D-057).
+	 *
+	 * Deliberately a data attribute and NOT `lang`. The two are different
+	 * claims: `lang` says "this text is Japanese", which is false for a hero
+	 * title like "Pretender · OFFICIAL HIGE DANDISM" — LRCLIB metadata is
+	 * usually romanised — and a screen reader would read the credit line in the
+	 * wrong voice. `lang` therefore stays on the canvas, where it is true
+	 * (D-053), while the typeface follows the lyrics across the whole shell,
+	 * which is the right editorial answer: one page, one set of Han shapes.
+	 */
+	const script = detectLang(
+		track.stanzas
+			.flatMap((stanza) => stanza.lines.map((line) => line.text))
+			.join(" "),
+	);
+
 	return (
 		<article
 			id="main"
 			className="track-shell"
 			data-track-scope={track.id}
+			data-script={script ?? undefined}
 			data-drawer={drawerOpen ? "open" : "closed"}
 		>
 			{/* Mounts alongside once the palette resolves, repainting every accent
