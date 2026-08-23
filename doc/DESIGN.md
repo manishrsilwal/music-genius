@@ -511,6 +511,34 @@ trusted the model — which is the test of whether a safeguard is real.
 
 ---
 
+### A typeface is a promise about which words you can set
+
+Rufina covers Latin and nothing else. For a product whose whole argument is
+that lyrics deserve to be *set*, that meant the argument only held in one
+alphabet — a Tamil song got boxes on its shareable card, and a system fallback
+on the page that matched neither Rufina nor the card it exported to.
+
+The fix is one companion face per script, chosen so the page still reads as one
+product: Amiri's classical naskh carries roughly Rufina's stroke contrast, the
+way Vesper Libre's transitional Devanagari already did. A humanist face would
+have set Arabic accurately and made it look like a different website.
+
+**Scope was measured.** 519 tracks sampled from the source catalogue: 67%
+carried a non-Latin script, and the three most common — Han, Arabic, Kana —
+were all unsupported. Devanagari, the one script that *was* supported, turns out
+to be mostly stored romanised.
+
+**Han is not one script.** Japanese, Chinese and Korean share codepoints and
+draw them differently, so "fall back per glyph" — correct for every other
+script, since their ranges do not overlap — silently sets Chinese in Japanese
+shapes. That one is chosen by the document's language instead. The general rule
+only looked general because nothing had tested its edge.
+
+**Check what the browser can rule out.** A fallback face with no declared range
+cannot be dismissed without being downloaded first, so a single stray character
+can pull a megabyte of Korean onto an English page. Declaring the range is what
+makes "only load what this page needs" true rather than assumed.
+
 ## 9. Conventions checklist
 
 Before shipping a component:
@@ -575,6 +603,18 @@ Before shipping a component:
       subtree — custom properties inherit downward only (D-052)
 - [ ] A new route that can be shared carries `og:title`, `og:description` and
       an ABSOLUTE `og:image` — crawlers drop a relative one (D-051)
+- [ ] A new script in the language detector ships with a face for it — labelling
+      a language correctly and then rendering it as boxes is worse than not
+      labelling it (D-057)
+- [ ] Every webfont declares a `unicode-range`; a face the browser cannot rule
+      out is a face it must download to check (D-057)
+- [ ] A `:lang()` rule targets the element that actually carries `lang` — on
+      this site that is the lyric canvas, never `<html>` (D-057)
+- [ ] Anything the page and the exported card both render uses the same face,
+      resolved the same way — satori has no system fallback (D-019, D-057)
+- [ ] A hand-typed asset path is asserted against the filesystem in a test; it
+      fails otherwise only in production, for the reader least likely to say so
+      (D-057)
 
 ---
 
@@ -582,6 +622,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | **D-057** Twelve script faces added — Arabic, Tamil, Thai, Hebrew, CJK and more; Cyrillic and Greek were broken too; CJK chosen by language, not by glyph |
 | 2026-08-23 | **D-056** Entry flow: continue reading, search empty state, taste chips in place of a full reset, a persistent way home |
 | 2026-08-23 | **D-055** Player mounts on first paint instead of after 4s; media lookup split from artwork; empty and loading states separated |
 | 2026-08-22 | **D-054** Playback gains real failure states, timeouts and a "Watch on YouTube" fallback; player no longer built on a React-owned node |

@@ -6,9 +6,23 @@
       "name": "scaffold",
       "dependencies": {
         "@fontsource-variable/elms-sans": "^5.3.0",
+        "@fontsource/amiri": "^5.3.0",
         "@fontsource/elms-sans": "^5.3.0",
         "@fontsource/martel": "^5.3.0",
+        "@fontsource/noto-serif": "^5.3.0",
+        "@fontsource/noto-serif-bengali": "^5.3.0",
         "@fontsource/noto-serif-devanagari": "^5.3.0",
+        "@fontsource/noto-serif-gujarati": "^5.3.0",
+        "@fontsource/noto-serif-gurmukhi": "^5.3.0",
+        "@fontsource/noto-serif-hebrew": "^5.3.0",
+        "@fontsource/noto-serif-jp": "^5.3.0",
+        "@fontsource/noto-serif-kannada": "^5.3.0",
+        "@fontsource/noto-serif-kr": "^5.3.0",
+        "@fontsource/noto-serif-malayalam": "^5.3.0",
+        "@fontsource/noto-serif-sc": "^5.3.0",
+        "@fontsource/noto-serif-tamil": "^5.3.0",
+        "@fontsource/noto-serif-telugu": "^5.3.0",
+        "@fontsource/noto-serif-thai": "^5.3.0",
         "@fontsource/rozha-one": "^5.3.0",
         "@fontsource/rufina": "^5.3.0",
         "@fontsource/tiro-devanagari-hindi": "^5.3.0",
@@ -110,11 +124,39 @@
 
     "@fontsource-variable/elms-sans": ["@fontsource-variable/elms-sans@5.3.0", "", {}, "sha512-31suRH3eOfASyFZpQD0RRD6pEJe23/1QitI3QpMKqNKC1YJFlgBjT1dNPQC2fmdKKbkwoPeJZAGdbTdrawl+kQ=="],
 
+    "@fontsource/amiri": ["@fontsource/amiri@5.3.0", "", {}, "sha512-i4SWJnVIphj8556EdVzNrEG/Qu82k6JXjXTtSUIohx3tHmo2GHw1Kv60TWo+xjk7Yf1Etb2Gskh0lUFclTKyUw=="],
+
     "@fontsource/elms-sans": ["@fontsource/elms-sans@5.3.0", "", {}, "sha512-IMIiEmlFBZf+cRt3XyOlPI9jZ1wz7I6N2wJEhbWg37xshHx8lpObTbztqvJs+6z+tbBbfjx/hEVKzKl6R8bv5w=="],
 
     "@fontsource/martel": ["@fontsource/martel@5.3.0", "", {}, "sha512-E/L2GnnmYkcjgt6IMN9ISgr2ldDzSeO1J+aTMwWsOy+Ti4EEC8B9RHiU32kUMGiyI9Ot8JLzQ4FA39HH1tFfbQ=="],
 
+    "@fontsource/noto-serif": ["@fontsource/noto-serif@5.3.0", "", {}, "sha512-ZrMzjuQlBIcw+qma1slZQdU3YDJvrjLG+9CWU1bxSf3YTkucwqd3EYa/Kfo4Ts19w8IMTGAmtOE3d6wWlgnBtA=="],
+
+    "@fontsource/noto-serif-bengali": ["@fontsource/noto-serif-bengali@5.3.0", "", {}, "sha512-CTEX03yqXP5A1GZUHiNOgNoHBWcwfrc7JskLSseAcOVMxopD8Wgc32naa58YRhMhXeZZoyoCjhfODwOiIxAQyA=="],
+
     "@fontsource/noto-serif-devanagari": ["@fontsource/noto-serif-devanagari@5.3.0", "", {}, "sha512-POketgM+TcAbtQCpl5GUmlCVvV7zGnFmLlQTIVxp0ePZkKTJ1UhpeyscIpgljOzHjrVzXPj7x1lSXl2W/wI3Gg=="],
+
+    "@fontsource/noto-serif-gujarati": ["@fontsource/noto-serif-gujarati@5.3.0", "", {}, "sha512-bppn0e8KHf4SWQj1MsF+9G0BZM0WsBTcdl2KGXD6qwY1Ye+uCgYjhrxAUalcshAPCRonzevq/b1bgWRbNTov9w=="],
+
+    "@fontsource/noto-serif-gurmukhi": ["@fontsource/noto-serif-gurmukhi@5.3.0", "", {}, "sha512-ER/oQacA7rFesTPIsMzr+y7v6Mk9DQRxN1A51p7hoOdPeovQq4qqByvgDSSN5zcuTrm2CdXLxWlBxXi4XXzk4g=="],
+
+    "@fontsource/noto-serif-hebrew": ["@fontsource/noto-serif-hebrew@5.3.0", "", {}, "sha512-UbTqdsCCQRYAxQ1ZNjWTcL+tbqYvCG0nhCSD0Y2CmWEfl32e71/DAlRw9IvhjEdCJnKJm0t9AOfiNiut1mHKeA=="],
+
+    "@fontsource/noto-serif-jp": ["@fontsource/noto-serif-jp@5.3.0", "", {}, "sha512-7dRFleN7F+uuJdcMW/fJmnl6KLZSn9dHCjAVTaWjTcT4hg5V4ECbi2qgIamI6rS/+yTt16KDLU+9aJi74r6ZxQ=="],
+
+    "@fontsource/noto-serif-kannada": ["@fontsource/noto-serif-kannada@5.3.0", "", {}, "sha512-YwBraVBPat9zUSpzxkKOOay+reitD8JNxD2Yob7GxW0zC4A9VWf0JplUxqnesAb0RnTwvuPOHRl/Y6/DJA1l5Q=="],
+
+    "@fontsource/noto-serif-kr": ["@fontsource/noto-serif-kr@5.3.0", "", {}, "sha512-PMVJPol7ZsWntq4p1blZnhzl1hJruzzQZbWOZJPnJriw+nEUPYyG+pkWCCHfbziZ6OolSxl1o05Z0gy4iMGmPA=="],
+
+    "@fontsource/noto-serif-malayalam": ["@fontsource/noto-serif-malayalam@5.3.0", "", {}, "sha512-VxpndrkwYlSkS4x6m6D5lTktMfqzuLBGvxhMu5Wk/gn8qBKYXaaIHtNcNPCEZ/LLsSQvZYDc5eFV14Rvv/wWEA=="],
+
+    "@fontsource/noto-serif-sc": ["@fontsource/noto-serif-sc@5.3.0", "", {}, "sha512-0/zaEFkidiWldE62rTeD74x8ygUsQvejiSNtO0LQxQk3qpaHnlMZ3w4C7yH80B4KTIg8VKeFP4oSgwWMchY9+g=="],
+
+    "@fontsource/noto-serif-tamil": ["@fontsource/noto-serif-tamil@5.3.0", "", {}, "sha512-Ksc/mqtACXTPzFQac1DF4xi4Cu4YhMYGQavu/DJX/wNxCIoCD/YUtYlK2tFDGs/uvKa8YbPXvGbIZP/j3C+7pQ=="],
+
+    "@fontsource/noto-serif-telugu": ["@fontsource/noto-serif-telugu@5.3.0", "", {}, "sha512-/svhIKXbxW9F9cz/zYj0uiB1lBDlul9krYFGxrhdZn0Kyyss7lzYL7PXMJKiD1IlCCEzhg8MvDh3SsJT6bYJXQ=="],
+
+    "@fontsource/noto-serif-thai": ["@fontsource/noto-serif-thai@5.3.0", "", {}, "sha512-BPE5PdY1NqA/aIvFhJz5Bgp/mL/ZS6eWJJXtpG+rlpK5sNXWcJilRBy2kdZfOZFamk5+r9lWFpq6cIRxWVMftQ=="],
 
     "@fontsource/rozha-one": ["@fontsource/rozha-one@5.3.0", "", {}, "sha512-/IUdv9LTshBBIqym7gbgOp/RbyD4HxwYOb+5lZKcv78m1xrD0wWWTWp20PNN9W5RVOQfAYQRkT76inav6uAPqg=="],
 

@@ -134,6 +134,96 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-057 — Twelve scripts had no typeface, and two of them were not on the list
+**Built 2026-08-23.** Resolves OD-017.
+
+Rufina covers **latin and latin-ext and nothing else** — read off its own
+`unicode-range`, not assumed. Everything past that fell through, and the two
+surfaces failed differently:
+
+- **The exported card rendered literal tofu boxes.** Satori has no system fonts
+  to fall back to, so an uncovered glyph has nowhere to go. Verified by
+  rendering a Japanese card before the change and looking at it.
+- **The reading view was quieter and less honest.** The stack ends in generic
+  `serif`, so most systems substituted something — a face that matches neither
+  Rufina nor the exported card, and that is simply absent on a machine without
+  the script installed. OD-017 described both as "tofu"; only the card was.
+
+**Cyrillic and Greek were broken too**, which the register never recorded. They
+turned up by reading Rufina's coverage rather than trusting the list of what was
+thought to be missing.
+
+**Scope came from measurement, not intuition.** Sampling 519 LRCLIB tracks
+across 28 artists: 67% carried a non-Latin script. Ranked — Devanagari 77, Han
+75, Arabic 73, Kana 45, Hangul 32, Gurmukhi 32, Tamil 30, Thai 20, then a tail.
+
+> A finding that reframes D-019: **LRCLIB stores most Hindi lyrics romanised.**
+> "Tum Hi Ho" comes back pure Latin. The Devanagari face is exercised far less
+> often than the catalogue's Hindi weighting suggests, while Han, Arabic and
+> Kana — none of which had a face — were the three most common non-Latin
+> scripts in the sample.
+
+**Twelve faces, weight 400 only.** Nothing in the app sets `font-weight: 700` on
+a display element, so a bold cut of each would double the bytes for a style
+never requested; `<strong>` inside insight prose is synthesised, which is the
+normal single-weight behaviour. Amiri for Arabic rather than Noto Naskh: D-019
+chose Vesper Libre because "transitional sits closer to Rufina's contrast than
+a humanist face would", and Amiri — a classical naskh revival off the Bulaq
+Press types — is that same argument in Arabic.
+
+**The faces are declared by hand, not imported.** fontsource's per-subset
+stylesheets (`amiri/arabic-400.css`) ship **no `unicode-range`**, so the browser
+cannot rule a face out without first downloading it — one stray character
+Rufina lacks could pull a megabyte of Korean onto an English page. The
+whole-package `400.css` files do carry ranges, but cost ~100KB of
+render-blocking CSS each for the CJK three, paid by every reader including
+Latin-only ones. Declaring the faces directly costs 8KB of source and states the
+ranges exactly.
+
+> The existing comment claiming "each import carries per-subset unicode-range"
+> was wrong, and had been since D-019 — `vesper-libre/devanagari-400.css` never
+> carried one either. Corrected, and Vesper Libre moved to the same explicit
+> declaration.
+
+**CJK is chosen by language, not by glyph.** Japanese, Chinese and Korean share
+U+4E00-9FFF and draw those codepoints differently. Per-glyph fallback would hand
+every Han character to whichever face sat first in the stack, so a Chinese
+lyric would silently set in Japanese shapes. `--font-cjk` is resolved by
+`:lang()` instead, reusing the detector D-053 already runs, and the card
+renderer picks its CJK binary the same way — so page and card agree on regional
+shapes as well as on typeface. It also means only one CJK face is ever
+reachable, which is what keeps the download to one file.
+
+> **Written wrong the first time.** The rules were `:root:lang(zh)`, which can
+> never match: D-053 puts the language on the lyric canvas, not on `<html>`,
+> because the language is read off words that arrive deferred, after the shell
+> has been sent. `<html>` stays `lang="en"`. Caught by checking which element
+> actually carries the attribute — the first check, that the rules were
+> unlayered and correctly ordered, was true and beside the point.
+
+**Known boundary:** text outside the canvas — hero title, credit line —
+inherits the `:root` default, so a Han title on a Chinese track is set in
+Japanese shapes. Rare, because LRCLIB metadata is usually romanised, and fixing
+it properly means labelling the language above the canvas, which the deferred
+load prevents.
+
+**Cost.** 8KB of source CSS; nothing extra downloaded on a Latin page. A
+non-Latin page fetches one file: 12KB (Hebrew, Cyrillic, Greek) to 140KB
+(Arabic), or 0.9–1.5MB for CJK. Server-side the small faces load together;
+the CJK binaries are read lazily, one per language actually asked for, because
+holding all three costs ~6MB resident for a route most cards never take.
+
+**The tables are asserted, not trusted.** Fifteen hand-typed paths, where a
+typo throws only when a reader exports a card in that script — in production,
+for the reader least likely to report it. `fonts.test.ts` checks every path
+against the filesystem, that every face is `.woff` (satori cannot parse woff2),
+and that every language `detectLang` can return has a face. Mutation-tested:
+a typo'd path, a `.woff2` path, and adding a detectable script without a face
+each fail exactly one test.
+
+Verified in Firefox against the production stylesheet: `lang="ja"` and
+`lang="zh"` render visibly different forms of 骨 and 雪 from the same markup.
+
 ### D-056 — The landing treated every visit as a first visit
 **Built 2026-08-23.** The entry-flow rework, approved from a written proposal.
 The track page is deliberately untouched apart from one link.
@@ -1888,6 +1978,8 @@ src/
 │   ├── genius.server.ts       # artwork, match scoring, youtube id (D-022)
 │   ├── palette.server.ts      # node-vibrant → OKLCH accents (D-016)
 │   ├── card.server.tsx        # Satori + resvg rasteriser (§3.4)
+│   ├── fonts.server.ts        # which face covers which script (D-057)
+│   ├── fonts.test.ts          # asserts every path + every script has a face
 │   ├── cache/                 # adapter selection: Upstash or memory (OD-001)
 │   └── providers/
 │       ├── insight.ts         # prompt + every output gate, shared (D-050)
@@ -1944,9 +2036,10 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-011 | Playback state store — React context vs TanStack Store | §3.2/§3.3 | Auto-scroll couples playback time to canvas |
 | OD-014 | Genius rate limits are undocumented | §3.1 | Cached per artist+title for 30d. Watch for 429s |
 | OD-016 | LRCLIB uploads sometimes set artistName equal to trackName | §3.1 | Mitigated by ranking well-tagged entries higher; underlying data still wrong |
-| OD-017 | Scripts beyond Latin and Devanagari still have no face — Arabic, Bengali, Tamil, CJK would render as tofu | §3.4 | Same class of bug as D-019. Needs a face per script the catalogue serves |
+| OD-017 | ~~Scripts beyond Latin and Devanagari still have no face~~ | §3.4 | **Resolved 2026-08-23 (D-057).** Twelve faces added, plus Cyrillic and Greek, which this entry never listed |
 
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
+| OD-027 | **The Lyric Card is broken in the production build.** `harfbuzzjs` — satori's shaper — is bundled as ESM but calls `__dirname`, so it throws at import and `/api/card` and `/api/og` both 500 | Deploy | Open — found 2026-08-23. Pre-existing: reproduced at HEAD on plain Latin text before D-057. Works under `vite dev`. Same family as OD-018; likely externalise, or shim `__dirname` |
 | OD-026 | **`og:image` picks the first four lines of a track.** For some songs that surfaces language that reads differently as a social preview than as a page a reader chose to open | §3.4 | Open — raised 2026-08-22 (D-051). Options: the hook rather than the opening, a curated line range, or accept it |
 | OD-021 | ~~**Gemini free tier: 20 requests/day.** Launch blocker~~ | §3.5 | **Resolved 2026-08-22 (D-050).** DeepSeek is metered at ~$0.0001/insight; Gemini demoted to fallback, where the quota no longer gates anything |
 | OD-023 | PRD §3.3 annotated phrases are styled but never populated — Genius annotations are not fetched | §3.3 | The `.lyric__annotated` rule exists and nothing applies it |

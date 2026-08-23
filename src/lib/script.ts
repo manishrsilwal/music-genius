@@ -60,6 +60,20 @@ const HAN = /\p{Script=Han}/gu;
 const KANA = /\p{Script=Hiragana}|\p{Script=Katakana}/gu;
 
 /**
+ * Every tag `detectLang` is capable of returning.
+ *
+ * Exported so the font tables can be asserted against it (D-057). Adding a
+ * script above without adding a face for it is a silent regression: the page
+ * still labels the language correctly and then renders it as boxes, which is
+ * the exact shape of the bug OD-017 described.
+ */
+export const DETECTABLE_LANGS: readonly string[] = [
+	"ja",
+	"zh",
+	...SCRIPTS.map((script) => script.lang),
+];
+
+/**
  * Returns a BCP-47 tag, or null when the text is Latin, empty, or too mixed to
  * call. Null means "leave the document's own lang alone".
  */

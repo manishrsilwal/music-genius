@@ -15,61 +15,72 @@ import satori from "satori";
 
 import { CARD_SIZE, type CardTheme, cardTypeScale } from "../lib/card";
 import { getRasteriser } from "../lib/og";
-
-const FONT_FILES = {
-	display: "node_modules/@fontsource/rufina/files/rufina-latin-400-normal.woff",
-	displayBold:
-		"node_modules/@fontsource/rufina/files/rufina-latin-700-normal.woff",
-	/**
-	 * Rufina has no Devanagari at all — every such codepoint mapped to .notdef
-	 * and rendered as tofu. Vesper Libre is a transitional Devanagari serif,
-	 * which sits closer to Rufina's contrast than a humanist face would.
-	 */
-	devanagari:
-		"node_modules/@fontsource/vesper-libre/files/vesper-libre-devanagari-400-normal.woff",
-	ui: "node_modules/@fontsource/elms-sans/files/elms-sans-latin-500-normal.woff",
-} as const;
+import { detectLang } from "../lib/script";
+import {
+	BASE_FONTS,
+	CJK_FAMILY,
+	CJK_FONTS,
+	SCRIPT_FONTS,
+} from "./fonts.server";
 
 /**
  * Satori falls back per glyph across the supplied fonts, so one line can mix
- * scripts — common in Hindi lyrics — with no script detection needed here.
+ * scripts — common in Hindi lyrics — with no script detection needed. The
+ * ordering among companions is irrelevant because their scripts are disjoint;
+ * the CJK face is appended per render, since that one is not.
  */
-const DISPLAY_STACK = "Rufina, Vesper Libre";
+const DISPLAY_STACK = ["Rufina", ...Object.keys(SCRIPT_FONTS)].join(", ");
 
-async function loadFonts() {
-	const [display, displayBold, devanagari, ui] = await Promise.all([
-		readFile(FONT_FILES.display),
-		readFile(FONT_FILES.displayBold),
-		readFile(FONT_FILES.devanagari),
-		readFile(FONT_FILES.ui),
+type LoadedFont = {
+	name: string;
+	data: Buffer;
+	weight: 400 | 500 | 700;
+	style: "normal";
+};
+
+async function loadFonts(): Promise<LoadedFont[]> {
+	const [display, displayBold, ui] = await Promise.all([
+		readFile(BASE_FONTS.display),
+		readFile(BASE_FONTS.displayBold),
+		readFile(BASE_FONTS.ui),
 	]);
 
+	const scripts = await Promise.all(
+		Object.entries(SCRIPT_FONTS).map(async ([name, file]) => ({
+			name,
+			data: await readFile(file),
+			weight: 400 as const,
+			style: "normal" as const,
+		})),
+	);
+
 	return [
-		{
-			name: "Rufina",
-			data: display,
-			weight: 400 as const,
-			style: "normal" as const,
-		},
-		{
-			name: "Rufina",
-			data: displayBold,
-			weight: 700 as const,
-			style: "normal" as const,
-		},
-		{
-			name: "Vesper Libre",
-			data: devanagari,
-			weight: 400 as const,
-			style: "normal" as const,
-		},
-		{
-			name: "Elms Sans",
-			data: ui,
-			weight: 500 as const,
-			style: "normal" as const,
-		},
+		{ name: "Rufina", data: display, weight: 400, style: "normal" },
+		{ name: "Rufina", data: displayBold, weight: 700, style: "normal" },
+		...scripts,
+		{ name: "Elms Sans", data: ui, weight: 500, style: "normal" },
 	];
+}
+
+/** Read once per process, per CJK language actually asked for. */
+const cjkCache = new Map<string, Promise<LoadedFont>>();
+
+function cjkFont(lang: string): Promise<LoadedFont> | null {
+	const file = CJK_FONTS[lang];
+	const name = CJK_FAMILY[lang];
+	if (!file || !name) return null;
+
+	let entry = cjkCache.get(lang);
+	if (!entry) {
+		entry = readFile(file).then((data) => ({
+			name,
+			data,
+			weight: 400 as const,
+			style: "normal" as const,
+		}));
+		cjkCache.set(lang, entry);
+	}
+	return entry;
 }
 
 /** Font binaries never change; read them once per process. */
@@ -93,6 +104,18 @@ export async function renderCard({
 	theme,
 }: CardRequest): Promise<Uint8Array> {
 	const { size, leading } = cardTypeScale(lines);
+
+	// Same detector the document's `lang` attribute uses (D-053), so the card
+	// and the page it was exported from resolve Han to the same regional
+	// shapes. Returns null for Latin, which is the common case and loads
+	// nothing.
+	const lang = detectLang(lines.join("\n"));
+	const cjk = lang ? cjkFont(lang) : null;
+	const loaded = cjk ? await cjk : null;
+
+	const fontFamily = loaded
+		? `${DISPLAY_STACK}, ${loaded.name}`
+		: DISPLAY_STACK;
 
 	const svg = await satori(
 		<div
@@ -125,7 +148,7 @@ export async function renderCard({
 						key={`${index}-${line}`}
 						style={{
 							display: "flex",
-							fontFamily: DISPLAY_STACK,
+							fontFamily,
 							fontSize: size,
 							lineHeight: leading,
 							color: theme.ink,
@@ -151,7 +174,11 @@ export async function renderCard({
 				{`${title} · ${artist}`}
 			</div>
 		</div>,
-		{ width: CARD_SIZE, height: CARD_SIZE, fonts: await fonts() },
+		{
+			width: CARD_SIZE,
+			height: CARD_SIZE,
+			fonts: loaded ? [...(await fonts()), loaded] : await fonts(),
+		},
 	);
 
 	return getRasteriser().toPng(svg, CARD_SIZE);

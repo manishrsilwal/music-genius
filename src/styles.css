@@ -8,17 +8,189 @@
 
 @import "tailwindcss";
 
-/* Self-hosted (D-005). Each import carries per-subset unicode-range, so the
-   browser fetches only the subsets a given track's lyrics actually need. */
+/* Self-hosted (D-005). Rufina's own `400.css`/`700.css` carry per-subset
+   unicode-range, so the browser fetches latin or latin-ext on demand. */
 @import "@fontsource/rufina/400.css";
 @import "@fontsource/rufina/700.css";
-/* Devanagari companion (D-019). Rufina has no Devanagari coverage at all, so
-   without this the browser silently substitutes a system face and the reading
-   view stops matching the exported card. */
-@import "@fontsource/vesper-libre/devanagari-400.css";
-@import "@fontsource/vesper-libre/devanagari-700.css";
 @import "@fontsource-variable/elms-sans/wght.css";
 @import "@fontsource-variable/elms-sans/wght-italic.css";
+
+/* --- Script companions (D-057) ---------------------------------------------
+   Rufina covers latin and latin-ext and nothing else, so every other script
+   fell through to whatever the OS happened to have — and on the exported card,
+   which has no system fonts at all, to literal tofu boxes.
+
+   These are declared by hand rather than imported, because fontsource's
+   per-subset stylesheets (`amiri/arabic-400.css` and friends) ship NO
+   unicode-range. Without one the browser cannot know a face is irrelevant
+   until it has downloaded it, so a single stray character Rufina lacks could
+   pull a megabyte of Korean onto an English page. The whole-package
+   `400.css` files do carry ranges, but at ~100KB of render-blocking CSS each
+   for the CJK three — paid by every reader, including the ones who only ever
+   open Latin tracks. Declaring the faces here costs a few hundred bytes and
+   states the ranges exactly.
+
+   Weight 400 only. Nothing in the app sets font-weight 700 on a display
+   element, so shipping a bold cut of each face would double the bytes for a
+   style that is never requested; `<strong>` inside insight prose is
+   synthesised, which is the normal browser behaviour for a single-weight
+   family. */
+
+@font-face {
+  font-family: "Vesper Libre";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/vesper-libre/files/vesper-libre-devanagari-400-normal.woff2") format("woff2");
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FF;
+}
+
+@font-face {
+  font-family: "Amiri";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/amiri/files/amiri-arabic-400-normal.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+@font-face {
+  font-family: "Noto Serif Bengali";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-bengali/files/noto-serif-bengali-bengali-400-normal.woff2") format("woff2");
+  unicode-range: U+0980-09FF, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: "Noto Serif Gurmukhi";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-gurmukhi/files/noto-serif-gurmukhi-gurmukhi-400-normal.woff2") format("woff2");
+  unicode-range: U+0A00-0A7F, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: "Noto Serif Gujarati";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-gujarati/files/noto-serif-gujarati-gujarati-400-normal.woff2") format("woff2");
+  unicode-range: U+0A80-0AFF, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: "Noto Serif Tamil";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-tamil/files/noto-serif-tamil-tamil-400-normal.woff2") format("woff2");
+  unicode-range: U+0B80-0BFF, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: "Noto Serif Telugu";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-telugu/files/noto-serif-telugu-telugu-400-normal.woff2") format("woff2");
+  unicode-range: U+0C00-0C7F, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: "Noto Serif Kannada";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-kannada/files/noto-serif-kannada-kannada-400-normal.woff2") format("woff2");
+  unicode-range: U+0C80-0CFF, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: "Noto Serif Malayalam";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-malayalam/files/noto-serif-malayalam-malayalam-400-normal.woff2") format("woff2");
+  unicode-range: U+0D00-0D7F, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: "Noto Serif Thai";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-thai/files/noto-serif-thai-thai-400-normal.woff2") format("woff2");
+  unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+
+@font-face {
+  font-family: "Noto Serif Hebrew";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-hebrew/files/noto-serif-hebrew-hebrew-400-normal.woff2") format("woff2");
+  unicode-range: U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+
+/* Rufina stops at latin-ext, so Cyrillic and Greek were tofu too — a gap
+   OD-017 never listed, found by reading Rufina's own unicode-range rather
+   than trusting the register. */
+@font-face {
+  font-family: "Noto Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif/files/noto-serif-cyrillic-400-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "Noto Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif/files/noto-serif-greek-400-normal.woff2") format("woff2");
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+
+/* CJK is selected by language, not by glyph (D-057).
+   Japanese, Chinese and Korean share U+4E00-9FFF, and the same codepoint is
+   drawn differently in each — 直 and 骨 are the usual examples. Per-glyph
+   fallback would hand every one of them to whichever face sat first in the
+   stack, so a Chinese track would silently render in Japanese shapes. The
+   document already carries a correct `lang` from detectLang (D-053), so the
+   rules below pick the face by language and only that face is ever in the
+   stack. Japanese is the default because kana make it the only one of the
+   three that is unambiguous from the text alone. */
+@font-face {
+  font-family: "Noto Serif JP";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-jp/files/noto-serif-jp-japanese-400-normal.woff2") format("woff2");
+  unicode-range: U+2E80-2EFF, U+3000-303F, U+3040-309F, U+30A0-30FF, U+31F0-31FF, U+3200-32FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF;
+}
+
+@font-face {
+  font-family: "Noto Serif SC";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-sc/files/noto-serif-sc-chinese-simplified-400-normal.woff2") format("woff2");
+  unicode-range: U+2E80-2EFF, U+3000-303F, U+3100-312F, U+3200-32FF, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF;
+}
+
+@font-face {
+  font-family: "Noto Serif KR";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/noto-serif-kr/files/noto-serif-kr-korean-400-normal.woff2") format("woff2");
+  unicode-range: U+1100-11FF, U+2E80-2EFF, U+3000-303F, U+3130-318F, U+3200-32FF, U+3400-4DBF, U+4E00-9FFF, U+A960-A97F, U+AC00-D7AF, U+D7B0-D7FF, U+F900-FAFF, U+FE30-FE4F, U+FF00-FFEF;
+}
 
 /* ---------------------------------------------------------------------------
    Runtime-swappable channel
@@ -133,10 +305,20 @@
   /* --- Typefaces (D-005) --------------------------------------------------
      Rufina: display only — 400/700, NO italic. Faux-oblique is forbidden.
      Elms Sans: UI chrome — variable 100–900, real italic. */
-  /* Vesper Libre sits after Rufina: Latin resolves to Rufina, and Devanagari —
-     which Rufina lacks entirely — falls through to Vesper Libre per glyph, the
-     same order the card renderer uses (D-019). */
-  --font-display: "Rufina", "Vesper Libre", ui-serif, Georgia, "Times New Roman", serif;
+  /* Rufina first, then one companion per script (D-019, extended in D-057).
+     Latin resolves to Rufina; every other script falls through per glyph to
+     the one face that declares its range, so a mixed line like
+     `दिल में hope है still` sets correctly without any script detection. The
+     ranges are disjoint, so the order among the companions does not matter —
+     except for CJK, where it matters entirely, which is why that slot is a
+     variable resolved by language below rather than a face named here.
+     The card renderer builds the same stack (D-057). */
+  --font-display:
+    "Rufina", "Vesper Libre", "Amiri", "Noto Serif Bengali",
+    "Noto Serif Gurmukhi", "Noto Serif Gujarati", "Noto Serif Tamil",
+    "Noto Serif Telugu", "Noto Serif Kannada", "Noto Serif Malayalam",
+    "Noto Serif Thai", "Noto Serif Hebrew", "Noto Serif", var(--font-cjk),
+    ui-serif, Georgia, "Times New Roman", serif;
   --font-ui: "Elms Sans Variable", "Elms Sans", ui-sans-serif, system-ui, sans-serif;
 
   /* --- Fluid type scale ---------------------------------------------------
@@ -187,6 +369,45 @@
   --radius-card: 1.25rem;
   --radius-sheet: 1.75rem;
 }
+
+/* --- CJK face, selected by content language (D-057) ------------------------
+   `:lang()`, NOT `:root:lang()`. D-053 puts the detected language on the lyric
+   canvas, not on <html> — it cannot go higher, because the language is read
+   off the words and the words arrive deferred, after the shell has already
+   been sent. `<html>` therefore stays `lang="en"` and a `:root:lang(zh)` rule
+   would never match anything. Written that way first, and caught only by
+   checking which element actually carries the attribute.
+
+   `:lang()` matches the canvas and everything under it, and a declaration set
+   directly on an element beats one inherited from :root regardless of
+   specificity, so the override lands without needing to outweigh the default.
+
+   Deliberately NOT inside @theme, and not inside a layer: `@theme` emits into
+   `:root` unlayered, and a layered rule loses to an unlayered one whatever its
+   specificity — the trap D-052 hit.
+
+   Japanese is the default because kana make it the only one of the three
+   detectLang can identify from the text alone; a Han-only lyric is genuinely
+   ambiguous, and `zh` is the answer detectLang gives it, which the second rule
+   then honours.
+
+   Known boundary: text outside the canvas — the hero title, the credit line —
+   inherits the :root default, so a Han title on a Chinese track is set in
+   Japanese shapes. LRCLIB metadata is romanised often enough that this is rare,
+   and fixing it properly means labelling the language above the canvas, which
+   the deferred load currently prevents. */
+:root {
+  --font-cjk: "Noto Serif JP";
+}
+
+:lang(zh) {
+  --font-cjk: "Noto Serif SC";
+}
+
+:lang(ko) {
+  --font-cjk: "Noto Serif KR";
+}
+
 
 /* Runtime-resolved tokens. `inline` makes utilities reference the value
    directly rather than a frozen theme var, so repainting --track-accent
