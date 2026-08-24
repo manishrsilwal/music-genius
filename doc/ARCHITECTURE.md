@@ -134,6 +134,31 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-078 — The cover beside the words
+**Built 2026-08-24.** The hero mock's "beside" layout, chosen by the owner with
+the seam marked and argued against — recorded as their call, made looking at
+both: the wide screen trades a seam into the centred canvas for the reference's
+composition. "Above" on a phone, per the same ruling, which keeps the narrow
+layout — where most readers are — on one centred axis end to end.
+
+**One lockup, two arrangements.** A grid that is a centred single column by
+default and `cover | text` from `md`. The blurred ground drops to 0.45: the
+sharp cover is now the artwork's appearance, and at full strength the ground
+read as the same image shown twice.
+
+**The fit-to-width title survived untouched**, and that is D-037 paying out:
+the title is fitted against a `container-type` measure, so `cqw` resolves
+against whatever column the measure occupies. The same arithmetic that fitted
+a centred 64rem hero fits the narrower beside column with no new numbers.
+
+**The no-artwork state is keyed on the cover existing, via `:has()`** — a
+track with no resolvable art gets the old centred hero, not a layout with a
+hole in it. The first cut got this half right and shipped a kicker hanging
+left inside a centred lockup: the fallback recentred the lockup but not the
+text block, whose own `align-items: flex-start` still applied. Caught by
+screenshotting a track that happened to have no artwork — the probe that
+confirmed the fallback had "applied" was true and beside the point.
+
 ### D-077 — Clearing the register
 **Built 2026-08-24.** Four entries had sat unruled; three closed, one returned
 to its owner.

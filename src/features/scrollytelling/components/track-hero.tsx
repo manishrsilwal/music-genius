@@ -40,7 +40,7 @@ export function TrackHero({
 }) {
 	return (
 		<motion.header
-			className="hero flex min-h-dvh flex-col items-center justify-center px-6 text-center"
+			className="hero flex min-h-dvh flex-col items-center justify-center px-6"
 			variants={staggerVariants}
 			initial="hidden"
 			animate="visible"
@@ -54,7 +54,11 @@ export function TrackHero({
 									src={artwork.full}
 									alt=""
 									initial={{ opacity: 0, scale: 1.35 }}
-									animate={{ opacity: 1, scale: 1.25 }}
+									// 0.45, not 1 (D-078). The sharp cover in the
+									// lockup is now the artwork's appearance; at
+									// full strength the blurred ground behind it
+									// read as the same image shown twice at once.
+									animate={{ opacity: 0.45, scale: 1.25 }}
 									transition={transition.cinematic}
 								/>
 							</div>
@@ -70,41 +74,70 @@ export function TrackHero({
 				}
 			</Await>
 
-			<motion.p
-				variants={riseVariants}
-				className="text-micro uppercase tracking-label text-ink-faint"
-			>
-				{track.synced ? "Time-synced" : "Lyrics"}
-			</motion.p>
-
 			{/*
-			  The measure the title is fitted against. A container rather than
-			  the heading itself: an element cannot query its own width (D-037).
+			  The lockup (D-078): cover beside the words on a wide screen, above
+			  them on a phone. The reference's composition, chosen with the seam
+			  known — the canvas below stays centred, so the hero re-centres
+			  everything below `md` rather than carrying a left axis into it.
 			*/}
-			<div className="hero__measure mt-8">
-				<motion.h1
-					variants={riseVariants}
-					transition={transition.cinematic}
-					className="hero__title text-ink"
-					// Real glyph advances, not an assumed average — the same
-					// table Satori renders cards from. The display face's widths
-					// vary enough that "Creep" and "Nights" differ by 8% on
-					// equal character counts.
-					style={{ "--title-em": measureEm(track.title) } as CSSProperties}
-				>
-					{track.title}
-				</motion.h1>
-			</div>
+			<div className="hero__lockup">
+				<Await promise={visuals} fallback={null}>
+					{({ artwork }) =>
+						artwork ? (
+							<motion.div
+								className="hero__cover"
+								aria-hidden="true"
+								variants={riseVariants}
+								transition={transition.cinematic}
+							>
+								<img src={artwork.full} alt="" />
+							</motion.div>
+						) : null
+					}
+				</Await>
 
-			<motion.p
-				variants={riseVariants}
-				className="mt-8 text-lead text-ink-muted"
-			>
-				{track.artist}
-				{/* Already null when it only repeats the artist or the title —
+				<div className="hero__text">
+					<motion.p
+						variants={riseVariants}
+						className="text-micro uppercase tracking-label text-ink-faint"
+					>
+						{track.synced ? "Time-synced" : "Lyrics"}
+					</motion.p>
+
+					{/*
+					  The measure the title is fitted against. A container rather
+					  than the heading itself: an element cannot query its own
+					  width (D-037) — which is also what makes the fit survive
+					  this layout change: `cqw` resolves against whatever column
+					  the measure occupies, so the same arithmetic fits the title
+					  to the narrower beside-column with no new numbers.
+					*/}
+					<div className="hero__measure mt-8">
+						<motion.h1
+							variants={riseVariants}
+							transition={transition.cinematic}
+							className="hero__title text-ink"
+							// Real glyph advances, not an assumed average — the same
+							// table Satori renders cards from. The display face's widths
+							// vary enough that "Creep" and "Nights" differ by 8% on
+							// equal character counts.
+							style={{ "--title-em": measureEm(track.title) } as CSSProperties}
+						>
+							{track.title}
+						</motion.h1>
+					</div>
+
+					<motion.p
+						variants={riseVariants}
+						className="mt-8 text-lead text-ink-muted"
+					>
+						{track.artist}
+						{/* Already null when it only repeats the artist or the title —
 				    normalised at the LRCLIB boundary, not guarded here. */}
-				{track.album ? ` · ${track.album}` : ""}
-			</motion.p>
+						{track.album ? ` · ${track.album}` : ""}
+					</motion.p>
+				</div>
+			</div>
 
 			{notice}
 

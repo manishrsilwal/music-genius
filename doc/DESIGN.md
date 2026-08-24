@@ -748,6 +748,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | **D-078** The hero lockup: cover beside the words on wide screens, above them on a phone; blurred ground drops to 0.45; centred fallback when no art resolves |
 | 2026-08-24 | **D-077** Register cleared: og:image opens at the hook, a component-test rig with a first SectionHeading test, the dead annotation rule removed, analytics returned as a ruling |
 | 2026-08-24 | **D-076** The docked bar rides a measured cream sheet with a derived deep accent; "Read next" offers two doors at the foot of every track |
 | 2026-08-24 | **D-075** When the linked video is a different cut from the timings, sync is withheld and the bar says so, instead of scrolling to the wrong line |

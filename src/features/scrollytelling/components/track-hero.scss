@@ -57,8 +57,82 @@
 			);
 	}
 
+	// The lockup (D-078): "above" on a phone, "beside" from `md`.
+	//
+	// Chosen with the seam known: the canvas below is one centred column, and
+	// a left-aligned hero runs into it. The mobile collapse back to the
+	// centred axis is what keeps the narrow layout — where most readers are —
+	// seamless; the wide screen trades that seam for the reference's
+	// composition, which is the call the owner made looking at both.
+	&__lockup {
+		display: grid;
+		justify-items: center;
+		text-align: center;
+		gap: 1.75rem;
+		width: 100%;
+		max-width: 72rem;
+
+		@include m.from("md") {
+			grid-template-columns: minmax(9rem, 14rem) 1fr;
+			align-items: center;
+			gap: clamp(1.5rem, 4vw, 3rem);
+			justify-items: start;
+			text-align: left;
+		}
+	}
+
+	// The cover as an object — sharp where the ground behind it is a wash.
+	&__cover {
+		width: clamp(6rem, 24vw, 10rem);
+		aspect-ratio: 1;
+		border-radius: var(--radius-nested);
+		overflow: hidden;
+		background: var(--color-well);
+		box-shadow: var(--shadow-3);
+
+		@include m.from("md") {
+			width: 100%;
+		}
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	// With no cover resolved the lockup is text alone, and the empty grid
+	// column would strand the words off-centre on a wide screen. `:has()`
+	// keys the two-column template to the cover actually existing — and the
+	// TEXT block needs recentring too: its own `align-items: flex-start`
+	// at `md` otherwise left-hangs the kicker inside a centred lockup, which
+	// is exactly how the first cut of this shipped (D-078).
+	&__lockup:not(:has(.hero__cover)) {
+		grid-template-columns: 1fr;
+		justify-items: center;
+		text-align: center;
+
+		.hero__text {
+			align-items: center;
+		}
+	}
+
+	&__text {
+		min-width: 0;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		@include m.from("md") {
+			align-items: flex-start;
+		}
+	}
+
 	// The measure the title is fitted against. `container-type` here rather
 	// than on the heading because an element cannot query its own width.
+	// Inside the lockup it spans whatever column it occupies, so the
+	// fit-to-width arithmetic adapts to the beside layout for free.
 	&__measure {
 		container-type: inline-size;
 		width: 100%;
@@ -104,5 +178,11 @@
 			var(--text-hero),
 			max(2.5rem, calc(100cqw / var(--title-em, 8)))
 		);
+
+		@include m.from("md") {
+			// Left-set type balances against its own left edge; centred
+			// balance would rag both sides inside the beside column.
+			text-wrap: pretty;
+		}
 	}
 }
