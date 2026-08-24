@@ -566,6 +566,22 @@
      steps down by the same amount (D-065). */
   --radius-nested: 0.875rem;
 
+  /* --- The light sheet (D-076) ------------------------------------------
+     The docked transport rides a cream sheet, the one light surface in the
+     product — the player-reference idea, admitted only after measuring a
+     full on-light palette. Ink reuses `--color-on-bright` (17.97:1 here).
+
+     The accent CANNOT ride along as-is: every extractable accent sits at
+     L 0.72, which is 2.16:1 against cream at worst — invisible. The deep
+     variant re-derives it at L 0.5 with the same hue, which clears 4.5:1
+     across every hue and chroma the extractor can produce (worst 5.20:1).
+     Derived with relative color syntax so the runtime palette channel keeps
+     working without the extractor learning about light grounds. */
+  --color-sheet: oklch(0.982 0.015 77.1);
+  --color-sheet-muted: oklch(0.45 0.03 269.6);
+  --color-sheet-hairline: oklch(0 0 0 / 0.15);
+  --track-accent-deep: oklch(from var(--track-accent) 0.5 min(c, 0.17) h);
+
   --color-lime: oklch(0.921 0.222 128.1);
   --color-sun: oklch(0.879 0.162 90.9);
   /* For text ON lime or sun, where cream would vanish. Measured at 15.72:1

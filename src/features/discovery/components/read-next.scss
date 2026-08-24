@@ -1,0 +1,76 @@
+@use "styles/mixins" as m;
+
+// Where to go when the song ends (D-076). Sits at the foot of the reading
+// page, so it takes the reading ground's quiet register — cards, not a queue.
+.read-next {
+	max-width: 34rem;
+	margin-inline: auto;
+	margin-bottom: 3rem;
+	text-align: left;
+
+	&__label {
+		margin: 0 0 0.85rem;
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		font-weight: 600;
+		letter-spacing: var(--tracking-label);
+		text-transform: uppercase;
+		color: var(--color-ink);
+	}
+
+	&__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 0.625rem;
+
+		@include m.from("sm") {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	&__card {
+		display: grid;
+		gap: 0.2rem;
+		height: 100%;
+		padding: 1rem 1.125rem;
+		border-radius: var(--radius-card);
+		@include m.surface;
+		transition:
+			border-color 0.22s var(--ease-editorial),
+			background-color 0.22s var(--ease-editorial);
+		@include m.press(0.98);
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--track-accent);
+			background: var(--color-hover);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__title {
+		font-family: var(--font-display);
+		color: var(--color-ink);
+	}
+
+	&__artist {
+		font-family: var(--font-ui);
+		font-size: var(--text-caption);
+		color: var(--color-ink-muted);
+	}
+
+	// The hand-written editorial line (D-045) — here it is doing the exact job
+	// it was written for: arguing for a song the reader has not opened yet.
+	&__note {
+		margin-top: 0.35rem;
+		font-family: var(--font-ui);
+		font-size: var(--text-caption);
+		color: var(--color-ink-faint);
+		text-wrap: pretty;
+	}
+}

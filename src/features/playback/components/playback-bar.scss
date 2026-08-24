@@ -70,6 +70,92 @@
 		// its own edges, so the shadow becomes a dark smear along the bottom
 		// of the screen rather than separation from what is behind it.
 		box-shadow: none;
+
+		// ── The light sheet (D-076) ─────────────────────────────────────
+		// Docked, the bar becomes the one light surface in the product — the
+		// player-reference idea, taken only after measuring a full on-light
+		// palette. Every rule below answers a measured pair; nothing on the
+		// sheet inherits a colour that was measured against the dark ground.
+		background: var(--color-sheet);
+		border-top-color: var(--color-sheet-hairline);
+		color: var(--color-on-bright);
+
+		.playback__time {
+			color: var(--color-sheet-muted);
+		}
+
+		.playback__title {
+			color: var(--color-on-bright);
+		}
+
+		.playback__status {
+			color: var(--color-sheet-muted);
+
+			&[data-notice] {
+				// The deep accent, not the accent: L 0.72 over cream is
+				// 2.16:1 at worst, invisible. L 0.5 clears 4.5:1 for every
+				// hue the extractor can produce.
+				color: var(--track-accent-deep);
+			}
+		}
+
+		.playback__seek {
+			&::-webkit-slider-runnable-track {
+				background: linear-gradient(
+					to right,
+					var(--track-accent-deep) var(--progress, 0%),
+					var(--color-sheet-hairline) var(--progress, 0%)
+				);
+			}
+
+			&::-moz-range-track {
+				background: linear-gradient(
+					to right,
+					var(--track-accent-deep) var(--progress, 0%),
+					var(--color-sheet-hairline) var(--progress, 0%)
+				);
+			}
+
+			&::-webkit-slider-thumb {
+				background: var(--track-accent-deep);
+			}
+
+			&::-moz-range-thumb {
+				background: var(--track-accent-deep);
+			}
+		}
+
+		// The bright fill fails on cream for the same reason the accent
+		// does — it IS the accent. Deep fill, sheet-coloured mark.
+		.playback__toggle {
+			background: var(--track-accent-deep);
+			color: var(--color-sheet);
+
+			&:hover:not(:disabled) {
+				background: var(--track-accent-deep);
+				filter: brightness(1.15);
+			}
+		}
+
+		.playback__resume {
+			border-color: var(--track-accent-deep);
+			color: var(--track-accent-deep);
+		}
+
+		.playback__elsewhere {
+			border-color: var(--color-sheet-hairline);
+			color: var(--color-sheet-muted);
+
+			&:hover {
+				color: var(--color-on-bright);
+				border-color: var(--track-accent-deep);
+				background: oklch(0 0 0 / 0.05);
+			}
+		}
+
+		.playback__record {
+			box-shadow: inset 0 0 0 1px var(--color-sheet-hairline);
+		}
 	}
 
 	@include m.reduced-motion {

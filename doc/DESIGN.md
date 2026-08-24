@@ -748,6 +748,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | **D-076** The docked bar rides a measured cream sheet with a derived deep accent; "Read next" offers two doors at the foot of every track |
 | 2026-08-24 | **D-075** When the linked video is a different cut from the timings, sync is withheld and the bar says so, instead of scrolling to the wrong line |
 | 2026-08-24 | **D-074** Stanzas fade with distance rather than switching — three measured steps, none below the readability floor the reference itself ignores |
 | 2026-08-24 | **D-073** A tool for growing the catalogue: 22 of 32 cells hold fewer than three tracks, and no ranking change fixes that — it proposes and classifies, but never writes the note or applies anything |

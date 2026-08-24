@@ -134,6 +134,38 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-076 — The light sheet and the open door
+**Built 2026-08-24.** Options 3 and 4 from the player study, both advised
+against there and both asked for anyway — so both built properly rather than
+grudgingly, which for the sheet meant measuring the full on-light palette the
+study said would be the cost.
+
+**The docked bar rides a cream sheet** — the one light surface in the product.
+Every pair on it is measured: ink reuses `--color-on-bright` (17.97:1),
+`--color-sheet-muted` at L 0.45 gives 7.08:1, hairlines are translucent black.
+
+**The accent could not ride along, and the numbers say why.** Every accent the
+extractor can produce sits at L 0.72 — 2.16:1 against cream at worst,
+invisible. `--track-accent-deep` re-derives the runtime channel at L 0.5 with
+relative color syntax — `oklch(from var(--track-accent) 0.5 min(c, 0.17) h)` —
+which clears 4.5:1 across every extractable hue (worst 5.20:1) without the
+palette engine learning that light grounds exist. Verified in the browser: the
+notice computes to the derived value, not the parent accent. Browsers without
+relative color support inherit the on-bright ink instead, which degrades to
+readable rather than to invisible.
+
+**"Up next" became "Read next", and the renaming is the design.** In a player
+it is a queue: the product decides and the next thing plays. This is a reader,
+so it is an offer — two cards at the foot of the page, chosen by the same
+scoring as the landing shelves, seeded per track so different songs open
+different doors, excluding everything already read. Nothing advances on its
+own, nothing is numbered. A queue is a promise to keep playing; this is a door
+held open.
+
+> It is also where the catalogue's hand-written `note` found its second home —
+> arguing for a song the reader has not opened yet, which is the exact job
+> D-045 wrote it for and the job D-069 removed from the landing cards.
+
 ### D-075 — The right song, the wrong cut
 **Built 2026-08-24.** Reported with a concrete pair of links: our "Blinding
 Lights" plays the official video, whose cinematic intro puts every synced line

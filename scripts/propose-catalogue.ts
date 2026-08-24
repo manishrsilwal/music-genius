@@ -125,10 +125,19 @@ async function suggest(gaps: Cell[]): Promise<void> {
 	const wanted = gaps.slice(0, limit);
 	console.log(`\nasking for candidates in ${wanted.length} thin cells…\n`);
 
-	for (const cell of wanted) {
-		const known = CATALOGUE.map((t) => `${t.title} — ${t.artist}`).join("; ");
-		const result = (await ask(
-			`Suggest 6 songs whose LYRICS are worth reading closely and that fit ALL of:
+	const known = CATALOGUE.map((t) => `${t.title} — ${t.artist}`).join("; ");
+
+	// Concurrent, in small groups. Sequential took 30–60 seconds a cell, which
+	// across twenty-two thin cells is a run nobody waits for — the first
+	// attempt was killed at the ten-minute mark with cells still queued.
+	const POOL = 5;
+	const results: Array<{ cell: Cell; songs: Array<{ title: string; artist: string }> }> = [];
+	for (let i = 0; i < wanted.length; i += POOL) {
+		const group = wanted.slice(i, i + POOL);
+		const answers = await Promise.all(
+			group.map(async (cell) => {
+				const result = (await ask(
+					`Suggest 6 songs whose LYRICS are worth reading closely and that fit ALL of:
 - mood: ${cell.mood}
 - what draws you in: ${cell.pull} (storytelling | wordplay | confession | imagery)
 - familiarity: ${cell.familiarity} (canon = widely known; deep = a deeper cut)
@@ -137,12 +146,18 @@ Mix English and Hindi/Urdu. Prefer songs with published, findable lyrics.
 Do NOT suggest any of these, which are already held: ${known}
 
 Return JSON: {"songs":[{"title":"…","artist":"…"}]}`,
-		)) as { songs?: Array<{ title: string; artist: string }> } | null;
+				)) as { songs?: Array<{ title: string; artist: string }> } | null;
+				return { cell, songs: result?.songs ?? [] };
+			}),
+		);
+		results.push(...answers);
+		console.log(`  …${Math.min(i + POOL, wanted.length)}/${wanted.length} cells answered`);
+	}
 
+	console.log();
+	for (const { cell, songs } of results) {
 		console.log(`# ${cell.mood} · ${cell.pull} · ${cell.familiarity}  (have ${cell.count})`);
-		for (const song of result?.songs ?? []) {
-			console.log(`${song.title} — ${song.artist}`);
-		}
+		for (const song of songs) console.log(`${song.title} — ${song.artist}`);
 		console.log();
 	}
 

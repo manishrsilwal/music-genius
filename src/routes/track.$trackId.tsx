@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 import { RouteError } from "@/components/route-error";
 import { RouteMessage } from "@/components/route-message";
+import { ReadNext } from "@/features/discovery/components/read-next";
 import {
 	TrackVersions,
 	VariantNotice,
@@ -306,6 +307,9 @@ function TrackPage() {
 			<InsightsAffordance trackId={track.id} onOpenChange={setDrawerOpen} />
 
 			<footer className="track-shell__foot px-6 text-center">
+				{/* Where to go when the song ends (D-076) — an offer, not a queue. */}
+				<ReadNext currentId={track.id} />
+
 				{/*
 				  The reader's way out of a wrong recording (OD-028). At the foot
 				  rather than in the hero: it is for someone who has noticed the
