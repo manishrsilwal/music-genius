@@ -12,6 +12,7 @@ import { SearchField } from "@/features/discovery/components/search-field";
 import { TasteChips } from "@/features/discovery/components/taste-chips";
 import { useHistory } from "@/features/discovery/hooks/use-history";
 import { usePreferences } from "@/features/discovery/hooks/use-preferences";
+import { useRotation } from "@/features/discovery/hooks/use-rotation";
 import { pickAlsoLiked, pickDeepDives, seedFromDate } from "@/lib/deep-dives";
 import { riseVariants, staggerVariants, transition } from "@/lib/motion";
 
@@ -39,15 +40,33 @@ function Discovery() {
 	const { today } = Route.useLoaderData();
 	const { preferences, answered, save, reset } = usePreferences();
 	const { entries, remove, clear } = useHistory();
+	const { rotation, shuffle } = useRotation();
 
-	const seed = seedFromDate(today);
+	/*
+	 * The day, plus how many times this reader has been here (D-072).
+	 *
+	 * The date alone meant a reader who came back an hour later saw the same
+	 * three songs, and a reader who skipped the questions saw the same three as
+	 * everyone else who skipped — all day, out of a catalogue of fifty-six.
+	 *
+	 * The prime is arbitrary but must be large and odd: multiplied into a seed
+	 * that `seededOrder` then xorshifts, a small factor moves the shuffle by
+	 * too little to change which three tracks come out on top.
+	 */
+	const seed = seedFromDate(today) + rotation * 7919;
+
+	// Songs already opened are pushed to the back rather than removed: with a
+	// finite catalogue, a reader who has been through it should still get a
+	// shelf.
+	const seen = useMemo(() => entries.map((entry) => entry.id), [entries]);
+
 	const dives = useMemo(
-		() => pickDeepDives(preferences, seed),
-		[preferences, seed],
+		() => pickDeepDives(preferences, seed, undefined, seen),
+		[preferences, seed, seen],
 	);
 	const also = useMemo(
-		() => pickAlsoLiked(preferences, seed, dives),
-		[preferences, seed, dives],
+		() => pickAlsoLiked(preferences, seed, dives, undefined, seen),
+		[preferences, seed, dives, seen],
 	);
 
 	return (
@@ -176,8 +195,19 @@ function Discovery() {
 							  an editorial claim; unlabelled it reads as the whole of
 							  a thin library (D-056).
 							*/}
-							<SectionHeading lead="Three from a catalogue we chose by hand, matched to your answers and rotated daily.">
-								Today's Deep Dives
+							<SectionHeading
+								lead="Three from a catalogue we chose by hand, matched to your answers. They change every time you come back."
+								action={
+									<button
+										type="button"
+										onClick={shuffle}
+										className="tap text-micro uppercase tracking-label text-ink-faint hover:text-ink"
+									>
+										Show three more
+									</button>
+								}
+							>
+								Deep Dives
 							</SectionHeading>
 
 							<DeepDives picks={dives} preferences={preferences} />

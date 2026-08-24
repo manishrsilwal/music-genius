@@ -134,6 +134,69 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-072 — The same three songs, forever
+**Built 2026-08-24.** Reported as "the suggestions are the same if I select the
+same parameters, or skip entirely". Both true, and for the same reason: the
+seed came from the date alone, so a given set of answers produced one shelf
+that stood all day for every reader who gave them. The catalogue holds
+fifty-six tracks and was showing three.
+
+**Three changes, and the interesting part is which one did the work.**
+
+**A rotation that counts visits, not days.** Folded into the seed, stored so a
+single visit stays stable — the shelf must not reshuffle under a reader who
+merely answered a question or resized a window. Plus a "Show three more"
+control, because a reader who wants another look should not have to leave and
+come back.
+
+**Memory of what has already been opened.** Read tracks sink beneath unread
+ones by a penalty, not a filter: the catalogue is finite, and a reader who has
+been through it should still get a shelf rather than an empty page.
+
+**A shortlist, after two attempts that did not work.** Measured across ten
+visits, the rotation alone moved a reader who *skipped* from 3 distinct tracks
+to 23 — and a reader who *answered all three questions* from 3 to 4.
+
+> The arithmetic says why, and it is worth writing down. `score` moves in steps
+> of 1.5 to 3, which the ×1000 scale turns into gaps of 1500–3000, while the
+> shuffled position spans 0–55. **Any multiplier small enough to preserve
+> relevance is far too small to move anything, and any multiplier large enough
+> to move something has already thrown relevance away.** Weighting one number
+> against the other cannot express what was wanted.
+
+So the two decisions were separated: relevance decides which tracks are
+eligible, the rotation decides which of them appear.
+
+**Cut at the score cliff, not at a fixed twelve.** The first shortlist took the
+top twelve by score and broke a promise the product makes — answer "defiant"
+and every pick is defiant. There are fewer than twelve defiant tracks, so a
+fixed window reached past them into songs the reader had just said they did not
+want. The existing test caught it. Cutting at the cliff — every track that
+matches as well as the best one, and none that matches less well — keeps the
+guarantee exactly.
+
+| answers given | distinct tracks over ten visits | mood relevance |
+|---|---|---|
+| skipped | 23 / 30 | — |
+| mood only | 13 / 30 | 30 / 30 |
+| mood + pull | 8 / 30 | 30 / 30 |
+| all three | 4 / 30 | 30 / 30 |
+
+Every one of those was **3** before.
+
+**The last row is a real limit, stated rather than hidden.** In a catalogue of
+fifty-six there are only four songs that are longing *and* confessional *and*
+deep cuts. Widening the shelf for that reader would mean showing them something
+they explicitly did not ask for. Their exploration lives in "People also like",
+which is loose by design, and in `familiarity: "surprise"` — an answer that
+deliberately scores nothing.
+
+> **Traded away:** every visitor no longer sees the same picks on a given day.
+> That was D-045's design — a shared daily rotation, and no cron job needed to
+> move it. Visits are counted per reader in `localStorage`, so the shelf is now
+> personal. Worth it for the stated goal, and reversible by dropping the
+> rotation from the seed.
+
 ### D-071 — Which recording, and the reader's way out of the wrong one
 **Built 2026-08-24.** Closes the ranking half of OD-028 and adds the escape
 hatch. Reported as "most of the time it returns the LoFi / home demo / video

@@ -303,3 +303,73 @@ describe("preference plumbing", () => {
 		});
 	});
 });
+
+/*
+ * Exploration (D-072). The catalogue holds fifty-six tracks and the shelf shows
+ * three; before this the same three came back all day for every reader who
+ * answered the same way — or skipped.
+ */
+describe("rotation", () => {
+	const rotate = (n: number) => seedFromDate("2026-08-22") + n * 7919;
+
+	it("shows a different shelf on a later visit", () => {
+		const first = pickDeepDives(NONE, rotate(1));
+		const second = pickDeepDives(NONE, rotate(2));
+		expect(first.map((t) => t.lrclibId)).not.toEqual(
+			second.map((t) => t.lrclibId),
+		);
+	});
+
+	it("reaches most of the catalogue over a handful of visits", () => {
+		const reached = new Set<string>();
+		for (let visit = 1; visit <= 12; visit++) {
+			for (const track of pickDeepDives(NONE, rotate(visit))) {
+				reached.add(track.lrclibId);
+			}
+		}
+		// Twelve visits, three at a time: thirty-six slots. Overlap is expected
+		// and fine — what matters is that it is not the same three forever.
+		expect(reached.size).toBeGreaterThan(20);
+	});
+
+	it("still leads with the reader's answers rather than the rotation", () => {
+		// Variety must not cost relevance: whatever the visit, a stated mood
+		// still decides most of the shelf.
+		for (let visit = 1; visit <= 6; visit++) {
+			const picks = pickDeepDives({ ...NONE, mood: "longing" }, rotate(visit));
+			const matching = picks.filter((t) => t.mood === "longing").length;
+			expect(matching).toBeGreaterThanOrEqual(2);
+		}
+	});
+});
+
+describe("already read", () => {
+	it("pushes an opened track off the shelf", () => {
+		const seed = seedFromDate("2026-08-22");
+		const first = pickDeepDives(NONE, seed);
+		const ids = first.map((t) => t.lrclibId);
+
+		const after = pickDeepDives(NONE, seed, undefined, ids);
+		expect(after.map((t) => t.lrclibId)).not.toEqual(ids);
+		for (const id of after.map((t) => t.lrclibId)) {
+			expect(ids).not.toContain(id);
+		}
+	});
+
+	it("still returns a full shelf when everything has been read", () => {
+		// A finite catalogue plus a determined reader must not produce an empty
+		// page, which is why this is a penalty and not a filter.
+		const everything = CATALOGUE.map((t) => t.lrclibId);
+		const picks = pickDeepDives(NONE, seed, undefined, everything);
+		expect(picks).toHaveLength(DEEP_DIVE_COUNT);
+	});
+
+	it("keeps read tracks out of the second shelf too", () => {
+		const dives = pickDeepDives(NONE, seed);
+		const read = dives.map((t) => t.lrclibId);
+		const also = pickAlsoLiked(NONE, seed, [], undefined, read);
+		for (const id of read) {
+			expect(also.map((t) => t.lrclibId)).not.toContain(id);
+		}
+	});
+});

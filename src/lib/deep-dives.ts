@@ -859,18 +859,90 @@ export function seedFromDate(date: string): number {
 interface Ranked {
 	track: CuratedTrack;
 	rank: number;
+	/** Index in the rotation's shuffle, so the shortlist can be reordered by it. */
+	position: number;
 }
 
-function rankAll(preferences: Preferences, seed: number): Ranked[] {
+/**
+ * Far larger than any score can reach, so anything already read sinks beneath
+ * everything unread — but finite, so a reader who has been through the whole
+ * catalogue still gets a shelf rather than an empty page (D-072).
+ */
+const SEEN_PENALTY = 100_000;
+
+function rankAll(
+	preferences: Preferences,
+	seed: number,
+	seen: ReadonlySet<string> = new Set(),
+): Ranked[] {
 	const order = seededOrder(CATALOGUE.length, seed);
 	return order
 		.map((index, position) => {
 			const track = CATALOGUE[index] as CuratedTrack;
-			// Position breaks ties, keeping the daily rotation visible when
-			// several tracks score identically.
-			return { track, rank: score(track, preferences) * 1000 - position };
+			// Position breaks ties, keeping the rotation visible when several
+			// tracks score identically.
+			let rank = score(track, preferences) * 1000 - position;
+			// Recommending a song the reader has already opened is the one
+			// suggestion that cannot possibly help them explore.
+			if (seen.has(track.lrclibId)) rank -= SEEN_PENALTY;
+			return { track, rank, position };
 		})
 		.sort((a, b) => b.rank - a.rank);
+}
+
+/**
+ * How many tracks the rotation gets to choose between (D-072).
+ *
+ * Relevance picks the shortlist; the rotation picks from it. Twelve, so a
+ * shelf of three has four times as many candidates as slots.
+ *
+ * Weighting the shuffle against the score does not work here, and the
+ * arithmetic says why: `score` moves in steps of 1.5 to 3, which the ×1000
+ * scale turns into gaps of 1500–3000, while the shuffled position spans 0–55.
+ * Any multiplier small enough to preserve relevance is far too small to move
+ * anything, and any multiplier large enough to move something has thrown
+ * relevance away. A reader who answered all three questions saw FOUR distinct
+ * tracks across ten visits, because only four in the catalogue reach the top
+ * tier and nothing could displace them.
+ *
+ * A shortlist separates the two decisions instead of trying to balance them in
+ * one number: everything in the window is a genuinely good match, and which
+ * three of them appear is the rotation's business.
+ */
+const SHORTLIST = DEEP_DIVE_COUNT * 4;
+
+/**
+ * Every track that matches the answers as well as the best one does, and no
+ * track that matches them less well — unless there are not enough to fill a
+ * shelf.
+ *
+ * Cutting the shortlist at a fixed twelve was the first attempt and it broke a
+ * promise the product makes: answer "defiant" and every pick is defiant. There
+ * are fewer than twelve defiant tracks in the catalogue, so a fixed window
+ * reached past them into songs the reader had just said they did not want.
+ *
+ * Cutting at the score CLIFF instead keeps that promise exactly, and still
+ * gives the rotation room wherever the tier is wide — which is most of the
+ * time, because one answer matches many tracks. A reader who answers all three
+ * questions gets a narrow tier and a small shelf, and that is honest: in a
+ * catalogue of fifty-six there are only so many songs that are longing, and
+ * confessional, and deep cuts. Exploration for that reader lives in "People
+ * also like", which is loose by design.
+ */
+function topTier(
+	ranked: Ranked[],
+	preferences: Preferences,
+	count: number,
+): Ranked[] {
+	const scores = ranked.map((entry) => score(entry.track, preferences));
+	const best = Math.max(...scores, 0);
+
+	const tier = ranked.filter((_, index) => scores[index] === best);
+	if (tier.length >= count) return tier.slice(0, SHORTLIST);
+
+	// Not enough at the top to fill the shelf: take the next-best as well,
+	// rather than showing two cards and a gap.
+	return ranked.slice(0, Math.max(count, tier.length)).slice(0, SHORTLIST);
 }
 
 /**
@@ -918,8 +990,20 @@ export function pickDeepDives(
 	preferences: Preferences,
 	seed: number,
 	count = DEEP_DIVE_COUNT,
+	/** LRCLIB ids the reader has already opened, pushed to the back. */
+	seen: readonly string[] = [],
 ): CuratedTrack[] {
-	return selectDiverse(rankAll(preferences, seed), count);
+	const ranked = rankAll(preferences, seed, new Set(seen));
+
+	// Relevance decides WHICH tracks are eligible; the rotation decides which
+	// of them appear. Re-ranking the shortlist by shuffled position alone is
+	// what makes a second visit worth making.
+	const shortlist = topTier(ranked, preferences, count).map((entry) => ({
+		...entry,
+		rank: -entry.position,
+	}));
+
+	return selectDiverse(shortlist, count);
 }
 
 /**
@@ -934,17 +1018,26 @@ export function pickAlsoLiked(
 	seed: number,
 	exclude: CuratedTrack[] = [],
 	count = ALSO_LIKED_COUNT,
+	/** LRCLIB ids the reader has already opened, pushed to the back. */
+	seen: readonly string[] = [],
 ): CuratedTrack[] {
 	const taken = new Set(exclude.map((track) => track.lrclibId));
-	const pool = rankAll(preferences, seed + 1).filter(
+	const pool = rankAll(preferences, seed + 1, new Set(seen)).filter(
 		(entry) => !taken.has(entry.track.lrclibId),
 	);
 
 	// Weighted sample: everything stays reachable, but tracks matching the
 	// reader's answers surface far more often.
+	const seenIds = new Set(seen);
 	const weighted = pool.map((entry, index) => ({
 		track: entry.track,
-		weight: score(entry.track, preferences) + 1 + ((index * 37) % 11) / 10,
+		weight:
+			score(entry.track, preferences) +
+			1 +
+			((index * 37) % 11) / 10 -
+			// `rankAll` already sank these, but the weighting below recomputes
+			// from `score` and would otherwise hand them back their places.
+			(seenIds.has(entry.track.lrclibId) ? 100 : 0),
 	}));
 
 	return weighted
