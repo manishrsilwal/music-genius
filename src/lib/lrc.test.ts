@@ -5,10 +5,12 @@ import {
 	lineKey,
 	linePositionAt,
 	parseSyncedLyrics,
+	previewLines,
 	stanzaIndexAt,
 	timingsDrift,
 	toStanzas,
 } from "./lrc";
+import type { Stanza } from "./types";
 
 describe("parseSyncedLyrics", () => {
 	it("parses [mm:ss.xx] timestamps into seconds", () => {
@@ -274,5 +276,50 @@ describe("timingsDrift", () => {
 		// exactly the tracks we know least about.
 		expect(timingsDrift(0, 200)).toBe(false);
 		expect(timingsDrift(263, null)).toBe(false);
+	});
+});
+
+describe("previewLines", () => {
+	const st = (lines: string[]): Stanza[] => [
+		{
+			id: "s0",
+			lines: lines.map((text, index) => ({ text, time: index })),
+		} as unknown as Stanza,
+	];
+
+	it("opens the preview at the most-repeated line — the hook", () => {
+		const stanzas = st([
+			"Rough opening line",
+			"Second verse line",
+			"I can never say it once",
+			"bridge material",
+			"I can never say it once",
+			"outro",
+		]);
+		expect(previewLines(stanzas, 2)[0]).toBe("I can never say it once");
+	});
+
+	it("collapses punctuation and case when counting repeats", () => {
+		const stanzas = st([
+			"Yeah, we know",
+			"verse",
+			"yeah we know!",
+			"more verse",
+		]);
+		expect(previewLines(stanzas, 1)[0]).toBe("Yeah, we know");
+	});
+
+	it("falls back to the opening when nothing repeats", () => {
+		const stanzas = st(["First", "Second", "Third"]);
+		expect(previewLines(stanzas, 2)).toEqual(["First", "Second"]);
+	});
+
+	it("returns a contiguous passage, not a supercut", () => {
+		const stanzas = st(["a", "hook line", "follows the hook", "hook line"]);
+		expect(previewLines(stanzas, 2)).toEqual(["hook line", "follows the hook"]);
+	});
+
+	it("survives an empty track", () => {
+		expect(previewLines([], 4)).toEqual([]);
 	});
 });

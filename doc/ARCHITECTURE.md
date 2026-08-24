@@ -134,6 +134,39 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-077 — Clearing the register
+**Built 2026-08-24.** Four entries had sat unruled; three closed, one returned
+to its owner.
+
+**OD-026 — the social preview now opens at the hook.** The most-repeated line
+in a song is almost always its chorus: the passage the artist chose to say more
+than once and the line a stranger already knows. Counted on normalised text so
+punctuation and case collapse; the window opens at the hook's first appearance
+so the preview reads as a passage, not a supercut; falls back to the opening
+when nothing repeats, because through-composed songs exist and for them the
+opening is the statement. Pure, in `lib/lrc.ts`, tested.
+
+**OD-020 — a component-test rig exists and has a first test.** happy-dom
+behind a per-file `@vitest-environment` pragma — vitest 4 removed
+`environmentMatchGlobs`, so the pragma is the mechanism that survives — and
+the 250 pure-logic tests keep their sub-second runtime. The first test covers
+`SectionHeading`, chosen because it is the markup the landing and the drawer
+share: it asserts semantics (a real heading role, the lead excluded from the
+accessible name, the action outside the heading), not styling. Also required
+`afterEach(cleanup)` in the setup file: testing-library's auto-cleanup keys
+off injected globals, which this config deliberately does not enable.
+
+**OD-023 — rescoped honestly.** The dead `.canvas__glow` rule is gone, and the
+site description no longer says "annotated" — the page was claiming a feature
+that does not exist. Building it for real is the Genius referents API,
+per-phrase ranges mapped onto LRC lines, and an interaction design for tapping
+a phrase mid-read. That is a feature with its own decisions, not a cleanup.
+
+**OD-024 — returned with options rather than decided.** Any analytics weakens
+"nothing leaves the device", which the product says out loud. The register now
+holds three costed options; the choice changes the privacy story and is the
+owner's.
+
 ### D-076 — The light sheet and the open door
 **Built 2026-08-24.** Options 3 and 4 from the player study, both advised
 against there and both asked for anyway — so both built properly rather than
@@ -3081,7 +3114,7 @@ Open. **To be ruled on explicitly — never assumed.**
 | OD-007 | Deployment target | Deploy | D-009 keeps this cheap to defer |
 | OD-008 | React Compiler (`compiler` add-on) — auto-memoization | Perf | Available but NOT enabled. Interaction with `motion` unverified |
 | OD-009 | Build-time env validation (`t3env` add-on) | API blocks | Attractive given 4+ secrets across OD-002..005 |
-| OD-020 | No component or integration tests — pure logic only (D-023) | Quality | Needs a DOM environment and fixture servers |
+| OD-020 | ~~No component or integration tests — pure logic only~~ | Quality | **Resolved 2026-08-24 (D-077).** happy-dom rig behind a per-file pragma so the logic suite keeps its speed; first component test covers `SectionHeading`, the markup both the landing and the drawer share |
 | OD-011 | Playback state store — React context vs TanStack Store | §3.2/§3.3 | Auto-scroll couples playback time to canvas |
 | OD-014 | Genius rate limits are undocumented | §3.1 | Cached per artist+title for 30d. Watch for 429s |
 | OD-028 | **LRCLIB search returns the wrong RECORDING, not just the wrong tagging.** Covers, LoFi edits, demos and live cuts outrank the original, and their LRC timings follow their own recording — so playback and lyrics drift apart even when both "work". Measured 2026-08-24: for "lag ja gale" the top five are all covers and Lata Mangeshkar appears nowhere; for "wonderful tonight" Eric Clapton is third behind two covers; for "holocene" a different song of the same name by Zella Day is first. Four of thirty curated entries also point at variants. Ranking currently reads well-formedness and `hasSyncedLyrics` only, and every candidate is synced, so the tie-break never fires | §3.1, §3.2 | Options under discussion: duration-cluster plausibility, variant-tag demotion, canonical-artist lookup via Genius, a version switcher on the track page, or a stated warning. See D-070 for why forcing canonical audio onto variant lyrics would make sync *worse* |
@@ -3090,10 +3123,10 @@ Open. **To be ruled on explicitly — never assumed.**
 
 | OD-018 | `@resvg/resvg-js` is native and must stay external in Vite; Workers would need the WASM build | Deploy | Already bit once — dev server failed to boot until externalised |
 | OD-027 | ~~The Lyric Card is broken in the production build~~ | Deploy | **Resolved 2026-08-23 (D-058).** `harfbuzzjs` externalised alongside `@resvg`; `/api/card` and `/api/og` verified 200 in the built server |
-| OD-026 | **`og:image` picks the first four lines of a track.** For some songs that surfaces language that reads differently as a social preview than as a page a reader chose to open | §3.4 | Open — raised 2026-08-22 (D-051). Options: the hook rather than the opening, a curated line range, or accept it |
+| OD-026 | ~~`og:image` picks the first four lines~~ | §3.4 | **Resolved 2026-08-24 (D-077).** The preview now opens at the hook — the most-repeated line, counted on normalised text, which is the passage the artist chose to say more than once. Falls back to the opening when nothing repeats |
 | OD-021 | ~~**Gemini free tier: 20 requests/day.** Launch blocker~~ | §3.5 | **Resolved 2026-08-22 (D-050).** DeepSeek is metered at ~$0.0001/insight; Gemini demoted to fallback, where the quota no longer gates anything |
-| OD-023 | PRD §3.3 annotated phrases are styled but never populated — Genius annotations are not fetched | §3.3 | The `.lyric__annotated` rule exists and nothing applies it |
-| OD-024 | No analytics, so none of the PRD §5 metrics can be measured | Metrics | Lyrics <500ms, 30% drawer engagement, 10% card export are all unobservable |
+| OD-023 | PRD §3.3 annotated phrases — Genius annotations are not fetched | §3.3 | Rescoped 2026-08-24 (D-077): the dead `.canvas__glow` rule is removed and the meta description no longer claims "annotated". Building it for real means the Genius referents API, per-phrase ranges mapped onto LRC lines, and an interaction design for tapping a phrase mid-read — a feature, not a fix |
+| OD-024 | No analytics, so none of the PRD §5 metrics can be measured | Metrics | **Needs a ruling, not code** (D-077). The product's stated stance is "nothing leaves the device" (D-045's stepper reasoning), and any analytics weakens that sentence. Options: (a) keep the stance, accept unobservable metrics; (b) a cookieless self-hosted counter (Plausible-class) measuring pages and drawer-opens only; (c) full analytics. The choice changes the privacy story, so it is not made unilaterally here |
 
 
 ### OD-002 is a product risk, not just a technical one

@@ -184,17 +184,22 @@ async function resolve(path: string): Promise<void> {
 	const entries: string[] = [];
 	let rejected = 0;
 
-	for (const line of lines) {
+	// Small groups, concurrent. Classification dominates the cost at up to
+	// half a minute a song, and a review batch runs to eighty candidates —
+	// sequential, that is a run nobody waits for. Four wide keeps LRCLIB
+	// comfortable (OD-014); the classify calls carry no rate limit we have hit.
+	const POOL = 4;
+	const work = async (line: string) => {
 		const [title, artist] = line.split(/\s+—\s+|\s+-\s+/).map((p) => p.trim());
 		if (!title || !artist) {
 			console.log(`SKIP    unparsable: ${line}`);
 			rejected++;
-			continue;
+			return;
 		}
 		if (held.has(`${artist}::${title}`.toLowerCase())) {
 			console.log(`SKIP    already held: ${title} — ${artist}`);
 			rejected++;
-			continue;
+			return;
 		}
 
 		// The product's own search, ranking included — if it cannot find the
@@ -206,14 +211,14 @@ async function resolve(path: string): Promise<void> {
 		if (!best) {
 			console.log(`REJECT  no clean synced entry: ${title} — ${artist}`);
 			rejected++;
-			continue;
+			return;
 		}
 
 		const track = await getTrack(best.id).catch(() => null);
 		if (!track || track.stanzas.length < 2) {
 			console.log(`REJECT  lyrics too thin: ${title} — ${artist}`);
 			rejected++;
-			continue;
+			return;
 		}
 
 		const lyrics = track.stanzas
@@ -241,7 +246,7 @@ Return JSON: {"mood":"…","pull":"…","familiarity":"…","language":"…","er
 		if (!tags?.mood) {
 			console.log(`REJECT  could not classify: ${title} — ${artist}`);
 			rejected++;
-			continue;
+			return;
 		}
 
 		/*
@@ -294,6 +299,11 @@ Return JSON: {"mood":"…","pull":"…","familiarity":"…","language":"…","er
 		language: ${JSON.stringify(tags.language)},
 		era: ${JSON.stringify(tags.era)},
 	},`);
+	};
+
+	for (let i = 0; i < lines.length; i += POOL) {
+		await Promise.all(lines.slice(i, i + POOL).map(work));
+		console.log(`  …${Math.min(i + POOL, lines.length)}/${lines.length}`);
 	}
 
 	console.log(`\n${entries.length} proposed · ${rejected} rejected\n`);

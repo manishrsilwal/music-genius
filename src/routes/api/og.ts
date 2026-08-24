@@ -14,6 +14,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { MAX_LINES, themeById } from "@/lib/card";
+import { previewLines } from "@/lib/lrc";
 import { renderCard } from "@/server/card.server";
 import { getTrack, getTrackVisuals } from "@/server/lyrics.server";
 
@@ -39,11 +40,7 @@ export const Route = createFileRoute("/api/og")({
 					// The opening of the song, which is what a reader recognises.
 					// Flattened across stanzas so a track whose first stanza is a
 					// single line still fills the card.
-					const lines = track.stanzas
-						.flatMap((stanza) => stanza.lines.map((line) => line.text))
-						.map((line) => line.trim())
-						.filter(Boolean)
-						.slice(0, PREVIEW_LINES);
+					const lines = previewLines(track.stanzas, PREVIEW_LINES);
 
 					if (lines.length === 0) {
 						return new Response("Nothing to render", { status: 404 });

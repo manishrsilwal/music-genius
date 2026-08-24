@@ -270,3 +270,56 @@ export function timingsDrift(
 	// Different cuts differ by intros — ten seconds and up.
 	return Math.abs(playerDuration - lyricsDuration) > 7;
 }
+
+/**
+ * The lines a stranger should see first (OD-026 → D-077).
+ *
+ * The social preview used to take the first four lines of the track. For some
+ * songs the opening is the weakest or roughest language in the lyric — and a
+ * preview is seen by people who did not choose to open the page.
+ *
+ * The hook is the mechanical alternative: the most-repeated line in a song is
+ * almost always its chorus, which is the part the artist chose to say more
+ * than once — the line people already know. Repetition is counted on
+ * normalised text so "Yeah" / "yeah," collapse, and the window opens at the
+ * repeated line's first appearance so the preview reads as a passage rather
+ * than as a supercut.
+ *
+ * Falls back to the opening when nothing repeats — spoken-word pieces and
+ * through-composed songs exist, and for them the opening IS the statement.
+ */
+export function previewLines(stanzas: Stanza[], count: number): string[] {
+	const all = stanzas
+		.flatMap((stanza) => stanza.lines.map((line) => line.text))
+		.map((text) => text.trim())
+		.filter(Boolean);
+	if (all.length === 0) return [];
+
+	const fold = (value: string) =>
+		value
+			.toLowerCase()
+			.replace(/[^\p{L}\p{N}]+/gu, " ")
+			.trim();
+
+	const counts = new Map<string, number>();
+	for (const line of all) {
+		const key = fold(line);
+		if (key.length < 3) continue;
+		counts.set(key, (counts.get(key) ?? 0) + 1);
+	}
+
+	let hook: string | null = null;
+	let best = 1;
+	for (const [key, count] of counts) {
+		if (count > best) {
+			best = count;
+			hook = key;
+		}
+	}
+
+	// Nothing repeats: the opening is the statement.
+	if (!hook) return all.slice(0, count);
+
+	const start = all.findIndex((line) => fold(line) === hook);
+	return all.slice(Math.max(0, start), start + count);
+}

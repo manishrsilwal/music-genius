@@ -86,10 +86,4 @@ $stanza-gap-lg: 4.5rem;
 		}
 	}
 
-	// An annotated phrase (PRD §3.3). Applied to inline spans later, once
-	// Genius annotations land.
-	&__glow {
-		color: var(--track-accent);
-		text-shadow: 0 0 1.75rem var(--track-glow);
-	}
 }

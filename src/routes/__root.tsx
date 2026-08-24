@@ -31,7 +31,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			{
 				name: "description",
 				content:
-					"Lyrics as a premium editorial reading experience \u2014 synced, annotated, and beautifully set.",
+					"Lyrics as a premium editorial reading experience \u2014 synced, explained, and beautifully set.",
 			},
 			{
 				title: "Typographic Lyrical Explorer",
@@ -49,7 +49,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			{
 				property: "og:description",
 				content:
-					"Lyrics as a premium editorial reading experience \u2014 synced, annotated, and beautifully set.",
+					"Lyrics as a premium editorial reading experience \u2014 synced, explained, and beautifully set.",
 			},
 			{ name: "twitter:card", content: "summary_large_image" },
 			{
