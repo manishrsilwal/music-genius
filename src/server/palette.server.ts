@@ -50,18 +50,28 @@ const GLOW_ALPHA = 0.35;
 /* -------------------------------------------------------------------------
    The paper (D-052)
 
-   Lightness values are copied verbatim from the default surfaces in
-   styles.css and must stay that way: OKLCH lightness is perceptual, so
-   holding it fixed while moving hue and chroma changes the colour of the page
-   without changing a single contrast ratio. Ink is unaffected either way.
+   Lightness values are copied verbatim from the READING surfaces in
+   styles.css — `--color-reading` and the two steps above it, inside
+   `body:has(.track-shell)` — and must stay that way: OKLCH lightness is
+   perceptual, so holding it fixed while moving hue and chroma changes the
+   colour of the page without changing a single contrast ratio. Ink is
+   unaffected either way.
+
+   They drifted once already. D-064 lifted the reading ground from 0.13 to
+   0.155 and these three were left behind, so a track WITH artwork rendered on
+   a page three steps darker than the same track without it — the palette
+   engine quietly undoing a palette change made in the stylesheet. The
+   contrast floors still held, which is why nothing failed; it simply meant
+   two different products depending on whether a cover happened to resolve.
+   The test beside this file pins all three (D-065).
 
    Chroma is roughly a seventh of an accent's. A surface carries far more area
    than a mark, and area multiplies chroma — at accent strength the page would
    compete with the artwork sitting in the hero instead of framing it.
    ---------------------------------------------------------------------- */
-const CANVAS_LIGHTNESS = 0.13;
-const SURFACE_LIGHTNESS = 0.175;
-const RAISED_LIGHTNESS = 0.225;
+const CANVAS_LIGHTNESS = 0.155;
+const SURFACE_LIGHTNESS = 0.205;
+const RAISED_LIGHTNESS = 0.25;
 
 /** Ceiling as well as a scale: a saturated cover must not shout through. */
 const SURFACE_CHROMA = 0.022;

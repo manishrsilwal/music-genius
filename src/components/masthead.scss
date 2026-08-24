@@ -1,7 +1,7 @@
 @use "styles/mixins" as m;
 
-// The persistent way home (D-059). Fixed, so it survives the track page's one
-// long scroll — a mark that scrolls away is not a way home.
+// The persistent way home (D-059, restyled D-065). Fixed, so it survives the
+// track page's one long scroll — a mark that scrolls away is not a way home.
 .masthead {
 	z-index: var(--layer-masthead);
 	top: calc(var(--dock-inset) * 0.75 + env(safe-area-inset-top, 0px));
@@ -9,24 +9,30 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.6rem;
-	padding: 0.5rem 0.85rem;
-	border-radius: 999px;
+	padding: 0.5rem 0.9rem;
+	border-radius: var(--radius-pill);
 	font-family: var(--font-ui);
 	font-size: var(--text-micro);
+	font-weight: 600;
 	letter-spacing: var(--tracking-label);
 	text-transform: uppercase;
 	color: var(--color-ink-muted);
-	transition: color 0.18s var(--ease-editorial);
+	transition:
+		color 0.18s var(--ease-editorial),
+		background-color 0.18s var(--ease-editorial);
 
 	// The hero is full-bleed artwork and the landing is flat canvas, so the
-	// mark cannot rely on either. Glass reads on both, and is the surface
-	// treatment the rest of the chrome already uses.
+	// mark cannot rely on either for legibility. It carries its own surface —
+	// solid since D-065, because the glass it used to sit on took its contrast
+	// from whatever happened to be behind it, which over album art is
+	// unknowable and therefore unmeasurable.
 	// Fixed, so the height the rest of the layout compensates for is known
 	// rather than measured. --masthead-height is the contract (D-060).
 	min-height: var(--masthead-height);
 
-	@include m.glass;
+	@include m.floating;
 	@include m.tap-target;
+	@include m.press;
 
 	// AFTER the mixins, not before. `tap-target` sets `position: relative` to
 	// anchor its hit-area pseudo-element, so declaring `fixed` first loses to
@@ -40,12 +46,7 @@
 	&:hover,
 	&:focus-visible {
 		color: var(--color-ink);
-	}
-
-	// Gives under the press, matching the answer cards. Same restraint: 0.985,
-	// not a bounce.
-	&:active {
-		transform: scale(0.985);
+		background: var(--color-surface);
 	}
 
 	// Already home. Still a link — going home from home is a harmless no-op and
@@ -62,7 +63,7 @@
 		fill: currentColor;
 	}
 
-	// Brass, and deliberately constant. `--track-accent` resolves to the :root
+	// Lime, and deliberately constant. `--track-accent` resolves to the :root
 	// default here because the masthead sits outside `[data-track-scope]` — the
 	// mark is the one thing on screen the record does not repaint. A logo that
 	// changes colour per page is not a logo.
@@ -90,9 +91,5 @@
 
 	@include m.reduced-motion {
 		transition: none;
-
-		&:active {
-			transform: none;
-		}
 	}
 }

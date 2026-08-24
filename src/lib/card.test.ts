@@ -81,7 +81,20 @@ describe("measureEm — full-width scripts (D-057)", () => {
 		// Each of these is now in the generated table; if a face were dropped
 		// from the generator they would collapse onto FALLBACK_ADVANCE and
 		// measure identically, which is the regression worth catching.
-		const samples = ["த", "ب", "ব", "ਗ", "ક", "త", "ಕ", "മ", "ก", "א", "ч", "α"];
+		const samples = [
+			"த",
+			"ب",
+			"ব",
+			"ਗ",
+			"ક",
+			"త",
+			"ಕ",
+			"മ",
+			"ก",
+			"א",
+			"ч",
+			"α",
+		];
 		const widths = samples.map((char) => measureEm(char));
 		expect(new Set(widths).size).toBeGreaterThan(6);
 		for (const width of widths) expect(width).toBeGreaterThan(0);

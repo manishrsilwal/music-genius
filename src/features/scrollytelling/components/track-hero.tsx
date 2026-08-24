@@ -79,9 +79,9 @@ export function TrackHero({
 					transition={transition.cinematic}
 					className="hero__title text-ink"
 					// Real glyph advances, not an assumed average — the same
-					// table Satori renders cards from. Rufina's widths vary
-					// enough that "Creep" and "Nights" differ by 8% on equal
-					// character counts.
+					// table Satori renders cards from. The display face's widths
+					// vary enough that "Creep" and "Nights" differ by 8% on
+					// equal character counts.
 					style={{ "--title-em": measureEm(track.title) } as CSSProperties}
 				>
 					{track.title}

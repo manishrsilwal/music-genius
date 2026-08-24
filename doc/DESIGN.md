@@ -12,17 +12,27 @@ that. Chrome stays quiet, type carries the hierarchy, and motion has a reason.
 
 ## 1. Type
 
-Set in three faces, each with one job (D-005, D-019).
+Set in two faces plus one companion per script, each with one job (D-005,
+D-019, D-064).
 
 | Face | Role | Notes |
 |---|---|---|
-| **Rufina** | Display — hero, lyrics, titles | 400/700. **No italic exists.** Zero Devanagari coverage. |
-| **Vesper Libre** | Devanagari | Sits *after* Rufina in the stack, so Latin resolves to Rufina and Devanagari falls through per glyph. |
-| **Elms Sans** | UI chrome, and long-form prose | Variable 100–900, real italic. Reading text is set here, not in the display face (D-044). |
+| **Fraunces** | Display — hero, lyrics, titles | Variable, all four axes: weight, `opsz`, `SOFT`, `WONK`. Ships a **real italic**. Latin + latin-ext only. |
+| **Outfit** | UI chrome, and long-form prose | Variable geometric sans, 32KB. Reading prose is set here, not in the display face (D-044). |
+| **Vesper Libre + 12 others** | Devanagari, Arabic, Tamil, Thai, Hebrew, Cyrillic, Greek, CJK… | Sit *after* Fraunces in the stack, with explicit `unicode-range`, so Latin resolves to Fraunces and every other script falls through per glyph (D-057). CJK is chosen by language, never by glyph. |
 
-`font-synthesis: none` is set on every display element. Rufina ships no italic,
-and a browser-synthesised oblique shears the letterforms — a stray `<em>`
-inside a lyric must not be allowed to do that.
+**Fraunces' axes are set per role, and set explicitly** (D-065). The hero pins
+`opsz` 144 with `SOFT` 40; `font-optical-sizing: auto` would track the
+*computed* size, and the hero's size is a `min()` of three terms, so a long
+title that shrank to fit would also get a different, text-weight drawing of the
+letterforms. The lyric canvas pins `opsz` 32 with SOFT and WONK at zero —
+someone else's words, read at length, where the face's job is to disappear. The
+wonk belongs to the landing headline's one italic word, where the product is
+speaking in its own voice.
+
+`font-synthesis: none` is still set on every display element — for the opposite
+reason to before. Fraunces *has* a drawn italic and it is loaded, so the browser
+must use that one or nothing, never a sheared upright.
 
 ### Scale
 
@@ -50,7 +60,7 @@ asks how wide the screen is, never how long the text is — so every hero title
 rendered at the same cap and long ones wrapped to two or three lines. Size
 display strings against their own measured width via `measureEm` and a
 `container-type` wrapper (D-037). Never assume an average glyph advance;
-Rufina varies by 8% across equal character counts.
+Fraunces varies by 8% across equal character counts.
 
 **A step is chosen for its role, not its size.** The landing hero uses a
 capped `clamp(2rem, 4.5vw, 3rem)` rather than `--text-display` because the
@@ -93,9 +103,17 @@ Two rules keep it from becoming a theme switcher:
   pushed up to full saturation would be showing a colour the record does not
   contain.
 
-The default, when a track has no usable artwork, is brass — foil on a sleeve,
-the label at the centre of a record. Not vermilion on near-black, which is a
-look generative design arrives at regardless of what it is designing.
+The default, when a track has no usable artwork, is **lime** — the brand
+accent, standing in for a record that has not been opened yet (D-064). It is
+also what the whole product outside a track page is painted in, which is why
+the landing comes out in the brand's own colour rather than in a neutral
+placeholder.
+
+Because `ACCENT_LIGHTNESS` is pinned at 0.72 by the extractor, `--color-on-bright`
+clears 4.5:1 on top of **any** accent this channel can ever hold — worst measured
+case 6.96:1, swept across all 360 hues at every chroma in the band. That is what
+makes a *filled* accent control safe to use on a page whose accent is unknown
+until the artwork resolves (D-065).
 
 ### The accent is not a brand colour
 
@@ -279,8 +297,8 @@ travel.
 ```
 
 An **opt-out, not an opt-in** (D-035). Six of seven controls previously had no
-focus style, each falling back to a default outline that a dark glassmorphic
-surface all but swallows. `:where()` keeps specificity at zero, so a component
+focus style, each falling back to a default outline that a saturated surface
+all but swallows. `:where()` keeps specificity at zero, so a component
 that needs a different ring simply writes one and wins.
 
 ### Reach for the platform control first
@@ -325,19 +343,46 @@ three-question flow that is supposed to feel light.
 
 ## 6. Surfaces
 
-`@include m.glass` is the one glass treatment (PRD §3.2). It reads the runtime
-tokens, so a track's extracted palette flows through without touching the
-mixin.
+Three mixins, and no glass (D-065).
+
+| Mixin | What it is | Where |
+|---|---|---|
+| `surface($bg)` | Solid fill + hairline | Cards, chips, panels, popovers |
+| `floating($bg)` | `surface` on the raised step + `--shadow-2` | Chrome that sits over content: masthead, dock, autocomplete |
+| `bright` | Filled `--track-accent` with `--color-on-bright` ink | **One per view.** The thing to press |
 
 ```
---glass-bg      white at 6%
---glass-border  white at 14%
---glass-blur    20px
---radius-card   1.25rem
---radius-sheet  1.75rem
+--radius-pill    999px      controls
+--radius-nested  0.875rem   inner elements — thumbnails, swatches, art
+--radius-card    1.75rem    cards, popovers, panels
+--radius-sheet   2.25rem    the composer, the mobile drawer
 ```
 
-Always pair `backdrop-filter` with `-webkit-backdrop-filter`; the mixin does.
+Nested corners are deliberately *tighter* than the box holding them: a
+thumbnail at the card's own radius reads as a sticker sitting on the card
+rather than as part of it.
+
+**Glassmorphism was removed rather than tuned.** A translucent panel takes its
+contrast from whatever is behind it, and behind the masthead and the dock that
+is full-bleed album art — a different colour on every track. Nothing on those
+surfaces had a ratio that could be *stated*, only one that happened to hold for
+the cover being looked at. Every surface now declares its own colour.
+
+**Elevation is contrast against the ground, not a fixed direction.** The bright
+canvas steps *down* to raise a surface; the reading ground steps *up*. Because
+of that, hover is a translucent white veil (`--color-hover`) rather than "the
+next surface along" — the latter would lighten a row on one page and darken it
+on the other.
+
+| Token | Use |
+|---|---|
+| `--color-hover` / `--color-hover-strong` | Row and control hover, on either ground |
+| `--color-well` | A recess: the slot an image has not arrived in yet |
+
+> **Tokens used only from SCSS must be declared in the `@theme static` block.**
+> Tailwind v4 tree-shakes theme tokens it cannot see used and does not scan
+> `.scss`. This has now silently dropped tokens from a build twice — the brand
+> accents in D-064, and every hover state in D-065.
 
 ---
 
@@ -513,14 +558,17 @@ trusted the model — which is the test of whether a safeguard is real.
 
 ### A typeface is a promise about which words you can set
 
-Rufina covers Latin and nothing else. For a product whose whole argument is
-that lyrics deserve to be *set*, that meant the argument only held in one
-alphabet — a Tamil song got boxes on its shareable card, and a system fallback
-on the page that matched neither Rufina nor the card it exported to.
+The display face covers Latin and latin-ext and nothing else. For a product
+whose whole argument is that lyrics deserve to be *set*, that meant the argument
+only held in one alphabet — a Tamil song got boxes on its shareable card, and a
+system fallback on the page that matched neither the display face nor the card
+it exported to.
 
 The fix is one companion face per script, chosen so the page still reads as one
-product: Amiri's classical naskh carries roughly Rufina's stroke contrast, the
-way Vesper Libre's transitional Devanagari already did. A humanist face would
+product: Amiri's classical naskh carries roughly the display face's stroke
+contrast, the way Vesper Libre's transitional Devanagari already did. The
+companions survived the D-064 redesign untouched — they are functional coverage,
+not style, and a redesign has no business removing Tamil support. A humanist face would
 have set Arabic accurately and made it look like a different website.
 
 **Scope was measured.** 519 tracks sampled from the source catalogue: 67%
@@ -567,10 +615,11 @@ costs one divider and removes the need to guess.
 ### A swap is not free just because it is fast
 
 `font-display: swap` guarantees the reader sees words immediately. It says
-nothing about what happens when the real face arrives. Rufina is 16.3% wider per
-character than Times New Roman and sits on a taller ascent, so the moment it
-loaded, every line re-wrapped and every line box changed height — a lurch, on a
-product whose hero is set at 11rem.
+nothing about what happens when the real face arrives. Fraunces is 6.0% wider
+per character than Georgia and 16.7% wider than Times New Roman, and sits on a
+taller ascent, so the moment it loaded, every line re-wrapped and every line box
+changed height — a lurch, on a product whose hero is set at 11rem. (Both numbers
+were re-measured when the face changed; the generator makes that one command.)
 
 The fix is to make the stand-in wear the real face's measurements:
 `size-adjust` and the `*-override` descriptors, computed from both fonts rather
@@ -699,6 +748,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | **D-065** The direction carried into every surface: glass retired for a solid surface system, elevation inverted on the bright ground after two measured contrast failures, one filled control per view, grain scoped to the reading page |
 | 2026-08-24 | **D-064** New direction: electric blue, Fraunces + Outfit, lime accent; reading canvas kept calm; session intro; one-tap escape from the stepper |
 | 2026-08-24 | **D-063** The landing now says a reader can search or start from a mood, instead of only implying it |
 | 2026-08-24 | **D-062** Focus follows route changes; slow actions announce themselves; systematic pass over 122 stack rules and 119 guidelines |

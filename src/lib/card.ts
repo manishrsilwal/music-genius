@@ -117,11 +117,13 @@ function extractHue(oklch: string): number {
  * structure the card exists to preserve.
  *
  * Widths come from the faces' real advance tables rather than an assumed
- * average. The first attempt guessed 0.46em; Rufina's true mean is 0.535em,
- * which is why it still wrapped. Measuring is not optional for this.
+ * average. The first attempt guessed 0.46em; the display face's true mean is
+ * 0.6828em, which is why it still wrapped. Measuring is not optional for this —
+ * and the number moved again when the face changed (D-064), which is the whole
+ * reason it comes from a generator rather than from a comment.
  *
- * The table covers Latin (Rufina) and Devanagari (Vesper Libre), because a
- * lyric line can mix both and Satori falls back per glyph.
+ * The table covers Latin (the display face) and Devanagari (Vesper Libre),
+ * because a lyric line can mix both and Satori falls back per glyph.
  *
  * The same table runs in the browser preview and the server render, so the
  * preview cannot drift from the exported file (D-018).

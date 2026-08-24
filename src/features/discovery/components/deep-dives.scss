@@ -1,6 +1,6 @@
 @use "styles/mixins" as m;
 
-// Today's Deep Dives (PRD §3.1).
+// Today's Deep Dives (PRD §3.1, restyled D-065).
 
 .dives {
 	display: grid;
@@ -18,15 +18,19 @@
 		gap: 0.875rem;
 		padding: 0.875rem;
 		border-radius: var(--radius-card);
-		border: 1px solid var(--color-hairline);
-		background: var(--color-surface);
+		@include m.surface;
 		transition:
 			border-color 0.22s var(--ease-editorial),
+			translate 0.22s var(--ease-editorial),
+			box-shadow 0.22s var(--ease-editorial),
 			background-color 0.22s var(--ease-editorial);
 
-		&:hover {
+		&:hover,
+		&:focus-within {
 			border-color: var(--track-accent);
-			background: var(--color-surface-raised);
+			background: var(--color-hover);
+			translate: 0 -3px;
+			box-shadow: var(--shadow-2);
 		}
 
 		@include m.from("sm") {
@@ -35,6 +39,11 @@
 
 		@include m.reduced-motion {
 			transition: none;
+
+			&:hover,
+			&:focus-within {
+				translate: none;
+			}
 		}
 	}
 
@@ -57,9 +66,10 @@
 		flex: none;
 		width: 3.25rem;
 		aspect-ratio: 1;
-		border-radius: 0.5rem;
+		// Tighter than the card that holds it (D-065).
+		border-radius: var(--radius-nested);
 		overflow: hidden;
-		background: var(--color-surface-raised);
+		background: var(--color-well);
 
 		@include m.from("sm") {
 			width: 100%;
@@ -97,12 +107,17 @@
 		gap: 0.3rem;
 	}
 
+	// Filled rather than outlined (D-065). These are the reasons the pick was
+	// made, which is the one piece of editorial argument on the card; an
+	// outlined pill in the accent colour reads as a control the reader can
+	// press, and none of them are.
 	&__why-tag {
 		font-family: var(--font-ui);
-		padding: 0.15rem 0.5rem;
-		border-radius: 999px;
-		border: 1px solid var(--track-accent);
-		color: var(--track-accent);
+		font-weight: 600;
+		padding: 0.2rem 0.6rem;
+		border-radius: var(--radius-pill);
+		background: var(--color-hover-strong);
+		color: var(--color-ink);
 		white-space: nowrap;
 	}
 
@@ -129,12 +144,12 @@
 		display: flex;
 		align-items: baseline;
 		gap: 0.625rem;
-		padding: 0.5rem 0.25rem;
-		border-radius: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: var(--radius-pill);
 		transition: background-color 0.18s var(--ease-editorial);
 
 		&:hover {
-			background: var(--color-surface);
+			background: var(--color-hover);
 		}
 
 		@include m.reduced-motion {

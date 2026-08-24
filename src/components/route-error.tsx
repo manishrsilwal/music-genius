@@ -30,7 +30,7 @@ export function RouteError({ error, reset }: ErrorComponentProps) {
 			<button
 				type="button"
 				onClick={retry}
-				className="mt-8 rounded-full border border-accent px-5 py-3 font-ui text-caption uppercase tracking-label text-accent"
+				className="mt-8 rounded-pill bg-accent px-6 py-3 font-ui text-caption font-semibold uppercase tracking-label text-on-bright"
 			>
 				Try again
 			</button>

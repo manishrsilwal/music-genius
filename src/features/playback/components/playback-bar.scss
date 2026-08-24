@@ -35,8 +35,12 @@
 	gap: 1rem;
 	height: var(--dock-height);
 	padding: var(--dock-pad) 1.25rem;
-	@include m.glass;
-	background: var(--color-surface);
+	// Solid since D-065. A translucent bar over a full-bleed hero took its
+	// contrast from the album art behind it, which is a different colour on
+	// every track — so the elapsed time, the artist and the status line had no
+	// ratio that could be stated, only one that happened to hold for whichever
+	// cover was on screen.
+	@include m.floating;
 	transition:
 		border-radius 0.32s var(--ease-editorial),
 		padding 0.32s var(--ease-editorial);
@@ -44,7 +48,7 @@
 	// ── In the hero ────────────────────────────────────────────────────────
 	// A compact pill sitting with the title and artist, sized to its contents
 	// rather than the viewport (D-038).
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 
 	// ── Docked ─────────────────────────────────────────────────────────────
 	// Full width across the bottom once the hero has scrolled away. Contents
@@ -62,6 +66,10 @@
 		border-radius: 0;
 		border-inline: 0;
 		border-bottom: 0;
+		// Docked it spans the viewport and no longer floats over anything at
+		// its own edges, so the shadow becomes a dark smear along the bottom
+		// of the screen rather than separation from what is behind it.
+		box-shadow: none;
 	}
 
 	@include m.reduced-motion {
@@ -96,12 +104,15 @@
 		// The filled portion is painted on the track rather than with a second
 		// element, so there is nothing to keep in sync with the value.
 		@mixin seek-track {
-			height: 3px;
+			// 4px, not 3. This is the one control on the bar a reader drags,
+			// and a 3px line under a 12px pointer target is a hairline they
+			// aim at rather than a track they grab.
+			height: 4px;
 			border-radius: 0;
 			background: linear-gradient(
 				to right,
 				var(--track-accent) var(--progress, 0%),
-				var(--color-hairline) var(--progress, 0%)
+				var(--color-hover-strong) var(--progress, 0%)
 			);
 		}
 
@@ -127,7 +138,7 @@
 
 		&::-webkit-slider-thumb {
 			appearance: none;
-			margin-top: calc((3px - 0.75rem) / 2);
+			margin-top: calc((4px - 0.75rem) / 2);
 			@include seek-thumb;
 		}
 
@@ -183,9 +194,7 @@
 		aspect-ratio: 1;
 		border-radius: 50%;
 		background: oklch(0.08 0 0);
-		box-shadow:
-			inset 0 0 0 1px var(--color-hairline),
-			var(--shadow-2);
+		box-shadow: inset 0 0 0 1px var(--color-hairline);
 
 		// Paused holds the angle it stopped at rather than snapping to zero,
 		// so play/pause reads as one continuous object.
@@ -210,20 +219,25 @@
 		border-radius: 50%;
 		object-fit: cover;
 
+		// No artwork. A blank record, not a coloured one (D-065): the
+		// spindle became a solid accent disc in the same change, and an
+		// accent-tinted face behind an accent label turned the whole thing
+		// into one bright dot that read as a status light rather than as a
+		// record with nothing on it.
 		&--empty {
-			background: var(--track-accent-soft);
-			opacity: 0.35;
+			background: var(--color-well);
 		}
 	}
 
-	// The centre hole. Small, and tinted with the track's own accent.
+	// The centre hole — the label at the middle of the record, in the
+	// track's own colour. Filled rather than ringed since D-065: at 20% of a
+	// 3.5rem disc a 1px ring is most of what the reader can see of it.
 	&__spindle {
 		position: absolute;
 		width: 20%;
 		aspect-ratio: 1;
 		border-radius: 50%;
-		background: var(--color-surface);
-		box-shadow: inset 0 0 0 1px var(--color-hairline);
+		background: var(--track-accent);
 	}
 
 	// ── The player ─────────────────────────────────────────────────────────
@@ -238,8 +252,8 @@
 	&__elsewhere {
 		flex: none;
 		align-self: center;
-		padding: 0.4rem 0.75rem;
-		border-radius: 999px;
+		padding: 0.4rem 0.85rem;
+		border-radius: var(--radius-pill);
 		border: 1px solid var(--color-hairline);
 		color: var(--color-ink-muted);
 		font-family: var(--font-ui);
@@ -252,6 +266,7 @@
 		&:hover {
 			color: var(--color-ink);
 			border-color: var(--track-accent);
+			background: var(--color-hover);
 		}
 
 		@include m.reduced-motion {
@@ -271,9 +286,9 @@
 		margin-inline-start: auto;
 		height: calc((var(--dock-height) - var(--dock-pad) * 2) * 0.68);
 		aspect-ratio: 16 / 9;
-		border-radius: 0.375rem;
+		border-radius: var(--radius-nested);
 		overflow: hidden;
-		background: oklch(0 0 0);
+		background: var(--color-well);
 
 		iframe {
 			width: 100%;
@@ -312,24 +327,27 @@
 
 	// Play/pause. A mark rather than a word (D-040): "Play" set in the UI face
 	// read as a form control sitting inside a music player.
+	// Filled, not outlined (D-065). This is the only control on the bar the
+	// reader reaches for repeatedly, and it was an outlined circle in a row of
+	// other outlined circles — indistinguishable from the chrome around it.
+	// The accent's lightness is pinned at 0.72 by the extractor, so the mark
+	// on top clears 4.5:1 against every palette a cover can produce.
 	&__toggle {
 		@include m.tap-target;
 		flex: none;
 		display: grid;
 		place-items: center;
-		width: 2.25rem;
-		height: 2.25rem;
+		width: 2.5rem;
+		height: 2.5rem;
 		border-radius: 50%;
-		border: 1px solid var(--color-hairline);
-		color: var(--color-ink);
-		cursor: pointer;
+		@include m.bright;
 		transition:
-			border-color 0.22s var(--ease-editorial),
-			color 0.22s var(--ease-editorial);
+			background-color 0.22s var(--ease-editorial),
+			opacity 0.22s var(--ease-editorial);
+		@include m.press(0.94);
 
 		&:hover:not(:disabled) {
-			border-color: var(--track-accent);
-			color: var(--track-accent);
+			background: var(--track-accent-soft);
 		}
 
 		&:disabled {
@@ -345,17 +363,30 @@
 	// Shown only once the reader has taken manual control.
 	&__resume {
 		@include m.tap-target;
+		@include m.press;
 		// No auto margin now: the player takes the right edge, so Resync sits
 		// in flow beside the title rather than fighting it for the corner.
 		flex: none;
-		border-radius: 999px;
+		border-radius: var(--radius-pill);
 		border: 1px solid var(--track-accent);
 		color: var(--track-accent);
 		font-family: var(--font-ui);
+		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: var(--tracking-label);
-		cursor: pointer;
 		white-space: nowrap;
+		transition: background-color 0.18s var(--ease-editorial);
+
+		// Outlined rather than filled, deliberately: the play button beside it
+		// is already the filled control, and two accent fills in one bar leave
+		// the reader with no way to tell which is the main one.
+		&:hover {
+			background: var(--color-hover-strong);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
 	}
 }
 

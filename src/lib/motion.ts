@@ -34,9 +34,11 @@ export const duration = {
 /** Scroll-spy opacity states. Mirrors --stanza-opacity-* in styles.css (PRD §3.3). */
 export const stanzaOpacity = {
 	active: 1,
-	// See --stanza-opacity-idle in styles.css: 0.2 measured 1.68:1 against the
-	// canvas, failing even the large-text floor (D-053).
-	idle: 0.38,
+	// See --stanza-opacity-idle in styles.css, which is the source of the
+	// number: 0.38 cleared the 3:1 large-text floor against the old reading
+	// ground and stopped clearing it at 2.86:1 when D-064 lifted that ground.
+	// 0.42 measures 3.24:1 (D-053, D-065).
+	idle: 0.42,
 } as const;
 
 export const transition = {

@@ -24,17 +24,59 @@
 	}
 }
 
-/// Glass surface (PRD §3.2). Reads the runtime tokens so a track's extracted
-/// palette flows through without touching this file.
-@mixin glass {
-	background: var(--glass-bg);
-	border: 1px solid var(--glass-border);
-	backdrop-filter: blur(var(--glass-blur));
-	-webkit-backdrop-filter: blur(var(--glass-blur));
-	// Real glass has thickness: light catches its top edge and the inside of
-	// its lower edge falls into shade. A single flat border renders a cut-out;
-	// these two insets render a pane.
-	box-shadow: var(--glass-sheen), var(--glass-inner);
+/// A solid surface (D-065).
+///
+/// This replaces the glass mixin, and the replacement is the point rather
+/// than a simplification. Glass was six declarations that produced a
+/// translucent panel whose contrast depended on whatever happened to be
+/// behind it — which on a saturated ground is unknowable, so nothing sitting
+/// on it could be measured. Every surface in this product now states its own
+/// colour, and every ink on it has a number.
+///
+/// Reads the tokens rather than naming colours, so a track's extracted
+/// palette still repaints all of it without touching this file.
+@mixin surface($bg: var(--color-surface)) {
+	background: $bg;
+	border: 1px solid var(--color-hairline);
+}
+
+/// A surface that floats over content — chrome, popovers, the dock.
+/// Raised rather than plain, plus a tinted shadow, because a panel over
+/// scrolling content has to separate itself from whatever passes underneath.
+@mixin floating($bg: var(--color-surface-raised)) {
+	@include surface($bg);
+	box-shadow: var(--shadow-2);
+}
+
+/// The one bright thing in a view: a filled, high-contrast control.
+///
+/// The product had no filled control at all — every button was an outlined
+/// ghost, so nothing on any screen looked like the thing to press. The fill
+/// is the track accent, whose lightness is pinned at 0.72 by the palette
+/// extractor, so `--color-on-bright` clears 4.5:1 on top of it for every hue
+/// and chroma the extractor can produce (worst measured case 6.96:1).
+@mixin bright {
+	border: 1px solid transparent;
+	background: var(--track-accent);
+	color: var(--color-on-bright);
+	font-weight: 600;
+}
+
+/// Gives under the press.
+///
+/// Written once because it was written five times: every card, chip and
+/// button in the product had its own copy of the same 0.985 scale and the
+/// same reduced-motion escape, and they had already drifted apart.
+@mixin press($scale: 0.97) {
+	&:active {
+		scale: $scale;
+	}
+
+	@include reduced-motion {
+		&:active {
+			scale: 1;
+		}
+	}
 }
 
 /// Extend a control's touch target without changing how big it looks.

@@ -236,4 +236,20 @@ export const GLYPH_ADVANCE: Record<string, number> = ${JSON.stringify(widths, nu
 `;
 
 await Bun.write(OUT, body);
+
+/*
+ * Hand the output to the formatter before it lands.
+ *
+ * `JSON.stringify(..., 0)` emits the table as one 30KB line, which Biome then
+ * rejects on every subsequent `check` — so the repository was left with a lint
+ * failure that no one had introduced and that reformatting by hand would only
+ * postpone until the next regeneration. Formatting here makes the generated
+ * file identical to what `biome check` expects, which is the only way a
+ * generated file stays lint-clean.
+ */
+Bun.spawnSync(["bunx", "biome", "format", "--write", OUT], {
+	stdout: "inherit",
+	stderr: "inherit",
+});
+
 console.log(`  wrote ${OUT}: ${Object.keys(widths).length} glyphs, fallback ${fallback}em`);

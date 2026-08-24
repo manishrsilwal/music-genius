@@ -1,6 +1,6 @@
 @use "styles/mixins" as m;
 
-// Continue reading (D-056).
+// Continue reading (D-056, restyled D-065).
 //
 // Deliberately the quietest shelf on the page. A Deep Dive card argues for a
 // track the reader has never heard of and needs the room to do it; this is a
@@ -16,11 +16,11 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		border-radius: 0.5rem;
+		border-radius: var(--radius-pill);
 		transition: background-color 0.18s var(--ease-editorial);
 
 		&:hover {
-			background: var(--color-surface);
+			background: var(--color-hover);
 		}
 
 		@include m.reduced-motion {
@@ -34,7 +34,7 @@
 		display: flex;
 		align-items: baseline;
 		gap: 0.625rem;
-		padding: 0.5rem 0.25rem 0.5rem 0.5rem;
+		padding: 0.5rem 0.25rem 0.5rem 0.75rem;
 	}
 
 	&__title {
@@ -59,13 +59,14 @@
 		place-items: center;
 		width: 1.75rem;
 		height: 1.75rem;
-		margin-inline-end: 0.25rem;
+		margin-inline-end: 0.4rem;
 		border-radius: 50%;
 		color: var(--color-ink-faint);
 		transition:
 			color 0.18s var(--ease-editorial),
 			background-color 0.18s var(--ease-editorial);
 		@include m.tap-target;
+		@include m.press(0.92);
 
 		svg {
 			width: 0.875rem;
@@ -74,7 +75,7 @@
 
 		&:hover {
 			color: var(--color-ink);
-			background: var(--color-surface-raised);
+			background: var(--color-hover-strong);
 		}
 
 		@include m.reduced-motion {

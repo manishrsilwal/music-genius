@@ -134,6 +134,103 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-065 — The direction, carried into every surface
+**Built 2026-08-24.** D-064 established a palette, two typefaces and a landing
+page. It did not restyle the twelve other surfaces the product is made of, so
+the landing spoke the new language and the search popover, the dock, the drawer,
+the composer and every card still spoke the old one. This is that second half —
+and finishing it surfaced three defects in the first.
+
+**Glassmorphism is gone, and its removal is the point rather than a tidy-up.**
+Six declarations produced a translucent panel whose contrast depended on
+whatever happened to be behind it. Behind the masthead and the playback bar that
+is full-bleed album art, which is a different colour on every track — so nothing
+sitting on those surfaces had a contrast ratio that could be *stated*, only one
+that happened to hold for the cover being looked at. Every surface now declares
+its own colour and every ink on it has a number. `@mixin glass` is replaced by
+`surface` / `floating` / `bright`.
+
+**Elevation runs downward on the bright ground, and that is a correction.**
+D-064 stepped `--color-surface` and `--color-surface-raised` *up* from the
+canvas, the way a dark theme does. On a ground at L 0.478 that walks straight
+into the ceiling: cream on the raised surface measured **4.17:1** and the muted
+ink **3.00:1** — both failing, on the surfaces that carry every card, chip and
+popover in the product. Elevation is contrast against the ground, not a fixed
+direction; on a bright ground the only direction with room left is down.
+Re-measured: cream 9.20:1 on surface and 11.86:1 on raised, muted ink 6.62 and
+8.53, lime 8.06 and 10.39. The reading ground still steps up, because there the
+room is in the other direction.
+
+> Because the two grounds now elevate in *opposite* directions, "the next
+> surface along" means the opposite thing on each — so a hover written as
+> `--color-surface-raised` lightens a row on one page and darkens it on the
+> other. Hover is therefore a translucent white veil (`--color-hover`), which
+> always reads as the row lifting toward the reader, including under an
+> extracted per-track palette.
+
+**Nothing in the product was ever filled.** Every button was an outlined ghost,
+so no screen had an obvious thing to press — the Discover button, the feature
+the product is named after, was a glass pill floating over the lyrics that a
+reader had to already know was there. There is now one bright control per view:
+Discover on a track page, Download on the composer, the way onward on a dead
+end. The fill is `--track-accent`, whose lightness is pinned at 0.72 by the
+palette extractor, so `--color-on-bright` clears 4.5:1 on top of it for **every
+hue and chroma the extractor can produce** — worst measured case 6.96:1, swept
+across all 360 hues.
+
+**Two numbers had gone quietly stale, three files apart.**
+
+- `--stanza-opacity-idle` was 0.38 because D-053 measured it at 3.28:1 against
+  an `oklch(0.13)` reading ground. D-064 lifted that ground to `0.155`, which
+  raised the floor of the composite and dropped the same 0.38 to **2.86:1** —
+  back under the 3:1 large-text bar, from a change made in a different file.
+  Now 0.42, at 3.24:1, mirrored in `src/lib/motion.ts`.
+- `palette.server.ts` pins canvas/surface/raised lightness to the reading ground
+  and carries a comment saying they are copied verbatim from `styles.css`.
+  D-064 moved the stylesheet and left the extractor behind, so a track **with**
+  artwork rendered three steps darker than the same track **without** it — the
+  palette engine quietly undoing a palette change. Contrast floors still held,
+  which is why nothing failed; it simply meant two different products depending
+  on whether a cover happened to resolve. The test beside it now pins all three.
+
+**Grain follows the paper metaphor rather than the whole app.** Texture exists
+to make a surface read as a printed page, which is the claim the lyric canvas
+makes and the claim the landing does not. Over saturated electric blue an
+overlay-blended noise does not read as paper; it reads as the colour being
+slightly dirty. Grain is now zero by default and restored on the reading ground.
+
+**The Tailwind tree-shaking trap caught the same change twice.** D-064 recorded
+it for the brand accents. It then took `--color-hover`, `--color-hover-strong`,
+`--color-well` and `--radius-nested` — declared the ordinary way, they went out
+in a build where every hover state and every nested corner silently did nothing.
+The rule is now stated plainly in `styles.css`: **a token used only from SCSS
+belongs in the `@theme static` block.** Verified by grepping the compiled
+stylesheet, which is the only check that actually proves it.
+
+**Fraunces' axes are set per role, not globally.** The hero pins `opsz` 144 with
+`SOFT` 40 — explicitly, because `font-optical-sizing: auto` tracks the *computed*
+size and the hero's size is a `min()` of three terms, so a long title that shrank
+to fit would also get a different, text-weight drawing of the letterforms. The
+lyric canvas pins `opsz` 32 with SOFT and WONK at zero: those are someone else's
+words, read at length, and the face's job there is to disappear. The character
+belongs on the landing and in the hero, where the product speaks in its own
+voice.
+
+> **Considered and rejected:** reinforcing the sung line with weight as well as
+> colour, the obvious second channel for WCAG 1.4.1. Fraunces is variable, so a
+> weight change alters every advance in the line and re-wraps it — under a reader
+> following along, mid-song. The stanza's own opacity step is already a
+> non-colour channel, and it does not move the text.
+
+**Verification.** Driven through WebDriver BiDi rather than
+`firefox --screenshot`, which captures at the load event — before hydration, with
+every motion component still at its `initial` variant, i.e. genuinely invisible.
+Landing, stepper, discovery shelves, track hero, lyric canvas, docked bar and the
+insights drawer were each rendered and read at 1280px and 390px. One apparent
+regression — a completely unstyled track page on mobile — was a stale browser
+cache, confirmed by checking which stylesheet hash the document had actually
+loaded before reporting anything.
+
 ### D-064 — A new visual direction: electric, playful, and still readable
 **Built 2026-08-24.** A deliberate reversal of D-005, D-019 and D-052, asked for
 explicitly: a brighter, friendlier product aimed at a younger audience, with
@@ -2368,7 +2465,7 @@ src/
 │   └── clients/lrclib.ts      # LRCLIB + normalisation (D-015, D-043)
 ├── styles/                    # Sass partials (D-013)
 │   ├── _breakpoints.scss      # mirrors Tailwind's screens
-│   └── _mixins.scss           # from() · reduced-motion · glass · line-clamp
+│   └── _mixins.scss           # from() · reduced-motion · surface/floating/bright · press · line-clamp (D-065)
 ├── styles.css                 # Tailwind entry + token layer (D-003, D-033, D-051)
 └── router.tsx
 ```

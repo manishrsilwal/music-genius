@@ -259,15 +259,16 @@
    extracted palette still renders correctly.
    ------------------------------------------------------------------------ */
 :root {
-  /* Brass, not vermilion (D-052).
-     The old default was near-black plus a bright vermilion accent, which is
-     one of the three looks generative design falls into by default — arrived
-     at regardless of subject. Brass is drawn from this subject's own
-     materials: foil stamping on a sleeve, the label at the centre of a record.
-     Same lightness, marginally lower chroma.
-
-     Only ever seen when artwork is missing or wholly achromatic; a track with
-     a cover overwrites all three within a second of load. */
+  /* Lime — the brand accent, standing in for a record that has not been
+     opened yet (D-064).
+     Everything accent-coloured in the product reads this one channel, which
+     is why a landing page with no track on it still comes out in the brand's
+     own colour rather than in a neutral placeholder. On a track page the
+     extracted palette overwrites all three within a second of load, and the
+     lightness it writes is fixed at 0.72 by construction (palette.server.ts)
+     — which is what makes `--color-on-bright` safe as a label colour on top
+     of any accent this can ever hold: measured worst case 6.96:1, across
+     every hue and chroma the extractor can produce. */
   --track-accent: oklch(0.921 0.222 128.1);
   --track-accent-soft: oklch(0.82 0.19 128.1);
   --track-glow: oklch(0.921 0.222 128.1 / 0.35);
@@ -275,24 +276,16 @@
   /* Scroll-spy states (PRD §3.3). Mirrored in src/lib/motion.ts, which is the
      source of truth for JS-driven animation. Keep the two in sync. */
   --stanza-opacity-active: 1;
-  /* 0.38, not 0.2 (D-053). Composited over the canvas, 0.2 computes to a
-     1.68:1 contrast ratio — below even the 3:1 large-text floor, which makes
-     every line the reader is not currently on effectively unreadable rather
-     than merely quiet. 0.38 is the lowest value that clears it, at 3.28:1.
-     The active line is still five times brighter, so the focus effect
-     survives; what changes is that the verse can now be scanned without
-     scrolling through it. Mirrored in src/lib/motion.ts. */
-  --stanza-opacity-idle: 0.38;
-
-  /* Glassmorphism (PRD §3.2) */
-  --glass-bg: oklch(1 0 0 / 0.06);
-  --glass-border: oklch(1 0 0 / 0.14);
-  --glass-blur: 20px;
-  /* Edge refraction: a glass pane catches light along its top edge and drops
-     a little shade inside its lower one. Two inset shadows read as thickness
-     in a way a flat 1px border cannot. */
-  --glass-sheen: inset 0 1px 0 oklch(1 0 0 / 0.1);
-  --glass-inner: inset 0 -1px 2px oklch(0.06 0.015 265 / 0.35);
+  /* 0.42, and the number is MEASURED rather than chosen (D-053, re-measured
+     for D-065). 0.2 computed to 1.68:1 — below even the 3:1 large-text floor,
+     which made every line the reader was not on unreadable rather than merely
+     quiet. 0.38 cleared it at 3.28:1 against the old oklch(0.13) reading
+     ground; D-064 lifted that ground to oklch(0.155), which raised the floor
+     of the composite and quietly dropped the same 0.38 to 2.86:1 — back under
+     the bar, from a change made three files away. 0.42 restores it at 3.24:1.
+     The active line is still more than twice as bright, so the focus effect
+     survives. Mirrored in src/lib/motion.ts. */
+  --stanza-opacity-idle: 0.42;
 
   /* --- Elevation ----------------------------------------------------------
      Tinted, never neutral black. A pure-black shadow on a canvas that is
@@ -307,9 +300,14 @@
      scale here would light it from below. */
   --shadow-sheet: 0 -1.5rem 3rem oklch(0.05 0.015 265 / 0.55);
 
-  /* Film grain. Deliberately faint: at 0.045 it is texture; by 0.12 it is an
-     effect the reader notices instead of the words. */
-  --grain-opacity: 0.045;
+  /* Film grain — off by default now, and restored only on the reading ground
+     (D-065). Grain exists to make a surface read as a printed page rather
+     than a screen, which is exactly the claim the lyric canvas makes and
+     exactly the claim the landing does not. Over saturated electric blue an
+     overlay-blended noise does not read as paper at all; it reads as the
+     colour being slightly dirty. So the texture follows the two grounds the
+     palette already splits on. */
+  --grain-opacity: 0;
 
   /* --- Layering (D-033) ---------------------------------------------------
      Named by role, not by number. Six ad-hoc z-indexes spread across five
@@ -438,18 +436,32 @@
      genuinely tiring, and this product's whole claim is that the words deserve
      to be read. The playful world frames the reading; it does not invade it. */
   --color-canvas: oklch(0.478 0.238 265.4);
-  --color-surface: oklch(0.53 0.225 265.4);
-  --color-surface-raised: oklch(0.585 0.21 265.4);
+  /* Elevation runs DOWNWARD here, and that is the whole correction (D-065).
+     D-064 stepped these UP from the canvas the way a dark theme does, and on
+     a ground this bright that walks straight into the ceiling: cream on the
+     raised surface measured 4.17:1 and the muted ink 3.00:1 — both failing,
+     on the surfaces that carry every card, chip and popover in the product.
+     Elevation is contrast against the ground, not a fixed direction, and on a
+     bright ground the only direction with room left is down. Measured: cream
+     9.20:1 on surface and 11.86:1 on raised, muted ink 6.62 and 8.53, lime
+     8.06 and 10.39. The reading ground below still steps up, because there
+     the room is in the other direction. */
+  --color-surface: oklch(0.405 0.212 265.6);
+  --color-surface-raised: oklch(0.34 0.185 265.8);
   --color-hairline: oklch(1 0 0 / 0.22);
-
-
 
   --color-ink: oklch(0.982 0.015 77.1);
   --color-ink-muted: oklch(0.875 0.032 279.8);
-  /* The same discipline as D-053, re-measured for the new ground. This carries
-     `text-micro` — 12px labels, kickers, the clock — which is nowhere near
-     large text, so it needs the full 4.5:1 against the WORST background it
-     lands on, which is now `--color-surface-raised`, not the canvas. */
+  /* Identical to `--color-ink-muted`, deliberately, and only on this ground.
+     This carries `text-micro` — 12px labels, kickers, the clock — which is
+     nowhere near large text, so it needs the full 4.5:1 against the worst
+     background it lands on. Now that the surfaces run downward that worst
+     background is the CANVAS itself, and the canvas leaves almost no room:
+     0.875 measures 4.87:1 and 0.851 is the floor. A third ink step inside
+     0.024 of lightness is not a step anyone can see, so on the bright ground
+     there are two inks, not three, and the name is kept so components do not
+     have to know which ground they are on. The reading ground, where there is
+     real room, gives it a real value (D-065). */
   --color-ink-faint: oklch(0.875 0.032 279.8);
 
   /* --- Motion -------------------------------------------------------------
@@ -508,17 +520,46 @@
 }
 
 
-/* Brand accents (D-064).
+/* Tokens the stylesheet uses and Tailwind cannot see (D-064, D-065).
    `@theme static`, NOT plain `@theme`. Tailwind v4 tree-shakes theme tokens it
-   cannot see used, and these are referenced only from .scss — which Tailwind
-   does not scan. Declared the ordinary way they were silently dropped from the
-   build, and `color: var(--color-lime)` resolved to nothing: the headline
+   cannot see used, and everything below is referenced only from .scss — which
+   Tailwind does not scan. Declared the ordinary way they are silently dropped
+   from the build and `var(--color-lime)` resolves to nothing: the headline
    rendered cream and looked like a styling bug rather than a missing token.
    `static` forces emission whether a utility uses them or not.
+
+   This trap caught the same change twice — once for the brand accents in
+   D-064, and again in D-065 for the four tokens below them, which went out in
+   a build where every hover state and every nested corner silently did
+   nothing. The rule is simple and worth stating plainly: a token used only
+   from SCSS belongs in THIS block, not in the one above.
 
    Lime is the primary accent — it is what the eye goes to. Sun is the
    secondary, for warmth, and never does the same job as lime in one view. */
 @theme static {
+  /* Hover, as a veil rather than as a surface step (D-065).
+     The two grounds elevate in opposite directions — the bright one steps
+     down, the reading one steps up — so "the next surface along" means the
+     opposite thing on each, and a hover written as `--color-surface-raised`
+     lightens a row on one page and darkens it on the other. A translucent
+     white veil always reads as the row lifting toward the reader, whatever it
+     is painted over, including an extracted per-track palette. */
+  --color-hover: oklch(1 0 0 / 0.08);
+  --color-hover-strong: oklch(1 0 0 / 0.14);
+
+  /* A recess rather than a surface: the slot an image has not arrived in yet
+     — search thumbnails, cover art, the video box (D-065). Translucent black
+     rather than a named colour, so it reads as a hole punched in whatever it
+     sits on and works unchanged on both grounds and under every extracted
+     palette. Carries no text, so it needs no ratio of its own. */
+  --color-well: oklch(0 0 0 / 0.22);
+
+  /* Nested corners are tighter than the box that holds them — a thumbnail
+     inside a 1.75rem card at the same radius reads as a sticker sitting on
+     the card rather than as part of it. One token, so every inner element
+     steps down by the same amount (D-065). */
+  --radius-nested: 0.875rem;
+
   --color-lime: oklch(0.921 0.222 128.1);
   --color-sun: oklch(0.879 0.162 90.9);
   /* For text ON lime or sun, where cream would vanish. Measured at 15.72:1
@@ -590,9 +631,20 @@
      palette engine then repaints this per track, exactly as before. */
   body:has(.track-shell) {
     --color-canvas: var(--color-reading);
+    /* Upward, unlike the bright ground: on a near-black page the room is
+       above, not below (D-065). */
     --color-surface: oklch(0.205 0.032 265);
     --color-surface-raised: oklch(0.25 0.035 265);
     --color-hairline: oklch(1 0 0 / 0.12);
+
+    /* Three real inks, which the bright ground cannot afford. Measured
+       against the worst surface each lands on (`--color-surface-raised`):
+       cream 15.21:1, muted 8.58:1, faint 5.56:1. */
+    --color-ink-muted: oklch(0.8 0.02 265);
+    --color-ink-faint: oklch(0.68 0.02 265);
+
+    /* The paper texture, restored where the paper metaphor is true. */
+    --grain-opacity: 0.05;
   }
 
   body {
@@ -624,8 +676,8 @@
 
   /* Keyboard focus (D-035).
      Written once, as an opt-out rather than an opt-in: six of seven controls
-     had no focus style, each relying on a default outline that a dark
-     glassmorphic surface all but swallows. `:where()` keeps specificity at
+     had no focus style, each relying on a default outline that a saturated
+     surface all but swallows. `:where()` keeps specificity at
      zero, so a component that wants a different ring simply writes one and
      wins without !important. */
   :where(a, button, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
@@ -648,7 +700,9 @@
 
   /* --- Film grain ---------------------------------------------------------
      A flat dark surface reads as a screen; a grained one reads as a printed
-     page, which is the premise of the product. Generated rather than fetched:
+     page, which is the premise of the product — so since D-065 the opacity
+     that drives this is zero everywhere except the reading ground, and the
+     rule below simply paints nothing. Generated rather than fetched:
      an feTurbulence data URI costs no request, tiles seamlessly via
      stitchTiles, and stays sharp at any pixel density.
 
@@ -679,9 +733,10 @@
     left: 0.75rem;
     z-index: var(--layer-modal);
     translate: 0 -150%;
-    padding: 0.625rem 1rem;
-    border-radius: 0.75rem;
+    padding: 0.625rem 1.125rem;
+    border-radius: var(--radius-pill);
     background: var(--color-surface-raised);
+    border: 1px solid var(--color-hairline);
     color: var(--color-ink);
     font-family: var(--font-ui);
     font-size: var(--text-caption);
@@ -708,8 +763,7 @@
   :root {
     --color-ink-muted: oklch(0.86 0.008 265);
     --color-ink-faint: oklch(0.72 0.01 265);
-    --color-hairline: oklch(1 0 0 / 0.22);
-    --glass-border: oklch(1 0 0 / 0.3);
+    --color-hairline: oklch(1 0 0 / 0.34);
     --stanza-opacity-idle: 0.55;
     --grain-opacity: 0;
   }

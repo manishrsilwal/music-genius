@@ -65,10 +65,25 @@
 		max-width: 64rem;
 	}
 
-	// Rufina has no italic and only two weights, so hierarchy here comes from
-	// scale and spacing rather than style (D-005).
+	// Fraunces, with its axes set for this size (D-064, D-065). The stale
+	// note this replaces described Rufina — a face with no italic and two
+	// weights, which is exactly why it was replaced.
+	//
+	// `opsz` is set explicitly rather than left to `font-optical-sizing: auto`,
+	// because the auto value tracks the COMPUTED font size and this heading's
+	// computed size is a `min()` of three terms — so a long title that shrinks
+	// to fit would also quietly get a different, text-weight drawing of the
+	// letterforms. Pinning it to the display end keeps one title looking like
+	// another. SOFT rounds the terminals a little, which is where this face's
+	// warmth lives; WONK stays off, because the wonky forms are a flourish for
+	// one word of the product's own copy, not for someone else's song title.
 	&__title {
 		font-family: var(--font-display);
+		font-weight: 600;
+		font-variation-settings:
+			"opsz" 144,
+			"SOFT" 40,
+			"WONK" 0;
 		line-height: var(--leading-hero);
 		letter-spacing: var(--tracking-hero);
 		text-wrap: balance;
@@ -79,7 +94,8 @@
 		// was a poster and "Phir Le Aya Dil" was two lines eating a third of
 		// the screen. `100cqw / --title-em` is the exact size at which this
 		// particular string fits one line; `--title-em` comes from the real
-		// Rufina/Vesper advance table, so it is measured rather than assumed.
+		// Fraunces/Vesper advance table, regenerated for the new face, so it
+		// is measured rather than assumed.
 		//
 		// `min` keeps the existing cap, so short titles are unchanged. The
 		// 2.5rem floor means a very long title stops shrinking and wraps

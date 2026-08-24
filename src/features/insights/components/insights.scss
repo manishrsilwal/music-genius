@@ -17,11 +17,24 @@
 	right: var(--dock-inset);
 	// Resolved by .track-shell below, which knows what else is on screen.
 	bottom: var(--discover-bottom, calc(var(--dock-inset) + var(--dock-safe)));
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	font-family: var(--font-ui);
-	cursor: pointer;
-	transition: bottom 0.42s var(--ease-editorial);
-	@include m.glass;
+	font-weight: 600;
+	// Filled, and the loudest thing on the reading page (D-065). It used to be
+	// a glass pill floating over the lyrics, which is the right treatment for
+	// chrome and the wrong one for the single feature the product is named
+	// after — a reader had to already know it was there. One bright control
+	// per view; on a track page, this is it.
+	@include m.bright;
+	box-shadow: var(--shadow-2);
+	transition:
+		bottom 0.42s var(--ease-editorial),
+		background-color 0.22s var(--ease-editorial);
+	@include m.press;
+
+	&:hover:not(:disabled) {
+		background: var(--track-accent-soft);
+	}
 
 	@include m.reduced-motion {
 		transition: none;
@@ -29,8 +42,13 @@
 
 	// While the model works, a slow sheen crosses the button — present enough
 	// to say "something is coming", quiet enough to ignore (PRD §4).
+	// Working. It steps back to a plain surface rather than staying filled:
+	// nothing can be pressed yet, and a bright button that refuses the press
+	// reads as broken rather than as busy.
 	&[data-state="generating"] {
 		cursor: default;
+		background: var(--color-surface-raised);
+		border-color: var(--color-hairline);
 		color: var(--color-ink-muted);
 		overflow: hidden;
 
@@ -49,10 +67,11 @@
 		}
 	}
 
+	// Ready. The fill already carries the accent, so "ready" is said with the
+	// glow alone rather than by adding a ring in the colour it is already
+	// painted.
 	&[data-state="ready"] {
-		color: var(--color-ink);
-		border-color: var(--track-accent);
-		box-shadow: 0 0 0 1px var(--track-accent), 0 0 2.5rem var(--track-glow);
+		box-shadow: var(--shadow-2), 0 0 2.5rem var(--track-glow);
 	}
 
 	@include m.reduced-motion {
@@ -87,9 +106,9 @@
 		color: var(--track-accent);
 	}
 
-	// Elms Sans, not Rufina. The synthesis is prose to be read at length in a
-	// narrow column, and the display face is cut for headlines — at reading
-	// size in a 30rem drawer it sets heavy and slows the line (D-044).
+	// The UI face, not the display face. The synthesis is prose to be read at
+	// length in a narrow column, and the display face is cut for headlines — at
+	// reading size in a 30rem drawer it sets heavy and slows the line (D-044).
 	//
 	// Scoped to `__prose` rather than written as `__synthesis p`. The section
 	// label is also a `<p>` inside that section, so the descendant selector
@@ -110,14 +129,12 @@
 		}
 	}
 
-	// The Quote (PRD §3.5). Elms Sans italic, not Rufina: Rufina ships no
-	// italic and a synthesised oblique shears the letterforms (D-005).
-	//
-	// The quote used to be distinguished from the synthesis by a serif→sans
-	// shift. Now that both are set in the sans (D-044), the accent rule and
-	// the attribution carry that job on their own.
+	// The Quote (PRD §3.5), set in the UI face's italic. The quote used to be
+	// distinguished from the synthesis by a serif→sans shift; now that both are
+	// set in the sans (D-044), the accent rule and the attribution carry that
+	// job on their own.
 	&__quote {
-		border-left: 2px solid var(--track-accent);
+		border-left: 3px solid var(--track-accent);
 		padding-left: 1.25rem;
 
 		blockquote {
@@ -145,8 +162,7 @@
 	&__resonance {
 		padding: 1.5rem;
 		border-radius: var(--radius-card);
-		border: 1px solid var(--color-hairline);
-		background: var(--color-surface-raised);
+		@include m.surface(var(--color-surface-raised));
 	}
 
 	&__lines {
@@ -155,7 +171,7 @@
 		padding: 0;
 		display: grid;
 		gap: 0.15rem;
-		border-inline-start: 2px solid var(--track-accent);
+		border-inline-start: 3px solid var(--track-accent);
 		padding-inline-start: 1.25rem;
 	}
 
@@ -209,12 +225,12 @@
 		align-items: flex-start;
 		gap: 0.75rem;
 		padding: 0.75rem 0.75rem 0.75rem 1.5rem;
-		border-radius: 0.75rem;
+		border-radius: var(--radius-nested);
 		color: var(--color-ink-muted);
 		transition: background-color 0.22s var(--ease-editorial);
 
 		&:hover {
-			background: var(--color-surface-raised);
+			background: var(--color-hover);
 		}
 
 		@include m.reduced-motion {
@@ -228,7 +244,8 @@
 		flex: none;
 		width: 4.5rem;
 		aspect-ratio: 16 / 9;
-		border-radius: 0.375rem;
+		border-radius: 0.5rem;
+		background: var(--color-well);
 		object-fit: cover;
 	}
 
@@ -265,9 +282,9 @@
 		display: inline-block;
 		margin-inline-start: 0.4rem;
 		min-width: 1.1rem;
-		padding: 0 0.3rem;
-		border-radius: 0.3rem;
-		background: var(--color-surface-raised);
+		padding: 0 0.35rem;
+		border-radius: var(--radius-pill);
+		background: var(--color-hover-strong);
 		color: var(--track-accent);
 		font-variant-numeric: tabular-nums;
 		text-align: center;
@@ -290,6 +307,9 @@
 	padding: 5rem 1.75rem 3rem;
 	background: var(--color-surface);
 	border-left: 1px solid var(--color-hairline);
+	// The panel slides over a page that keeps its own background, so the seam
+	// needs more than a hairline to read as a separate plane.
+	box-shadow: var(--shadow-3);
 }
 
 // The canvas is squeezed rather than covered, so the reader keeps their place.
@@ -393,9 +413,9 @@
 		&::before {
 			content: "";
 			width: 2.5rem;
-			height: 0.25rem;
-			border-radius: 999px;
-			background: var(--color-ink-faint);
+			height: 0.3rem;
+			border-radius: var(--radius-pill);
+			background: var(--color-hover-strong);
 		}
 
 		&:active {

@@ -26,10 +26,19 @@ export function RouteMessage({
 }) {
 	const { to, label } = action ?? { to: "/", label: "Back to search" };
 
+	/*
+	 * The link is the page's one way onward, so by default it is the filled
+	 * control (D-065). When a caller supplies its own action — RouteError's
+	 * "Try again", which is the better thing to press first — this demotes
+	 * itself to a quiet link rather than presenting two equally loud buttons
+	 * and leaving the reader to work out the order.
+	 */
+	const secondary = children != null;
+
 	return (
 		<main
 			id="main"
-			className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 text-center"
+			className="mx-auto flex min-h-dvh max-w-xl flex-col items-center justify-center px-6 pt-[calc(var(--masthead-reach)+2rem)] pb-16 text-center"
 		>
 			<p className="text-micro uppercase tracking-label text-ink-faint">
 				{kicker}
@@ -41,7 +50,11 @@ export function RouteMessage({
 			{children}
 			<Link
 				to={to}
-				className="mt-8 text-caption uppercase tracking-label text-accent"
+				className={
+					secondary
+						? "mt-6 text-caption uppercase tracking-label text-ink-muted underline underline-offset-4 hover:text-ink"
+						: "mt-8 rounded-pill bg-accent px-6 py-3 font-ui text-caption font-semibold uppercase tracking-label text-on-bright"
+				}
 			>
 				{label}
 			</Link>

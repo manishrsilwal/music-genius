@@ -37,9 +37,13 @@ describe("buildPalette — the paper", () => {
 			expect(palette, hex).not.toBeNull();
 			if (!palette) continue;
 
-			expect(channels(palette.canvas).l, hex).toBe(0.13);
-			expect(channels(palette.surface).l, hex).toBe(0.175);
-			expect(channels(palette.surfaceRaised).l, hex).toBe(0.225);
+			// The three numbers are the reading ground in styles.css
+			// (`--color-reading` and the two steps above it). If that block
+			// moves and these do not, a track with artwork renders on a
+			// different page from a track without it (D-065).
+			expect(channels(palette.canvas).l, hex).toBe(0.155);
+			expect(channels(palette.surface).l, hex).toBe(0.205);
+			expect(channels(palette.surfaceRaised).l, hex).toBe(0.25);
 		}
 	});
 

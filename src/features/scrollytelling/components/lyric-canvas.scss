@@ -30,6 +30,16 @@ $stanza-gap-lg: 4.5rem;
 
 	&__stanza {
 		font-family: var(--font-display);
+		// The one place in the product where Fraunces is asked to behave
+		// rather than perform (D-065). SOFT and WONK stay at zero and `opsz`
+		// is left at reading size: these are someone else's words, read at
+		// length, and the face's job here is to disappear. The character shows
+		// up on the landing and in the hero, which is where the product is
+		// speaking in its own voice.
+		font-variation-settings:
+			"opsz" 32,
+			"SOFT" 0,
+			"WONK" 0;
 		font-size: var(--text-lyric);
 		line-height: var(--leading-lyric);
 		text-wrap: balance;
@@ -57,6 +67,13 @@ $stanza-gap-lg: 4.5rem;
 		&[data-sung] {
 			color: var(--track-accent);
 		}
+
+		// Deliberately NOT reinforced with weight, which is the obvious way to
+		// give this a second, non-colour channel. Fraunces is variable, so a
+		// weight change alters every advance in the line and re-wraps it — under
+		// a reader who is following along, mid-song. The stanza's own opacity
+		// step is the channel that does not depend on hue, and it is already
+		// there.
 
 		@include m.reduced-motion {
 			transition: none;

@@ -17,8 +17,8 @@ import {
 } from "./fonts.server";
 
 /**
- * Scripts detectLang reports but which need no companion face: Rufina already
- * covers Latin, and Greek and Cyrillic are served by one Noto Serif family
+ * Scripts detectLang reports but which need no companion face: the display face
+ * already covers Latin, and Greek and Cyrillic are served by one Noto Serif family
  * declared under two names — the web gets a single family with two
  * unicode-ranges, while Satori, which cannot express a range, needs each
  * binary registered separately.
