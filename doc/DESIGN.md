@@ -748,6 +748,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | **D-070** Playback resolves for 27 of 30 tracks instead of 17 — the Genius query was sent raw while only the scoring was cleaned |
 | 2026-08-24 | **D-069** Deep Dive cards reduced to artwork, title and artist; one shared section heading — rule, confident label, asymmetric space — on the landing and in the story drawer |
 | 2026-08-24 | **D-068** Deep Dives: shared reasons said once above the row instead of on all three cards; song titles no longer clamped to fit; cards share a height and a baseline |
 | 2026-08-24 | **D-067** Devtools no longer ship to production; fourteen touch targets raised to 44px; a filled chip's label measured 4.46:1 and fixed |

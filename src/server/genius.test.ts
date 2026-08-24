@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import {
 	canonical,
+	creditedArtists,
 	MATCH_THRESHOLD,
 	scoreNames,
+	searchQuery,
 	similarity,
 	splitCandidates,
+	stripTitleNoise,
 } from "./genius.server";
 
 /**
@@ -196,5 +199,85 @@ describe("splitCandidates", () => {
 		expect(splitCandidates("Redbone", "Childish Gambino")).toEqual([]);
 		expect(splitCandidates(" - Redbone", "channel")).toEqual([]);
 		expect(splitCandidates("Redbone - ", "channel")).toEqual([]);
+	});
+});
+
+/*
+ * Every case below is a real LRCLIB record that produced no player before
+ * D-070. A 30-track probe went from 17 playable to 27; these are the strings
+ * that moved.
+ */
+describe("creditedArtists", () => {
+	it("splits a film soundtrack's full billing", () => {
+		expect(
+			creditedArtists(
+				"Alka Yagnik & Arijit Singh & A.R. Rahman & Irshad Kamil",
+			),
+		).toContain("Arijit Singh");
+	});
+
+	it("keeps the whole string as a reading, for a band that contains a separator", () => {
+		// "Earth, Wind & Fire" must still be able to match itself.
+		expect(creditedArtists("Earth, Wind & Fire")[0]).toBe("Earth, Wind & Fire");
+	});
+
+	it("returns a solo artist unchanged and alone", () => {
+		expect(creditedArtists("Nirvana")).toEqual(["Nirvana"]);
+	});
+});
+
+describe("searchQuery", () => {
+	it("strips the release qualifier the search used to be sent verbatim", () => {
+		expect(
+			searchQuery("Motion Sickness (Official Video)", "Phoebe Bridgers"),
+		).toBe("phoebe bridgers motion sickness");
+	});
+
+	it("searches the first credited name, not the last", () => {
+		// `.at(-1)` searched for the lyricist, who sang none of it.
+		const query = searchQuery(
+			"Agar Tum Saath Ho",
+			"Alka Yagnik & Arijit Singh & A.R. Rahman & Irshad Kamil",
+		);
+		expect(query).toContain("alka yagnik");
+		expect(query).not.toContain("irshad");
+	});
+
+	it("drops a bracketed film credit", () => {
+		expect(searchQuery('Tum Se Hi (From "Jab We Met")', "Mohit Chauhan")).toBe(
+			"mohit chauhan tum se hi",
+		);
+	});
+});
+
+describe("stripTitleNoise", () => {
+	it("removes a qualifier that follows a dash", () => {
+		expect(stripTitleNoise("Holocene - Official Video", "Bon Iver")).toBe(
+			"Holocene",
+		);
+		expect(
+			stripTitleNoise("Chura Liya Hai Tumne - Trap Mix", "Asha Bhosle"),
+		).toBe("Chura Liya Hai Tumne");
+	});
+
+	it("removes a bare performer credit with no separator at all", () => {
+		expect(
+			stripTitleNoise("Kabhi Kabhi Mere Dil Mein Solo By Mukesh", "Mukesh"),
+		).toBe("Kabhi Kabhi Mere Dil Mein");
+	});
+
+	it("refuses to strip a tail that is part of the song's name", () => {
+		// The whole point of the guard: this is the artist, not packaging, and
+		// trimming it would search Genius for "Frank Ocean".
+		expect(stripTitleNoise("Frank Ocean - Nights", "Blonded")).toBeNull();
+		expect(
+			stripTitleNoise("Love Will Tear Us Apart", "Joy Division"),
+		).toBeNull();
+	});
+
+	it("refuses when the tail is a real subtitle", () => {
+		expect(
+			stripTitleNoise("Hurt - A Tribute to Johnny Cash", "Nine Inch Nails"),
+		).toBeNull();
 	});
 });

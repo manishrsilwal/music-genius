@@ -97,10 +97,16 @@ export function PlaybackBar({
 	// "Loading" is only honest while something is still happening. When
 	// playback has actually failed, say what failed — a spinner that never
 	// resolves is the one state that tells the reader nothing at all (D-054).
+	// "No recording found" claimed something untrue (D-070). We do not look for
+	// recordings; we read the one Genius has already linked to the song, and a
+	// blank there means Genius never filled the field — not that no recording
+	// exists. For a song with a hundred million plays, telling the reader it
+	// has no recording is simply wrong, and the "Find it on YouTube" button
+	// sitting beside the notice contradicts it in the same breath.
 	const notice = searching
 		? "Finding the recording"
 		: noRecording
-			? "No recording found"
+			? "No player for this one"
 			: status === "unavailable"
 				? (reason ?? "Playback unavailable")
 				: !ready

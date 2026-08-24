@@ -134,6 +134,66 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-070 — "No recording found" was mostly our search failing, not YouTube
+**Built 2026-08-24.** Reported as "most of the time it says no recording".
+Measured before changing anything, by running thirty catalogue tracks through
+the real chain **the way the app opens them** — with LRCLIB's metadata, not
+the curated catalogue's, which is the distinction that made the bug visible.
+
+| | before | after |
+|---|---|---|
+| playable | 17 | **27** |
+| no Genius match | 10 | **0** |
+| matched, but Genius has no media | 3 | 3 |
+
+Ten of the thirteen failures never reached YouTube at all: the Genius search
+found nothing.
+
+**The query was sent raw while only the scoring was cleaned.** `canonical()`
+strips release qualifiers — and it was used exclusively to score results. The
+search itself was handed the untouched LRCLIB strings, so Genius was asked for
+`"Phoebe Bridgers Motion Sickness (Official Video)"`, `"Eric Clapton Wonderful
+Tonight [Official Live]"`, `"Lata Mangeshkar Lag Ja Gale (LoFi)"`. The cleaning
+existed; it was applied to the wrong half of the problem. Scoring still runs
+against the original strings, so a cleaned query cannot make a wrong match look
+right.
+
+**A full billing was compared as one string.** LRCLIB records `"Alka Yagnik &
+Arijit Singh & A.R. Rahman & Irshad Kamil"`; Genius records a single
+`primary_artist`. Compared whole those score near zero, so the match was
+refused for songs both catalogues plainly hold. `creditedArtists` splits the
+credit and scoring takes the best part. This lands hardest on film soundtracks,
+where a playback singer, a composer and a lyricist are billed on one track —
+which is to say, on exactly the catalogue this product cares most about.
+
+> And a bug inside the fix, caught by the probe rather than by reading: the
+> first version took `.at(-1)` of the credit list as "the artist to search
+> for". On a soundtrack the billing runs singer → composer → lyricist, so it
+> searched Genius for **Irshad Kamil**, who wrote the words and sang none of
+> them.
+
+**Two shapes of title noise arrive without brackets**, so `canonical` never saw
+them: a qualifier after a dash (`"Holocene - Official Video"`,
+`"Chura Liya Hai Tumne - Trap Mix"`) and a bare performer credit
+(`"Kabhi Kabhi Mere Dil Mein Solo By Mukesh"`). `stripTitleNoise` removes a
+tail only when every word in it is either a packaging word or one of the
+credited names — because the naive version, trimming whatever follows a dash,
+turns `"Frank Ocean - Nights"` into a search for **Frank Ocean**. That guard is
+mutation-tested: forcing it to accept everything fails exactly the two tests
+written to defend it.
+
+**The remaining three are a data gap, and the copy now says so.** Genius holds
+the song and has no YouTube entry for it. "No recording found" claimed
+something untrue — we never look for recordings, we read the one Genius has
+already linked — and for a song with a hundred million plays it is simply
+wrong, contradicted in the same breath by the "Find it on YouTube" button
+beside it. It reads "No player for this one".
+
+> **Still open:** the three remaining misses could be resolved with a YouTube
+> Data API search, but that costs 100 quota units per call against a default
+> allowance of 10,000 a day — roughly 100 tracks. The current source is free
+> and covers 90%. Not worth a second API key without a ruling (OD-005).
+
 ### D-069 — A card is three things, and a section says where it starts
 **Built 2026-08-24.** Two requests, one root cause: the product had no
 hierarchy to scan by.
