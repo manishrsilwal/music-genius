@@ -16,9 +16,14 @@
 
 import { cached, TTL } from "../lib/cache";
 import { fetchTrack, searchTracks } from "../lib/clients/lrclib";
+import { rankTracks } from "../lib/ranking";
 import type { Track, TrackSummary, TrackVisuals } from "../lib/types";
 import { initCache } from "./cache/index.server";
-import { findArtwork, findPlayback } from "./genius.server";
+import {
+	findArtwork,
+	findCanonicalArtist,
+	findPlayback,
+} from "./genius.server";
 import { extractPalette } from "./palette.server";
 
 // Select the cache backend before any read-through runs (OD-001).
@@ -114,14 +119,70 @@ export function getTrackPlayback(
  * row afterwards (PRD §3.1) — bundling them here cost 2s per novel query,
  * which is the opposite of instant.
  */
-export function searchLyrics(
+export async function searchLyrics(
 	query: string,
 	limit = 8,
 ): Promise<TrackSummary[]> {
 	const normalised = query.trim().toLowerCase();
-	if (normalised.length < 2) return Promise.resolve([]);
+	if (normalised.length < 2) return [];
 
-	return cached(`search:v2:${limit}:${normalised}`, TTL.search, () =>
-		searchTracks(normalised, { limit }),
+	// v3: a POOL is fetched and cached, and the ordering is decided here.
+	//
+	// The obvious version of this — asking for twice the display limit — was
+	// wrong in a way that hid itself: `searchTracks` ranks and then slices, so
+	// a six-entry request was cut down using the ranking that has NO hint, and
+	// the entry the hint would have promoted was already gone by the time it
+	// arrived. Searching "lag ja gale" returns sixteen entries with the only
+	// Lata Mangeshkar upload at number ten; the boost was working perfectly on
+	// a list she was not in. Cache the pool, rank the pool (OD-028).
+	//
+	// Deliberately caching the RESULTS and not the ORDER. The ranking hint
+	// takes the better part of a second to arrive from Genius and is allowed to
+	// miss its deadline, so a first search can legitimately rank without it —
+	// and if the ordered list were what got stored, that one unlucky call would
+	// be served to everyone for the life of the entry. Ranking on read instead
+	// means the hint, which has its own long-lived cache, corrects the order
+	// from the second search onward. Both halves are cached; only the cheap
+	// pure step runs every time.
+	const [tracks, canonicalArtist] = await Promise.all([
+		cached(`search:pool:v3:${normalised}`, TTL.search, () =>
+			searchTracks(normalised, { limit: POOL }),
+		),
+		withDeadline(getCanonicalArtist(normalised), RANKING_HINT_MS),
+	]);
+
+	return rankTracks(tracks, { canonicalArtist }).slice(0, limit);
+}
+
+/**
+ * Who the song is by, cached hard.
+ *
+ * Genius answers in 760–950ms, which is too slow to block autocomplete on but
+ * far too useful to skip: it is the only signal that can tell Lata
+ * Mangeshkar's "Lag Ja Gale" from five Sanam covers of it. Cached for the same
+ * 30 days as every other Genius lookup, so exactly one search per query ever
+ * pays for it.
+ */
+function getCanonicalArtist(query: string): Promise<string | null> {
+	return cached(`genius:artist:v1:${query}`, TTL.track, () =>
+		findCanonicalArtist(query),
 	);
+}
+
+/** How long a ranking hint may hold up a search before it is dropped. */
+const RANKING_HINT_MS = 900;
+
+/**
+ * How many candidates to rank over. Generous, because the entry worth
+ * promoting is routinely well down LRCLIB's own order — and ranking can only
+ * ever reorder what it was given.
+ */
+const POOL = 40;
+
+/** Resolves to null rather than rejecting, and never leaves a rejection loose. */
+function withDeadline<T>(work: Promise<T>, ms: number): Promise<T | null> {
+	return Promise.race([
+		work.catch(() => null),
+		new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+	]);
 }

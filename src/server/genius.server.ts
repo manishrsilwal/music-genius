@@ -367,6 +367,50 @@ export function splitCandidates(
 	];
 }
 
+/**
+ * Who a free-text query is really about (OD-028).
+ *
+ * LRCLIB holds uploads; Genius holds an editorial catalogue with one primary
+ * artist per song. That difference is the only reliable way to tell a faithful
+ * cover from the original — searching "lag ja gale" on LRCLIB returns five
+ * Sanam uploads before it returns Lata Mangeshkar, and nothing in the LRCLIB
+ * record says which of them is the record everyone means.
+ *
+ * Returned as a HINT, never a filter. Ranking uses it to promote; nothing is
+ * removed on the strength of it, because Genius can be wrong and someone may
+ * have come for the cover.
+ */
+export async function findCanonicalArtist(
+	query: string,
+	signal?: AbortSignal,
+): Promise<string | null> {
+	if (!features.artwork) return null;
+
+	try {
+		const songs = await searchGenius(canonical(query), signal);
+		const top = songs[0];
+		const name = top?.primary_artist?.name;
+		if (!top?.title || !name) return null;
+
+		// The query has to actually be about this song. A query that matches
+		// nothing still returns Genius's best effort, and boosting on that
+		// would promote an unrelated artist to the top of the list.
+		// Genius files translations and romanisations under house accounts.
+		// "Tum Se Hi" came back as by "Genius Romanizations", which would then
+		// have been promoted over every real artist in the results.
+		if (/^genius\b/i.test(name)) return null;
+
+		const asked = canonical(query);
+		const found = canonical(top.title);
+		const recognised = asked.includes(found) || similarity(asked, found) >= 0.5;
+		return recognised ? name : null;
+	} catch (error) {
+		// A ranking hint is the most optional thing in the request.
+		console.warn("[genius] canonical artist lookup failed", error);
+		return null;
+	}
+}
+
 export async function findArtwork(
 	title: string,
 	artist: string,

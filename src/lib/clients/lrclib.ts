@@ -7,6 +7,7 @@
  */
 
 import { buildStanzas } from "../lrc";
+import { type RankingContext, rankTracks } from "../ranking";
 import type { Track, TrackSummary } from "../types";
 
 const BASE = "https://lrclib.net/api";
@@ -196,16 +197,6 @@ function toTrack(raw: LrclibRecord): Track {
  * recording; we keep the one most useful to us — synced lyrics first, then the
  * one with actual lyrics, then the longest (usually the least truncated).
  */
-/**
- * Some uploads set artistName to the same string as trackName — LRCLIB returns
- * a "Paranoid Android" whose artist is also "Paranoid Android". We cannot
- * recover the real artist from that, but we can stop it outranking a
- * correctly-tagged copy of the same recording.
- */
-function isWellFormed(item: TrackSummary): boolean {
-	return item.artist.toLowerCase() !== item.title.toLowerCase();
-}
-
 function dedupe(summaries: TrackSummary[]): TrackSummary[] {
 	const best = new Map<string, TrackSummary>();
 
@@ -222,14 +213,10 @@ function dedupe(summaries: TrackSummary[]): TrackSummary[] {
 		if (better > 0) best.set(key, item);
 	}
 
-	// Rank well-tagged entries above self-referential ones, then synced above
-	// unsynced. Stable within each tier, so LRCLIB's own ordering still shows
-	// through for entries of equal quality.
-	return [...best.values()].sort(
-		(a, b) =>
-			Number(isWellFormed(b)) - Number(isWellFormed(a)) ||
-			Number(b.hasSyncedLyrics) - Number(a.hasSyncedLyrics),
-	);
+	// Ordering moved to src/lib/ranking.ts (OD-028). Deduping is about the same
+	// recording uploaded twice; ranking is about which recording the reader
+	// meant, and conflating them is what let five covers outrank the original.
+	return [...best.values()];
 }
 
 /* -------------------------------------------------------------------------
@@ -238,7 +225,12 @@ function dedupe(summaries: TrackSummary[]): TrackSummary[] {
 
 export async function searchTracks(
 	query: string,
-	options: { limit?: number; signal?: AbortSignal } = {},
+	options: {
+		limit?: number;
+		signal?: AbortSignal;
+		/** Who the song is really by, when a caller was able to find out. */
+		ranking?: RankingContext;
+	} = {},
 ): Promise<TrackSummary[]> {
 	const trimmed = query.trim();
 	if (trimmed.length < 2) return [];
@@ -253,7 +245,11 @@ export async function searchTracks(
 	const usable = results.filter(
 		(r) => !r.instrumental && (r.syncedLyrics || r.plainLyrics),
 	);
-	return dedupe(usable.map(toSummary)).slice(0, options.limit ?? 8);
+	// Rank AFTER deduping and BEFORE slicing, or the limit would cut the list
+	// down using LRCLIB's order and then reorder the survivors — which is how
+	// an original that sat sixth would be dropped before it could be promoted.
+	const ranked = rankTracks(dedupe(usable.map(toSummary)), options.ranking);
+	return ranked.slice(0, options.limit ?? 8);
 }
 
 export async function fetchTrack(
