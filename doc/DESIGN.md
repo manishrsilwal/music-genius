@@ -748,6 +748,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | **D-068** Deep Dives: shared reasons said once above the row instead of on all three cards; song titles no longer clamped to fit; cards share a height and a baseline |
 | 2026-08-24 | **D-067** Devtools no longer ship to production; fourteen touch targets raised to 44px; a filled chip's label measured 4.46:1 and fixed |
 | 2026-08-24 | **D-066** Rufina, Domine and Cormorant Garamond trialled against the new design and declined — the first two ship no italic, the third under-sets the UI face by 19.6%; seven unused font packages removed |
 | 2026-08-24 | **D-065** The direction carried into every surface: glass retired for a solid surface system, elevation inverted on the bright ground after two measured contrast failures, one filled control per view, grain scoped to the reading page |

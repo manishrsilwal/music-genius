@@ -134,6 +134,57 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-068 — The Deep Dives row said the same thing three times
+**Built 2026-08-24.** Raised on looking at it: the shelf read badly. Four
+faults, three of them structural and one of them about information rather than
+layout.
+
+**A tag on all three cards describes the shelf, not a song.** Every card
+carried its full list of matched reasons, and the picker is good at its job —
+so all three routinely came back stamped "something tender", which is the
+reader's own answer read back to them three times. A label that appears on
+every card carries no information about any of them. The shared reasons are
+now stated once, above the row, where they are true of the thing they are
+attached to; each card keeps only what tells it apart from the other two, and
+often that is nothing, which is the honest answer — the editorial note is then
+the whole of the difference and gets the card to itself.
+
+> The code already knew. The comment being replaced reads "the three picks
+> share identical reasons 42% of the time", and concluded that repeated tags
+> "read as classification". They do not; they read as a stutter. The
+> measurement was right and the conclusion drawn from it was wrong.
+
+**A song title was clamped to keep three cards uniform.** `line-clamp(1)` on
+`.dives__title` turned "Wonderful Tonight" into "Wonderful…". The
+ui-ux-pro-max guideline names this exactly — *Essential Text Truncation*,
+severity Critical: "headings and distinguishing names need complete access; do
+not clamp essential meaning only to make cards uniform." Now two lines, with
+the second reserved from `sm` so the artist, the rule and the note align
+without any title being shortened to get them there. A longer title still
+clamps, and the card links to a page whose hero **is** the full title — a
+visible path to the whole name rather than a hover tooltip, which the same
+guideline forbids.
+
+**The grid stretched the wrong element.** `.dives` is a grid and stretches its
+children, but the child is motion's animation wrapper; the `<a>` inside it kept
+its content height. Three cards with different amounts of text therefore ended
+at three different depths. The wrapper now passes the stretch through.
+
+**Anchoring the note to the card floor was the obvious move and the wrong
+one.** `margin-top: auto` on `.dives__why` aligns the notes' *bottoms* — so
+with equal-height cards a three-line note begins higher than a two-line one and
+the rules sit at three different heights. Everything above it is fixed —
+square art, two reserved title lines, one artist line — so leaving it in flow
+puts the rule at the same y on all three, which is the alignment a reader
+scans by. Measured after the change: card bottoms, artist tops, rule tops and
+note tops all identical at 768px and 1280px.
+
+**Also from the skill:** *Compact Label Overflow*, severity High — "do not let
+one compact label wrap to a second line". The tag row wrapped to two rows on
+some cards and one on others, which is what pulled everything below out of
+alignment. Fewer tags fixes the cause; `white-space: nowrap` holds each label
+whole.
+
 ### D-067 — Auditing the surfaces the redesign touched
 **Built 2026-08-24.** D-065 restyled every interactive control in the product
 and verified them by eye. This is the pass that measured them, and it found

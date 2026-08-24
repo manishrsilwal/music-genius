@@ -5,9 +5,19 @@
 .dives {
 	display: grid;
 	gap: 0.75rem;
+	// Rows share a height, so the three cards end on one line (D-068).
+	align-items: stretch;
 
 	@include m.from("sm") {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	// The animation wrapper sat between the grid and the card, so the grid
+	// stretched the WRAPPER and the card inside it kept its content height —
+	// which is why three cards with different amounts of text ended at three
+	// different depths. The wrapper now passes the stretch through.
+	&__slot {
+		display: flex;
 	}
 
 	// A column at every width, so "why this" can span the card. The art and
@@ -15,6 +25,7 @@
 	&__card {
 		display: flex;
 		flex-direction: column;
+		width: 100%;
 		gap: 0.875rem;
 		padding: 0.875rem;
 		border-radius: var(--radius-card);
@@ -82,9 +93,31 @@
 		}
 	}
 
+	// Two lines, and the height of two lines whether it uses them or not.
+	//
+	// This was clamped to ONE line, which turned "Wonderful Tonight" into
+	// "Wonderful…" — a song title cut down to keep three cards uniform, which
+	// is the one thing truncation must never do to a name. Reserving the
+	// second line means the artist, the rule and the note below all sit at the
+	// same height across the row without any title being shortened to get
+	// them there (D-068).
+	//
+	// Two lines holds every title in the catalogue. A longer one still clamps,
+	// and the card links to a page whose hero IS the full title — a visible
+	// path to the whole name rather than a hover tooltip.
 	&__title {
 		font-family: var(--font-display);
-		@include m.line-clamp(1);
+		line-height: 1.25;
+		text-wrap: balance;
+		@include m.line-clamp(2);
+
+		// The reserved second line exists to align three cards standing side
+		// by side. Below `sm` they are stacked, each one its own row, so there
+		// is nothing to align to — reserving the line there would only put a
+		// blank gap under every single-line title on a phone.
+		@include m.from("sm") {
+			min-height: 2.5em;
+		}
 	}
 
 	&__artist {
@@ -96,7 +129,21 @@
 	// Why this song (D-045). Set below a rule rather than in a box: it is an
 	// aside from the curator, not a second piece of metadata competing with
 	// the title.
+	// Starts at the same height on every card, and is allowed to end wherever
+	// its note ends (D-068).
+	//
+	// Anchoring this to the card's FLOOR instead was the obvious move and the
+	// wrong one: with equal-height cards, a three-line note then begins higher
+	// than a two-line one, so the rules and the first lines of the notes sit
+	// at three different heights across the row. Everything above this is a
+	// fixed height — square art, two reserved title lines, one artist line —
+	// so leaving it in flow puts the rule at the same y on all three, which is
+	// the alignment a reader actually scans by. Short notes simply leave room
+	// at the bottom of their card.
 	&__why {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
 		padding-top: 0.75rem;
 		border-top: 1px solid var(--color-hairline);
 	}
@@ -111,6 +158,9 @@
 	// made, which is the one piece of editorial argument on the card; an
 	// outlined pill in the accent colour reads as a control the reader can
 	// press, and none of them are.
+	// One line, always. A compact label that wraps stops reading as a label,
+	// and a row of them wrapping to different depths on each card was what
+	// pulled the notes out of alignment.
 	&__why-tag {
 		font-family: var(--font-ui);
 		font-weight: 600;
@@ -119,6 +169,7 @@
 		background: var(--color-hover-strong);
 		color: var(--color-ink);
 		white-space: nowrap;
+		min-width: 0;
 	}
 
 	&__why-note {
@@ -176,5 +227,20 @@
 		margin-inline-start: auto;
 		flex: none;
 		@include m.line-clamp(1);
+	}
+}
+
+// What all three picks have in common, said once (D-068).
+//
+// It used to be a tag on every card. A label that appears on all three
+// describes the shelf, not any song on it — so it belongs above the row,
+// where it is true of the thing it is attached to, and the cards keep only
+// what tells them apart.
+.dives__shared {
+	margin: 0 0 0.75rem;
+
+	&-value {
+		color: var(--track-accent);
+		font-weight: 600;
 	}
 }

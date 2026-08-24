@@ -26,48 +26,88 @@ export function DeepDives({
 	picks: CuratedTrack[];
 	preferences: Preferences;
 }) {
+	/*
+	 * Split the reasons into what the picks SHARE and what tells them apart
+	 * (D-068).
+	 *
+	 * Every card used to carry its full list, and the picker is good at its
+	 * job — so all three routinely came back stamped "something tender", which
+	 * is the reader's own answer read back to them three times. A label on
+	 * every card carries no information about any of them; what the reader
+	 * needs is the part that differs. The shared half is stated once, above
+	 * the row, where it is true of the shelf rather than of a song.
+	 */
+	const explained = picks.map((pick) => explainPick(pick, preferences));
+	const lists = explained.map(({ matched }) =>
+		matched.length > 0 ? matched : ["today's rotation"],
+	);
+	const shared = (lists[0] ?? []).filter((reason) =>
+		lists.every((list) => list.includes(reason)),
+	);
+
 	return (
-		<motion.div
-			className="dives"
-			variants={staggerVariants}
-			initial="hidden"
-			animate="visible"
-		>
-			{picks.map((pick) => (
-				<motion.div
-					key={`${pick.artist}-${pick.title}`}
-					variants={riseVariants}
-				>
-					<Link
-						to="/track/$trackId"
-						params={{ trackId: pick.lrclibId }}
-						className="dives__card"
+		<>
+			{shared.length > 0 && (
+				<p className="dives__shared text-caption text-ink-muted">
+					All three match{" "}
+					<span className="dives__shared-value">{joinReasons(shared)}</span>.
+				</p>
+			)}
+
+			<motion.div
+				className="dives"
+				variants={staggerVariants}
+				initial="hidden"
+				animate="visible"
+			>
+				{picks.map((pick, index) => (
+					<motion.div
+						className="dives__slot"
+						key={`${pick.artist}-${pick.title}`}
+						variants={riseVariants}
 					>
-						{/*
-						  The art and the name are one row on a phone and a
-						  column from `sm`. The reason sits OUTSIDE that row so
-						  it spans the whole card at every width — nested inside
-						  it, a phone squeezed it into the column beside the
-						  artwork (D-046).
-						*/}
-						<span className="dives__head">
-							<DiveArt title={pick.title} artist={pick.artist} />
-							<span className="min-w-0">
-								<span className="dives__title text-lead text-ink">
-									{pick.title}
-								</span>
-								<span className="dives__artist mt-0.5 block text-caption">
-									{pick.artist}
+						<Link
+							to="/track/$trackId"
+							params={{ trackId: pick.lrclibId }}
+							className="dives__card"
+						>
+							{/*
+							  The art and the name are one row on a phone and a
+							  column from `sm`. The reason sits OUTSIDE that row so
+							  it spans the whole card at every width — nested inside
+							  it, a phone squeezed it into the column beside the
+							  artwork (D-046).
+							*/}
+							<span className="dives__head">
+								<DiveArt title={pick.title} artist={pick.artist} />
+								<span className="min-w-0">
+									<span className="dives__title text-lead text-ink">
+										{pick.title}
+									</span>
+									<span className="dives__artist mt-0.5 block text-caption">
+										{pick.artist}
+									</span>
 								</span>
 							</span>
-						</span>
 
-						<WhyThis pick={pick} preferences={preferences} />
-					</Link>
-				</motion.div>
-			))}
-		</motion.div>
+							<WhyThis
+								note={pick.note}
+								reasons={(lists[index] ?? []).filter(
+									(reason) => !shared.includes(reason),
+								)}
+							/>
+						</Link>
+					</motion.div>
+				))}
+			</motion.div>
+		</>
 	);
+}
+
+/** "a and b", "a, b and c" — a list a person would say out loud. */
+function joinReasons(reasons: string[]): string {
+	if (reasons.length <= 1) return reasons[0] ?? "";
+	return `${reasons.slice(0, -1).join(", ")} and ${reasons.at(-1)}`;
 }
 
 /**
@@ -78,31 +118,23 @@ export function DeepDives({
  * are no axes, so it says the pick came from the day's rotation rather than
  * claiming a reason it does not have.
  */
-function WhyThis({
-	pick,
-	preferences,
-}: {
-	pick: CuratedTrack;
-	preferences: Preferences;
-}) {
-	const { matched, note } = explainPick(pick, preferences);
-
-	// Chips rather than a sentence. The three picks share identical reasons
-	// 42% of the time, and three repetitions of "For longing, the honesty and
-	// deep cuts" reads as a stutter — where repeated tags read as
-	// classification, which is what they are.
-	const reasons = matched.length > 0 ? matched : ["today's rotation"];
-
+function WhyThis({ note, reasons }: { note: string; reasons: string[] }) {
+	// Only what sets this pick apart from the other two — the reasons all
+	// three share are stated once, above the row (D-068). Often that leaves
+	// nothing, and nothing is the right answer: the note below is then the
+	// whole of what distinguishes this song, and it gets the card to itself.
 	return (
 		<span className="dives__why block">
-			<span className="dives__why-tags">
-				{reasons.map((reason) => (
-					<span key={reason} className="dives__why-tag text-micro">
-						{reason}
-					</span>
-				))}
-			</span>
-			<span className="dives__why-note mt-2 block text-caption">{note}</span>
+			{reasons.length > 0 && (
+				<span className="dives__why-tags">
+					{reasons.map((reason) => (
+						<span key={reason} className="dives__why-tag text-micro">
+							{reason}
+						</span>
+					))}
+				</span>
+			)}
+			<span className="dives__why-note block text-caption">{note}</span>
 		</span>
 	);
 }
