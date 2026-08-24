@@ -57,9 +57,17 @@
 		// Inside a filled chip both halves sit on the accent, so the quiet one
 		// has to be quiet by opacity rather than by colour — the faint ink is
 		// measured against the page, not against a bright fill.
+		//
+		// 0.78, and the number is measured (D-067). 0.7 composites to 4.46:1
+		// against the worst accent the palette extractor can produce — under
+		// the bar by four hundredths. It happens never to be reached today,
+		// because the chips only appear on the landing where the accent is
+		// always lime (7.48:1), but a value that is only safe while a
+		// component stays where it was born is not safe. 0.78 clears every
+		// accent at 5.2:1 and is still visibly the quieter half.
 		.taste__chip[data-open] & {
 			color: inherit;
-			opacity: 0.7;
+			opacity: 0.78;
 		}
 	}
 

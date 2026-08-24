@@ -140,10 +140,17 @@
 		gap: 0.375rem 1.5rem;
 	}
 
+	// 44px, DECLARED rather than arrived at (D-067). These rows measured 40px
+	// at 390px — a dozen of them, and the main way into a track on a phone,
+	// every one under the size this product holds itself to (D-035). Padding
+	// alone got them to 43.99px, which is the kind of answer that depends on
+	// the line-height of whatever face is loaded; `min-height` states the
+	// contract and cannot drift when the type does.
 	&__row {
 		display: flex;
 		align-items: baseline;
 		gap: 0.625rem;
+		min-height: 2.75rem;
 		padding: 0.5rem 0.75rem;
 		border-radius: var(--radius-pill);
 		transition: background-color 0.18s var(--ease-editorial);

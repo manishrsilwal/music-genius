@@ -722,6 +722,29 @@
     mix-blend-mode: overlay;
   }
 
+  /* A hit area for a control that is only words (D-067).
+     The Sass `tap-target` mixin does this for components with their own
+     stylesheet; these are the ones styled entirely with utilities in the JSX —
+     "Clear" on the reading shelf and "Search another" at the foot of a track —
+     which measured 20px and 18px tall. Both are the only control of their kind
+     on the screen, and one of them is how a reader leaves a track on a phone.
+
+     Extends the target without changing how big the control looks: padding
+     would push the text off its own baseline in a row that is aligned to it. */
+  .tap {
+    position: relative;
+  }
+
+  .tap::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: max(100%, 2.75rem);
+    height: max(100%, 2.75rem);
+  }
+
   /* --- Skip to content ----------------------------------------------------
      A track page is one long scroll of lyrics, so a keyboard reader should not
      have to tab through the chrome to reach the words. Off screen until

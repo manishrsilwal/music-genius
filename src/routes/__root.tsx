@@ -114,18 +114,34 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				    (D-062). Renders nothing. */}
 				<RouteFocus />
 				{children}
-				<TanStackDevtools
-					config={{
-						position: "bottom-right",
-					}}
-					plugins={[
-						{
-							name: "Tanstack Router",
-							render: <TanStackRouterDevtoolsPanel />,
-						},
-						TanStackQueryDevtools,
-					]}
-				/>
+				{/*
+				  Development only (D-067).
+				  
+				  This shipped unconditionally — a scaffolder default nobody
+				  gated — so the production build put a floating devtools
+				  trigger in the bottom-right corner of every page, which is
+				  exactly where the Discover button lives. A reader got a
+				  control that is not part of the product sitting on top of the
+				  one that is, plus the devtools bundle on every page load.
+				  
+				  `import.meta.env.DEV` is statically replaced at build time, so
+				  the whole subtree — and its imports — drop out of the
+				  production bundle rather than merely rendering nothing.
+				*/}
+				{import.meta.env.DEV && (
+					<TanStackDevtools
+						config={{
+							position: "bottom-right",
+						}}
+						plugins={[
+							{
+								name: "Tanstack Router",
+								render: <TanStackRouterDevtoolsPanel />,
+							},
+							TanStackQueryDevtools,
+						]}
+					/>
+				)}
 				<Scripts />
 			</body>
 		</html>

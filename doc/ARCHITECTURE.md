@@ -134,6 +134,73 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-067 — Auditing the surfaces the redesign touched
+**Built 2026-08-24.** D-065 restyled every interactive control in the product
+and verified them by eye. This is the pass that measured them, and it found
+three real defects — plus two false alarms that were properties of the harness
+rather than of the page.
+
+**The devtools shipped to production.** `<TanStackDevtools>` was mounted
+unconditionally in `__root.tsx` — a scaffolder default nobody gated — so the
+production build put a floating trigger in the bottom-right corner of every
+page, which is exactly where the Discover button lives. A reader got a control
+that is not part of the product sitting on top of the one that is, plus the
+devtools bundle on every page load. Now behind `import.meta.env.DEV`, which is
+statically replaced at build time, so the subtree **and its imports** drop out
+of the bundle rather than merely rendering nothing. Verified by grepping the
+built assets: no `tsd-trigger`, no devtools reference, and the only button in
+that corner is `.discover`.
+
+**Fourteen of twenty-five touch targets failed at 390px.** The browse rows —
+`.also__row` and `.recent__link`, which are the main way into a track on a
+phone — measured 40px against the 44px this product holds itself to (D-035).
+Two text-only controls were worse: "Clear" at 20px and "Search another" at
+18px, the latter being how a reader leaves a track. Fixed with a declared
+`min-height: 2.75rem` on the rows and a `.tap` utility for the two controls
+styled entirely with utilities in the JSX.
+
+> Padding arithmetic got the rows to **43.99px**, which rounds to 44 and passes
+> a sloppy check. `min-height` states the contract instead of deriving it from
+> a line-height that changes with the loaded face.
+
+**A filled chip's quiet label measured 4.46:1.** `.taste__chip-label` inside an
+open chip is `color: inherit; opacity: 0.7` over the accent fill. Against the
+worst accent the extractor can produce that composites to 4.46:1 — under the
+bar by four hundredths. It is never actually reached today, because the chips
+only appear on the landing where the accent is always lime (7.48:1) — but a
+value that is only safe while a component stays where it was born is not safe.
+0.78 clears every accent at 5.2:1.
+
+### Two false alarms, and why they are worth recording
+
+Both would have been reported as serious regressions by an audit that trusted
+its own output.
+
+**"No element on the page has a focus ring."** `el.focus()` from script does not
+match `:focus-visible` — the browser only applies it when it judges the focus
+came from the keyboard. Driving real Tab keypresses through BiDi's
+`input.performActions` produced the same answer, which looked like confirmation
+and was not: `:focus` was not matching *either*, because a headless window is
+not "active" and focus styles do not apply in an inactive document.
+`browsingContext.activate` does not fix it. The question was settled instead by
+reading the compiled stylesheet — the `:focus-visible` rules are present, and
+the only two `outline: none` rules in the entire build are the two intended
+ones (`.search__input:focus`, whose 2px border is the indicator at 10.39:1, and
+`[tabindex="-1"]:focus` from D-062).
+
+**"The track page renders completely unstyled on mobile."** A stale browser
+cache serving an older route chunk. Caught by checking which stylesheet hash the
+document had actually loaded before reporting anything.
+
+> The lesson both times: when a check reports that something basic is broken
+> everywhere, suspect the check. A real regression is rarely uniform.
+
+**Still open, and a design decision rather than a defect:** the Discover button
+is `position: fixed` in the bottom-right and permanently covers part of the
+reading column on a phone. Standard floating-action behaviour, but this is a
+product whose claim is that the words deserve to be read, which makes it worth
+a ruling rather than a default.
+
 ### D-066 — Two typefaces tried against the new design, both declined
 **Trialled and reverted 2026-08-24.** Fraunces and Outfit stay. Recorded
 because the trial produced a measurement worth keeping, and because the same

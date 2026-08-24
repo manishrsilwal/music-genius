@@ -302,7 +302,7 @@ function TrackPage() {
 			<footer className="track-shell__foot text-center">
 				<Link
 					to="/"
-					className="text-caption uppercase tracking-label text-accent"
+					className="tap text-caption uppercase tracking-label text-accent"
 				>
 					Search another
 				</Link>

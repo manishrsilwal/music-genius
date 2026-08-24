@@ -36,7 +36,7 @@ export function ContinueReading({
 				<button
 					type="button"
 					onClick={onClear}
-					className="text-micro uppercase tracking-label text-ink-faint hover:text-ink-muted"
+					className="tap text-micro uppercase tracking-label text-ink-faint hover:text-ink"
 				>
 					Clear
 				</button>

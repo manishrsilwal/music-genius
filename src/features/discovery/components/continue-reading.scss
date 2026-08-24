@@ -28,12 +28,16 @@
 		}
 	}
 
+	// Same declared 44px as the `also` shelf (D-067). The link drives the
+	// row's height, so the contract lives here — the remove button beside it
+	// already carries its own `tap-target`.
 	&__link {
 		flex: 1;
 		min-width: 0;
 		display: flex;
-		align-items: baseline;
+		align-items: center;
 		gap: 0.625rem;
+		min-height: 2.75rem;
 		padding: 0.5rem 0.25rem 0.5rem 0.75rem;
 	}
 
