@@ -748,6 +748,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | **D-073** A tool for growing the catalogue: 22 of 32 cells hold fewer than three tracks, and no ranking change fixes that — it proposes and classifies, but never writes the note or applies anything |
 | 2026-08-24 | **D-072** Shelves rotate per visit rather than per day, remember what has been read, and can be re-rolled — 3 distinct tracks became 4–23 depending on how specific the answers were |
 | 2026-08-24 | **D-071** Search ranks by which recording an entry is, not just how it is tagged; a variant notice and a version switcher on the track page; six curated picks repointed at the original |
 | 2026-08-24 | **D-070** Playback resolves for 27 of 30 tracks instead of 17 — the Genius query was sent raw while only the scoring was cleaned |

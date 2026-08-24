@@ -134,6 +134,58 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-073 — The constraint is the catalogue, not the algorithm
+**Built 2026-08-24.** D-072 got a reader who answers all three questions from
+three distinct tracks to four, and that was the ceiling: there are only four
+songs in the catalogue that are longing *and* confessional *and* deep cuts. No
+ranking technique produces a fifth.
+
+Measured properly, the shape of the problem is worse than that one cell:
+
+```
+56 tracks across 32 cells (4 moods × 4 pulls × 2 scored familiarities)
+  empty      5
+  thin (1–2) 17
+  healthy    10
+```
+
+**Twenty-two of thirty-two cells hold fewer than three tracks.** Language and
+era are balanced — english 27 / hindi 29, classic 25 / modern 31 — so the gaps
+are entirely mood × pull.
+
+`scripts/propose-catalogue.ts` reports that, proposes candidates for the
+thinnest cells, resolves each to a real LRCLIB entry, and classifies it. It
+**proposes and never applies**.
+
+**It refuses to write the `note`.** The type already says the note is written
+rather than generated (D-045) — it is the editorial half of "why this", and a
+model asked to justify a pick invents a rationale it had no part in. Every
+emitted entry carries an empty note above a TODO, so an unreviewed paste is
+obvious on sight rather than shipping quietly.
+
+**Resolution runs through the product's own search**, ranking and all. If
+`searchLyrics` cannot find a clean synced entry, neither can a reader, and the
+card would be a dead end — two of six candidates were rejected on exactly that.
+It is also a standing test of D-071: the ranking is being used, not just
+tested.
+
+### What running it taught
+
+**The cell a track fills is an outcome, not an instruction.** The suggester
+guesses from a title and an artist; the classifier reads the words. They
+disagree often and the classifier is right — "Fast Car" was proposed for
+*tender · wordplay* and came back *longing · storytelling*, which is what the
+song is. So filling a named gap takes more candidates than gaps, and the tool
+now reports where each track actually landed and whether that cell was thin.
+
+**LRCLIB casing is not editorial casing** — "EMINEM", "the Mountain Goats",
+"channa mereya". Every existing catalogue entry is properly cased, so anything
+shouting or whispering is flagged in the output and in the emitted comment.
+
+> **Not done, deliberately:** no tracks were added. Which songs belong in the
+> catalogue is the editorial decision this whole product is built on, and the
+> tool exists to remove the typing, not the judgement.
+
 ### D-072 — The same three songs, forever
 **Built 2026-08-24.** Reported as "the suggestions are the same if I select the
 same parameters, or skip entirely". Both true, and for the same reason: the
