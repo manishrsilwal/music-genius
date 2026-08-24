@@ -58,12 +58,15 @@ function getGenius(title: string, artist: string) {
  * for. PRD §4/§5: cached for 30 days, since lyrics effectively never change.
  */
 export function getTrack(id: string): Promise<Track | null> {
+	// v3: `meaningfulAlbum` refuses view-count debris (D-080) — "23M views"
+	// survived the fix through this cache until the bump, exactly as the note
+	// below predicts.
 	// v2: `meaningfulAlbum` changed what a stored track looks like (D-043), and
 	// entries live for 30 days. Without a bump the reader keeps being served
 	// the pre-fix shape for every track they have already opened — which is
 	// exactly how "Arijit Singh · Arijit Singh" survived a fix that worked
 	// (D-049). Bump this whenever the parsed shape changes.
-	return cached(`track:v2:${id}`, TTL.track, () => fetchTrack(id));
+	return cached(`track:v3:${id}`, TTL.track, () => fetchTrack(id));
 }
 
 /**

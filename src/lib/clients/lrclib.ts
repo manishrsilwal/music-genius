@@ -147,6 +147,10 @@ export function meaningfulAlbum(
 	const value = clean(album);
 	if (!value) return null;
 
+	// YouTube-scrape debris, not a title: "23M views", "4.5K Views". An album
+	// has never been called this; a lyric-channel rip's metadata often is.
+	if (/^[\d.,]+\s*[kmb]?\s*views?$/i.test(value)) return null;
+
 	// Punctuation and spacing only, so "Radiohead - Creep", "Radiohead: Creep"
 	// and "Radiohead  Creep" all fold together. Bracketed suffixes are left
 	// alone deliberately: "(Redux)" and "(Remastered)" say which recording this

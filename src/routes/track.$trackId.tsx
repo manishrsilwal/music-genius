@@ -22,7 +22,6 @@ import { PaletteStyle } from "@/features/scrollytelling/components/palette-style
 import { TrackHero } from "@/features/scrollytelling/components/track-hero";
 import type { LinePosition } from "@/lib/lrc";
 import { detectLang } from "@/lib/script";
-import type { Track, TrackVisuals } from "@/lib/types";
 import {
 	getSiteOriginFn,
 	getTrackFn,
@@ -147,50 +146,12 @@ export const Route = createFileRoute("/track/$trackId")({
 	errorComponent: RouteError,
 });
 
-/**
- * The bar, with artwork resolved on its own promise (D-055).
- *
- * Split out so the playback `<Await>` does not nest a second one inline in
- * both of its branches — where the two copies would be free to drift apart.
- */
-function StreamingPlaybackBar({
-	track,
-	visuals,
-	videoId,
-	resolving,
-	onSyncChange,
-}: {
-	track: Track;
-	visuals: Promise<TrackVisuals>;
-	videoId: string | null;
-	resolving: boolean;
-	onSyncChange: (position: LinePosition | null) => void;
-}) {
-	const bar = (artwork: string | null) => (
-		<PlaybackBar
-			videoId={videoId}
-			resolving={resolving}
-			title={track.title}
-			artist={track.artist}
-			artwork={artwork}
-			stanzas={track.stanzas}
-			synced={track.synced}
-			lyricsDuration={track.duration}
-			onSyncChange={onSyncChange}
-		/>
-	);
-
-	return (
-		<Await promise={visuals} fallback={bar(null)}>
-			{({ artwork }) => bar(artwork?.thumbnail ?? null)}
-		</Await>
-	);
-}
-
 function TrackPage() {
 	const { track, visuals, playback } = Route.useLoaderData();
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [syncPosition, setSyncPosition] = useState<LinePosition | null>(null);
+	// The hero's cover is the record now (D-080): it spins on this.
+	const [playing, setPlaying] = useState(false);
 
 	// Opening the page is the record — not scrolling, not finishing. A reader
 	// who opened something and left still wants to find it again (D-056).
@@ -240,6 +201,7 @@ function TrackPage() {
 			<TrackHero
 				track={track}
 				visuals={visuals}
+				playing={playing}
 				notice={<VariantNotice title={track.title} />}
 				/*
 				 * The bar mounts on the first paint, not when the data arrives
@@ -259,22 +221,30 @@ function TrackPage() {
 					<Await
 						promise={playback}
 						fallback={
-							<StreamingPlaybackBar
-								track={track}
-								visuals={visuals}
+							<PlaybackBar
 								videoId={null}
 								resolving
+								title={track.title}
+								artist={track.artist}
+								stanzas={track.stanzas}
+								synced={track.synced}
+								lyricsDuration={track.duration}
 								onSyncChange={setSyncPosition}
+								onPlayingChange={setPlaying}
 							/>
 						}
 					>
 						{({ youtubeId }) => (
-							<StreamingPlaybackBar
-								track={track}
-								visuals={visuals}
+							<PlaybackBar
 								videoId={youtubeId}
 								resolving={false}
+								title={track.title}
+								artist={track.artist}
+								stanzas={track.stanzas}
+								synced={track.synced}
+								lyricsDuration={track.duration}
 								onSyncChange={setSyncPosition}
+								onPlayingChange={setPlaying}
 							/>
 						)}
 					</Await>

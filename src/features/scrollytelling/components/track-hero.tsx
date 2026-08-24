@@ -25,6 +25,7 @@ export function TrackHero({
 	visuals,
 	player,
 	notice,
+	playing = false,
 }: {
 	track: Track;
 	visuals: Promise<TrackVisuals>;
@@ -37,6 +38,13 @@ export function TrackHero({
 	 * business knowing how the hero is laid out.
 	 */
 	notice?: ReactNode;
+	/**
+	 * Whether the song is playing (D-080). The cover is the page's record: it
+	 * spins while the song plays and holds its angle when paused, the way the
+	 * bar's miniature used to — one artwork carrying the state instead of two
+	 * copies of the same image splitting it.
+	 */
+	playing?: boolean;
 }) {
 	return (
 		<motion.header
@@ -87,10 +95,12 @@ export function TrackHero({
 							<motion.div
 								className="hero__cover"
 								aria-hidden="true"
+								data-spinning={playing || undefined}
 								variants={riseVariants}
 								transition={transition.cinematic}
 							>
 								<img src={artwork.full} alt="" />
+								<span className="hero__spindle" />
 							</motion.div>
 						) : null
 					}

@@ -748,6 +748,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-25 | **D-080** The cover is the record; the player is a card with a real scrub row; one Sync control replaces a Resync that could never render; drift threshold retuned on a measured false positive |
 | 2026-08-25 | **D-079** Desktop split view — sticky rail (art, title, player) beside a scrolling lyric column; the player joins the words' axis and the dock retires itself at `lg` |
 | 2026-08-24 | **D-078** The hero lockup: cover beside the words on wide screens, above them on a phone; blurred ground drops to 0.45; centred fallback when no art resolves |
 | 2026-08-24 | **D-077** Register cleared: og:image opens at the hook, a component-test rig with a first SectionHeading test, the dead annotation rule removed, analytics returned as a ruling |

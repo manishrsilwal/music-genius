@@ -134,6 +134,47 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-080 — One record, and a sync the reader commands
+**Built 2026-08-25.** Four reports on the split-view player, and pulling the
+first thread unravelled the rest.
+
+**The artwork was on screen three times** — lockup cover, the bar's spinning
+miniature, the video thumbnail. Now the cover IS the record: a disc with the
+track-accent spindle that spins while the song plays and holds its angle when
+paused, the attributes the miniature used to carry, moved to the artwork that
+was already the page's centrepiece. The bar's record is gone, and with it the
+`artwork` prop and the entire `StreamingPlaybackBar` wrapper, which existed
+only to resolve art for the miniature.
+
+**The seekbar was missing because the dock retired** (D-079): it rendered
+behind `docked &&`, and the rail never docks. The scrub row — elapsed, track,
+total — now renders whenever there is a player, docked or not; docked, it
+collapses back to the full-bleed top edge.
+
+**"Sync button missing" was a condition that could never be true.** The old
+Resync pill required `manual && syncing`, and D-075's drift made `syncing`
+permanently false — so on any drifted track the one control that could have
+helped could not render. There is now a single Sync toggle, shown whenever
+timings exist: pressed while the canvas follows, and able to overrule the
+drift default in both directions. D-075 withheld sync with no recourse; the
+reader has the last word now, with the notice standing down once they use it.
+
+**And the lyrics "not being synced" was the drift threshold punishing honest
+metadata.** Seven seconds was tuned on one true positive — a 63-second
+official-video intro — and then fired on "Choo Lo": video 234s, LRCLIB claims
+252s. Same cut, sloppy uploader-typed duration field. A false positive used to
+be harmless caution; once it sets the sync *default* it turns sync off for
+readers whose timings were fine. Retuned to 20 — every measured different-cut
+delta clears it, ordinary metadata slop stays under it — with both real cases
+pinned in the tests.
+
+**Two strays fixed on the way.** "The Local Train · 23M views": LRCLIB's album
+field carried a YouTube view count, now refused by `meaningfulAlbum` — and it
+survived the fix through the 30-day track cache until the version bump, exactly
+as that cache's own comment predicts. Headless verification could not start
+YouTube playback (autoplay policy), so spin-on-play is verified by inspection:
+it is the same one-line `data-spinning` wiring the record used.
+
 ### D-079 — The split view: a rail that stays, words that scroll
 **Built 2026-08-25.** Two reports on the beside hero, one fix. The player pill
 sat centred under a left-aligned lockup — two axes in one composition — and

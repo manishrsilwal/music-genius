@@ -160,3 +160,20 @@ describe("meaningfulAlbum", () => {
 		expect(meaningfulAlbum(undefined, "t", "a")).toBeNull();
 	});
 });
+
+describe("meaningfulAlbum — scrape debris", () => {
+	it("refuses a view count posing as an album", () => {
+		// Seen live on "Choo Lo": albumName was "23M views", straight off a
+		// lyric channel's YouTube scrape, and it rendered in the hero credit.
+		expect(
+			meaningfulAlbum("23M views", "Choo Lo", "The Local Train"),
+		).toBeNull();
+		expect(meaningfulAlbum("4.5K Views", "x", "y")).toBeNull();
+		expect(meaningfulAlbum("1,200,000 views", "x", "y")).toBeNull();
+	});
+
+	it("does not refuse an album that merely contains a number", () => {
+		expect(meaningfulAlbum("25", "Hello", "Adele")).toBe("25");
+		expect(meaningfulAlbum("4:44", "The Story of O.J.", "JAY-Z")).toBe("4:44");
+	});
+});

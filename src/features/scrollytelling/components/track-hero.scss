@@ -90,17 +90,31 @@
 		}
 	}
 
-	// The cover as an object — sharp where the ground behind it is a wash.
+	// The cover is the record (D-080). One artwork on the page, and it
+	// carries the play state: spinning while the song plays, holding its
+	// angle when paused — the attributes the bar's miniature used to have,
+	// moved to the artwork that was already the page's centrepiece. The
+	// duplicate in the player is gone.
 	&__cover {
+		position: relative;
 		width: clamp(6rem, 24vw, 10rem);
 		aspect-ratio: 1;
-		border-radius: var(--radius-nested);
+		border-radius: 50%;
 		overflow: hidden;
 		background: var(--color-well);
-		box-shadow: var(--shadow-3);
+		box-shadow:
+			inset 0 0 0 1px var(--color-hairline),
+			var(--shadow-3);
+
+		animation: cover-spin 14s linear infinite;
+		animation-play-state: paused;
+
+		&[data-spinning] {
+			animation-play-state: running;
+		}
 
 		@include m.from("md") {
-			width: 100%;
+			width: min(16rem, 100%);
 		}
 
 		// Bounded in the rail: the cover is context, not the page.
@@ -113,6 +127,25 @@
 			height: 100%;
 			object-fit: cover;
 		}
+
+		// A spinning disc is decoration; the toggle and the status line carry
+		// the same fact. Held still rather than removed, so the artwork stays.
+		@include m.reduced-motion {
+			animation: none;
+		}
+	}
+
+	// The label at the centre of the record, in the track's own colour —
+	// the same detail the bar's miniature carried (D-065, D-080).
+	&__spindle {
+		position: absolute;
+		inset: 0;
+		margin: auto;
+		width: 18%;
+		aspect-ratio: 1;
+		border-radius: 50%;
+		background: var(--track-accent);
+		box-shadow: 0 0 0 3px oklch(0 0 0 / 0.35);
 	}
 
 	// With no cover resolved the lockup is text alone, and the empty grid
@@ -198,5 +231,11 @@
 			// balance would rag both sides inside the beside column.
 			text-wrap: pretty;
 		}
+	}
+}
+
+@keyframes cover-spin {
+	to {
+		transform: rotate(1turn);
 	}
 }

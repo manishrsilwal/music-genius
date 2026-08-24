@@ -264,6 +264,13 @@ describe("timingsDrift", () => {
 		expect(timingsDrift(207, 200)).toBe(false);
 	});
 
+	it("accepts sloppy uploader metadata on the same cut", () => {
+		// "Choo Lo": the video runs 234s, LRCLIB claims 252. The timings fit
+		// the recording; only the typed-in duration field is loose. Flagging
+		// this turned sync off by default for a track where it worked.
+		expect(timingsDrift(234, 252)).toBe(false);
+	});
+
 	it("is symmetric — a shorter upload drifts too", () => {
 		// A radio edit against full-length timings is as wrong as an extended
 		// video against them.

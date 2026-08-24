@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { type LinePosition, linePositionAt, timingsDrift } from "@/lib/lrc";
 import { riseVariants, transition } from "@/lib/motion";
@@ -23,11 +23,11 @@ export function PlaybackBar({
 	resolving,
 	title,
 	artist,
-	artwork,
 	stanzas,
 	synced,
 	lyricsDuration,
 	onSyncChange,
+	onPlayingChange,
 }: {
 	/** Null while the lookup is still running, and null if it found nothing. */
 	videoId: string | null;
@@ -39,8 +39,6 @@ export function PlaybackBar({
 	resolving: boolean;
 	title: string;
 	artist: string;
-	/** Null until the Genius lookup streams in, or if it found nothing. */
-	artwork: string | null;
 	stanzas: Stanza[];
 	/** Without timestamps there is nothing to sync to — audio still plays. */
 	synced: boolean;
@@ -52,6 +50,12 @@ export function PlaybackBar({
 	 */
 	lyricsDuration: number | null;
 	onSyncChange: (position: LinePosition | null) => void;
+	/**
+	 * Play state, reported upward so the hero's cover can spin (D-080). The
+	 * record left the bar — the page's one artwork carries the play state now,
+	 * instead of a second copy of the same image announcing it in miniature.
+	 */
+	onPlayingChange?: (playing: boolean) => void;
 }) {
 	const mountRef = useRef<HTMLDivElement>(null);
 	const sentinelRef = useRef<HTMLDivElement>(null);
@@ -80,8 +84,33 @@ export function PlaybackBar({
 	// video does not promise.
 	const drifted = synced && timingsDrift(duration, lyricsDuration);
 
-	const syncing = synced && playing && !drifted;
+	/*
+	 * Whether the reader WANTS the canvas following the song (D-080).
+	 *
+	 * Null means they have not said, and the default answers for them: on,
+	 * unless the timings belong to a different cut (D-075) — in which case
+	 * sync starts off and the notice says why. The button below lets them
+	 * overrule either way, which D-075 never offered: drift used to withhold
+	 * sync with no recourse, and the "Resync" pill required `manual && syncing`
+	 * — a pair that drift made permanently false, so the one control that
+	 * could have helped could never render.
+	 */
+	const [wantSync, setWantSync] = useState<boolean | null>(null);
+	const desire = wantSync ?? !drifted;
+
+	const syncing = synced && playing && desire;
 	const { manual, resume } = useManualOverride(syncing);
+
+	/** One control for "follow the song": resumes after a manual scroll too. */
+	const followOn = syncing && !manual;
+	const toggleSync = () => {
+		if (followOn) {
+			setWantSync(false);
+		} else {
+			setWantSync(true);
+			resume();
+		}
+	};
 
 	// Derived, then pushed up. Recomputed each poll tick; linePositionAt is a
 	// backwards scan over a few dozen entries, so this is cheap.
@@ -97,6 +126,11 @@ export function PlaybackBar({
 	// change-only behaviour for free.
 	const latest = useRef<LinePosition | null>(null);
 	latest.current = position;
+
+	// The hero's cover spins on this (D-080).
+	useEffect(() => {
+		onPlayingChange?.(playing);
+	}, [playing, onPlayingChange]);
 
 	// The effect reads `latest.current`, a ref, so `reportedKey` is a trigger
 	// rather than a read. It is what gives the effect its change-only
@@ -127,8 +161,8 @@ export function PlaybackBar({
 				? (reason ?? "Playback unavailable")
 				: !ready
 					? "Loading"
-					: playing && drifted
-						? "Timings are for a different cut"
+					: playing && drifted && wantSync !== true
+						? "Timings are from another cut"
 						: playing && !synced
 							? "No timings"
 							: playing && manual
@@ -152,30 +186,6 @@ export function PlaybackBar({
 				animate="visible"
 				transition={transition.editorial}
 			>
-				{/* Full-bleed across the top edge when docked (D-040). */}
-				{docked && !unavailable && (
-					<Seekbar
-						currentTime={currentTime}
-						duration={duration}
-						disabled={!ready}
-						onSeek={seek}
-					/>
-				)}
-
-				{/*
-			  The record. Spins while the song plays and holds where it stopped
-			  when paused — the state is readable before the label is (D-036).
-			  Decorative: the title beside it already names the track.
-			*/}
-				<div className="playback__record" data-spinning={playing || undefined}>
-					{artwork ? (
-						<img src={artwork} alt="" className="playback__art" />
-					) : (
-						<span className="playback__art playback__art--empty" />
-					)}
-					<span className="playback__spindle" />
-				</div>
-
 				{!unavailable && (
 					<button
 						type="button"
@@ -188,14 +198,6 @@ export function PlaybackBar({
 					</button>
 				)}
 
-				{/* Times are read from the seekbar's aria-valuetext, so these are
-				    decoration for the eye only. */}
-				{docked && (
-					<span className="playback__time" aria-hidden="true">
-						{formatTime(currentTime)}
-					</span>
-				)}
-
 				<span className="playback__meta">
 					<span className="playback__title text-caption text-ink">{title}</span>
 					<span
@@ -206,10 +208,28 @@ export function PlaybackBar({
 					</span>
 				</span>
 
-				{docked && (
-					<span className="playback__time" aria-hidden="true">
-						{formatTime(duration)}
-					</span>
+				{/*
+				  The scrub row — always, not only when docked (D-080). The
+				  seekbar used to render behind `docked &&`, and D-079's rail
+				  never docks, so the split view silently retired the seekbar
+				  along with the dock. Times are decoration for the eye; the
+				  input's aria-valuetext is the accessible reading.
+				*/}
+				{!unavailable && (
+					<div className="playback__scrub">
+						<span className="playback__time" aria-hidden="true">
+							{formatTime(currentTime)}
+						</span>
+						<Seekbar
+							currentTime={currentTime}
+							duration={duration}
+							disabled={!ready}
+							onSeek={seek}
+						/>
+						<span className="playback__time" aria-hidden="true">
+							{formatTime(duration)}
+						</span>
+					</div>
 				)}
 
 				{/*
@@ -268,13 +288,21 @@ export function PlaybackBar({
 						</a>
 					))}
 
-				{manual && syncing && (
+				{/*
+				  Follow the song — one control replacing the old Resync pill.
+				  Present whenever there are timings to follow, pressed when the
+				  canvas is following, and able to overrule the drift default:
+				  a reader who wants sync against a mismatched cut gets their
+				  choice, with the notice standing down once they have made it.
+				*/}
+				{synced && !unavailable && (
 					<button
 						type="button"
-						onClick={resume}
-						className="playback__resume px-3 py-1.5 text-micro"
+						onClick={toggleSync}
+						aria-pressed={followOn}
+						className="playback__sync px-3 py-1.5 text-micro"
 					>
-						Resync
+						Sync
 					</button>
 				)}
 			</motion.div>

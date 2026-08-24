@@ -42,6 +42,58 @@
 	gap: 1rem;
 	height: var(--dock-height);
 	padding: var(--dock-pad) 1.25rem;
+
+	// ── In the composition (D-080) ─────────────────────────────────────
+	// Undocked, the bar is a card in the hero's text column: controls on the
+	// first row, the scrub across the second. The old pill hid the seekbar
+	// behind `docked &&` — and the rail never docks (D-079), so the split
+	// view had no seekbar at all.
+	&:not([data-docked]) {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		grid-template-areas:
+			"toggle meta video"
+			"scrub scrub scrub";
+		row-gap: 0.6rem;
+		height: auto;
+		min-height: var(--dock-height);
+		width: 100%;
+		max-width: 26rem;
+		padding: 0.875rem 1rem;
+		border-radius: var(--radius-card);
+
+		.playback__toggle {
+			grid-area: toggle;
+		}
+
+		.playback__meta {
+			grid-area: meta;
+		}
+
+		.playback__video {
+			grid-area: video;
+			margin-inline-start: 0;
+		}
+
+		.playback__scrub {
+			grid-area: scrub;
+		}
+
+		.playback__sync,
+		.playback__elsewhere {
+			grid-area: video;
+			justify-self: end;
+		}
+
+		// Sync shares the video's row-end corner only when there is no
+		// video box to share it with; with both present it joins the meta
+		// row's end instead.
+		&:has(.playback__video:not(:empty)) .playback__sync {
+			grid-area: meta;
+			justify-self: end;
+			align-self: center;
+		}
+	}
 	// Solid since D-065. A translucent bar over a full-bleed hero took its
 	// contrast from the album art behind it, which is a different colour on
 	// every track — so the elapsed time, the artist and the status line had no
@@ -144,9 +196,14 @@
 			}
 		}
 
-		.playback__resume {
+		.playback__sync {
 			border-color: var(--track-accent-deep);
 			color: var(--track-accent-deep);
+
+			&[aria-pressed="true"] {
+				background: var(--track-accent-deep);
+				color: var(--color-sheet);
+			}
 		}
 
 		.playback__elsewhere {
@@ -160,13 +217,31 @@
 			}
 		}
 
-		.playback__record {
-			box-shadow: inset 0 0 0 1px var(--color-sheet-hairline);
-		}
 	}
 
 	@include m.reduced-motion {
 		transition: none;
+	}
+
+	// The scrub row: elapsed — track — total (D-080). Docked, it collapses
+	// to the old full-bleed line across the bar's top edge and the times
+	// stand down; the input's aria-valuetext remains the accessible reading
+	// either way.
+	&__scrub {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		min-width: 0;
+	}
+
+	&[data-docked] &__scrub {
+		position: absolute;
+		inset-inline: 0;
+		top: 0;
+
+		.playback__time {
+			display: none;
+		}
 	}
 
 	// ── The scrub track ────────────────────────────────────────────────────
@@ -174,9 +249,8 @@
 	// player's is (D-040). A real range input, so keyboard and screen-reader
 	// behaviour come from the platform rather than from us.
 	&__seek {
-		position: absolute;
-		inset-inline: 0;
-		top: 0;
+		flex: 1;
+		min-width: 0;
 		width: 100%;
 		// The visible line is 3px; the input is taller so there is something
 		// to grab, and sized to sit inside the bar's own top padding. It is
@@ -267,70 +341,6 @@
 		font-size: var(--text-micro);
 		font-variant-numeric: tabular-nums;
 		color: var(--color-ink-faint);
-
-		// The first thing to go on a narrow bar: the scrub track already shows
-		// the position, and the title matters more.
-		@include m.until("sm") {
-			display: none;
-		}
-	}
-
-	// ── The record ─────────────────────────────────────────────────────────
-	// Album art as a turntable: spinning means playing, stopped means paused.
-	// The state is legible before the word "Paused" is (D-036).
-	&__record {
-		position: relative;
-		flex: none;
-		display: grid;
-		place-items: center;
-		width: calc(var(--dock-height) - var(--dock-pad) * 2);
-		aspect-ratio: 1;
-		border-radius: 50%;
-		background: oklch(0.08 0 0);
-		box-shadow: inset 0 0 0 1px var(--color-hairline);
-
-		// Paused holds the angle it stopped at rather than snapping to zero,
-		// so play/pause reads as one continuous object.
-		animation: record-spin 8s linear infinite;
-		animation-play-state: paused;
-
-		&[data-spinning] {
-			animation-play-state: running;
-		}
-
-		// A spinning disc is decoration, not information — the status text
-		// carries the same fact. Hold it still rather than removing it, so the
-		// artwork is still there.
-		@include m.reduced-motion {
-			animation: none;
-		}
-	}
-
-	&__art {
-		width: 100%;
-		height: 100%;
-		border-radius: 50%;
-		object-fit: cover;
-
-		// No artwork. A blank record, not a coloured one (D-065): the
-		// spindle became a solid accent disc in the same change, and an
-		// accent-tinted face behind an accent label turned the whole thing
-		// into one bright dot that read as a status light rather than as a
-		// record with nothing on it.
-		&--empty {
-			background: var(--color-well);
-		}
-	}
-
-	// The centre hole — the label at the middle of the record, in the
-	// track's own colour. Filled rather than ringed since D-065: at 20% of a
-	// 3.5rem disc a 1px ring is most of what the reader can see of it.
-	&__spindle {
-		position: absolute;
-		width: 20%;
-		aspect-ratio: 1;
-		border-radius: 50%;
-		background: var(--track-accent);
 	}
 
 	// ── The player ─────────────────────────────────────────────────────────
@@ -454,11 +464,12 @@
 	}
 
 	// Shown only once the reader has taken manual control.
-	&__resume {
+	// Follow the song (D-080). Outlined when off, filled when following —
+	// the state IS the label, read before the word is. Outlined-off keeps
+	// the play toggle the one resting accent fill in the bar.
+	&__sync {
 		@include m.tap-target;
 		@include m.press;
-		// No auto margin now: the player takes the right edge, so Resync sits
-		// in flow beside the title rather than fighting it for the corner.
 		flex: none;
 		border-radius: var(--radius-pill);
 		border: 1px solid var(--track-accent);
@@ -468,12 +479,16 @@
 		text-transform: uppercase;
 		letter-spacing: var(--tracking-label);
 		white-space: nowrap;
-		transition: background-color 0.18s var(--ease-editorial);
+		transition:
+			background-color 0.18s var(--ease-editorial),
+			color 0.18s var(--ease-editorial);
 
-		// Outlined rather than filled, deliberately: the play button beside it
-		// is already the filled control, and two accent fills in one bar leave
-		// the reader with no way to tell which is the main one.
-		&:hover {
+		&[aria-pressed="true"] {
+			background: var(--track-accent);
+			color: var(--color-on-bright);
+		}
+
+		&:hover:not([aria-pressed="true"]) {
 			background: var(--color-hover-strong);
 		}
 
@@ -483,8 +498,3 @@
 	}
 }
 
-@keyframes record-spin {
-	to {
-		transform: rotate(1turn);
-	}
-}

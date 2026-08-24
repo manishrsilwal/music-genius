@@ -266,9 +266,16 @@ export function timingsDrift(
 	// would disable sync for exactly the tracks we know least about.
 	if (!lyricsDuration || playerDuration <= 0) return false;
 
-	// Rips of the SAME cut differ by a second or two of silence and rounding.
-	// Different cuts differ by intros — ten seconds and up.
-	return Math.abs(playerDuration - lyricsDuration) > 7;
+	// 20 seconds, retuned from 7 (D-080). Seven was set against one true
+	// positive — a 63-second official-video intro — and then flagged "Choo
+	// Lo", where the video runs 234s against LRCLIB's claimed 252s. That is
+	// not a different cut; it is uploader-typed metadata being loose, which
+	// LRCLIB's duration field routinely is. A false positive here used to be
+	// harmless caution; now that it sets the sync DEFAULT, it turns sync off
+	// for readers whose timings were fine. Different cuts differ by intros
+	// and outros — twenty seconds and up in every case measured; sloppy
+	// metadata on the same cut stays under it.
+	return Math.abs(playerDuration - lyricsDuration) > 20;
 }
 
 /**
