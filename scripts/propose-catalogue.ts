@@ -302,7 +302,16 @@ Return JSON: {"mood":"…","pull":"…","familiarity":"…","language":"…","er
 	};
 
 	for (let i = 0; i < lines.length; i += POOL) {
-		await Promise.all(lines.slice(i, i + POOL).map(work));
+		// Settled, not all: one LRCLIB rate-limit response must cost one
+		// candidate, not the whole batch — a run of seventy-eight died on the
+		// seventy-seventh this way, with every survivor already resolved.
+		const outcomes = await Promise.allSettled(lines.slice(i, i + POOL).map(work));
+		for (const [j, outcome] of outcomes.entries()) {
+			if (outcome.status === "rejected") {
+				rejected++;
+				console.log(`ERROR   ${lines[i + j]}: ${outcome.reason}`);
+			}
+		}
 		console.log(`  …${Math.min(i + POOL, lines.length)}/${lines.length}`);
 	}
 
