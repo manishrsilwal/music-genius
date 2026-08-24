@@ -56,11 +56,20 @@
 			"scrub scrub scrub";
 		row-gap: 0.6rem;
 		height: auto;
-		min-height: var(--dock-height);
+		min-height: 0;
 		width: 100%;
 		max-width: 26rem;
-		padding: 0.875rem 1rem;
-		border-radius: var(--radius-card);
+		padding: 0;
+		border-radius: 0;
+
+		// No box (D-081). The column is the player — disc, name, controls —
+		// and a card drawn around one slice of it fenced the controls off
+		// from the composition they belong to. The surface returns with the
+		// dock, where the bar stands alone over scrolling lyrics and needs
+		// its own ground.
+		background: transparent;
+		border-color: transparent;
+		box-shadow: none;
 
 		.playback__toggle {
 			grid-area: toggle;

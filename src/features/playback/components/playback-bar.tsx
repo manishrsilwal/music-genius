@@ -198,13 +198,27 @@ export function PlaybackBar({
 					</button>
 				)}
 
+				{/*
+				  In the hero the column IS the player (D-081): the disc, the
+				  title and the artist already stand directly above these
+				  controls, so repeating them here was the record redundancy
+				  again, in words. The name returns when the bar DOCKS —
+				  pinned to the foot of a scrolled page, the hero is gone and
+				  the bar is the only thing saying what is playing. Notices
+				  ("Loading", "Timings are from another cut") speak in both
+				  states; they are the bar's own facts, not the page's.
+				*/}
 				<span className="playback__meta">
-					<span className="playback__title text-caption text-ink">{title}</span>
+					{docked && (
+						<span className="playback__title text-caption text-ink">
+							{title}
+						</span>
+					)}
 					<span
 						className="playback__status text-micro"
 						data-notice={notice ? "" : undefined}
 					>
-						{notice ?? artist}
+						{notice ?? (docked ? artist : "")}
 					</span>
 				</span>
 

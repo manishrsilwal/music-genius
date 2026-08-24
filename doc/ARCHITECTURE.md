@@ -134,6 +134,26 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-081 — The column is the player
+**Built 2026-08-25.** The owner's read, and the right one: with the disc, the
+title and the artist already stacked in the column, a boxed mini-player
+repeating the name underneath was the record redundancy again, in words.
+
+**In the hero the bar is chrome-less controls** — play, notices, Sync, video,
+scrub — with no card around them and no title or artist of their own. The
+column supplies the context; a surface drawn around one slice of it fenced the
+controls off from the composition they belong to.
+
+**Both come back with the dock.** Pinned to the foot of a scrolled page the
+bar stands alone over moving lyrics: it regains its sheet, and it is the only
+thing saying what is playing, so the title and artist return. One component,
+two honest states — in the composition it borrows context, standing alone it
+carries its own.
+
+**Notices speak in both states.** "Loading", "Timings are from another cut",
+"Manual scroll" are the bar's own facts, not the page's, and they are the one
+line of text the chrome-less bar keeps.
+
 ### D-080 — One record, and a sync the reader commands
 **Built 2026-08-25.** Four reports on the split-view player, and pulling the
 first thread unravelled the rest.

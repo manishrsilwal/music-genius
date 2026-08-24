@@ -748,6 +748,7 @@ Before shipping a component:
 
 | Date | Change |
 |---|---|
+| 2026-08-25 | **D-081** The column is the player: chrome-less controls in the hero borrowing its context; card, title and artist return only when the bar docks |
 | 2026-08-25 | **D-080** The cover is the record; the player is a card with a real scrub row; one Sync control replaces a Resync that could never render; drift threshold retuned on a measured false positive |
 | 2026-08-25 | **D-079** Desktop split view — sticky rail (art, title, player) beside a scrolling lyric column; the player joins the words' axis and the dock retires itself at `lg` |
 | 2026-08-24 | **D-078** The hero lockup: cover beside the words on wide screens, above them on a phone; blurred ground drops to 0.45; centred fallback when no art resolves |
