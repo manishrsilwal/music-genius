@@ -134,6 +134,56 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-074 — Depth of field, borrowed from a player and bounded by contrast
+**Built 2026-08-24.** From a music-player reference: the current line lit, each
+line below it dimmer than the last. The best idea in it, and the study
+(published separately) settled how much of it we can actually have.
+
+**The reference's signature look is unreadable text.** Measured against our
+reading ground, its trailing lines sit at roughly 0.35 and 0.15 opacity —
+**2.57:1 and 1.34:1**. That is entirely reasonable in a player, where you are
+listening and the faded lines are atmosphere. It is not available to a product
+whose claim is that the words deserve to be read: a reader scanning back two
+lines to re-read something has to be able to.
+
+So the idea ports and the values do not. The usable range runs from 1.0 down to
+the floor D-053 established, and that is still three real steps:
+
+| state | opacity | contrast | what it is |
+|---|---|---|---|
+| `active` | 1.00 | 18.56:1 | the stanza being read |
+| `near` | 0.62 | 6.48:1 | one either side |
+| `idle` | 0.42 | 3.29:1 | everything beyond — the floor |
+
+**Symmetric, deliberately.** The reference fades only downward, because a
+player has a direction of travel. A reader does not: going back up to re-read a
+line is reading, and it must not be harder than reading on. `stanzaState`
+answers on absolute distance.
+
+**The ladder lives in `lib/motion.ts` and is tested**, not left in a
+stylesheet. These are contrast decisions, and the test pins the floor, the
+ordering, and that the steps stay far enough apart to read as depth rather than
+as a rendering artefact. Mutation-tested: dropping `near` to 0.30 fails three
+of them.
+
+**All three states are also declared in CSS.** Motion drives the opacity once
+hydrated, but a reader whose JavaScript has not arrived would otherwise get the
+binary version of a graded design.
+
+> **Checked rather than assumed:** the canvas comment warns that many LRC files
+> carry no blank lines and collapse to a single stanza, which would leave
+> nothing to grade. Sampled across twenty catalogue tracks: **none** collapsed,
+> five had 2–4 stanzas and fifteen had five or more. The worry is real in
+> general and does not bite this catalogue.
+
+**Not taken from the reference, and why.** Art beside the lyrics suits the hero
+and not the canvas, which is one long centred scroll — worth a mock before
+committing. A light sheet under the dark stage would introduce a third ground,
+and every ink, hairline and control in the product is measured against one of
+the two we have. "Up next" and playlists are a product decision wearing a
+visual costume: they would make this a player that shows lyrics rather than a
+reader that plays audio.
+
 ### D-073 — The constraint is the catalogue, not the algorithm
 **Built 2026-08-24.** D-072 got a reader who answers all three questions from
 three distinct tracks to four, and that was the ceiling: there are only four

@@ -286,6 +286,12 @@
      The active line is still more than twice as bright, so the focus effect
      survives. Mirrored in src/lib/motion.ts. */
   --stanza-opacity-idle: 0.42;
+  /* One stanza either side of the active one (D-074). Three steps rather than
+     two, so attention falls off with distance instead of switching. Measured
+     on the reading ground at 6.48:1, comfortably clear of the 4.5 body floor —
+     the near line is still a line you can read, which is the point of grading
+     rather than dimming. Mirrored in src/lib/motion.ts. */
+  --stanza-opacity-near: 0.62;
 
   /* --- Elevation ----------------------------------------------------------
      Tinted, never neutral black. A pure-black shadow on a canvas that is

@@ -2,7 +2,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
 
 import { type LinePosition, lineKey } from "@/lib/lrc";
-import { stanzaVariants } from "@/lib/motion";
+import { stanzaState, stanzaVariants } from "@/lib/motion";
 import { detectLang } from "@/lib/script";
 import type { Stanza } from "@/lib/types";
 
@@ -22,8 +22,11 @@ interface LyricCanvasProps {
 /**
  * The scrollytelling canvas (PRD §3.3).
  *
- * The stanza at the centre of the viewport is fully opaque; every other stanza
- * falls to 20%. Opacity values come from lib/motion.ts — never inline.
+ * The stanza at the centre of the viewport is fully opaque, its neighbours sit
+ * one step down, and everything beyond rests on the floor — attention falling
+ * off with distance rather than switching (D-074). All three values come from
+ * lib/motion.ts, never inline, and none of them goes below the measured
+ * readability floor.
  *
  * Two granularities on purpose: opacity is per stanza, because that is the
  * unit of reading attention, while auto-scroll follows the individual line,
@@ -86,16 +89,21 @@ export function LyricCanvas({
 	return (
 		<div className="canvas" lang={lang ?? undefined}>
 			{stanzas.map((stanza, stanzaIndex) => {
-				const isActive = stanzaIndex === activeIndex;
+				const state = stanzaState(stanzaIndex, activeIndex);
 				return (
 					<motion.p
 						key={stanza.id}
 						ref={register(stanzaIndex)}
 						className="canvas__stanza text-ink"
-						data-active={isActive}
+						// `data-state` carries the same answer to CSS, which owns
+						// the pre-hydration paint. `data-active` is kept because it
+						// is the honest name for "this is the line being read" and
+						// is what a test or a future selector would reach for.
+						data-active={state === "active"}
+						data-state={state}
 						variants={stanzaVariants}
 						initial={false}
-						animate={isActive ? "active" : "idle"}
+						animate={state}
 						transition={prefersReducedMotion ? { duration: 0 } : undefined}
 					>
 						{stanza.lines.map((line, lineIndex) => {

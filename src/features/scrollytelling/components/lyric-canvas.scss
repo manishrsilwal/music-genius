@@ -44,11 +44,17 @@ $stanza-gap-lg: 4.5rem;
 		line-height: var(--leading-lyric);
 		text-wrap: balance;
 
-		// Motion drives opacity, so this is only the pre-hydration value.
+		// Motion drives opacity, so these are only the pre-hydration values —
+		// but all three states are declared, or a reader whose JavaScript has
+		// not arrived would see the binary version of a graded design.
 		opacity: var(--stanza-opacity-idle);
 		transition: opacity 0.42s var(--ease-editorial);
 
-		&[data-active="true"] {
+		&[data-state="near"] {
+			opacity: var(--stanza-opacity-near);
+		}
+
+		&[data-state="active"] {
 			opacity: var(--stanza-opacity-active);
 		}
 
