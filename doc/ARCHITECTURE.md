@@ -134,6 +134,53 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-066 — Two typefaces tried against the new design, both declined
+**Trialled and reverted 2026-08-24.** Fraunces and Outfit stay. Recorded
+because the trial produced a measurement worth keeping, and because the same
+question will come back.
+
+**Rufina and Domine were both ruled out by the same missing capability.**
+Neither ships an italic, and `font-synthesis: none` is set product-wide — so
+the landing headline's emphasised word does not render upright, it falls
+through the display stack until it reaches a family that *does* have an italic,
+which is a system serif. Not ugly, but nothing chose it. A move to either face
+means redesigning that headline rather than swapping a font.
+
+**Cormorant Garamond has a real italic and was still declined**, on a number
+rather than on taste. Measured from the font binaries:
+
+| Face | Role | x-height | Cap height | Mean advance |
+|---|---|---|---|---|
+| Fraunces | display | 0.482 | 0.700 | 0.515 |
+| Outfit | UI | 0.475 | 0.694 | 0.504 |
+| Cormorant Garamond | display | 0.386 | 0.625 | 0.417 |
+| Elms Sans | UI | 0.480 | 0.700 | 0.530 |
+
+Fraunces sits **1.5%** off Outfit's x-height — near enough to identical that the
+two share a line at one font-size and read as a single piece of type, which is
+exactly what the landing headline asks of them. Cormorant sits **19.6% below**
+Elms Sans: at the same font-size it reads a fifth smaller, which is why the
+Deep Dive card titles undersized against the artist names beneath them. It
+would need 125% of the font-size wherever it meets UI text, or
+`font-size-adjust: ex-height 0.48`. That is a retuned type scale, not a swap.
+
+> **x-height, not font-size, is what makes type look big.** Worth pinning to
+> this register: any future display face has to be checked against the UI
+> face's x-height *before* it is judged by eye, because a face that under-sets
+> looks "elegant" in isolation and broken beside a label.
+
+**Cormorant also needed weight compensation** — its 400 is drawn for display,
+and a verse of it on the reading ground at idle opacity thinned to the point of
+shimmering. The trial ran lyrics at 500 and the hero at 600 to be fair to it.
+
+**Seven font packages removed** in the same pass — 6MB of `node_modules` that
+nothing imported: Elms Sans (both builds), Rufina, and four Devanagari
+candidates left over from the bake-off Vesper Libre won (Martel, Rozha One,
+Tiro Devanagari Hindi, Noto Serif Devanagari). Verified by resolving every
+package name against `src/`, `scripts/` and `vite.config.ts` before removal,
+then by rendering a Latin + Devanagari + Tamil Lyric Card, which reads the font
+binaries at runtime and would have 500'd on a missing one.
+
 ### D-065 — The direction, carried into every surface
 **Built 2026-08-24.** D-064 established a palette, two typefaces and a landing
 page. It did not restyle the twelve other surfaces the product is made of, so
