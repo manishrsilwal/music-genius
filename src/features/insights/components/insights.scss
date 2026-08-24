@@ -336,6 +336,48 @@
 
 	transition: padding-right 0.42s var(--ease-editorial);
 
+	// ── Split view (D-079) ──────────────────────────────────────────────
+	// From `lg` the page is a rail and a reading column: art, title and the
+	// player stay fixed on the left while the lyrics scroll on the right —
+	// the reader never loses the record they are inside of, and the player
+	// never needs to dock because it never leaves the viewport (the dock's
+	// sentinel simply keeps reporting visible, so the same code answers a
+	// layout it was never written for).
+	//
+	// Lives HERE, beside the drawer coupling, because both are claims about
+	// the same element: the drawer squeezes this grid's padding, and the
+	// rail's minmax floor decides who absorbs the squeeze (the canvas does).
+	@include m.from("lg") {
+		display: grid;
+		grid-template-columns: minmax(21rem, 26rem) minmax(0, 1fr);
+		grid-template-rows: 1fr auto;
+		column-gap: clamp(1.5rem, 3vw, 3.5rem);
+
+		> .hero {
+			grid-column: 1;
+			grid-row: 1 / -1;
+			align-self: start;
+			position: sticky;
+			top: 0;
+			// Exactly one viewport, so sticky has something to stick within
+			// — and the Tailwind `min-h-dvh` on the element stops mattering
+			// once height is pinned.
+			height: 100dvh;
+			min-height: 0;
+			padding-inline: clamp(1.5rem, 3vw, 3rem);
+		}
+
+		> .canvas {
+			grid-column: 2;
+			grid-row: 1;
+		}
+
+		> .track-shell__foot {
+			grid-column: 2;
+			grid-row: 2;
+		}
+	}
+
 	// Only once the bar has DOCKED does it own the bottom edge. While it is
 	// still up in the hero the corner is free, so the button sits at its
 	// normal inset (D-038).

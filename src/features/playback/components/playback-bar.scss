@@ -16,6 +16,13 @@
 	width: 100%;
 	min-height: var(--dock-height);
 	margin-top: 3rem;
+
+	// The slot lives inside the lockup's text column now (D-079), so it
+	// follows the same axis the words do: centred on a phone, left from `md`.
+	// Centred-under-left was the reported imbalance.
+	@include m.from("md") {
+		justify-content: flex-start;
+	}
 }
 
 // Zero-height and always in flow. The dock threshold is read from this, never

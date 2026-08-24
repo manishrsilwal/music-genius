@@ -134,6 +134,43 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-079 — The split view: a rail that stays, words that scroll
+**Built 2026-08-25.** Two reports on the beside hero, one fix. The player pill
+sat centred under a left-aligned lockup — two axes in one composition — and
+the owner proposed the larger idea: on desktop, fix the art on the left and
+let the lyrics scroll on the right.
+
+That proposal quietly dissolves D-078's seam. The canvas is no longer *below*
+a left-aligned hero with nothing to relate to; it is a column beside a rail,
+and each owns its axis. The skill's database has no split-view entry — said
+plainly rather than stretched — but its constraints all hold: the reading
+measure stays bounded in its column, nothing scrolls horizontally, and the
+sticky rail obscures nothing because it owns its own track.
+
+**The player moved inside the lockup's text column**, which fixes the
+imbalance at every width with one DOM change: centred on a phone because the
+column is, left-aligned in the beside layout and the rail because the column
+is. The axis is inherited instead of coordinated.
+
+**From `lg` the shell is a grid: `rail | canvas`.** The hero spans all rows,
+sticks at `top: 0`, and is pinned to exactly `100dvh`. The lockup stacks
+again inside it — a rail is one narrow column, so "beside" has no room to
+mean anything there. The grid lives beside the drawer coupling in
+`insights.scss`, because both are claims about the same element: the drawer
+squeezes the shell's padding, and the rail's `minmax` floor decides that the
+canvas absorbs it. Measured with the drawer open: canvas 441→390px, rail
+holding at 416.
+
+**The dock retired itself on desktop, with no code knowing it.** The bar
+docks when its slot's sentinel leaves the viewport; in a sticky rail the slot
+never leaves, so the sentinel keeps reporting visible and the bar stays in
+the composition. Probed while scrolled: `data-docked` never appears at `lg`.
+Below `lg` everything behaves exactly as before — the dock, the beside
+lockup at `md`, the centred stack on a phone.
+
+**The fit-to-width title needed nothing again** — `cqw` resolves against the
+rail column now, same arithmetic, third layout it has absorbed unchanged.
+
 ### D-078 — The cover beside the words
 **Built 2026-08-24.** The hero mock's "beside" layout, chosen by the owner with
 the seam marked and argued against — recorded as their call, made looking at

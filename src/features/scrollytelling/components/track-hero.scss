@@ -79,6 +79,15 @@
 			justify-items: start;
 			text-align: left;
 		}
+
+		// In the desktop rail (D-079) the lockup stacks again — the rail is
+		// one narrow column, so "beside" has no room to mean anything. Art on
+		// top, words under it, everything on the rail's left axis.
+		@include m.from("lg") {
+			grid-template-columns: 1fr;
+			align-items: start;
+			gap: 1.5rem;
+		}
 	}
 
 	// The cover as an object — sharp where the ground behind it is a wash.
@@ -92,6 +101,11 @@
 
 		@include m.from("md") {
 			width: 100%;
+		}
+
+		// Bounded in the rail: the cover is context, not the page.
+		@include m.from("lg") {
+			width: min(15rem, 100%);
 		}
 
 		img {

@@ -136,12 +136,20 @@ export function TrackHero({
 				    normalised at the LRCLIB boundary, not guarded here. */}
 						{track.album ? ` · ${track.album}` : ""}
 					</motion.p>
+
+					{/*
+					  Inside the text column, not centred under the whole hero
+					  (D-079). A pill centred on the page while the words sit
+					  left was the reported imbalance: two axes in one
+					  composition. Sharing the text's axis, it is aligned on
+					  every layout this hero has — centred on a phone, left in
+					  the beside columns, left in the desktop rail.
+					*/}
+					{notice}
+
+					{player}
 				</div>
 			</div>
-
-			{notice}
-
-			{player}
 		</motion.header>
 	);
 }
