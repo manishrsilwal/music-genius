@@ -6,6 +6,7 @@ import {
 	linePositionAt,
 	parseSyncedLyrics,
 	stanzaIndexAt,
+	timingsDrift,
 	toStanzas,
 } from "./lrc";
 
@@ -243,5 +244,35 @@ describe("linePositionAt", () => {
 		for (let t = 0; t < 30; t++)
 			keys.add(linePositionAt(stanzas, t)?.key ?? "none");
 		expect(keys.size).toBeGreaterThan(2);
+	});
+});
+
+/*
+ * D-075. The reported case is real: "Blinding Lights" timings are cut for the
+ * 200-second audio release, and Genius links the official video at 263.
+ */
+describe("timingsDrift", () => {
+	it("flags an official video against audio-cut timings", () => {
+		expect(timingsDrift(263, 200)).toBe(true);
+	});
+
+	it("accepts rips of the same cut, which differ by seconds", () => {
+		expect(timingsDrift(201, 200)).toBe(false);
+		expect(timingsDrift(198, 200)).toBe(false);
+		expect(timingsDrift(207, 200)).toBe(false);
+	});
+
+	it("is symmetric — a shorter upload drifts too", () => {
+		// A radio edit against full-length timings is as wrong as an extended
+		// video against them.
+		expect(timingsDrift(160, 200)).toBe(true);
+	});
+
+	it("stays quiet when it has nothing to compare", () => {
+		// LRCLIB omits duration on some uploads, and the player reports 0
+		// until ready. Claiming drift on missing data would disable sync for
+		// exactly the tracks we know least about.
+		expect(timingsDrift(0, 200)).toBe(false);
+		expect(timingsDrift(263, null)).toBe(false);
 	});
 });

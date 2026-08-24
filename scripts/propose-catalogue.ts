@@ -120,13 +120,15 @@ async function ask(prompt: string): Promise<unknown | null> {
 }
 
 async function suggest(gaps: Cell[]): Promise<void> {
-	const wanted = gaps.slice(0, 10);
+	// Every thin cell by default; `--suggest 6` to take just the worst few.
+	const limit = Number(process.argv[3]) || gaps.length;
+	const wanted = gaps.slice(0, limit);
 	console.log(`\nasking for candidates in ${wanted.length} thin cells…\n`);
 
 	for (const cell of wanted) {
 		const known = CATALOGUE.map((t) => `${t.title} — ${t.artist}`).join("; ");
 		const result = (await ask(
-			`Suggest 4 songs whose LYRICS are worth reading closely and that fit ALL of:
+			`Suggest 6 songs whose LYRICS are worth reading closely and that fit ALL of:
 - mood: ${cell.mood}
 - what draws you in: ${cell.pull} (storytelling | wordplay | confession | imagery)
 - familiarity: ${cell.familiarity} (canon = widely known; deep = a deeper cut)

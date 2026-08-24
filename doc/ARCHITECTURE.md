@@ -134,6 +134,41 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-075 — The right song, the wrong cut
+**Built 2026-08-24.** Reported with a concrete pair of links: our "Blinding
+Lights" plays the official video, whose cinematic intro puts every synced line
+tens of seconds from the voice; the upload the timings were actually cut for is
+the audio release. D-071 solved *which recording the lyrics are* — this is its
+sibling: the lyrics are right and the **video** is a different cut, because
+artists ship two or three uploads of one song and Genius links the official
+video by default.
+
+**Both durations were already in hand.** LRCLIB records the duration its
+timings were made for; the IFrame player reports what actually loaded. More
+than seven seconds apart means a different cut — rips of the same cut differ by
+a second or two, official videos by tens. `timingsDrift` in `lib/lrc.ts`, pure
+and tested against the reported numbers (200s vs 263s).
+
+**On drift, sync is withheld rather than run wrong.** The canvas falls back to
+scroll-spy and the bar says "Timings are for a different cut". A canvas
+scrolling to lines tens of seconds from the voice is worse than one that says
+why it stopped following.
+
+> **Deliberately not done: shifting the timestamps by the difference.** That
+> assumes all the extra time is intro, and an official video splits it between
+> intro and outro in proportions nobody publishes. A sync that is confidently
+> wrong is worse than none.
+
+**Detection stays quiet on missing data** — LRCLIB omits duration on some
+uploads, and the player reports 0 until ready. Claiming drift there would
+disable sync for exactly the tracks we know least about.
+
+**The full fix is out of reach without a second API.** Choosing the *audio*
+upload requires searching YouTube, and the Data API prices search at 100 quota
+units against a 10,000/day default — the same economics that parked the last
+three playback misses in D-070. If a YouTube key ever arrives (OD-005), the
+right query is title + artist + "audio" filtered by duration ≈ LRCLIB's.
+
 ### D-074 — Depth of field, borrowed from a player and bounded by contrast
 **Built 2026-08-24.** From a music-player reference: the current line lit, each
 line below it dimmer than the last. The best idea in it, and the study

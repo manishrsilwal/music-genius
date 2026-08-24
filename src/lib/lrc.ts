@@ -236,3 +236,37 @@ export function linePositionAt(
 	}
 	return null;
 }
+
+/**
+ * Do these timings belong to the recording that is actually playing? (D-075)
+ *
+ * LRC timestamps are cut against one specific recording — almost always the
+ * album audio. Genius, meanwhile, links whichever YouTube upload it considers
+ * canonical, which is usually the OFFICIAL VIDEO: a different cut with a
+ * cinematic intro and outro. "Blinding Lights" is the reported case — the
+ * timings are for the 200-second audio, the linked video runs 263 seconds, and
+ * every line lands tens of seconds away from the voice.
+ *
+ * The two durations are the tell, and both are already in hand: LRCLIB records
+ * the duration its timings were made for, and the IFrame player reports what
+ * is actually loaded. Anything beyond a few seconds apart is a different cut.
+ *
+ * Deliberately detection only. The tempting next step — shifting every
+ * timestamp by the difference — assumes all the extra time is intro, and an
+ * official video splits it between intro and outro in proportions nobody
+ * publishes. A sync that is confidently wrong is worse than a canvas that
+ * says why it stopped following.
+ */
+export function timingsDrift(
+	playerDuration: number,
+	lyricsDuration: number | null,
+): boolean {
+	// Nothing to compare: LRCLIB omits duration on some uploads, and the
+	// player reports 0 until it is ready. Claiming drift on missing data
+	// would disable sync for exactly the tracks we know least about.
+	if (!lyricsDuration || playerDuration <= 0) return false;
+
+	// Rips of the SAME cut differ by a second or two of silence and rounding.
+	// Different cuts differ by intros — ten seconds and up.
+	return Math.abs(playerDuration - lyricsDuration) > 7;
+}

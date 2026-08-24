@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
 
-import { type LinePosition, linePositionAt } from "@/lib/lrc";
+import { type LinePosition, linePositionAt, timingsDrift } from "@/lib/lrc";
 import { riseVariants, transition } from "@/lib/motion";
 import type { Stanza } from "@/lib/types";
 
@@ -26,6 +26,7 @@ export function PlaybackBar({
 	artwork,
 	stanzas,
 	synced,
+	lyricsDuration,
 	onSyncChange,
 }: {
 	/** Null while the lookup is still running, and null if it found nothing. */
@@ -43,6 +44,13 @@ export function PlaybackBar({
 	stanzas: Stanza[];
 	/** Without timestamps there is nothing to sync to — audio still plays. */
 	synced: boolean;
+	/**
+	 * The duration the LRC timings were cut against, from LRCLIB (D-075).
+	 * Compared with what the player actually loads: Genius usually links the
+	 * official video, whose cinematic intro puts every line tens of seconds
+	 * from the voice. Null when LRCLIB did not record one.
+	 */
+	lyricsDuration: number | null;
 	onSyncChange: (position: LinePosition | null) => void;
 }) {
 	const mountRef = useRef<HTMLDivElement>(null);
@@ -64,7 +72,15 @@ export function PlaybackBar({
 	const noRecording = !resolving && !videoId;
 	const unavailable = status === "unavailable" || noRecording;
 
-	const syncing = synced && playing;
+	// The linked upload is a different cut from the one the timings were made
+	// for (D-075). Sync is withheld rather than run wrong: a canvas scrolling
+	// to lines tens of seconds from the voice is worse than one that says why
+	// it stopped following. Detection only — shifting the timestamps by the
+	// difference would assume all the extra time is intro, which an official
+	// video does not promise.
+	const drifted = synced && timingsDrift(duration, lyricsDuration);
+
+	const syncing = synced && playing && !drifted;
 	const { manual, resume } = useManualOverride(syncing);
 
 	// Derived, then pushed up. Recomputed each poll tick; linePositionAt is a
@@ -111,11 +127,13 @@ export function PlaybackBar({
 				? (reason ?? "Playback unavailable")
 				: !ready
 					? "Loading"
-					: playing && !synced
-						? "No timings"
-						: playing && manual
-							? "Manual scroll"
-							: null;
+					: playing && drifted
+						? "Timings are for a different cut"
+						: playing && !synced
+							? "No timings"
+							: playing && manual
+								? "Manual scroll"
+								: null;
 
 	return (
 		<div className="playback-slot">

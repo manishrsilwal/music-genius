@@ -174,6 +174,7 @@ function StreamingPlaybackBar({
 			artwork={artwork}
 			stanzas={track.stanzas}
 			synced={track.synced}
+			lyricsDuration={track.duration}
 			onSyncChange={onSyncChange}
 		/>
 	);
