@@ -20,8 +20,9 @@
 		display: flex;
 	}
 
-	// A column at every width, so "why this" can span the card. The art and
-	// the name are the row inside it.
+	// A card is artwork, a title and an artist, and nothing else (D-069).
+	// Still a column rather than a plain row, because from `sm` the art sits
+	// above the name rather than beside it.
 	&__card {
 		display: flex;
 		flex-direction: column;
@@ -97,10 +98,7 @@
 	//
 	// This was clamped to ONE line, which turned "Wonderful Tonight" into
 	// "Wonderful…" — a song title cut down to keep three cards uniform, which
-	// is the one thing truncation must never do to a name. Reserving the
-	// second line means the artist, the rule and the note below all sit at the
-	// same height across the row without any title being shortened to get
-	// them there (D-068).
+	// is the one thing truncation must never do to a name (D-068).
 	//
 	// Two lines holds every title in the catalogue. A longer one still clamps,
 	// and the card links to a page whose hero IS the full title — a visible
@@ -111,10 +109,11 @@
 		text-wrap: balance;
 		@include m.line-clamp(2);
 
-		// The reserved second line exists to align three cards standing side
-		// by side. Below `sm` they are stacked, each one its own row, so there
-		// is nothing to align to — reserving the line there would only put a
-		// blank gap under every single-line title on a phone.
+		// The reserved second line keeps the artist name at one height across
+		// three cards standing side by side, so the row has a baseline even
+		// though the titles do not all wrap. Below `sm` the cards are stacked
+		// and there is nothing to align to, so the line is not reserved and no
+		// single-line title carries a blank gap under it.
 		@include m.from("sm") {
 			min-height: 2.5em;
 		}
@@ -126,57 +125,6 @@
 		@include m.line-clamp(1);
 	}
 
-	// Why this song (D-045). Set below a rule rather than in a box: it is an
-	// aside from the curator, not a second piece of metadata competing with
-	// the title.
-	// Starts at the same height on every card, and is allowed to end wherever
-	// its note ends (D-068).
-	//
-	// Anchoring this to the card's FLOOR instead was the obvious move and the
-	// wrong one: with equal-height cards, a three-line note then begins higher
-	// than a two-line one, so the rules and the first lines of the notes sit
-	// at three different heights across the row. Everything above this is a
-	// fixed height — square art, two reserved title lines, one artist line —
-	// so leaving it in flow puts the rule at the same y on all three, which is
-	// the alignment a reader actually scans by. Short notes simply leave room
-	// at the bottom of their card.
-	&__why {
-		display: flex;
-		flex-direction: column;
-		gap: 0.6rem;
-		padding-top: 0.75rem;
-		border-top: 1px solid var(--color-hairline);
-	}
-
-	&__why-tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.3rem;
-	}
-
-	// Filled rather than outlined (D-065). These are the reasons the pick was
-	// made, which is the one piece of editorial argument on the card; an
-	// outlined pill in the accent colour reads as a control the reader can
-	// press, and none of them are.
-	// One line, always. A compact label that wraps stops reading as a label,
-	// and a row of them wrapping to different depths on each card was what
-	// pulled the notes out of alignment.
-	&__why-tag {
-		font-family: var(--font-ui);
-		font-weight: 600;
-		padding: 0.2rem 0.6rem;
-		border-radius: var(--radius-pill);
-		background: var(--color-hover-strong);
-		color: var(--color-ink);
-		white-space: nowrap;
-		min-width: 0;
-	}
-
-	&__why-note {
-		font-family: var(--font-ui);
-		color: var(--color-ink-muted);
-		text-wrap: pretty;
-	}
 }
 
 // "People also like" — a longer, looser shelf beneath the headline picks.

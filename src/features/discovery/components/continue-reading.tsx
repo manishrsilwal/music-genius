@@ -1,9 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-
+import { SectionHeading } from "@/components/section-heading";
 import type { HistoryEntry } from "@/lib/history";
 import { riseVariants, staggerVariants } from "@/lib/motion";
-
 import "./continue-reading.scss";
 
 /**
@@ -29,18 +28,19 @@ export function ContinueReading({
 
 	return (
 		<section>
-			<div className="mb-3 flex items-baseline justify-between gap-4">
-				<h2 className="text-micro uppercase tracking-label text-ink-faint">
-					Continue reading
-				</h2>
-				<button
-					type="button"
-					onClick={onClear}
-					className="tap text-micro uppercase tracking-label text-ink-faint hover:text-ink"
-				>
-					Clear
-				</button>
-			</div>
+			<SectionHeading
+				action={
+					<button
+						type="button"
+						onClick={onClear}
+						className="tap text-micro uppercase tracking-label text-ink-faint hover:text-ink"
+					>
+						Clear
+					</button>
+				}
+			>
+				Continue reading
+			</SectionHeading>
 
 			<motion.ul
 				className="recent"

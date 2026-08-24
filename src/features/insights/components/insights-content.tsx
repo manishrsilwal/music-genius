@@ -1,5 +1,6 @@
 import type { SyntheticEvent } from "react";
 
+import { SectionHeading } from "@/components/section-heading";
 import type { Insight } from "@/lib/types";
 
 /**
@@ -35,7 +36,7 @@ export function InsightsContent({ insight }: { insight: Insight }) {
 	return (
 		<div className="insights">
 			<section className="insights__synthesis">
-				<p className="insights__label text-micro">The Synthesis</p>
+				<SectionHeading>The Synthesis</SectionHeading>
 				<div className="insights__prose mt-4">
 					{insight.synthesis
 						.split(/\n{2,}/)
@@ -54,7 +55,7 @@ export function InsightsContent({ insight }: { insight: Insight }) {
 			*/}
 			{insight.resonance && (
 				<section className="insights__resonance">
-					<p className="insights__label text-micro">Why this, for you</p>
+					<SectionHeading>Why this, for you</SectionHeading>
 					<ol className="insights__lines mt-4">
 						{insight.resonance.lines.map((line) => (
 							<li key={line} className="insights__line text-lead">
@@ -95,7 +96,7 @@ export function InsightsContent({ insight }: { insight: Insight }) {
 
 			{insight.sources.length > 0 && (
 				<section>
-					<p className="insights__label text-micro">The Sources</p>
+					<SectionHeading>The Sources</SectionHeading>
 					{/* Numbered so the quote's citation points somewhere real. */}
 					<ol className="insights__sources mt-4">
 						{insight.sources.map((source, index) => (

@@ -1,0 +1,53 @@
+@use "styles/mixins" as m;
+
+// See section-heading.tsx for why this exists.
+.section-heading {
+	// The rule is the section's own top edge, so the space above it belongs to
+	// the gap between sections and the space below it belongs to the label.
+	// That asymmetry is the whole point: it groups the label downward, with
+	// the content it introduces, rather than centring it in a uniform gap.
+	border-top: 1px solid var(--color-hairline);
+	padding-top: 1.1rem;
+	margin-bottom: 1rem;
+
+
+	&__bar {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	&__label {
+		margin: 0;
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		// Full ink at 600, not faint at 400. A heading set in the same colour
+		// and weight as the helper text beneath it is not a heading.
+		font-weight: 600;
+		letter-spacing: var(--tracking-label);
+		text-transform: uppercase;
+		color: var(--color-ink);
+	}
+
+	&__lead {
+		margin: 0.45rem 0 0;
+		max-width: 62ch;
+		font-size: var(--text-caption);
+		color: var(--color-ink-muted);
+		text-wrap: pretty;
+	}
+}
+
+// The first section in a column has nothing above it to be divided from.
+//
+// Keyed on the SECTION's position, not the heading's. Written as
+// `.section-heading:first-child` it matched every heading in the product —
+// each one is the first child of its own <section> — and silently removed the
+// rule from all of them, which is how a change meant to separate sections
+// shipped looking identical to the thing it replaced.
+:where(.shelves, .insights) > :where(section, div):first-of-type
+	> .section-heading {
+	border-top: 0;
+	padding-top: 0;
+}

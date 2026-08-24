@@ -134,6 +134,67 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-069 — A card is three things, and a section says where it starts
+**Built 2026-08-24.** Two requests, one root cause: the product had no
+hierarchy to scan by.
+
+**The Deep Dive cards are artwork, a title and an artist, and nothing else.**
+The tags and the editorial note come off. Those three facts are what a reader
+needs to decide whether to open a card; everything about *why* belongs on the
+page they open, which is where they went to find out.
+
+> Worth recording honestly: the note existed **only** on the card. The track
+> route never reads the curated catalogue — its story comes from the insights
+> drawer, which is different text entirely — so removing it retires that
+> writing rather than relocating it. The `note` field stays in the catalogue
+> rather than being deleted, because it is hand-written editorial and cheap to
+> surface later.
+
+The shelf-level line survives, because it is one sentence about the shelf
+rather than a label repeated on every card, and without it "Today's Deep
+Dives" is an unexplained assertion that three songs were chosen for you.
+
+**Sections had no beginning.** Every section label in the product was set
+identically — `text-micro`, uppercase, `--color-ink-faint` — the same size,
+weight and colour as the helper text beneath it. Five of those on the landing
+produced five interchangeable grey lines, and the spacing between sections was
+uniform, so each label floated equidistant between the section above and the
+one it belonged to. The one guideline in the skill's database that bites here
+is *Font Size Scale — "consistent type hierarchy aids scanning"*: there was no
+hierarchy, so there was nothing to scan.
+
+> The skill's `landing` domain returned conversion-page patterns — hero,
+> testimonials, CTA — which do not apply to a discovery page for a reading
+> product. Recorded rather than stretched to fit: the three devices below are
+> ordinary editorial practice, not a database match.
+
+One `SectionHeading`, used on the landing and inside the story drawer:
+
+1. **A hairline above the label.** The oldest way of saying "a new thing starts
+   here", and the cheapest — no colour, no box, one pixel.
+2. **The label steps up** to full ink at weight 600. A heading set in the same
+   colour and weight as its own helper text is not a heading.
+3. **Asymmetric space** — a lot above the rule, a little between label and
+   content. Proximity then groups the label downward with what it introduces.
+
+**D-048 is half-reversed, deliberately.** It argued that a label which
+announces itself is a better boundary than a rule, and that a rule would add
+chrome to a reading panel. The first half was right and the second was
+over-cautious: four prose blocks with a coloured label on each still read as
+one column, which is the complaint that produced this entry. The accent comes
+off those labels in the process, which is a gain — it is now spent only on the
+quote rule and the resonance card, the two places the panel quotes the song.
+
+### A CSS mistake worth keeping
+
+The first version wrote the rule's exception as `.section-heading:first-child`,
+meaning "the first section in a column". Every heading in the product is the
+first child of its own `<section>`, so it matched all of them and removed every
+rule — and the change shipped to the preview looking **identical** to the thing
+it was replacing. Caught by looking at the render rather than by trusting that
+the CSS said what it meant. It is keyed on the section's position now:
+`:where(.shelves, .insights) > :where(section, div):first-of-type`.
+
 ### D-068 — The Deep Dives row said the same thing three times
 **Built 2026-08-24.** Raised on looking at it: the shelf read badly. Four
 faults, three of them structural and one of them about information rather than

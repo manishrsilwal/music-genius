@@ -90,21 +90,24 @@
 // ── Shared content ──────────────────────────────────────────────────────────
 .insights {
 	display: grid;
-	gap: 2rem;
+	// 1.5rem, not 2rem. The headings now carry their own space above the rule,
+	// so the old blanket gap stacked on top of it (D-069).
+	gap: 1.5rem;
 	align-content: start;
 
 
-	// The section labels carry the separation. Four prose blocks at 2rem apart
-	// read as one column that happens to have small grey headings in it; a
-	// label that announces itself is a better boundary than a rule, and does
-	// not add chrome to a reading panel (D-048).
-	&__label {
-		font-family: var(--font-ui);
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: var(--tracking-label);
-		color: var(--track-accent);
-	}
+	// D-048 argued that a label which announces itself is a better boundary
+	// than a rule, and that a rule would add chrome to a reading panel. Half
+	// right: the label was necessary and it was not sufficient. Four prose
+	// blocks 2rem apart with a coloured label on each still read as one
+	// column, which is the complaint that produced D-069 — so the shared
+	// `SectionHeading` now carries a hairline as well, the same one the
+	// landing uses. It is a single 1px line; the panel is not full of chrome.
+	//
+	// The accent comes off the labels in the process, which is a gain rather
+	// than a loss: it is now spent only on the quote rule and the resonance
+	// card, where it marks the two things in the panel that are quotations
+	// from the song itself.
 
 	// The UI face, not the display face. The synthesis is prose to be read at
 	// length in a narrow column, and the display face is cut for headlines — at
@@ -163,6 +166,14 @@
 		padding: 1.5rem;
 		border-radius: var(--radius-card);
 		@include m.surface(var(--color-surface-raised));
+
+		// This section is a card, and the card's own edge already separates it
+		// from the prose above. A rule inside it as well is the boundary drawn
+		// twice (D-069).
+		.section-heading {
+			border-top: 0;
+			padding-top: 0;
+		}
 	}
 
 	&__lines {

@@ -27,20 +27,21 @@ export function DeepDives({
 	preferences: Preferences;
 }) {
 	/*
-	 * Split the reasons into what the picks SHARE and what tells them apart
-	 * (D-068).
+	 * The reasons the picks have in common, said once above the row (D-069).
 	 *
-	 * Every card used to carry its full list, and the picker is good at its
-	 * job — so all three routinely came back stamped "something tender", which
-	 * is the reader's own answer read back to them three times. A label on
-	 * every card carries no information about any of them; what the reader
-	 * needs is the part that differs. The shared half is stated once, above
-	 * the row, where it is true of the shelf rather than of a song.
+	 * The cards themselves carry no reasoning at all now: no tags and no note.
+	 * A card is artwork, a title and an artist — the three things a reader
+	 * needs to decide whether to open it — and everything about *why* lives on
+	 * the page they open, which is where they went to find out.
+	 *
+	 * This line survives because it is one sentence for the whole shelf rather
+	 * than a repeated label on each card, and because without it "Today's Deep
+	 * Dives" is an unexplained assertion that three songs were chosen for you.
 	 */
-	const explained = picks.map((pick) => explainPick(pick, preferences));
-	const lists = explained.map(({ matched }) =>
-		matched.length > 0 ? matched : ["today's rotation"],
-	);
+	const lists = picks.map((pick) => {
+		const { matched } = explainPick(pick, preferences);
+		return matched.length > 0 ? matched : ["today's rotation"];
+	});
 	const shared = (lists[0] ?? []).filter((reason) =>
 		lists.every((list) => list.includes(reason)),
 	);
@@ -60,7 +61,7 @@ export function DeepDives({
 				initial="hidden"
 				animate="visible"
 			>
-				{picks.map((pick, index) => (
+				{picks.map((pick) => (
 					<motion.div
 						className="dives__slot"
 						key={`${pick.artist}-${pick.title}`}
@@ -89,13 +90,6 @@ export function DeepDives({
 									</span>
 								</span>
 							</span>
-
-							<WhyThis
-								note={pick.note}
-								reasons={(lists[index] ?? []).filter(
-									(reason) => !shared.includes(reason),
-								)}
-							/>
 						</Link>
 					</motion.div>
 				))}
@@ -108,35 +102,6 @@ export function DeepDives({
 function joinReasons(reasons: string[]): string {
 	if (reasons.length <= 1) return reasons[0] ?? "";
 	return `${reasons.slice(0, -1).join(", ")} and ${reasons.at(-1)}`;
-}
-
-/**
- * Why this song, in the reader's own terms (D-045).
- *
- * Two halves: the axes that actually scored, read straight out of the picker,
- * and the track's editorial note. When the reader skipped the stepper there
- * are no axes, so it says the pick came from the day's rotation rather than
- * claiming a reason it does not have.
- */
-function WhyThis({ note, reasons }: { note: string; reasons: string[] }) {
-	// Only what sets this pick apart from the other two — the reasons all
-	// three share are stated once, above the row (D-068). Often that leaves
-	// nothing, and nothing is the right answer: the note below is then the
-	// whole of what distinguishes this song, and it gets the card to itself.
-	return (
-		<span className="dives__why block">
-			{reasons.length > 0 && (
-				<span className="dives__why-tags">
-					{reasons.map((reason) => (
-						<span key={reason} className="dives__why-tag text-micro">
-							{reason}
-						</span>
-					))}
-				</span>
-			)}
-			<span className="dives__why-note block text-caption">{note}</span>
-		</span>
-	);
 }
 
 /** Same per-row artwork fetch as the autocomplete, deduped by TanStack Query. */

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo } from "react";
+import { SectionHeading } from "@/components/section-heading";
 import { ContinueReading } from "@/features/discovery/components/continue-reading";
 import {
 	AlsoLiked,
@@ -93,7 +94,7 @@ function Discovery() {
 				) : (
 					<motion.div
 						key="discovery"
-						className="mt-8 grid gap-10"
+						className="shelves mt-8 grid gap-10"
 						initial={{ opacity: 0, y: 12 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={transition.editorial}
@@ -133,14 +134,18 @@ function Discovery() {
 							  and assumes that is the product. One line costs nothing and
 							  removes the guess.
 							
-							  Not a heading: the field owns the only heading-shaped thing
-							  here, its own visible label (D-060), and a second one above
-							  it would compete for the same job.
+							  D-063 deliberately left this section headingless, so the
+							  field's own visible label (D-060) was the only
+							  heading-shaped thing in it. That was right when this was
+							  the only unlabelled block on the page; with every other
+							  section now opening on a rule and a label (D-069), the one
+							  section without them read as a fragment of the one above.
+							  The field's label is a different rank and still the only
+							  thing naming the input.
 							*/}
-							<p className="entry__lead text-caption text-ink-muted">
-								Two ways in — look up a song you already love, or tell us how
-								you want to feel and we will choose.
-							</p>
+							<SectionHeading lead="Two ways in — look up a song you already love, or tell us how you want to feel and we will choose.">
+								Start reading
+							</SectionHeading>
 
 							<SearchField />
 
@@ -148,7 +153,7 @@ function Discovery() {
 								or
 							</p>
 
-							<h2 className="mb-1 text-micro uppercase tracking-label text-ink-faint">
+							<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
 								Start from a mood
 							</h2>
 							{/* The lead above already makes the offer; repeating "tell us
@@ -165,30 +170,23 @@ function Discovery() {
 						</section>
 
 						<section>
-							<h2 className="mb-1 text-micro uppercase tracking-label text-ink-faint">
-								Today's Deep Dives
-							</h2>
 							{/*
-							  Says what the shelf is, which the label alone did not.
-							  Three picks out of a hand-built catalogue is an
-							  editorial claim; unlabelled it reads as the whole of
+							  The lead says what the shelf is, which the label alone
+							  did not. Three picks out of a hand-built catalogue is
+							  an editorial claim; unlabelled it reads as the whole of
 							  a thin library (D-056).
 							*/}
-							<p className="mb-4 text-caption text-ink-faint">
-								Three from a catalogue we chose by hand, matched to your answers
-								and rotated daily.
-							</p>
+							<SectionHeading lead="Three from a catalogue we chose by hand, matched to your answers and rotated daily.">
+								Today's Deep Dives
+							</SectionHeading>
 
 							<DeepDives picks={dives} preferences={preferences} />
 						</section>
 
 						<section>
-							<h2 className="mb-1 text-micro uppercase tracking-label text-ink-faint">
+							<SectionHeading lead="More from the same catalogue, ranked further down your answers.">
 								People also like
-							</h2>
-							<p className="mb-3 text-caption text-ink-faint">
-								More from the same catalogue, ranked further down your answers.
-							</p>
+							</SectionHeading>
 							<AlsoLiked picks={also} />
 						</section>
 					</motion.div>
