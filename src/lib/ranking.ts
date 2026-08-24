@@ -107,6 +107,16 @@ export function isVariant(title: string): boolean {
 	const zones = qualifiers(title);
 	if (trailing?.[1]) zones.push(trailing[1]);
 
+	// And some arrive with no punctuation at all — "Chura Liya Hai Tumne Jo Dil
+	// Ko LoFi Flip".
+	//
+	// The last two words, and ONLY when the title is long enough for those two
+	// to be a suffix rather than the whole thing. Without that floor the window
+	// swallows short titles entirely and "Cover Me" reads as a cover of
+	// something — which is exactly what the test written to protect it caught.
+	const all = words(title);
+	if (all.length >= 4) zones.push(all.slice(-2).join(" "));
+
 	return zones.some((zone) => {
 		const parts = words(zone);
 		return parts.length > 0 && parts.some((word) => VARIANT_WORDS.has(word));

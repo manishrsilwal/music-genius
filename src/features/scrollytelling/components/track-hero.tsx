@@ -24,11 +24,19 @@ export function TrackHero({
 	track,
 	visuals,
 	player,
+	notice,
 }: {
 	track: Track;
 	visuals: Promise<TrackVisuals>;
 	/** The playback bar, opening here before it docks (D-038). */
 	player?: ReactNode;
+	/**
+	 * A caveat about this recording, when there is one (OD-028). Passed in
+	 * rather than imported, the same way the player is: the hero has no
+	 * business knowing what makes a recording a variant, and discovery has no
+	 * business knowing how the hero is laid out.
+	 */
+	notice?: ReactNode;
 }) {
 	return (
 		<motion.header
@@ -97,6 +105,8 @@ export function TrackHero({
 				    normalised at the LRCLIB boundary, not guarded here. */}
 				{track.album ? ` · ${track.album}` : ""}
 			</motion.p>
+
+			{notice}
 
 			{player}
 		</motion.header>

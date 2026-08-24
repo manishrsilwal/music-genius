@@ -8,6 +8,10 @@ import {
 import { useState } from "react";
 import { RouteError } from "@/components/route-error";
 import { RouteMessage } from "@/components/route-message";
+import {
+	TrackVersions,
+	VariantNotice,
+} from "@/features/discovery/components/track-versions";
 import { useRecordVisit } from "@/features/discovery/hooks/use-history";
 import { InsightsAffordance } from "@/features/insights/components/insights-affordance";
 import { CardAffordance } from "@/features/lyric-card/components/card-affordance";
@@ -234,6 +238,7 @@ function TrackPage() {
 			<TrackHero
 				track={track}
 				visuals={visuals}
+				notice={<VariantNotice title={track.title} />}
 				/*
 				 * The bar mounts on the first paint, not when the data arrives
 				 * (D-055).
@@ -299,10 +304,22 @@ function TrackPage() {
 
 			<InsightsAffordance trackId={track.id} onOpenChange={setDrawerOpen} />
 
-			<footer className="track-shell__foot text-center">
+			<footer className="track-shell__foot px-6 text-center">
+				{/*
+				  The reader's way out of a wrong recording (OD-028). At the foot
+				  rather than in the hero: it is for someone who has noticed the
+				  lyrics are not lining up, and they can only notice that after
+				  reading for a moment.
+				*/}
+				<TrackVersions
+					trackId={track.id}
+					title={track.title}
+					artist={track.artist}
+				/>
+
 				<Link
 					to="/"
-					className="tap text-caption uppercase tracking-label text-accent"
+					className="tap mt-10 inline-block text-caption uppercase tracking-label text-accent"
 				>
 					Search another
 				</Link>

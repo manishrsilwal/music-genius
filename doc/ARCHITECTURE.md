@@ -134,6 +134,76 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-071 — Which recording, and the reader's way out of the wrong one
+**Built 2026-08-24.** Closes the ranking half of OD-028 and adds the escape
+hatch. Reported as "most of the time it returns the LoFi / home demo / video
+version, and then the lyrics do not sync".
+
+**Why this is worse than a bad search result.** An LRC file's timings belong to
+the recording it was made from. A LoFi cover's timings are *correct* for the
+LoFi cover. Land on the wrong entry and the page renders, the lyrics scroll,
+the player plays — and they are simply the wrong recording's words at the wrong
+tempo. Nothing reports an error, which is why this survived every check the
+product had.
+
+> The proposal on the table was to always resolve the *audio* to the canonical
+> version. That would have made it worse: forcing the studio recording behind a
+> LoFi lyric file breaks a sync that currently works. The choice has to be made
+> when the LYRIC entry is picked, and the player then follows for free.
+
+**Ranking, in `src/lib/ranking.ts` as pure tested logic.** Three signals:
+
+- **Canonical artist from Genius**, which keeps an editorial catalogue where
+  LRCLIB keeps uploads. The only signal that separates a faithful cover from
+  the original.
+- **Variant tags in qualifier position** — bracketed, after a top-level dash,
+  or as a trailing tag on a long title. Kept deliberately distinct from D-070's
+  *packaging* vocabulary: "Official Video" is the same recording labelled,
+  "LoFi" is a different performance.
+- **Duration outliers** at a factor of two, weighted heavily enough that a
+  correct artist tag cannot rescue a "Creep" running 949 seconds.
+
+Covers are ranked lower and never removed; someone may have come for the Sanam
+recording.
+
+Measured, cold and warm: "wonderful tonight" moved Eric Clapton from third to
+first, "holocene" moved Bon Iver above an unrelated song of the same name, and
+"lag ja gale" moved Lata Mangeshkar above five Sanam covers.
+
+### Four bugs, all found by measuring rather than reading
+
+1. **A median needs a middle.** With two candidates the "median" was one of the
+   pair, so the rule fired against the *genuine* track and promoted the junk.
+   Requires three samples now.
+2. **Substring artist matching** let an upload tagged "radiohead creep" claim
+   to be Radiohead and take the boost. Whole-word now, with a length bound.
+3. **The ranking was reordering a list the answer was not in.** `searchTracks`
+   ranks *then* slices, so asking it for twice the display limit cut the pool
+   using the ranking that has no hint. "lag ja gale" returns sixteen entries
+   with the only Lata upload at number ten — the boost worked perfectly, on six
+   entries she was not among. A pool of 40 is cached and ranked here instead.
+4. **A two-word title is entirely tail.** The trailing-tag window read "Cover
+   Me" as a cover of something. It now applies only from four words up.
+
+**Results are cached; the order is not.** The hint takes 760–950ms and is
+allowed to miss its 900ms deadline, so a first search can legitimately rank
+without it — and storing that order would serve one unlucky call to everyone
+for the life of the entry. Ranking on read lets the separately-cached hint
+correct it from the second search onward.
+
+**Six of sixty curated picks pointed at the wrong recording** — a LoFi edit, a
+home demo, a live cut, two trap mixes. Five now point at the original.
+`scripts/audit-catalogue.ts` finds them; a script rather than a test, because
+the answer lives on LRCLIB and a unit test that reaches the network fails when
+someone else's server is slow.
+
+**The sixth has no fix, and that is the point of the last piece.** LRCLIB holds
+exactly one upload of "Musafir Hoon Yaaron", and it is the LoFi. No ranking
+finds a record that does not exist. So the reader gets told — `VariantNotice`
+under the hero when the entry is a variant — and `TrackVersions` at the foot
+offers the other recordings. That is the honest answer to a user-contributed
+catalogue: rank well, then admit the limit and hand over the choice.
+
 ### D-070 — "No recording found" was mostly our search failing, not YouTube
 **Built 2026-08-24.** Reported as "most of the time it says no recording".
 Measured before changing anything, by running thirty catalogue tracks through

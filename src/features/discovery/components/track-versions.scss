@@ -1,0 +1,81 @@
+@use "styles/mixins" as m;
+
+// Other recordings of this song (OD-028). Set as a quiet aside at the foot of
+// the page: it is there for the reader who noticed something was wrong, and
+// must not compete with the words above it.
+.versions {
+	max-width: 34rem;
+	margin-inline: auto;
+	text-align: left;
+
+	&__label {
+		margin: 0 0 0.35rem;
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		font-weight: 600;
+		letter-spacing: var(--tracking-label);
+		text-transform: uppercase;
+		color: var(--color-ink);
+	}
+
+	&__note {
+		margin: 0 0 0.85rem;
+		font-size: var(--text-caption);
+		color: var(--color-ink-faint);
+		text-wrap: pretty;
+	}
+
+	&__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 0.25rem;
+	}
+
+	&__row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.75rem;
+		// The 44px this product holds itself to (D-035, D-067).
+		min-height: 2.75rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: var(--radius-pill);
+		transition: background-color 0.18s var(--ease-editorial);
+
+		&:hover {
+			background: var(--color-hover);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__title {
+		font-family: var(--font-display);
+		color: var(--color-ink);
+		@include m.line-clamp(1);
+	}
+
+	&__artist {
+		flex: none;
+		font-family: var(--font-ui);
+		font-size: var(--text-caption);
+		color: var(--color-ink-faint);
+		@include m.line-clamp(1);
+	}
+
+	// Shown under the hero when the reader is already on a variant. Sun rather
+	// than lime: this is a caveat, and the accent is spoken for by the one
+	// bright control on the page (D-065).
+	&__variant {
+		margin: 1rem auto 0;
+		max-width: 44ch;
+		font-family: var(--font-ui);
+		font-size: var(--text-caption);
+		color: var(--color-sun);
+		text-wrap: pretty;
+	}
+}

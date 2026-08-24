@@ -31,6 +31,8 @@ describe("isVariant", () => {
 		expect(isVariant("Chura Liya Hai Tumne - Trap Mix")).toBe(true);
 		expect(isVariant("Tum Se Hi (Reprise)")).toBe(true);
 		expect(isVariant("Tum Se Hi-LoFi")).toBe(true);
+		// No punctuation at all — the tag is simply stuck on the end.
+		expect(isVariant("Chura Liya Hai Tumne Jo Dil Ko LoFi Flip")).toBe(true);
 	});
 
 	it("leaves songs whose NAME contains one of the words alone", () => {
@@ -40,6 +42,8 @@ describe("isVariant", () => {
 		expect(isVariant("Cover Me")).toBe(false);
 		expect(isVariant("Mixed Emotions")).toBe(false);
 		expect(isVariant("Demolition Man")).toBe(false);
+		// Long enough for the tail window to apply, and still not a variant.
+		expect(isVariant("Everything In Its Right Place")).toBe(false);
 	});
 
 	it("ignores packaging, which is the same recording with a label", () => {

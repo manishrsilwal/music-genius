@@ -74,7 +74,7 @@ export const CATALOGUE: CuratedTrack[] = [
 	{
 		title: "Lag Ja Gale",
 		artist: "Lata Mangeshkar",
-		lrclibId: "23658883",
+		lrclibId: "25555080",
 		note: "Asks for one embrace on the grounds that this night may not come again.",
 		mood: "longing",
 		pull: "confession",
@@ -118,7 +118,7 @@ export const CATALOGUE: CuratedTrack[] = [
 	{
 		title: "Choo Lo",
 		artist: "The Local Train",
-		lrclibId: "7036519",
+		lrclibId: "6631894",
 		note: "Asks to be held before the feeling passes, unsure the answer will come.",
 		mood: "longing",
 		pull: "confession",
@@ -228,7 +228,7 @@ export const CATALOGUE: CuratedTrack[] = [
 	{
 		title: "Wonderful Tonight",
 		artist: "Eric Clapton",
-		lrclibId: "15652449",
+		lrclibId: "29098309",
 		note: "An ordinary evening described so closely it becomes the reason.",
 		mood: "tender",
 		pull: "storytelling",
@@ -250,7 +250,7 @@ export const CATALOGUE: CuratedTrack[] = [
 	{
 		title: "Chura Liya Hai Tumne",
 		artist: "Asha Bhosle",
-		lrclibId: "33926738",
+		lrclibId: "15931477",
 		note: "Playful theft as a love song, all lightness over real stakes.",
 		mood: "tender",
 		pull: "storytelling",
@@ -503,7 +503,7 @@ export const CATALOGUE: CuratedTrack[] = [
 	{
 		title: "Mera Joota Hai Japani",
 		artist: "Mukesh",
-		lrclibId: "34787788",
+		lrclibId: "37057544",
 		note: "Borrowed clothes, borrowed everything, and a heart that is not.",
 		mood: "defiant",
 		pull: "wordplay",
