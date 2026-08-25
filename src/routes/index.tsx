@@ -76,15 +76,15 @@ function Discovery() {
 
 	/*
 	 * The second shelf is an accordion with its own pagination (D-101).
-	 * Collapsed by default — it is the secondary shelf, and the owner has
-	 * been stripping this page's weight all day. The count survives both the
-	 * toggle and a shuffle: it is the reader's chosen depth, not the shelf's.
+	 * OPEN by default (owner's revision): a collapsed bar hid what the
+	 * section even was — expanded, the first screen of rows says what to
+	 * expect, and the fold remains for readers who want it gone. With the
+	 * shelf visible on load, the covers fetch on load too, so the
+	 * first-open latch that guarded them died with the closed default.
+	 * The count survives both the toggle and a shuffle: it is the
+	 * reader's chosen depth, not the shelf's.
 	 */
-	const [alsoOpen, setAlsoOpen] = useState(false);
-	// Latches on first open: the collapse is CSS, so rows stay mounted, and
-	// the covers should neither fetch for a shelf nobody expanded nor pop
-	// out mid-close-animation (D-101).
-	const [alsoEverOpen, setAlsoEverOpen] = useState(false);
+	const [alsoOpen, setAlsoOpen] = useState(true);
 	const [alsoCount, setAlsoCount] = useState(12);
 
 	const dives = useMemo(
@@ -298,10 +298,7 @@ function Discovery() {
 										className="bento__also-toggle"
 										aria-expanded={alsoOpen}
 										aria-controls="also-liked"
-										onClick={() => {
-											setAlsoOpen(!alsoOpen);
-											if (!alsoOpen) setAlsoEverOpen(true);
-										}}
+										onClick={() => setAlsoOpen(!alsoOpen)}
 									>
 										<span className="text-micro font-semibold uppercase tracking-label text-ink">
 											People also like
@@ -332,7 +329,7 @@ function Discovery() {
 												More from the same catalogue, ranked further
 												down your answers.
 											</p>
-											<AlsoLiked picks={also} art={alsoEverOpen} />
+											<AlsoLiked picks={also} art />
 											{/*
 											  Deepens THIS shelf only (D-101) — the count
 											  is separate from the shuffle, which re-deals

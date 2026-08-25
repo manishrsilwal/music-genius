@@ -141,8 +141,11 @@ small album art on each row "as the divider".
 
 **The accordion** collapses D-100's well to one slim bar — the whole header
 row is the control (`aria-expanded`/`aria-controls`, chevron saying which
-way the row will move), closed by default: it is the secondary shelf on a
-page the owner has spent the day lightening. The collapse is the 0fr→1fr
+way the row will move). OPEN by default (the owner reversed my closed
+default the same day): a collapsed bar hid what the section even was, and
+expanded, the first rows say what to expect — the fold remains for readers
+who want it gone. With the shelf visible on load the covers fetch on load,
+so the first-open latch that guarded them died with the closed default. The collapse is the 0fr→1fr
 grid-rows transition — no measurement, honest easing, `reduced-motion`
 cuts it. One SCSS lesson paid for: the open-state rules were first written
 as `.bento__also[data-open] &` deep inside the nesting, where `&` expands
@@ -157,9 +160,8 @@ chosen depth — it survives both the toggle and a shuffle.
 
 **Covers anchor the rows.** Each entry starts on a 2.25rem cover (reusing
 DiveArt's cached query), which is what divides it from its neighbours
-without a rule — the owner's read. Gated on first-open: the collapse is
-CSS, rows stay mounted, and a shelf nobody expanded must not fetch a dozen
-covers; the latch also keeps thumbs from popping out mid-close.
+without a rule — the owner's read. The `art` prop stays on AlsoLiked so a
+future caller without the covers' fetch budget can opt out.
 
 ### D-100 — A well under the second shelf
 **Built 2026-08-25.** Owner's ask: a subtle background for "People also

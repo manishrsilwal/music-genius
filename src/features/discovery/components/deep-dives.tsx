@@ -181,10 +181,9 @@ export function AlsoLiked({
 }: {
 	picks: CuratedTrack[];
 	/**
-	 * Whether rows carry a small album art (D-101). Off until the shelf has
-	 * actually been opened: the accordion collapses with CSS, so the rows
-	 * stay mounted — without this gate a shelf nobody expanded would still
-	 * fetch a dozen covers.
+	 * Whether rows carry a small album art (D-101). A prop rather than a
+	 * default so a future caller without the covers' fetch budget can opt
+	 * out; the landing passes it always now that the shelf opens expanded.
 	 */
 	art?: boolean;
 }) {
