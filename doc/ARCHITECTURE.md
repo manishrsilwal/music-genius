@@ -143,9 +143,10 @@ boundary-drawn-twice reasoning, one level up. Surfaces hold content;
 controls can stand on the canvas.
 
 The landing now reads statement → quiet filter strip → ONE results card.
-The strip takes the tiles' own padding as its inline inset so its heading
-sits on the tile headings' line; adjacency carries the "this governs that"
-reading D-090 used a shared surface for. With it: the bento gap grows to
+The strip rides the page's own left axis with the title — the owner struck
+the first cut's tile-padding inset: two registers, two lines, canvas
+content on the margin and card content behind its padding. Adjacency
+carries the "this governs that" reading D-090 used a shared surface for. With it: the bento gap grows to
 1.75rem from `md` (the tiles were a slab at 1.25rem), and the Deep Dives
 lead drops its "matched to your answers" clause — the match-line directly
 below says the same thing with the actual answers in it.

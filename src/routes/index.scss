@@ -110,17 +110,9 @@
 	}
 
 	// The filter is a chrome-less strip since D-098 — chips on the canvas,
-	// no card (a card around a row of pills is a box around boxes). It
-	// aligns to the tiles' inner text by taking their padding as its own
-	// inline inset, so the heading sits on the same line as the tile
-	// headings below it.
-	&__filter {
-		padding-inline: 1.5rem;
-
-		@include m.from("md") {
-			padding-inline: 1.75rem;
-		}
-	}
+	// no card, no inset (owner's call): it rides the page's own left axis
+	// with the title, not the tiles' inner text. Two registers, two lines —
+	// canvas content on the margin, card content behind its padding.
 
 	// The region's action moved into the shelf itself (D-097): the ghost
 	// card in Deep Dives is the shuffle, and Retake rides in the chip
