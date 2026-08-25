@@ -34,6 +34,28 @@ const config = defineConfig({
 		devtools(),
 		nitro({
 			rollupConfig: { external: [/^@sentry\//, /^@resvg\//, /^harfbuzzjs/] },
+			// The documents must say how to cache them (D-087). They said
+			// nothing, so every layer guessed: a browser or proxy that kept a
+			// copy of the HTML kept its references to hashed asset files —
+			// files a rebuild deletes — and the page came back broken until a
+			// hard refresh. `no-cache` means store-but-revalidate; with no
+			// validators on the SSR stream that is a refetch of a few
+			// kilobytes, which is the price of never serving last week's shell.
+			//
+			// Scoped to the two document routes, NOT `/**` — measured, a
+			// routeRules header OVERRIDES a handler's own Cache-Control in
+			// this Nitro, so a blanket rule silently flattened every /api
+			// policy (no-store on card, immutable on og) to no-cache. The
+			// assets rule restates Nitro's default so nothing can erode the
+			// one cache that SHOULD be eternal: hashed filenames are their
+			// own version stamp.
+			routeRules: {
+				"/": { headers: { "cache-control": "no-cache" } },
+				"/track/**": { headers: { "cache-control": "no-cache" } },
+				"/assets/**": {
+					headers: { "cache-control": "public, max-age=31536000, immutable" },
+				},
+			},
 		}),
 		tailwindcss(),
 		tanstackStart(),

@@ -59,7 +59,13 @@ export const Route = createFileRoute("/api/insights")({
 					}
 
 					return Response.json(insight, {
-						headers: { "Cache-Control": `public, max-age=${TTL.track}` },
+						// Browser one hour, shared caches the month (D-087): the
+						// insight's shape follows the drawer's design, and a
+						// browser-held copy outliving a redesign is unfixable
+						// from here.
+						headers: {
+							"Cache-Control": `public, max-age=3600, s-maxage=${TTL.track}`,
+						},
 					});
 				} catch (error) {
 					console.warn("[api/insights] failed", error);

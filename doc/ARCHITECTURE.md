@@ -134,6 +134,37 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-087 — Say how to cache the document; never let a browser keep JSON for a month
+**Built 2026-08-25.** The owner's report: after a long time away, hitting the
+URL serves a stale app until a hard refresh. Measured, two holes, both ours:
+
+**The HTML documents carried no Cache-Control at all.** Whatever stored a
+copy — a browser's session restore, any proxy or CDN once this deploys —
+kept its references to hashed asset files, which a rebuild deletes; the
+stale shell then loads against assets that no longer exist, and only a hard
+refresh recovers. The documents now say `no-cache` (store, but revalidate —
+a few kilobytes per visit) via Nitro routeRules, verified in dev and in the
+built server. Scoped to `/` and `/track/**`, NOT `/**`: measured, a
+routeRules header **overrides** a handler's own Cache-Control in this Nitro,
+so the blanket rule silently flattened every /api policy (card's no-store,
+og's immutable) to no-cache. The assets rule restates the default
+year-immutable so nothing can erode it — hashed filenames are their own
+version stamp.
+
+**/api/track, /api/artwork and /api/insights told the browser to keep JSON
+for 30 days** — track marked `immutable`. The 30 days is right for caches we
+control; it is wrong for the one cache nothing can purge. This response's
+shape has changed twice (track:v2→v3), and the server-side version bump that
+fixed it cannot touch a copy a reader's browser kept — month-old JSON meeting
+this week's code is the same bug D-077's cache comment predicted, waiting
+client-side. Now `max-age=3600, s-maxage=${TTL.track}`: browsers one hour,
+CDNs the month. `/api/og` keeps its long TTL (image bytes have no shape to
+drift) and `/api/card` keeps no-store.
+
+One caveat stated rather than hidden: if the owner's symptom came from a
+long-idle dev server rather than a stored document, these headers make the
+browser side honest but a wedged dev process still wants its restart.
+
 ### D-086 — The mark is a signature, not a button
 **Built 2026-08-25.** The owner's read on the remaining pages: boxed in a
 pill, the logo read as a control — chrome promising an action, when it is an

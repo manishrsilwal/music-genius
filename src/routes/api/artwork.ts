@@ -29,7 +29,11 @@ export const Route = createFileRoute("/api/artwork")({
 				try {
 					const visuals = await getTrackVisuals(title, artist);
 					return Response.json(visuals, {
-						headers: { "Cache-Control": `public, max-age=${TTL.track}` },
+						// Browser one hour, shared caches the month (D-087) —
+						// same shape-versus-stale-copy reasoning as /api/track.
+						headers: {
+							"Cache-Control": `public, max-age=3600, s-maxage=${TTL.track}`,
+						},
 					});
 				} catch (error) {
 					// A missing cover is never worth an error status to the caller.

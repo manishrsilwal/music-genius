@@ -30,8 +30,16 @@ export const Route = createFileRoute("/api/track")({
 
 					return Response.json(track, {
 						headers: {
-							// Lyrics don't change. Let every layer in front of us cache too.
-							"Cache-Control": `public, max-age=${TTL.track}, immutable`,
+							// The 30 days belongs to caches we can reach, not the
+							// reader's browser (D-087). This response's SHAPE has
+							// changed twice (track:v2 -> v3), and the server bump
+							// that fixed it cannot touch a copy a browser kept —
+							// `immutable` for a month meant a returning reader
+							// could feed month-old JSON to this week's code, and
+							// only a hard refresh recovers. One hour locally;
+							// CDNs get the month via s-maxage and are purged or
+							// replaced on deploy.
+							"Cache-Control": `public, max-age=3600, s-maxage=${TTL.track}`,
 						},
 					});
 				} catch (error) {
