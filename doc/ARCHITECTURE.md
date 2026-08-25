@@ -134,6 +134,26 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-110 — The hydration warning that libelled the server
+**Built 2026-08-25.** The owner's dev console: React 19 reporting
+`disabled={true}` client vs `disabled={null}` server on the playback
+toggle, the seekbar and the story button. Investigated before believing
+it: the streamed SSR HTML carries `disabled=""` on every one of them
+(curl, grep — after discovering the payload trips grep's binary detection
+and needs `--text`), the live DOM holds the attribute before and after
+hydration, and the controls behave correctly (the story button enables
+itself the moment state flips to ready). The differ mis-reads boolean
+attributes through the streamed Await/Suspense boundary and reports a
+server value that provably is not what the server sent — dev-only, no
+functional impact.
+
+The fix is `suppressHydrationWarning` on exactly those three elements,
+each commented with the evidence — because noise on every load teaches
+people to ignore warnings, which is the real cost. Verified by console
+capture: zero mismatch warnings after. The suppression is element-scoped;
+a future REAL mismatch on these elements' other attributes would also be
+silenced, which the comments say out loud.
+
 ### D-109 — The rail clips for real; the embed fits its own chrome
 **Built 2026-08-25.** Two owner reports on one screenshot.
 

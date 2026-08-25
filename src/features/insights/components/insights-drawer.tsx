@@ -54,6 +54,8 @@ export function DiscoverButton({
 			aria-controls={PANEL_ID}
 			onClick={onToggle}
 			className="discover px-5 py-3 text-caption uppercase tracking-label"
+			// Same verified false positive as the playback toggle (D-110).
+			suppressHydrationWarning
 		>
 			{/*
 			  The label changes while a request is in flight, but a disabled

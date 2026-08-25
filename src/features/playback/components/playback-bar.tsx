@@ -193,6 +193,13 @@ export function PlaybackBar({
 						disabled={!ready}
 						aria-label={playing ? "Pause" : "Play"}
 						className="playback__toggle"
+						// React 19's dev differ mis-reads boolean attributes
+						// through the streamed Await boundary and reports the
+						// server as having omitted `disabled` (D-110). Measured
+						// otherwise: the stream carries disabled="" and the live
+						// DOM holds it through hydration. Dev-only noise — but
+						// noise on every load teaches people to ignore warnings.
+						suppressHydrationWarning
 					>
 						{playing ? <PauseIcon /> : <PlayIcon />}
 					</button>

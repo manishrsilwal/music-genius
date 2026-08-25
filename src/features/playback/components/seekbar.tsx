@@ -33,6 +33,8 @@ export function Seekbar({
 			value={Math.min(currentTime, duration || 0)}
 			disabled={disabled || duration <= 0}
 			aria-label="Seek"
+			// Same verified false positive as the toggle (D-110).
+			suppressHydrationWarning
 			aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
 			style={{ "--progress": `${progress}%` } as React.CSSProperties}
 			onChange={(event: ChangeEvent<HTMLInputElement>) =>
