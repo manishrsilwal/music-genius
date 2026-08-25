@@ -134,6 +134,19 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-105 — The title greets by what the page knows
+**Built 2026-08-25.** The owner retired "Read the words properly" for copy
+that promises the product's three verbs and reflects the reader's choice —
+extending D-103's explorer move to every state. First visit: "Find the
+lyrics, know the *meaning*". Answered: "Songs for your *longing /
+defiance / tenderness / restlessness*" (a new MOOD_TITLE_NOUN table —
+MOOD_LABEL's "something defiant" is built for the match sentence and reads
+wrong after "your"), falling back to "Songs picked for *you*" when only
+non-mood answers exist. Skip-all keeps "Search for a *song*". The metadata
+tagline follows: "Lyrical Explorer — find the lyrics, know the meaning".
+Same mixed-face collision in every state — the identity is the treatment,
+not the words.
+
 ### D-104 — The copy audit: say what is true, in one voice
 **Built 2026-08-25.** The owner asked for a copywriter's pass on titles and
 descriptions. The UI copy was already sharp; the metadata spoke a different

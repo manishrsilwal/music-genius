@@ -46,7 +46,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				 * and appear nowhere in the UI. The tagline rides the landing
 				 * title — it is the product's best line.
 				 */
-				title: "Lyrical Explorer — read the words properly",
+				title: "Lyrical Explorer — find the lyrics, know the meaning",
 			},
 			/*
 			 * Social cards (D-051). A shared link previously rendered as a bare
@@ -57,7 +57,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			 */
 			{ property: "og:type", content: "website" },
 			{ property: "og:site_name", content: "Lyrical Explorer" },
-			{ property: "og:title", content: "Lyrical Explorer — read the words properly" },
+			{ property: "og:title", content: "Lyrical Explorer — find the lyrics, know the meaning" },
 			{
 				property: "og:description",
 				content:

@@ -791,6 +791,19 @@ export interface Explanation {
 	note: string;
 }
 
+/**
+ * The mood as a possessive noun, for the landing's answered-state title
+ * (D-105): "Songs for your longing / defiance / tenderness / restlessness".
+ * Separate from MOOD_LABEL below, whose phrasing ("something defiant") is
+ * built for the match sentence and reads wrong after "your".
+ */
+export const MOOD_TITLE_NOUN: Record<Mood, string> = {
+	longing: "longing",
+	defiant: "defiance",
+	tender: "tenderness",
+	restless: "restlessness",
+};
+
 const MOOD_LABEL: Record<Mood, string> = {
 	longing: "longing",
 	defiant: "something defiant",

@@ -13,7 +13,12 @@ import { TasteChips } from "@/features/discovery/components/taste-chips";
 import { useHistory } from "@/features/discovery/hooks/use-history";
 import { usePreferences } from "@/features/discovery/hooks/use-preferences";
 import { useRotation } from "@/features/discovery/hooks/use-rotation";
-import { pickAlsoLiked, pickDeepDives, seedFromDate } from "@/lib/deep-dives";
+import {
+	MOOD_TITLE_NOUN,
+	pickAlsoLiked,
+	pickDeepDives,
+	seedFromDate,
+} from "@/lib/deep-dives";
 import { riseVariants, staggerVariants, transition } from "@/lib/motion";
 
 import "./index.scss";
@@ -122,20 +127,38 @@ function Discovery() {
 			<div className="landing__head">
 				<motion.h1 variants={riseVariants} className="landing__title text-ink">
 					{/*
-					  The explorer titles itself by its one feature (D-103) —
-					  and the statement returns with the shelves. Same mixed-face
-					  collision either way; the identity is the treatment, not
-					  the words.
+					  The title greets by what the page knows (D-105, extending
+					  D-103's explorer move to every state): a first visitor gets
+					  the promise, an answered reader gets their own mood in the
+					  headline, the skip-all reader gets the search. Same
+					  mixed-face collision throughout — the identity is the
+					  treatment, not the words.
 					*/}
 					{unpersonalised ? (
 						<>
 							<span className="landing__title-plain">Search for a</span>{" "}
 							<em className="landing__title-fancy">song</em>
 						</>
+					) : answered === true ? (
+						preferences.mood ? (
+							<>
+								<span className="landing__title-plain">Songs for your</span>{" "}
+								<em className="landing__title-fancy">
+									{MOOD_TITLE_NOUN[preferences.mood]}
+								</em>
+							</>
+						) : (
+							<>
+								<span className="landing__title-plain">Songs picked for</span>{" "}
+								<em className="landing__title-fancy">you</em>
+							</>
+						)
 					) : (
 						<>
-							<span className="landing__title-plain">Read the words</span>{" "}
-							<em className="landing__title-fancy">properly</em>
+							<span className="landing__title-plain">
+								Find the lyrics, know the
+							</span>{" "}
+							<em className="landing__title-fancy">meaning</em>
 						</>
 					)}
 				</motion.h1>
