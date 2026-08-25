@@ -109,20 +109,59 @@
 		margin-bottom: 2rem;
 	}
 
-	// Cards beside the list from lg; stacked below it. The also-liked list
-	// keeps its own column — it two-ups from `sm` in the component, which is
-	// right when stacked and wrong beside the cards.
+	&__filter-bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 1rem 1.5rem;
+	}
+
+	// The region's one action (D-091), styled like an action: outlined in
+	// the product's own accent, glyph and label together. It re-picks both
+	// shelves, so it lives at the region's head rather than inside one
+	// shelf's heading, where its old home quietly misstated its scope.
+	&__shuffle {
+		@include m.tap-target;
+		@include m.press;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex: none;
+		border-radius: var(--radius-pill);
+		border: 1px solid var(--color-lime);
+		color: var(--color-lime);
+		font-family: var(--font-ui);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-label);
+		white-space: nowrap;
+		transition:
+			background-color 0.18s var(--ease-editorial),
+			color 0.18s var(--ease-editorial);
+
+		&:hover {
+			background: var(--color-hover-strong);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	// Stacked (D-091): the also-liked list runs UNDER the cards at full
+	// width rather than beside them — a side column always outran the three
+	// cards and left a dead zone under the shelf. Three columns from lg, the
+	// component's own two-up below that.
 	&__shelves {
 		display: grid;
 		grid-template-columns: 1fr;
-		gap: 2rem;
+		gap: 2.5rem;
 
 		@include m.from("lg") {
-			grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
-			gap: clamp(1.5rem, 3vw, 3rem);
-
 			.also {
-				grid-template-columns: 1fr;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				column-gap: 2.5rem;
 			}
 		}
 	}

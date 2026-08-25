@@ -134,6 +134,29 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-091 — The region's controls say what they do
+**Built 2026-08-25.** Three owner reports on D-090's results region, each a
+control saying less than it does.
+
+**"Start over" was the only way back to the stepper, and nearly invisible** —
+underlined micro text at the end of the chips row. It is a pill now, like its
+row-mates, because it IS one of the row's controls — but with a restart glyph
+and no value slot, so it cannot be mistaken for a fourth filter.
+
+**"Show three more" re-picked BOTH shelves while sitting in one shelf's
+heading.** The also-liked list changed with no signal that it would. The
+control moved to the region's head, beside the filter it complements, and its
+label states its scope: "Shuffle all picks", outlined in the product's lime
+with a shuffle glyph. The shelves block is keyed on the rotation counter, so
+a shuffle re-enters both lists as one visible gesture instead of two lists
+silently swapping contents.
+
+**The dead zone under the cards** — the side column always outran three
+cards — closes by the owner's own instinct: the also-liked list runs UNDER
+the cards at full region width, three columns from `lg`, and the region ends
+flush. (The list's two-up-from-`sm` component default still serves the
+narrower widths.)
+
 ### D-090 — One results region, search as chrome
 **Built 2026-08-25.** Four owner directives that resolve into one principle:
 group by dependency, not by widget. Everything that depends on the reader's

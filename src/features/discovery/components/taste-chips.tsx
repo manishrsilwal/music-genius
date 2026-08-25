@@ -97,6 +97,23 @@ export function TasteChips({
 					onClick={onStartOver}
 					className="taste__reset text-micro uppercase tracking-label"
 				>
+					{/* Decorative — the label beside it says the same thing. */}
+					<svg
+						viewBox="0 0 14 14"
+						width="12"
+						height="12"
+						aria-hidden="true"
+						focusable="false"
+					>
+						<path
+							d="M2.5 7 A4.5 4.5 0 1 1 4 10.4"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="1.5"
+							strokeLinecap="round"
+						/>
+						<path d="M2 4.2 L2.6 7.6 L5.8 6.4 Z" fill="currentColor" />
+					</svg>
 					Start over
 				</button>
 			</div>

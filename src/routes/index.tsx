@@ -146,12 +146,51 @@ function Discovery() {
 						*/}
 						<section className="bento__tile bento__results">
 							<div className="bento__filter">
-								<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
-									Tuned to your answers
-								</h2>
-								<p className="mb-3 text-caption text-ink-faint">
-									Change any answer without starting over.
-								</p>
+								<div className="bento__filter-bar">
+									<div>
+										<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
+											Tuned to your answers
+										</h2>
+										<p className="mb-3 text-caption text-ink-faint">
+											Change any answer without starting over.
+										</p>
+									</div>
+
+									{/*
+									  At the region's head, not inside Deep Dives
+									  (D-091). "Show three more" sat in one shelf's
+									  heading while quietly re-picking BOTH shelves —
+									  the also-liked list changed with no signal that
+									  it would. The control now sits level with the
+									  filter it complements and its label states its
+									  scope.
+									*/}
+									<button
+										type="button"
+										onClick={shuffle}
+										className="bento__shuffle px-4 py-2 text-micro"
+									>
+										<svg
+											viewBox="0 0 14 14"
+											width="13"
+											height="13"
+											aria-hidden="true"
+											focusable="false"
+										>
+											<path
+												d="M1.5 5.5 A5 5 0 0 1 11 3.5 M12.5 8.5 A5 5 0 0 1 3 10.5"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="1.5"
+												strokeLinecap="round"
+											/>
+											<path d="M11.5 0.8 L11.3 4 L8.2 3.4 Z" fill="currentColor" />
+											<path d="M2.5 13.2 L2.7 10 L5.8 10.6 Z" fill="currentColor" />
+										</svg>
+										Shuffle all picks
+									</button>
+								</div>
+
 								<TasteChips
 									preferences={preferences}
 									onChange={save}
@@ -159,7 +198,19 @@ function Discovery() {
 								/>
 							</div>
 
-							<div className="bento__shelves">
+							{/*
+							  Keyed on the rotation, so a shuffle re-enters BOTH
+							  shelves together (D-091): the interaction's whole
+							  scope is visible as one gesture instead of two lists
+							  silently swapping their contents.
+							*/}
+							<motion.div
+								key={rotation}
+								className="bento__shelves"
+								initial={{ opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={transition.editorial}
+							>
 								<div className="bento__dives">
 									{/*
 									  The lead says what the shelf is, which the label
@@ -167,31 +218,26 @@ function Discovery() {
 									  catalogue is an editorial claim; unlabelled it
 									  reads as the whole of a thin library (D-056).
 									*/}
-									<SectionHeading
-										lead="Three from a catalogue we chose by hand, matched to your answers. They change every time you come back."
-										action={
-											<button
-												type="button"
-												onClick={shuffle}
-												className="tap text-micro uppercase tracking-label text-ink-faint hover:text-ink"
-											>
-												Show three more
-											</button>
-										}
-									>
+									<SectionHeading lead="Three from a catalogue we chose by hand, matched to your answers. They change every time you come back.">
 										Deep Dives
 									</SectionHeading>
 
 									<DeepDives picks={dives} preferences={preferences} />
 								</div>
 
+								{/*
+								  Below the cards, not beside them (D-091): a side
+								  column always outran the three cards and left a
+								  dead zone under them. Full width, the list runs
+								  three columns and the region closes flush.
+								*/}
 								<aside className="bento__also">
 									<SectionHeading lead="More from the same catalogue, ranked further down your answers.">
 										People also like
 									</SectionHeading>
 									<AlsoLiked picks={also} />
 								</aside>
-							</div>
+							</motion.div>
 						</section>
 
 						{/*
