@@ -22,9 +22,17 @@ import "./deep-dives.scss";
 export function DeepDives({
 	picks,
 	preferences,
+	onShuffle,
 }: {
 	picks: CuratedTrack[];
 	preferences: Preferences;
+	/**
+	 * When provided, the shelf ends on a ghost card that re-picks EVERYTHING
+	 * under the filter (D-097) — the shuffle lives inside the thing it
+	 * shuffles, and its label owns the full scope the old corner button
+	 * misstated.
+	 */
+	onShuffle?: () => void;
 }) {
 	/*
 	 * The reasons the picks have in common, said once above the row (D-069).
@@ -93,6 +101,35 @@ export function DeepDives({
 						</Link>
 					</motion.div>
 				))}
+
+				{onShuffle && (
+					<motion.div className="dives__slot" variants={riseVariants}>
+						<button
+							type="button"
+							onClick={onShuffle}
+							className="dives__more"
+						>
+							<svg
+								viewBox="0 0 14 14"
+								width="16"
+								height="16"
+								aria-hidden="true"
+								focusable="false"
+							>
+								<path
+									d="M1.5 5.5 A5 5 0 0 1 11 3.5 M12.5 8.5 A5 5 0 0 1 3 10.5"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="1.5"
+									strokeLinecap="round"
+								/>
+								<path d="M11.5 0.8 L11.3 4 L8.2 3.4 Z" fill="currentColor" />
+								<path d="M2.5 13.2 L2.7 10 L5.8 10.6 Z" fill="currentColor" />
+							</svg>
+							Show me different picks
+						</button>
+					</motion.div>
+				)}
 			</motion.div>
 		</>
 	);

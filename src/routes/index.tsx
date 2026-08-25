@@ -195,51 +195,12 @@ function Discovery() {
 						*/}
 						<section className="bento__tile bento__results">
 							<div className="bento__filter">
-								<div className="bento__filter-bar">
-									<div>
-										<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
-											Tuned to your answers
-										</h2>
-										<p className="mb-3 text-caption text-ink-faint">
-											Change any answer without starting over.
-										</p>
-									</div>
-
-									{/*
-									  At the region's head, not inside Deep Dives
-									  (D-091). "Show three more" sat in one shelf's
-									  heading while quietly re-picking BOTH shelves —
-									  the also-liked list changed with no signal that
-									  it would. The control now sits level with the
-									  filter it complements and its label states its
-									  scope.
-									*/}
-									<button
-										type="button"
-										onClick={shuffle}
-										className="bento__shuffle px-4 py-2 text-micro"
-									>
-										<svg
-											viewBox="0 0 14 14"
-											width="13"
-											height="13"
-											aria-hidden="true"
-											focusable="false"
-										>
-											<path
-												d="M1.5 5.5 A5 5 0 0 1 11 3.5 M12.5 8.5 A5 5 0 0 1 3 10.5"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="1.5"
-												strokeLinecap="round"
-											/>
-											<path d="M11.5 0.8 L11.3 4 L8.2 3.4 Z" fill="currentColor" />
-											<path d="M2.5 13.2 L2.7 10 L5.8 10.6 Z" fill="currentColor" />
-										</svg>
-										Shuffle all picks
-									</button>
-								</div>
-
+								<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
+									Tuned to your answers
+								</h2>
+								<p className="mb-3 text-caption text-ink-faint">
+									Change any answer without starting over.
+								</p>
 								<TasteChips
 									preferences={preferences}
 									onChange={save}
@@ -271,7 +232,17 @@ function Discovery() {
 										Deep Dives
 									</SectionHeading>
 
-									<DeepDives picks={dives} preferences={preferences} />
+									{/*
+									  The shuffle is the shelf's own ghost card now
+									  (D-097) — the control lives inside the thing
+									  it re-picks, and both shelves still re-enter
+									  together on the rotation key (D-091).
+									*/}
+									<DeepDives
+										picks={dives}
+										preferences={preferences}
+										onShuffle={shuffle}
+									/>
 								</div>
 
 								{/*

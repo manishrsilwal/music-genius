@@ -80,12 +80,12 @@
 		}
 	}
 
-	// A pill like its row-mates, because it IS one of the row's controls —
-	// but with a glyph and no value slot, so it cannot be mistaken for a
-	// fourth filter (D-091). The underlined-text version was the owner's
-	// report: the only way back to the stepper, and nearly invisible.
+	// In the CLUSTER, not pushed to the far edge (D-097): the control edits
+	// the answers, so it stands directly after them — the corner placement
+	// was the owner's report, a control disconnected from what it governs.
+	// Glyph plus "Retake", no value slot, so it cannot be mistaken for a
+	// fourth filter (D-091).
 	&__reset {
-		margin-inline-start: auto;
 		display: inline-flex;
 		align-items: center;
 		gap: 0.45rem;

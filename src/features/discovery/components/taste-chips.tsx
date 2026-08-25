@@ -114,7 +114,7 @@ export function TasteChips({
 						/>
 						<path d="M2 4.2 L2.6 7.6 L5.8 6.4 Z" fill="currentColor" />
 					</svg>
-					Start over
+					Retake
 				</button>
 			</div>
 

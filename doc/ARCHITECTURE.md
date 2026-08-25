@@ -134,6 +134,27 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-097 — The controls live inside what they control
+**Built 2026-08-25.** The owner's second pass on the results controls:
+D-091's pills still read as a corner dump — two different-rank controls
+stacked at the region's edge, each far from what it governed. Two rounds of
+options; the owner chose the ghost card.
+
+**The shuffle is a card in the shelf it shuffles.** Deep Dives gains a slim
+fourth column — dashed, because it is a slot rather than a pick: the shape
+of a card with none of a card's substance, holding the place of the picks a
+press will summon. "Show me different picks" owns the full scope (both
+shelves still re-enter together on the rotation key, D-091's honesty), and
+on a phone it becomes a full-width row under the stack. `:has(.dives__more)`
+keys the narrow column to the control actually rendering, so the shelf
+without an `onShuffle` keeps its three equal thirds.
+
+**Start over became the Retake chip**, standing in the cluster directly
+after the answers it edits — not pushed to the row's far edge, which was
+the disconnection the owner kept reporting. Glyph plus word, no value slot
+(D-091's guard against reading as a fourth filter). The filter head loses
+its action bar entirely: no corner controls left to stack.
+
 ### D-096 — The spread animates as one reflow
 **Built 2026-08-25.** The owner felt the jitter on close, and it was
 mechanical: `data-drawer` collapsed the third grid track instantly while

@@ -109,45 +109,9 @@
 		margin-bottom: 2rem;
 	}
 
-	&__filter-bar {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 1rem 1.5rem;
-	}
-
-	// The region's one action (D-091), styled like an action: outlined in
-	// the product's own accent, glyph and label together. It re-picks both
-	// shelves, so it lives at the region's head rather than inside one
-	// shelf's heading, where its old home quietly misstated its scope.
-	&__shuffle {
-		@include m.tap-target;
-		@include m.press;
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		flex: none;
-		border-radius: var(--radius-pill);
-		border: 1px solid var(--color-lime);
-		color: var(--color-lime);
-		font-family: var(--font-ui);
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: var(--tracking-label);
-		white-space: nowrap;
-		transition:
-			background-color 0.18s var(--ease-editorial),
-			color 0.18s var(--ease-editorial);
-
-		&:hover {
-			background: var(--color-hover-strong);
-		}
-
-		@include m.reduced-motion {
-			transition: none;
-		}
-	}
+	// The region's action moved into the shelf itself (D-097): the ghost
+	// card in Deep Dives is the shuffle, and Retake rides in the chip
+	// cluster — no corner controls left to stack.
 
 	// Stacked (D-091): the also-liked list runs UNDER the cards at full
 	// width rather than beside them — a side column always outran the three

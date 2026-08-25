@@ -12,6 +12,54 @@
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 
+	// With the ghost shuffle card (D-097) the shelf gains a narrow fourth
+	// column: the three picks keep their size and the control takes a slim
+	// rail at the end, where "the next pick" naturally points.
+	&:has(.dives__more) {
+		@include m.from("sm") {
+			grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(6.5rem, 8rem);
+		}
+	}
+
+	// The ghost card (D-097): dashed, because it is a slot rather than a
+	// pick — the shape of a card with none of a card's substance, holding
+	// the place of the picks a press will summon.
+	&__more {
+		@include m.tap-target;
+		@include m.press;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.6rem;
+		width: 100%;
+		height: 100%;
+		min-height: 2.75rem;
+		padding: 1rem;
+		border: 1px dashed var(--color-hairline);
+		border-radius: var(--radius-card);
+		color: var(--color-lime);
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-label);
+		text-align: center;
+		text-wrap: balance;
+		transition:
+			border-color 0.18s var(--ease-editorial),
+			background-color 0.18s var(--ease-editorial);
+
+		&:hover {
+			border-color: var(--color-lime);
+			background: var(--color-hover);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
 	// The animation wrapper sat between the grid and the card, so the grid
 	// stretched the WRAPPER and the card inside it kept its content height —
 	// which is why three cards with different amounts of text ended at three
