@@ -440,8 +440,8 @@ function Discovery() {
 									<div id="also-liked" className="bento__also-body">
 										<div className="bento__also-inner">
 											<p className="mb-4 text-caption text-ink-faint">
-												More from the same catalogue, ranked further
-												down your answers.
+												More from the same catalogue, ranked further down your
+												answers.
 											</p>
 											<AlsoLiked picks={also} art />
 											{/*

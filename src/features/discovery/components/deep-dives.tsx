@@ -104,11 +104,7 @@ export function DeepDives({
 
 				{onShuffle && (
 					<motion.div className="dives__slot" variants={riseVariants}>
-						<button
-							type="button"
-							onClick={onShuffle}
-							className="dives__more"
-						>
+						<button type="button" onClick={onShuffle} className="dives__more">
 							<svg
 								viewBox="0 0 14 14"
 								width="16"

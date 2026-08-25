@@ -193,53 +193,53 @@ export function InsightsDrawer({
 	) : (
 		<AnimatePresence>
 			{open && (
-					<motion.aside
-						key="sheet"
-						ref={panelRef}
-						id={PANEL_ID}
-						className="drawer-sheet"
-						aria-label="The story behind this song"
-						tabIndex={-1}
-						initial={{ y: "100%" }}
-						animate={{ y: 0 }}
-						exit={{ y: "100%" }}
-						transition={transition.sheet}
-						drag="y"
-						// Drag is started by the grip alone (below). Without this the
-						// whole sheet is a drag surface and the body cannot scroll.
-						dragListener={false}
-						dragControls={dragControls}
-						// Upward drag is clamped to nothing: the sheet is half the
-						// screen by design, so growing it would cover the lyrics.
-						dragConstraints={{ top: 0, bottom: 0 }}
-						dragElastic={{ top: 0, bottom: 0.4 }}
-						onDragEnd={(_event, info) => {
-							if (
-								info.offset.y > DISMISS_DISTANCE ||
-								info.velocity.y > DISMISS_VELOCITY
-							) {
-								onClose();
-							}
-						}}
-						{...motionProps}
-					>
-						{/*
+				<motion.aside
+					key="sheet"
+					ref={panelRef}
+					id={PANEL_ID}
+					className="drawer-sheet"
+					aria-label="The story behind this song"
+					tabIndex={-1}
+					initial={{ y: "100%" }}
+					animate={{ y: 0 }}
+					exit={{ y: "100%" }}
+					transition={transition.sheet}
+					drag="y"
+					// Drag is started by the grip alone (below). Without this the
+					// whole sheet is a drag surface and the body cannot scroll.
+					dragListener={false}
+					dragControls={dragControls}
+					// Upward drag is clamped to nothing: the sheet is half the
+					// screen by design, so growing it would cover the lyrics.
+					dragConstraints={{ top: 0, bottom: 0 }}
+					dragElastic={{ top: 0, bottom: 0.4 }}
+					onDragEnd={(_event, info) => {
+						if (
+							info.offset.y > DISMISS_DISTANCE ||
+							info.velocity.y > DISMISS_VELOCITY
+						) {
+							onClose();
+						}
+					}}
+					{...motionProps}
+				>
+					{/*
 						  The only drag surface, so the body below stays scrollable.
 						  Hidden from assistive technology: it is a pointer
 						  affordance with no keyboard equivalent, and Escape
 						  already closes the sheet — announcing it would offer a
 						  control that cannot be operated.
 						*/}
-						<div
-							aria-hidden="true"
-							className="drawer-sheet__grip"
-							onPointerDown={(event) => dragControls.start(event)}
-						/>
-						<div className="drawer-sheet__body">
-							{head}
-							<InsightsContent insight={insight} />
-						</div>
-					</motion.aside>
+					<div
+						aria-hidden="true"
+						className="drawer-sheet__grip"
+						onPointerDown={(event) => dragControls.start(event)}
+					/>
+					<div className="drawer-sheet__body">
+						{head}
+						<InsightsContent insight={insight} />
+					</div>
+				</motion.aside>
 			)}
 		</AnimatePresence>
 	);

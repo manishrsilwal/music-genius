@@ -1,10 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { SectionHeading } from "@/components/section-heading";
-
-import { DiveArt } from "./deep-dives";
 import type { HistoryEntry } from "@/lib/history";
 import { riseVariants, staggerVariants } from "@/lib/motion";
+import { DiveArt } from "./deep-dives";
 import "./continue-reading.scss";
 
 /**

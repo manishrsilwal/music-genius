@@ -57,7 +57,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			 */
 			{ property: "og:type", content: "website" },
 			{ property: "og:site_name", content: "Lyrical Explorer" },
-			{ property: "og:title", content: "Lyrical Explorer — find the lyrics, know the meaning" },
+			{
+				property: "og:title",
+				content: "Lyrical Explorer — find the lyrics, know the meaning",
+			},
 			{
 				property: "og:description",
 				content:
