@@ -5,7 +5,16 @@
 .masthead {
 	z-index: var(--layer-masthead);
 	top: calc(var(--dock-inset) * 0.75 + env(safe-area-inset-top, 0px));
-	left: var(--dock-inset);
+	// The content column's left edge, not the viewport's corner (D-092). The
+	// owner drew the line: every heading on the page starts where the landing
+	// container starts, and the mark hanging left of that line was a second
+	// axis. On a narrow screen the calc goes negative and max() falls back to
+	// the plain inset — which equals the container's own px-6 gutter, so the
+	// mark rides the same line at every width.
+	left: max(
+		var(--dock-inset),
+		calc((100vw - var(--container-landing)) / 2 + var(--dock-inset))
+	);
 	display: inline-flex;
 	align-items: center;
 	gap: 0.6rem;

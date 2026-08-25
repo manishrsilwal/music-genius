@@ -74,7 +74,7 @@ function Discovery() {
 			id="main"
 			// Wide enough for the bento (D-088); the stepper branch narrows
 			// itself back to the old reading measure.
-			className="landing mx-auto w-full max-w-6xl px-6"
+			className="landing mx-auto w-full max-w-landing px-6"
 			variants={staggerVariants}
 			initial="hidden"
 			animate="visible"

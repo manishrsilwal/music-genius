@@ -543,6 +543,12 @@
    Lime is the primary accent — it is what the eye goes to. Sun is the
    secondary, for warmth, and never does the same job as lime in one view. */
 @theme static {
+  /* The landing's measure (D-092), named so the masthead can align to the
+     column's left edge instead of the viewport's corner. `--container-*`
+     also makes `max-w-landing` a real utility, so the page and the mark
+     derive the same line from one number. */
+  --container-landing: 72rem;
+
   /* Hover, as a veil rather than as a surface step (D-065).
      The two grounds elevate in opposite directions — the bright one steps
      down, the reading one steps up — so "the next surface along" means the

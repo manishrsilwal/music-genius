@@ -134,6 +134,21 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-092 — The mark rides the content's line
+**Built 2026-08-25.** The owner drew a red line down the landing's left
+edge: every heading starts on it, and the masthead hung at the viewport's
+corner to its left — a second axis carrying nothing. The mark's `left` is
+now the content column's own edge: `max(var(--dock-inset),
+calc((100vw - var(--container-landing)) / 2 + var(--dock-inset)))`. On a
+narrow screen the calc goes negative and max() falls back to the plain
+inset, which equals the container's px-6 gutter — one line at every width.
+
+`--container-landing: 72rem` lives in `@theme static` (the SCSS-consumed
+rule, twice bitten) and, because it is in the `--container-*` namespace,
+also mints the `max-w-landing` utility — the landing container now uses it
+instead of `max-w-6xl`, so the page and the mark derive the same line from
+one number. Verified present in the production CSS.
+
 ### D-091 — The region's controls say what they do
 **Built 2026-08-25.** Three owner reports on D-090's results region, each a
 control saying less than it does.
