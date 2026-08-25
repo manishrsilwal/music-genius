@@ -134,6 +134,30 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-096 — The spread animates as one reflow
+**Built 2026-08-25.** The owner felt the jitter on close, and it was
+mechanical: `data-drawer` collapsed the third grid track instantly while
+AnimatePresence held the exiting panel — a `grid-column: 3` child of a grid
+with no third column, wrapping mid-fade as the lyrics snapped wide. Two
+unsynchronised reflows, both of them visible.
+
+The grid does the animating now. **Three tracks always exist** at `lg`; the
+story's track transitions between `0rem` and `--spread-open` — track-count
+changes cannot interpolate, but a length can, and both states are plain
+lengths on purpose. The panel never mounts or unmounts on desktop: it sits
+at FIXED width inside a clipping rail (the actual grid item), so its text
+never reflows — the story slides away like a door rather than squashing —
+with `inert` keeping the concealed copy out of the tab order and the
+accessibility tree, and an opacity fade so a sliver of opening window does
+not flash fully-lit text. `column-gap` went with it: a gap is paid even
+beside a 0-width track, which would have left a phantom right gutter
+whenever the story was closed; the columns carry their own internal spacing
+over one continuous dark ground.
+
+Measured, not eyeballed: the track eases 0→199→338→402→413→416px on open
+and 416→104→26→7→0 on close, the canvas gliding with it — no snap in either
+direction. The mobile sheet keeps its AnimatePresence spring untouched.
+
 ### D-095 — The story is a spread, and it closes itself
 **Built 2026-08-25.** The owner's report: the button that closed the
 right-hand story panel lived in the LEFT rail — the gesture and its target

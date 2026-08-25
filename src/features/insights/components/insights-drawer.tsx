@@ -160,32 +160,37 @@ export function InsightsDrawer({
 		</div>
 	);
 
-	return (
+	/*
+	 * Desktop: the panel is ALWAYS mounted and the grid does the animating
+	 * (D-096). The first spread mounted and unmounted the panel with the
+	 * open state, and the close jittered: `data-drawer` collapsed the third
+	 * grid track instantly while AnimatePresence held the exiting panel — a
+	 * `grid-column: 3` child of a grid with no third column, wrapping
+	 * mid-fade as the lyrics snapped wide. Two unsynchronised reflows.
+	 *
+	 * Now the third track transitions between 0 and its open width, and the
+	 * panel sits inside a clipping rail at FIXED width, so its text never
+	 * reflows — the story is revealed and concealed like a sliding door.
+	 * `inert` while closed keeps the hidden copy out of the tab order and
+	 * the accessibility tree; the aside stays non-modal (D-095).
+	 */
+	return isDesktop ? (
+		<div className="drawer-rail" aria-hidden={open ? undefined : true}>
+			<aside
+				ref={panelRef}
+				id={PANEL_ID}
+				className="drawer-panel"
+				aria-label="The story behind this song"
+				tabIndex={-1}
+				inert={open ? undefined : true}
+			>
+				{head}
+				<InsightsContent insight={insight} />
+			</aside>
+		</div>
+	) : (
 		<AnimatePresence>
-			{open &&
-				(isDesktop ? (
-					<motion.aside
-						key="panel"
-						ref={panelRef}
-						id={PANEL_ID}
-						className="drawer-panel"
-						aria-label="The story behind this song"
-						// A column in the spread (D-095), not a dialog over the
-						// page: the lyrics stay live beside it, so nothing here
-						// is modal any more — the body lock and aria-modal left
-						// with the overlay. The aside's implicit complementary
-						// role is the honest one.
-						tabIndex={-1}
-						initial={{ opacity: 0, x: 24 }}
-						animate={{ opacity: 1, x: 0 }}
-						exit={{ opacity: 0, transition: transition.dismiss }}
-						transition={transition.editorial}
-						{...motionProps}
-					>
-						{head}
-						<InsightsContent insight={insight} />
-					</motion.aside>
-				) : (
+			{open && (
 					<motion.aside
 						key="sheet"
 						ref={panelRef}
@@ -233,7 +238,7 @@ export function InsightsDrawer({
 							<InsightsContent insight={insight} />
 						</div>
 					</motion.aside>
-				))}
+			)}
 		</AnimatePresence>
 	);
 }

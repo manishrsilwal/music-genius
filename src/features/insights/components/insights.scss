@@ -318,18 +318,25 @@
 }
 
 // ── Desktop: a panel that compresses the canvas ─────────────────────────────
-// The spread column (D-095). The story is a grid column beside the lyrics
-// now, not an overlay over them: it scrolls its own content inside a sticky
-// viewport-height box, the way the rail does. No shadow — it is part of the
-// page's plane, and the hairline is the honest seam between two columns of
-// one spread.
-.drawer-panel {
-	position: sticky;
-	top: 0;
+// The spread column (D-095, animated properly in D-096). The story is a
+// grid column beside the lyrics, not an overlay over them. The RAIL is the
+// grid item and the clipping window: the track animates between 0 and the
+// open width, and the panel inside keeps a fixed width so its text never
+// reflows — the story slides away like a door rather than squashing.
+.drawer-rail {
 	grid-column: 3;
 	grid-row: 1 / -1;
+	position: sticky;
+	top: 0;
 	height: 100dvh;
-	min-width: 0;
+	overflow: hidden;
+}
+
+.drawer-panel {
+	// The OPEN width, always — the rail's track does the shrinking, and a
+	// panel that kept `min-width: 0` would reflow its every line mid-close.
+	width: var(--spread-open);
+	height: 100%;
 	overflow-y: auto;
 	// Thin, because the page's own scrollbar sits one gutter to the right —
 	// two full-width bars side by side read as a rendering fault (D-048's
@@ -342,6 +349,18 @@
 	padding: 1.25rem 1.75rem 3rem;
 	background: var(--color-surface);
 	border-left: 1px solid var(--color-hairline);
+	// Faded while concealed, so the first frame of an opening track does not
+	// flash fully-lit text through a sliver of window.
+	opacity: 0;
+	transition: opacity 0.32s var(--ease-editorial);
+
+	@include m.reduced-motion {
+		transition: none;
+	}
+}
+
+.track-shell[data-drawer="open"] .drawer-panel {
+	opacity: 1;
 }
 
 // The story's own head: its name, and its way out (D-095) — the same
@@ -427,9 +446,24 @@
 	// rail's minmax floor decides who absorbs the squeeze (the canvas does).
 	@include m.from("lg") {
 		display: grid;
-		grid-template-columns: minmax(21rem, 26rem) minmax(0, 1fr);
+		// Three tracks ALWAYS (D-096): the story's track is 0 when closed and
+		// animates to its open width — track-count changes cannot interpolate,
+		// but a length can, and both states are plain lengths on purpose.
+		--spread-open: min(30rem, 26vw);
+		grid-template-columns:
+			minmax(21rem, 26rem) minmax(0, 1fr)
+			var(--spread, 0rem);
 		grid-template-rows: 1fr auto;
-		column-gap: clamp(1.5rem, 3vw, 3.5rem);
+		// No column-gap (D-096): a gap is paid even beside a 0-width track,
+		// which would leave a phantom right gutter whenever the story is
+		// closed. The columns carry their own internal spacing — the hero's
+		// padding-inline on one side, the panel's border and padding on the
+		// other — over one continuous dark ground.
+		transition: grid-template-columns 0.42s var(--ease-editorial);
+
+		@include m.reduced-motion {
+			transition: none;
+		}
 
 		> .hero {
 			grid-column: 1;
@@ -482,14 +516,12 @@
 	}
 
 	&[data-drawer="open"] {
-		// The spread (D-095): a third column opens for the story, and the
+		// The spread (D-095): the story's track takes its open width and the
 		// lyrics keep their place between rail and story. The old overlay's
 		// padding squeeze and its docked-bar compensation are gone with the
 		// overlay itself — the rail never docks in the split view.
 		@include m.from("lg") {
-			grid-template-columns:
-				minmax(21rem, 26rem) minmax(0, 1fr)
-				minmax(22rem, 30rem);
+			--spread: var(--spread-open);
 
 			// One way out at a time. The page's fixed cross would sit exactly
 			// on the story's own close; while the story is open, closing the
