@@ -134,6 +134,20 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-099 — The filter is a bar
+**Built 2026-08-25.** The owner's mock, one step further than D-098: from
+`lg` the strip becomes a single bar — the words on the page's left axis,
+the chips and Retake on the right — one line where three used to stack,
+which pulls the results card a full band higher on the page.
+
+The usability trap the mock carried was wrapping: at laptop widths a
+right-aligned cluster that wraps under a left heading reads as broken. So
+the bar exists only from `lg`; below it the strip keeps its stacked,
+left-aligned form, and chips that must wrap inside the bar stay ragged
+against the right edge (`justify-content: flex-end`) rather than
+scattering. The note's stacked bottom margin stands down inside the bar so
+the two sides centre on each other.
+
 ### D-098 — The filter is a strip, not a tile
 **Built 2026-08-25.** The owner mocked the filter split out of the results
 tile ("too crowded"), then asked the sharper question: does that section

@@ -207,13 +207,22 @@ function Discovery() {
 						  on the canvas, and the results card below is the page's
 						  one tile.
 						*/}
+						{/*
+						  A bar from lg (D-099, the owner's mock): the words on the
+						  page's left axis, the chips on the right — one line where
+						  three used to stack. Below lg it keeps the stack; a
+						  wrapped right-aligned cluster under a left heading reads
+						  as broken, so the narrow layout never attempts it.
+						*/}
 						<section className="bento__filter">
-							<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
-								Tuned to your answers
-							</h2>
-							<p className="mb-3 text-caption text-ink-faint">
-								Change any answer without starting over.
-							</p>
+							<div className="bento__filter-words">
+								<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
+									Tuned to your answers
+								</h2>
+								<p className="bento__filter-note mb-3 text-caption text-ink-faint">
+									Change any answer without starting over.
+								</p>
+							</div>
 							<TasteChips
 								preferences={preferences}
 								onChange={save}
