@@ -43,18 +43,25 @@
 	height: var(--dock-height);
 	padding: var(--dock-pad) 1.25rem;
 
-	// ── In the composition (D-080) ─────────────────────────────────────
-	// Undocked, the bar is a card in the hero's text column: controls on the
-	// first row, the scrub across the second. The old pill hid the seekbar
-	// behind `docked &&` — and the rail never docks (D-079), so the split
-	// view had no seekbar at all.
+	// ── In the composition (D-080, D-082) ──────────────────────────────
+	// Undocked, the bar reads top to bottom the way a player screen does:
+	// the scrub with its times, then a transport row with play at the
+	// centre, then the status line. The first grid put play at one edge
+	// and the video at the other with the scrub bolted underneath — a
+	// docked bar's furniture without its bar. The reference's grammar is
+	// the fix: one big primary control on the centreline, secondaries
+	// flanking it, the line above, the words below.
 	&:not([data-docked]) {
 		display: grid;
-		grid-template-columns: auto minmax(0, 1fr) auto;
+		// 1fr auto 1fr, not auto auto auto: play sits on the true
+		// centreline whatever the sync pill and the video box weigh.
+		grid-template-columns: 1fr auto 1fr;
 		grid-template-areas:
-			"toggle meta video"
-			"scrub scrub scrub";
-		row-gap: 0.6rem;
+			"scrub scrub scrub"
+			"sync toggle video"
+			"meta meta meta";
+		row-gap: 0.85rem;
+		column-gap: 1.25rem;
 		height: auto;
 		min-height: 0;
 		width: 100%;
@@ -71,36 +78,44 @@
 		border-color: transparent;
 		box-shadow: none;
 
-		.playback__toggle {
-			grid-area: toggle;
-		}
-
-		.playback__meta {
-			grid-area: meta;
-		}
-
-		.playback__video {
-			grid-area: video;
-			margin-inline-start: 0;
-		}
-
 		.playback__scrub {
 			grid-area: scrub;
 		}
 
-		.playback__sync,
-		.playback__elsewhere {
-			grid-area: video;
-			justify-self: end;
+		.playback__toggle {
+			grid-area: toggle;
+			// The one control the reader comes back to, at the size the
+			// reference gives it. Everything else on the row stays quiet.
+			width: 3.25rem;
+			height: 3.25rem;
 		}
 
-		// Sync shares the video's row-end corner only when there is no
-		// video box to share it with; with both present it joins the meta
-		// row's end instead.
-		&:has(.playback__video:not(:empty)) .playback__sync {
-			grid-area: meta;
+		.playback__sync {
+			grid-area: sync;
 			justify-self: end;
 			align-self: center;
+		}
+
+		.playback__video {
+			grid-area: video;
+			justify-self: start;
+			align-self: center;
+			margin-inline-start: 0;
+		}
+
+		// Renders only when the toggle does not (playback failed), so the
+		// centre slot is free — the way out stands where play would have.
+		.playback__elsewhere {
+			grid-area: toggle;
+			justify-self: center;
+		}
+
+		// The status line under the transport, centred like a caption —
+		// notices only; the title and artist live in the column above.
+		.playback__meta {
+			grid-area: meta;
+			align-items: center;
+			text-align: center;
 		}
 	}
 	// Solid since D-065. A translucent bar over a full-bleed hero took its

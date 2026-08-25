@@ -208,19 +208,27 @@ export function PlaybackBar({
 				  ("Loading", "Timings are from another cut") speak in both
 				  states; they are the bar's own facts, not the page's.
 				*/}
-				<span className="playback__meta">
-					{docked && (
-						<span className="playback__title text-caption text-ink">
-							{title}
+				{/*
+				  Rendered only when it has something to say (D-082). In the hero
+				  the meta is the transport's caption line — a notice, or nothing.
+				  An empty span still owns a grid row, and the empty row's gap
+				  pushed the status area around whenever a notice appeared.
+				*/}
+				{(docked || notice) && (
+					<span className="playback__meta">
+						{docked && (
+							<span className="playback__title text-caption text-ink">
+								{title}
+							</span>
+						)}
+						<span
+							className="playback__status text-micro"
+							data-notice={notice ? "" : undefined}
+						>
+							{notice ?? (docked ? artist : "")}
 						</span>
-					)}
-					<span
-						className="playback__status text-micro"
-						data-notice={notice ? "" : undefined}
-					>
-						{notice ?? (docked ? artist : "")}
 					</span>
-				</span>
+				)}
 
 				{/*
 				  The scrub row — always, not only when docked (D-080). The

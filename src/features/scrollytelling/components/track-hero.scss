@@ -7,6 +7,14 @@
 .hero {
 	position: relative;
 	isolation: isolate;
+
+	// The drawer's pill sits fixed over the viewport's foot. A tall phone
+	// clears it for free; on a short one the centred player column ran
+	// underneath it, transport row first. Reserving the pill's zone keeps
+	// the whole instrument visible on one 667px screen (D-082).
+	@media (max-height: 44rem) {
+		padding-bottom: 6rem;
+	}
 	// The docked player is `position: fixed` inside this element, and
 	// `isolation` traps it in the hero's stacking context. Naming the layer
 	// here lifts the whole hero — and therefore the bar — above the canvas
@@ -97,7 +105,19 @@
 	// duplicate in the player is gone.
 	&__cover {
 		position: relative;
-		width: clamp(6rem, 24vw, 10rem);
+		// A player screen leads with its art (D-082). At 24vw the disc was a
+		// stamp above the title; the reference gives the artwork the top of
+		// the screen. 38vw is the widest the disc can go and still leave a
+		// two-line title, the credit and the transport inside one 667px
+		// viewport — the smallest phone this app treats as real.
+		width: clamp(8rem, 38vw, 12rem);
+
+		// Short viewports keep the smaller disc. On a 667px phone the grown
+		// art pushed the transport row under the drawer's fixed pill — the
+		// art leads only where there is a screen to lead.
+		@media (max-height: 44rem) {
+			width: clamp(6rem, 24vw, 10rem);
+		}
 		aspect-ratio: 1;
 		border-radius: 50%;
 		overflow: hidden;

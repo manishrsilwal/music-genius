@@ -134,6 +134,40 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-082 — The player screen's grammar
+**Built 2026-08-25.** The owner brought a reference (a dark neon mobile
+player) with the note that the design was "all over the place", and asked for
+a modern player UI in the left column, loading first on a phone with the
+lyrics arriving on scroll. The skin stays ours — cream, Fraunces, the track's
+own accent (the D-074 study's conclusion holds) — what the reference
+contributes is its **grammar**: art, then words, then the line, then one big
+control on the centreline.
+
+**The undocked bar reads top to bottom now.** The old grid was a docked bar's
+furniture without its bar — play at one edge, video at the other, the scrub
+bolted underneath. The new template is `scrub / sync·toggle·video / meta`:
+the seekbar with its times first, then a transport row whose columns are
+`1fr auto 1fr` so play sits on the true centreline whatever the sync pill and
+the video box weigh, then the status line as a centred caption. Play grows to
+3.25rem undocked — the reference's one big filled control; the ui-ux database
+has no player-layout pattern (checked, as with the split view), but its 44px
+touch minimum is what the size clears. When playback has failed the
+"elsewhere" link takes the empty centre slot. The meta line renders only when
+it has something to say — an empty span still owns a grid row, and its gap
+pushed the transport around whenever a notice appeared.
+
+**The art leads where there is a screen to lead.** The phone disc grows from
+24vw to 38vw — the widest that still leaves title, credit and transport
+inside one viewport. Two short-viewport rules keep the 667px phone honest,
+both found by screenshot: the small disc returns below 44rem, and the hero
+reserves the drawer pill's fixed zone with bottom padding — the taller player
+column ran underneath it, transport row first.
+
+**"Loads first on mobile" was already true** — the hero is `min-h-dvh`, so
+the first paint is the player screen and the lyrics sit below the fold,
+reached by scroll or by sync's own auto-scroll. No change was needed there;
+recorded so nobody goes looking for the mechanism.
+
 ### D-081 — The column is the player
 **Built 2026-08-25.** The owner's read, and the right one: with the disc, the
 title and the artist already stacked in the column, a boxed mini-player
