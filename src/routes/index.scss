@@ -21,6 +21,11 @@
 		padding-block: calc(var(--masthead-reach) + 2.75rem) 6rem;
 	}
 
+	// A line the composition chose, not the wrap (D-108).
+	&__title-line {
+		display: block;
+	}
+
 	&__title {
 		// Bigger than before (D-064). The old scale was set for a page that
 		// opened with three answer cards below the fold; the landing now opens
@@ -29,7 +34,10 @@
 		line-height: 0.98;
 		letter-spacing: -0.035em;
 		text-wrap: balance;
-		max-width: 14ch;
+		// 18ch, was 14 (D-108): "your restlessness" is 17 characters and must
+		// hold one line for the lockup to mean anything. The other states'
+		// natural wraps land in the same places at either width.
+		max-width: 18ch;
 	}
 
 	// The plain half: geometric sans, heavy, tight.

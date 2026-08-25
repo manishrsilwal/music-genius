@@ -134,6 +134,17 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-108 — The answered title is a lockup, not a wrap
+**Built 2026-08-25.** The owner's misalignment report, diagnosed: the
+natural wrap put the italic at the head of the second line, and Fraunces'
+slant makes an italic-led line read as indented against the plain line
+above. The answered title is a deliberate two-line lockup now — "Songs
+for" / "your *longing*" (fallback "Songs picked" / "for *you*") — with
+"your" anchoring the second line in the plain face so the italic never
+touches the margin. The title measure widens 14ch→18ch so "your
+restlessness" (17 characters) holds one line; the other states' natural
+wraps land in the same places at either width.
+
 ### D-107 — The promise's last word flips
 **Built 2026-08-25.** Owner's ask: the accent word rotates. "Find the
 lyrics, know the ___" cycles meaning → story → mood → craft → words at

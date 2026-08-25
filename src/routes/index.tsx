@@ -188,17 +188,34 @@ function Discovery() {
 							<em className="landing__title-fancy">song</em>
 						</>
 					) : answered === true ? (
+						/*
+						  A deliberate two-line lockup (D-108): the natural wrap
+						  put the italic at the head of line two, and Fraunces'
+						  slant makes an italic-led line read as indented against
+						  the plain line above — the owner's misalignment. "your"
+						  anchors the second line in the plain face; the italic
+						  never touches the margin.
+						*/
 						preferences.mood ? (
 							<>
-								<span className="landing__title-plain">Songs for your</span>{" "}
-								<em className="landing__title-fancy">
-									{MOOD_TITLE_NOUN[preferences.mood]}
-								</em>
+								<span className="landing__title-line landing__title-plain">
+									Songs for
+								</span>
+								<span className="landing__title-line landing__title-plain">
+									your{" "}
+									<em className="landing__title-fancy">
+										{MOOD_TITLE_NOUN[preferences.mood]}
+									</em>
+								</span>
 							</>
 						) : (
 							<>
-								<span className="landing__title-plain">Songs picked for</span>{" "}
-								<em className="landing__title-fancy">you</em>
+								<span className="landing__title-line landing__title-plain">
+									Songs picked
+								</span>
+								<span className="landing__title-line landing__title-plain">
+									for <em className="landing__title-fancy">you</em>
+								</span>
 							</>
 						)
 					) : (
