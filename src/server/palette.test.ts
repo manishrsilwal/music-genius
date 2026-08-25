@@ -124,6 +124,14 @@ describe("isAllowedArtworkUrl", () => {
 		expect(isAllowedArtworkUrl("https://assets.genius.com/x.jpg")).toBe(true);
 	});
 
+	it("accepts Spotify's image CDN", () => {
+		// Missed when Spotify arrived (D-111): every Spotify-art page lost its
+		// palette to this guard, silently. This pin keeps the two lists honest.
+		expect(
+			isAllowedArtworkUrl("https://i.scdn.co/image/ab67616d00001e02ec548c00"),
+		).toBe(true);
+	});
+
 	it("refuses cloud instance metadata", () => {
 		expect(
 			isAllowedArtworkUrl("http://169.254.169.254/latest/meta-data/"),

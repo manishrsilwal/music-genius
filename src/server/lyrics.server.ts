@@ -91,11 +91,13 @@ export function getTrackVisuals(
 	title: string,
 	artist: string,
 ): Promise<TrackVisuals> {
+	// v6: v5 shipped before `i.scdn.co` was on the palette allowlist, so every
+	// Spotify-art track stored a null palette for 30 days — correct-looking
+	// entries produced by a bug are exactly what D-049 says a bump is for.
 	// v5: Spotify leads (D-111) — a source change is a shape change as far as
-	// stored entries are concerned. v4 sat alongside `genius:v3` — this wraps
-	// the inner lookups, so bumping only an inner key would leave the stale
-	// outer entry serving the old result (D-049).
-	const key = `visuals:v5:${artist.toLowerCase()}::${title.toLowerCase()}`;
+	// stored entries are concerned; wraps the inner lookups, so bumping only
+	// an inner key would leave the stale outer entry serving the old result.
+	const key = `visuals:v6:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
 	return cached(key, TTL.track, async () => {
 		// Spotify first: its sleeve is the canonical square at known sizes,

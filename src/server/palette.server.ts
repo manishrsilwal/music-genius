@@ -154,6 +154,10 @@ const ARTWORK_HOSTS = [
 	"assets.genius.com",
 	"filepicker.genius.com",
 	"t2.genius.com",
+	// Spotify's image CDN (D-111). Left off when Spotify arrived, and every
+	// Spotify-art page silently lost its palette: this guard did exactly its
+	// job on a host nobody had vouched for yet.
+	"i.scdn.co",
 ];
 
 export function isAllowedArtworkUrl(value: string): boolean {
