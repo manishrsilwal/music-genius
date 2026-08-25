@@ -329,7 +329,13 @@
 	position: sticky;
 	top: 0;
 	height: 100dvh;
-	overflow: hidden;
+	// `clip`, not `hidden` (D-109). The closed panel keeps its open width
+	// inside this zero-width rail (D-096's no-reflow design), overhanging
+	// the viewport by the panel's full width — measured right:1371 on a
+	// 1085px viewport. A hidden-overflow box is still a scroll container
+	// that gestures or focus can scroll sideways; `clip` is a true clip
+	// nothing can scroll.
+	overflow: clip;
 }
 
 .drawer-panel {
@@ -446,6 +452,9 @@
 	// rail's minmax floor decides who absorbs the squeeze (the canvas does).
 	@include m.from("lg") {
 		display: grid;
+		// The belt for the rail's clip (D-109): no child of the shell may
+		// widen the page sideways, whatever future state overhangs.
+		overflow-x: clip;
 		// Three tracks ALWAYS (D-096): the story's track is 0 when closed and
 		// animates to its open width — track-count changes cannot interpolate,
 		// but a length can, and both states are plain lengths on purpose.

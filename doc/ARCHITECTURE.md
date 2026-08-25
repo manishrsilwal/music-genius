@@ -134,6 +134,27 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-109 — The rail clips for real; the embed fits its own chrome
+**Built 2026-08-25.** Two owner reports on one screenshot.
+
+**The horizontal scroll had nothing to do with the sheen the eye was on.**
+Probing while the "Preparing the story" animation ran found the document
+clean at phone width — and the CLOSED story panel overhanging the viewport
+by its full width at rail widths (measured right:1371 on a 1085px
+viewport): D-096 keeps the panel at open width inside the zero-width rail
+by design, and the rail's `overflow: hidden` is still a scroll container
+that gestures or focus can scroll sideways in some engines. Now
+`overflow: clip` — a true clip nothing can scroll — with `overflow-x:
+clip` on the shell as the belt against any future overhang.
+
+**The broken video preview was arithmetic.** The undocked box inherited
+the docked height calc: ~76×43px, and YouTube's play control is a fixed
+~68×48 — the chrome could not fit inside its own player and rendered
+cropped. The undocked box is `clamp(8rem, 32vw, 10rem)` wide at 16:9 now
+(~128-160×72-90), the smallest size at which the embed clears its own
+furniture. D-036's visibility duty holds; the player is simply no longer
+smaller than its buttons.
+
 ### D-108 — The answered title is a lockup, not a wrap
 **Built 2026-08-25.** The owner's misalignment report, diagnosed: the
 natural wrap put the italic at the head of the second line, and Fraunces'

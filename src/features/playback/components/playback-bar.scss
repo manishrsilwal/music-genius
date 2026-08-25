@@ -101,6 +101,12 @@
 			justify-self: start;
 			align-self: center;
 			margin-inline-start: 0;
+			// Sized for YouTube's own chrome (D-109): the docked height calc
+			// gave ~76×43px here, and YT's play control is a fixed ~68×48 —
+			// it rendered cropped, the owner's broken preview. At 8-10rem
+			// wide the embed clears its own furniture.
+			height: auto;
+			width: clamp(8rem, 32vw, 10rem);
 		}
 
 		// Renders only when the toggle does not (playback failed), so the
