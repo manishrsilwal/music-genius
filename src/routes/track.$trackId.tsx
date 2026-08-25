@@ -68,11 +68,19 @@ export const Route = createFileRoute("/track/$trackId")({
 		return { track, visuals, playback, origin };
 	},
 	head: ({ loaderData, params }) => {
-		if (!loaderData) return { meta: [{ title: "Track not found" }] };
+		// One voice with the page it heads: the route's message component
+		// already says "Not in the library" (D-104).
+		if (!loaderData) return { meta: [{ title: "Not in the library" }] };
 
-		const { title, artist, album, duration } = loaderData.track;
-		const heading = `${title} — ${artist}`;
-		const description = `Read the lyrics to ${title} by ${artist}.`;
+		const { title, artist, album, duration, synced } = loaderData.track;
+		// "· Lyrics" says what the page IS — a bare "Song — Artist" could be
+		// a video, a review, a store (D-104).
+		const heading = `${title} — ${artist} · Lyrics`;
+		// Differentiated by what this track actually has, not one sentence
+		// stamped on every page (D-104).
+		const description = synced
+			? `Read the lyrics to ${title} by ${artist}, synced line by line to the song.`
+			: `Read the lyrics to ${title} by ${artist}, set to be read — not skimmed.`;
 		const canonical = `${loaderData.origin}/track/${encodeURIComponent(params.trackId)}`;
 
 		/*
@@ -131,7 +139,12 @@ export const Route = createFileRoute("/track/$trackId")({
 				// real dimensions stops crawlers guessing and letterboxing it.
 				{ property: "og:image:width", content: "1080" },
 				{ property: "og:image:height", content: "1080" },
-				{ property: "og:image:alt", content: `A lyric card for ${heading}` },
+				// Prose, not the tab title — "· Lyrics" belongs in a tab, not
+				// a sentence (D-104).
+				{
+					property: "og:image:alt",
+					content: `A lyric card for ${title} by ${artist}`,
+				},
 				{ name: "twitter:card", content: "summary_large_image" },
 			],
 		};

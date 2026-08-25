@@ -134,6 +134,39 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-104 — The copy audit: say what is true, in one voice
+**Built 2026-08-25.** The owner asked for a copywriter's pass on titles and
+descriptions. The UI copy was already sharp; the metadata spoke a different
+language than the product. Findings, all applied:
+
+- **Two names in circulation.** The chrome has said "Lyrical Explorer" since
+  D-059; the tab, social cards and robots.txt said "Typographic Lyrical
+  Explorer" — the PRD's codename, three abstract nouns that truncate in a
+  tab and appear nowhere in the UI. Unified on the name readers see. The
+  landing title carries the tagline — "Lyrical Explorer — read the words
+  properly" — because it is the product's best line.
+- **The description was inside-voice.** "Lyrics as a premium editorial
+  reading experience" described the pitch, not the benefit, in a register
+  the UI copy never uses. Now: "Lyrics synced line by line to the song, set
+  like print, with the story behind the words."
+- **Track titles now say what the page is** — "Creep — Radiohead · Lyrics";
+  a bare "Song — Artist" could be a video, a review, a store.
+- **Track descriptions differentiate honestly**: synced tracks say "synced
+  line by line to the song", unsynced say "set to be read — not skimmed" —
+  keyed on the data, not one sentence stamped on every page. The og:image
+  alt keeps prose ("A lyric card for X by Y"), because "· Lyrics" belongs
+  in a tab, not a sentence.
+- **"Track not found" head vs "Not in the library" page** — one state, two
+  voices; unified on the page's better line.
+- **"People also like" claimed what nothing measures.** OD-024 is
+  deliberately unresolved: no analytics, so nobody knows what people like.
+  The shelf is ranked down the reader's own answers — its lead admits it —
+  so the heading is now "More for you", a claim the code keeps.
+
+Kept, on their merits: "Read the words properly", the stepper's questions,
+the playback notices (D-036/D-054's honesty work), "Not in the library",
+and the story vocabulary — the voice the rest now matches.
+
 ### D-103 — The explorer titles itself by its feature
 **Built 2026-08-25.** Owner's direction for the skip-all view: the search is
 the page's main feature and should carry it. Three moves, one identity kept:

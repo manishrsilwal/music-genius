@@ -30,11 +30,23 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 			{
 				name: "description",
+				/*
+				 * Benefit-first, in the product's own voice (D-104). "A premium
+				 * editorial reading experience" described the pitch, not the
+				 * reader's gain — the register the UI copy itself never uses.
+				 */
 				content:
-					"Lyrics as a premium editorial reading experience \u2014 synced, explained, and beautifully set.",
+					"Lyrics synced line by line to the song, set like print, with the story behind the words.",
 			},
 			{
-				title: "Typographic Lyrical Explorer",
+				/*
+				 * The name readers see (D-104). The chrome has said "Lyrical
+				 * Explorer" since D-059; "Typographic Lyrical Explorer" was the
+				 * PRD's codename, three abstract nouns that truncate in a tab
+				 * and appear nowhere in the UI. The tagline rides the landing
+				 * title — it is the product's best line.
+				 */
+				title: "Lyrical Explorer — read the words properly",
 			},
 			/*
 			 * Social cards (D-051). A shared link previously rendered as a bare
@@ -44,12 +56,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			 * og:image per song; these are the defaults for everything else.
 			 */
 			{ property: "og:type", content: "website" },
-			{ property: "og:site_name", content: "Typographic Lyrical Explorer" },
-			{ property: "og:title", content: "Typographic Lyrical Explorer" },
+			{ property: "og:site_name", content: "Lyrical Explorer" },
+			{ property: "og:title", content: "Lyrical Explorer — read the words properly" },
 			{
 				property: "og:description",
 				content:
-					"Lyrics as a premium editorial reading experience \u2014 synced, explained, and beautifully set.",
+					"Lyrics synced line by line to the song, set like print, with the story behind the words.",
 			},
 			{ name: "twitter:card", content: "summary_large_image" },
 			{

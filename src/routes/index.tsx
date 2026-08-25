@@ -320,8 +320,15 @@ function Discovery() {
 										aria-controls="also-liked"
 										onClick={() => setAlsoOpen(!alsoOpen)}
 									>
+										{/*
+										  "More for you", not "People also like" (D-104):
+										  nothing measures what people like — OD-024 is
+										  deliberately unresolved — and the shelf is ranked
+										  down the reader's own answers, as its lead says.
+										  The heading now claims only what the code does.
+										*/}
 										<span className="text-micro font-semibold uppercase tracking-label text-ink">
-											People also like
+											More for you
 										</span>
 										{/* The chevron says which way the row will move. */}
 										<svg
