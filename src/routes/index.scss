@@ -46,14 +46,13 @@
 		font-weight: 700;
 	}
 
-	// The flip's mask (D-107): clips the word's travel without clipping its
-	// glyphs — the italic's descenders need the padding, the negative margin
-	// gives it back so the line does not grow.
+	// No mask (D-107, revised on the owner's report): overflow-hidden
+	// clipped Fraunces' italic descenders at rest — worse than the travel
+	// it was hiding. The words fade as they move, so the un-masked flip
+	// reads as a rise, not a slide-over; the shortened travel in the JSX
+	// keeps the moving ghost off the neighbouring lines.
 	&__flip {
 		display: inline-block;
-		overflow: hidden;
-		padding-block: 0.15em;
-		margin-block: -0.15em;
 		vertical-align: bottom;
 	}
 

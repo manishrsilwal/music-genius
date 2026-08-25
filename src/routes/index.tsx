@@ -75,9 +75,9 @@ function FlipWord() {
 					<motion.em
 						key={FLIP_WORDS[index]}
 						className="landing__title-fancy landing__flip-word"
-						initial={{ y: "1.1em", opacity: 0 }}
+						initial={{ y: "0.5em", opacity: 0 }}
 						animate={{ y: 0, opacity: 1 }}
-						exit={{ y: "-1.1em", opacity: 0, transition: transition.dismiss }}
+						exit={{ y: "-0.5em", opacity: 0, transition: transition.dismiss }}
 						transition={transition.editorial}
 					>
 						{FLIP_WORDS[index]}

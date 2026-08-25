@@ -150,8 +150,12 @@ wraps land in the same places at either width.
 lyrics, know the ___" cycles meaning → story → mood → craft → words at
 2.6s — each one product vocabulary (the drawer's story, the questions'
 mood, a pull's craft, the words themselves), so the rotation is a tour of
-what the app does, one noun at a time. Exit up, enter from below, inside
-an overflow mask padded for the italic's descenders. The h1's accessible
+what the app does, one noun at a time. Exit up, enter from below — UNMASKED,
+after the owner's report: the overflow mask's padding could not spare
+Fraunces' italic descenders at hero size and trimmed the word at rest,
+worse than the travel it hid. The words fade as they move, so the open
+flip reads as a rise, and the travel is short (±0.5em) to keep the moving
+ghost off the neighbouring lines. The h1's accessible
 text stays stable — the rotator is aria-hidden beside a static sr-only
 "meaning", because a headline that re-announces itself every few seconds
 is screen-reader noise — and reduced motion pins the first word without
