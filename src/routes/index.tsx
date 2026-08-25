@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useEffect, useMemo, useState } from "react";
 import { SectionHeading } from "@/components/section-heading";
 import { ContinueReading } from "@/features/discovery/components/continue-reading";
 import {
@@ -41,6 +41,54 @@ export const Route = createFileRoute("/")({
  * full display size, pushed the first question below the fold on a laptop —
  * the reader had to scroll before they could answer (D-028).
  */
+/*
+ * The promise's last word, flipping (D-107). Each word is product
+ * vocabulary — the meaning (insights), the story (the drawer), the mood
+ * (the questions), the craft (a pull), the words (the lyrics themselves) —
+ * so the rotation is a tour of what the app does, one noun at a time.
+ *
+ * The h1's accessible text stays STABLE: the rotator is aria-hidden with a
+ * static sr-only "meaning" beside it — a headline that re-announces itself
+ * every few seconds is noise to a screen reader. Reduced motion pins the
+ * first word and never starts the clock.
+ */
+const FLIP_WORDS = ["meaning", "story", "mood", "craft", "words"] as const;
+const FLIP_INTERVAL_MS = 2600;
+
+function FlipWord() {
+	const reduce = useReducedMotion();
+	const [index, setIndex] = useState(0);
+
+	useEffect(() => {
+		if (reduce) return;
+		const timer = setInterval(
+			() => setIndex((n) => (n + 1) % FLIP_WORDS.length),
+			FLIP_INTERVAL_MS,
+		);
+		return () => clearInterval(timer);
+	}, [reduce]);
+
+	return (
+		<>
+			<span className="landing__flip" aria-hidden="true">
+				<AnimatePresence mode="wait" initial={false}>
+					<motion.em
+						key={FLIP_WORDS[index]}
+						className="landing__title-fancy landing__flip-word"
+						initial={{ y: "1.1em", opacity: 0 }}
+						animate={{ y: 0, opacity: 1 }}
+						exit={{ y: "-1.1em", opacity: 0, transition: transition.dismiss }}
+						transition={transition.editorial}
+					>
+						{FLIP_WORDS[index]}
+					</motion.em>
+				</AnimatePresence>
+			</span>
+			<span className="sr-only">meaning</span>
+		</>
+	);
+}
+
 function Discovery() {
 	const { today } = Route.useLoaderData();
 	const { preferences, answered, save, reset } = usePreferences();
@@ -158,7 +206,7 @@ function Discovery() {
 							<span className="landing__title-plain">
 								Find the lyrics, know the
 							</span>{" "}
-							<em className="landing__title-fancy">meaning</em>
+							<FlipWord />
 						</>
 					)}
 				</motion.h1>

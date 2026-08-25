@@ -134,6 +134,19 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-107 — The promise's last word flips
+**Built 2026-08-25.** Owner's ask: the accent word rotates. "Find the
+lyrics, know the ___" cycles meaning → story → mood → craft → words at
+2.6s — each one product vocabulary (the drawer's story, the questions'
+mood, a pull's craft, the words themselves), so the rotation is a tour of
+what the app does, one noun at a time. Exit up, enter from below, inside
+an overflow mask padded for the italic's descenders. The h1's accessible
+text stays stable — the rotator is aria-hidden beside a static sr-only
+"meaning", because a headline that re-announces itself every few seconds
+is screen-reader noise — and reduced motion pins the first word without
+starting the clock. Verified by probe: mood → craft → words → meaning on
+schedule.
+
 ### D-106 — Chips only, and a hover that does not perform
 **Built 2026-08-25.** Two owner calls. The filter strip drops its words:
 with D-105's title carrying the reader's mood directly above, "Tuned to
