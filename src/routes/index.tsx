@@ -72,7 +72,9 @@ function Discovery() {
 	return (
 		<motion.main
 			id="main"
-			className="landing mx-auto w-full max-w-2xl px-6"
+			// Wide enough for the bento (D-088); the stepper branch narrows
+			// itself back to the old reading measure.
+			className="landing mx-auto w-full max-w-6xl px-6"
 			variants={staggerVariants}
 			initial="hidden"
 			animate="visible"
@@ -102,7 +104,7 @@ function Discovery() {
 				) : answered === false ? (
 					<motion.div
 						key="stepper"
-						className="mt-8"
+						className="mt-8 max-w-2xl"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0, y: -12 }}
@@ -113,71 +115,52 @@ function Discovery() {
 				) : (
 					<motion.div
 						key="discovery"
-						className="shelves mt-8 grid gap-10"
+						className="bento mt-10"
 						initial={{ opacity: 0, y: 12 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={transition.editorial}
 					>
 						{/*
-						  Above the search field (D-056). A reader who has been here
-						  before is likelier to be resuming than starting, and putting
-						  the shelf below the field would make them look past the
-						  thing they came back for.
+						  The shelves are tiles now (D-088): each block carries its
+						  own surface, and the card edge does the separating that
+						  hairline rules used to. The reading order is unchanged —
+						  continue first (D-056), the two ways in, then the shelves.
+
+						  Gated on entries because ContinueReading returns null for
+						  an empty history — and an empty tile would render as a
+						  blank card, which reads as something failing to load.
 						*/}
-						<ContinueReading
-							entries={entries}
-							onRemove={remove}
-							onClear={clear}
-						/>
+						{entries.length > 0 && (
+							<section className="bento__tile bento__tile--resume">
+								<ContinueReading
+									entries={entries}
+									onRemove={remove}
+									onClear={clear}
+								/>
+							</section>
+						)}
 
 						{/*
-						  The two ways in, presented together (D-059).
-						
-						  They used to sit at opposite ends of the page: the field
-						  here, the mood chips far below inside Deep Dives. A reader
-						  who did not have a song in mind had no way of knowing the
-						  second route existed without scrolling past the thing they
-						  could not use. Naming both at the moment of the choice is
-						  the whole point — the PRD's own reasoning for the stepper
-						  is that "a blank search bar is intimidating", and that does
-						  not stop being true on the second visit.
+						  The two ways in are two adjacent tiles now (D-059's offer,
+						  D-088's geometry): the search's lead still names both
+						  routes at the moment of the choice, and the mood tile sits
+						  beside it rather than below a ruled "or" — the fork is
+						  spatial, not typographic.
 						*/}
-						<section className="entry">
-							{/*
-							  Names both routes in a sentence (D-063).
-							
-							  The section already showed the choice — a labelled field, a
-							  ruled "or", labelled chips — but never said it. Structure
-							  reads as a choice only to someone already looking for one;
-							  a reader who does not have a song in mind sees a search box
-							  and assumes that is the product. One line costs nothing and
-							  removes the guess.
-							
-							  D-063 deliberately left this section headingless, so the
-							  field's own visible label (D-060) was the only
-							  heading-shaped thing in it. That was right when this was
-							  the only unlabelled block on the page; with every other
-							  section now opening on a rule and a label (D-069), the one
-							  section without them read as a fragment of the one above.
-							  The field's label is a different rank and still the only
-							  thing naming the input.
-							*/}
+						<section className="bento__tile bento__tile--search">
 							<SectionHeading lead="Two ways in — look up a song you already love, or tell us how you want to feel and we will choose.">
 								Start reading
 							</SectionHeading>
 
 							<SearchField />
+						</section>
 
-							<p className="entry__or" aria-hidden="true">
-								or
-							</p>
-
+						<section className="bento__tile bento__tile--mood">
 							<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
 								Start from a mood
 							</h2>
-							{/* The lead above already makes the offer; repeating "tell us
-							    how you want to feel" here was the same sentence twice on
-							    one screen. What is left is the part the lead does not say. */}
+							{/* The search tile's lead already makes the offer; what is
+							    left is the part the lead does not say. */}
 							<p className="mb-3 text-caption text-ink-faint">
 								Change any answer without starting over.
 							</p>
@@ -188,7 +171,7 @@ function Discovery() {
 							/>
 						</section>
 
-						<section>
+						<section className="bento__tile bento__tile--dives">
 							{/*
 							  The lead says what the shelf is, which the label alone
 							  did not. Three picks out of a hand-built catalogue is
@@ -213,7 +196,7 @@ function Discovery() {
 							<DeepDives picks={dives} preferences={preferences} />
 						</section>
 
-						<section>
+						<section className="bento__tile bento__tile--also">
 							<SectionHeading lead="More from the same catalogue, ranked further down your answers.">
 								People also like
 							</SectionHeading>

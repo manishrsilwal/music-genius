@@ -53,28 +53,91 @@
 	}
 }
 
-// The two ways in (D-059). One section, so the choice reads as a choice
-// rather than as two unrelated blocks that happen to be adjacent.
-.entry {
-	&__or {
-		display: flex;
-		align-items: center;
-		gap: 0.9rem;
-		margin-block: 1.5rem;
-		font-family: var(--font-ui);
-		font-size: var(--text-micro);
-		letter-spacing: var(--tracking-label);
-		text-transform: uppercase;
-		color: var(--color-ink-faint);
+// The bento (D-088, style match: bento-box-grid). The shelves used to be one
+// column with hairline rules between sections; now each block is a tile with
+// its own surface, and the card edge does the separating. Surfaces step DOWN
+// from the bright canvas — the same measured direction the search field
+// already used (styles.css: "on a bright ground the only direction with room
+// left is down").
+.bento {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 1rem;
 
-		// Rules either side, so "or" reads as a fork in the path rather than as
-		// a word someone left on the page.
-		&::before,
-		&::after {
-			content: "";
-			flex: 1;
-			height: 1px;
-			background: var(--color-hairline, oklch(1 0 0 / 0.12));
+	@include m.from("md") {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1.25rem;
+	}
+
+	@include m.from("lg") {
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+	}
+
+	&__tile {
+		min-width: 0;
+		padding: 1.5rem;
+		border-radius: var(--radius-card);
+		background: var(--color-surface);
+		// shadow-1, not 2: the tiles sit in a field of siblings, and the deep
+		// drop the drawer uses would have six cards all floating at once.
+		box-shadow: var(--shadow-1);
+
+		@include m.from("md") {
+			grid-column: span 2;
+			padding: 1.75rem;
+		}
+
+		// The card edge is the boundary; the heading's hairline on top of it
+		// would draw the boundary twice (the D-069 rule, same exception the
+		// insights resonance card already makes).
+		.section-heading {
+			border-top: 0;
+			padding-top: 0;
+		}
+
+		// The field sits ON the tile now, so its resting fill steps down one
+		// more level — same surface it already adopts on focus. Without this
+		// the input's fill matched the tile exactly and only the border said
+		// where to type.
+		.search__input {
+			background: var(--color-surface-raised);
+		}
+
+		// The also-liked list pairs rows two-up from `sm` — sized for the old
+		// full-width column. Inside a 2-of-6 tile the pairs crush each other
+		// into truncation; one row per line is the honest fit.
+		.also {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	// The fork is spatial now: search beside mood, no ruled "or" between.
+	@include m.from("md") {
+		&__tile--search,
+		&__tile--mood {
+			grid-column: span 1;
+		}
+	}
+
+	@include m.from("lg") {
+		&__tile--resume {
+			grid-column: span 6;
+		}
+
+		&__tile--search {
+			grid-column: span 4;
+		}
+
+		&__tile--mood {
+			grid-column: span 2;
+		}
+
+		&__tile--dives {
+			grid-column: span 4;
+		}
+
+		&__tile--also {
+			grid-column: span 2;
 		}
 	}
 }

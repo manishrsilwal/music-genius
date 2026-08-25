@@ -134,6 +134,32 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-088 — The landing is a bento
+**Built 2026-08-25.** Owner's direction, via the ui-ux database (verified
+match: `bento-box-grid` — modular cards, varied spans, 4→2→1 responsive,
+subtle shadows). The discovery state's one hairline-ruled column becomes a
+grid of tiles: each block carries its own surface and the card edge does the
+separating. The skin stays ours — the database's neutral palette lost to the
+existing system, per the skill's own precedence.
+
+Geometry at `lg` (6 columns): the resume strip spans all six (still first —
+D-056's ordering survives the regrid), search spans four beside mood's two —
+**the "or" fork is spatial now, not typographic**, so the ruled `.entry__or`
+divider and the `.entry` section died — and Deep Dives' four sit beside the
+also-liked two. `md` pairs search/mood; a phone stacks one column. The
+stepper branch keeps the old narrow measure inside the widened page.
+
+The details that made it work, all reused reasoning: tiles suppress the
+SectionHeading's top rule (the card edge IS the boundary — D-069's rule, the
+same exception the insights resonance card makes); the search input steps
+down to `--color-surface-raised` because its resting fill matched the tile's
+exactly; the also-liked list drops to one column inside its narrow tile (its
+two-up layout was sized for the old full-width column and crushed into
+truncation); the resume tile is gated on `entries.length` because
+ContinueReading returns null when empty and an empty card reads as a load
+failure; tiles carry `--shadow-1`, not the drawer's deep drop — six cards
+all floating at once is not elevation, it is noise.
+
 ### D-087 — Say how to cache the document; never let a browser keep JSON for a month
 **Built 2026-08-25.** The owner's report: after a long time away, hitting the
 URL serves a stale app until a hard refresh. Measured, two holes, both ours:
