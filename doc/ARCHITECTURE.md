@@ -134,6 +134,26 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-086 — The mark is a signature, not a button
+**Built 2026-08-25.** The owner's read on the remaining pages: boxed in a
+pill, the logo read as a control — chrome promising an action, when it is an
+identity. The pill was not a whim; D-065 gave the mark a solid surface
+because it floated over full-bleed album art, a ground whose contrast was
+unknowable. D-084 removed the masthead from the track page, and everywhere it
+still renders the ground is the flat canvas — measurable, and fine. The
+justification left; the box had stayed out of habit.
+
+Now: no surface, no border, no shadow, no padding — the mark and wordmark sit
+directly on the layout's inset, hover shifts colour only (a hover that paints
+a box back on would give back what the removal took away), and the
+`tap-target` mixin still guarantees the 44px hit area the padding used to.
+`--masthead-height` is still the height contract (D-060).
+
+Removing the box exposed a bug it had been hiding: the skip-link tucks above
+the viewport by a few pixels, but its `--shadow-2` reached past its element
+into the corner — a dark sliver that had always been there, invisible only
+while the pill sat on top of it. The shadow now arrives with focus.
+
 ### D-085 — Sync says its state with motion
 **Built 2026-08-25.** The owner's screenshot made the case: with the song
 playing, the Sync pill was filled — the "following" state — and still

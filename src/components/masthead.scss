@@ -9,28 +9,27 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.6rem;
-	padding: 0.5rem 0.9rem;
-	border-radius: var(--radius-pill);
 	font-family: var(--font-ui);
 	font-size: var(--text-micro);
 	font-weight: 600;
 	letter-spacing: var(--tracking-label);
 	text-transform: uppercase;
 	color: var(--color-ink-muted);
-	transition:
-		color 0.18s var(--ease-editorial),
-		background-color 0.18s var(--ease-editorial);
+	transition: color 0.18s var(--ease-editorial);
 
-	// The hero is full-bleed artwork and the landing is flat canvas, so the
-	// mark cannot rely on either for legibility. It carries its own surface —
-	// solid since D-065, because the glass it used to sit on took its contrast
-	// from whatever happened to be behind it, which over album art is
-	// unknowable and therefore unmeasurable.
-	// Fixed, so the height the rest of the layout compensates for is known
-	// rather than measured. --masthead-height is the contract (D-060).
+	// No surface (D-086). The pill earned its keep when the mark floated over
+	// full-bleed album art (D-065) — a ground whose contrast was unknowable.
+	// D-084 took the masthead off the track page, and everywhere it still
+	// renders the ground is the flat canvas, which IS measurable. Boxed on a
+	// page of open typography, the identity read as a button — chrome
+	// promising an action, when it is a signature. The padding went with the
+	// box: the mark sits on the layout's own inset, and the tap-target mixin
+	// still guarantees the 44px hit area the padding used to.
+	// Fixed height regardless, so the height the rest of the layout
+	// compensates for is known rather than measured — --masthead-height is
+	// still the contract (D-060).
 	min-height: var(--masthead-height);
 
-	@include m.floating;
 	@include m.tap-target;
 	@include m.press;
 
@@ -43,10 +42,11 @@
 	// correctly.
 	position: fixed;
 
+	// Colour only — a hover that paints a box back on would give back the
+	// button reading the box's removal just took away (D-086).
 	&:hover,
 	&:focus-visible {
 		color: var(--color-ink);
-		background: var(--color-surface);
 	}
 
 	// Already home. Still a link — going home from home is a harmless no-op and
@@ -80,7 +80,6 @@
 	// element here, which left a phone reader with no way back at all.
 	@include m.until("sm") {
 		gap: 0;
-		padding: 0.5rem;
 
 		// Safe to remove outright rather than hide visually: the link carries
 		// its own aria-label, so the accessible name does not depend on this.

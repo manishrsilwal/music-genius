@@ -785,12 +785,16 @@
     color: var(--color-ink);
     font-family: var(--font-ui);
     font-size: var(--text-caption);
-    box-shadow: var(--shadow-2);
     transition: translate 0.18s var(--ease-entrance);
   }
 
+  /* The shadow arrives WITH focus. Hidden, the element clears the viewport
+     by a few pixels but its shadow did not — a dark sliver bled over the
+     top-left corner, invisible only while the masthead's pill happened to
+     sit on top of it (found when D-086 removed that pill). */
   .skip-link:focus-visible {
     translate: 0 0;
+    box-shadow: var(--shadow-2);
   }
 }
 
