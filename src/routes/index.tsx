@@ -193,21 +193,35 @@ function Discovery() {
 						  the resume strip follows the results rather than
 						  interrupting them.
 						*/}
-						<section className="bento__tile bento__results">
-							<div className="bento__filter">
-								<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
-									Tuned to your answers
-								</h2>
-								<p className="mb-3 text-caption text-ink-faint">
-									Change any answer without starting over.
-								</p>
-								<TasteChips
-									preferences={preferences}
-									onChange={save}
-									onStartOver={reset}
-								/>
-							</div>
+						{/*
+						  The filter is its own slim tile now (D-098, the owner's
+						  mock): adjacency carries the "this governs that" reading
+						  D-090 used one shared surface for, and the results tile
+						  stops being a wall — the page gets rhythm between cards
+						  instead of one uninterrupted block.
+						*/}
+						{/*
+						  No surface (D-098). The chips are bordered pills already;
+						  a card around a row of pills is a box around boxes — the
+						  D-069 reasoning, one level up. The filter is a quiet strip
+						  on the canvas, and the results card below is the page's
+						  one tile.
+						*/}
+						<section className="bento__filter">
+							<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
+								Tuned to your answers
+							</h2>
+							<p className="mb-3 text-caption text-ink-faint">
+								Change any answer without starting over.
+							</p>
+							<TasteChips
+								preferences={preferences}
+								onChange={save}
+								onStartOver={reset}
+							/>
+						</section>
 
+						<section className="bento__tile bento__results">
 							{/*
 							  Keyed on the rotation, so a shuffle re-enters BOTH
 							  shelves together (D-091): the interaction's whole
@@ -228,7 +242,7 @@ function Discovery() {
 									  catalogue is an editorial claim; unlabelled it
 									  reads as the whole of a thin library (D-056).
 									*/}
-									<SectionHeading lead="Three from a catalogue we chose by hand, matched to your answers. They change every time you come back.">
+									<SectionHeading lead="Three from a catalogue we chose by hand. They change every time you come back.">
 										Deep Dives
 									</SectionHeading>
 

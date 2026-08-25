@@ -134,6 +134,22 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-098 — The filter is a strip, not a tile
+**Built 2026-08-25.** The owner mocked the filter split out of the results
+tile ("too crowded"), then asked the sharper question: does that section
+need a background at all? It does not. The chips are bordered pills
+already; a card around a row of pills is a box around boxes — D-069's
+boundary-drawn-twice reasoning, one level up. Surfaces hold content;
+controls can stand on the canvas.
+
+The landing now reads statement → quiet filter strip → ONE results card.
+The strip takes the tiles' own padding as its inline inset so its heading
+sits on the tile headings' line; adjacency carries the "this governs that"
+reading D-090 used a shared surface for. With it: the bento gap grows to
+1.75rem from `md` (the tiles were a slab at 1.25rem), and the Deep Dives
+lead drops its "matched to your answers" clause — the match-line directly
+below says the same thing with the actual answers in it.
+
 ### D-097 — The controls live inside what they control
 **Built 2026-08-25.** The owner's second pass on the results controls:
 D-091's pills still read as a corner dump — two different-rank controls

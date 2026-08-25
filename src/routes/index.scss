@@ -79,7 +79,13 @@
 .bento {
 	display: grid;
 	grid-template-columns: 1fr;
+	// 1.75rem from md (D-098): the tiles were 1.25rem apart and the page
+	// read as one crowded slab — the owner's word. The gap is the rhythm.
 	gap: 1.25rem;
+
+	@include m.from("md") {
+		gap: 1.75rem;
+	}
 
 	&__tile {
 		min-width: 0;
@@ -103,10 +109,17 @@
 		}
 	}
 
-	// The filter reads before the results it governs: chips up top, results
-	// under them, one surface saying one thing — these are YOUR picks.
+	// The filter is a chrome-less strip since D-098 — chips on the canvas,
+	// no card (a card around a row of pills is a box around boxes). It
+	// aligns to the tiles' inner text by taking their padding as its own
+	// inline inset, so the heading sits on the same line as the tile
+	// headings below it.
 	&__filter {
-		margin-bottom: 2rem;
+		padding-inline: 1.5rem;
+
+		@include m.from("md") {
+			padding-inline: 1.75rem;
+		}
 	}
 
 	// The region's action moved into the shelf itself (D-097): the ghost
