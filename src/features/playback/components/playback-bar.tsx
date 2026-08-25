@@ -324,6 +324,21 @@ export function PlaybackBar({
 						aria-pressed={followOn}
 						className="playback__sync px-3 py-1.5 text-micro"
 					>
+						{/*
+						  The state, said with motion rather than with fill
+						  (D-085). Fill alone could not say it: the play toggle
+						  beside this pill is also a filled accent shape, so
+						  "filled = following" read as "another button", not as
+						  a state. The bars move while the canvas is following
+						  and lie flat when it is not — the one cue the rest of
+						  the row cannot counterfeit. Decorative: aria-pressed
+						  already tells assistive tech the same fact.
+						*/}
+						<span className="playback__sync-wave" aria-hidden="true">
+							<span />
+							<span />
+							<span />
+						</span>
 						Sync
 					</button>
 				)}

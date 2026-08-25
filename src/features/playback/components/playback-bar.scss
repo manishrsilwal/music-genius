@@ -495,6 +495,9 @@
 		@include m.tap-target;
 		@include m.press;
 		flex: none;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
 		border-radius: var(--radius-pill);
 		border: 1px solid var(--track-accent);
 		color: var(--track-accent);
@@ -519,6 +522,65 @@
 		@include m.reduced-motion {
 			transition: none;
 		}
+	}
+
+	// The equaliser inside the Sync pill (D-085). Fill could not carry the
+	// state — the play toggle beside it is also a filled accent shape, so a
+	// filled pill read as "another button". Movement is the cue nothing else
+	// on the row has: the bars step while the canvas is following the song,
+	// and lie flat when it is not.
+	&__sync-wave {
+		display: inline-flex;
+		align-items: flex-end;
+		gap: 2px;
+		height: 0.7rem;
+
+		// Off is a frozen wave, not a flat line: three equal stubs on the
+		// baseline read as an ellipsis — "loading" — where unequal heights
+		// read as a wave that stopped.
+		span {
+			width: 2px;
+			height: 100%;
+			border-radius: 1px;
+			background: currentColor;
+			transform: scaleY(0.3);
+			transform-origin: bottom;
+			transition: transform 0.25s var(--ease-editorial);
+
+			&:nth-child(2) {
+				transform: scaleY(0.6);
+			}
+		}
+	}
+
+	&__sync[aria-pressed="true"] &__sync-wave span {
+		animation: sync-wave 1.1s ease-in-out infinite;
+
+		&:nth-child(2) {
+			animation-delay: 0.18s;
+		}
+
+		&:nth-child(3) {
+			animation-delay: 0.36s;
+		}
+
+		// Still two readable states without the movement: tall bars for
+		// following, flat for not. The animation is the cue, not the state.
+		@include m.reduced-motion {
+			animation: none;
+			transform: scaleY(0.9);
+		}
+	}
+}
+
+@keyframes sync-wave {
+	0%,
+	100% {
+		transform: scaleY(0.3);
+	}
+
+	50% {
+		transform: scaleY(1);
 	}
 }
 

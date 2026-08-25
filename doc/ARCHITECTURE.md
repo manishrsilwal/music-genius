@@ -134,6 +134,23 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-085 — Sync says its state with motion
+**Built 2026-08-25.** The owner's screenshot made the case: with the song
+playing, the Sync pill was filled — the "following" state — and still
+unreadable, because the play toggle beside it is also a filled accent shape.
+In a row of filled controls, "filled = on" reads as "another button", not as
+a state. Fill was the wrong channel; every neighbour can counterfeit it.
+
+The pill now carries a three-bar equaliser that steps while the canvas is
+actually following the song and freezes when it is not. Movement is the one
+cue nothing else on the row has, and it is the honest one — the bars move
+exactly when the lyrics do. Off is a frozen unequal wave rather than a flat
+line: three equal stubs on the baseline read as an ellipsis ("loading"),
+where a stopped wave reads as a wave, stopped. Under reduced motion the two
+states stay readable statically — tall bars for following, the short frozen
+wave for not. The glyph is `aria-hidden`; `aria-pressed` was already telling
+assistive tech the same fact.
+
 ### D-084 — The track page is a sheet
 **Built 2026-08-25.** Three owner calls that turn out to be one idea: the
 story button joins the rail, the masthead yields to a cross, and the page
