@@ -134,6 +134,34 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-090 — One results region, search as chrome
+**Built 2026-08-25.** Four owner directives that resolve into one principle:
+group by dependency, not by widget. Everything that depends on the reader's
+answers lives on one surface; everything that does not leaves it.
+
+**Search is page chrome now** — top right in the landing's head beside the
+title, the pill alone on the canvas, no card (the owner's word: seamless).
+It renders only in the answered state; a first visitor is mid-stepper and
+the field would compete with the questions. The dropdown was already
+absolutely positioned, so the head placement costs nothing.
+
+**The results are ONE region.** The three cards and the also-liked list are
+both outputs of the same answers, so they share one tile — cards left, list
+beside — and the mood chips sit on top of that region as its FILTER, not as
+a sibling tile: change a chip and everything under it re-ranks, which the
+geometry now says. The filter heading reads "Tuned to your answers"; the
+old "Start from a mood" framed the chips as an entry point, which stopped
+being true the moment they governed visible results. This also dissolves
+D-090's first draft (mood/also stacked in a side column) before it shipped
+— the owner's regroup is the stronger fix for the same dead-space
+screenshot that prompted it: a chips strip stretched to a tall neighbour's
+height was two-thirds empty surface.
+
+**The resume strip follows the results** rather than interrupting them —
+still a tile, still gated on a non-empty history. D-056's continue-first
+ordering is now fully yielded: on a results page, the result is what the
+reader came back to see.
+
 ### D-089 — The result leads the bento
 **Built 2026-08-25.** The owner's read, and a real UX finding: with
 preferences answered, the landing IS a results page — but D-088's first cut

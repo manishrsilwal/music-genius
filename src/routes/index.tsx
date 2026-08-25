@@ -90,10 +90,24 @@ function Discovery() {
 			  language gets its energy from that collision rather than from
 			  decoration, and it costs nothing but two spans.
 			*/}
-			<motion.h1 variants={riseVariants} className="landing__title text-ink">
-				<span className="landing__title-plain">Read the words</span>{" "}
-				<em className="landing__title-fancy">properly</em>
-			</motion.h1>
+			<div className="landing__head">
+				<motion.h1 variants={riseVariants} className="landing__title text-ink">
+					<span className="landing__title-plain">Read the words</span>{" "}
+					<em className="landing__title-fancy">properly</em>
+				</motion.h1>
+
+				{/*
+				  Search is page chrome now, not a card (D-090): top right, the
+				  pill alone on the canvas. It renders only once the shelves do —
+				  a first visitor is mid-stepper and the field would compete with
+				  the questions.
+				*/}
+				{answered === true && (
+					<motion.div variants={riseVariants} className="landing__find">
+						<SearchField />
+					</motion.div>
+				)}
+			</div>
 
 			<AnimatePresence mode="wait">
 				{/* `answered` is null until localStorage has been read. Reserving
@@ -121,60 +135,72 @@ function Discovery() {
 						transition={transition.editorial}
 					>
 						{/*
-						  The result leads (D-089). With preferences answered this page
-						  IS a results page, and the first cut of the bento opened on
-						  the ways to ask again — the reader's picks sat entirely below
-						  the fold, so the answered state looked identical to having
-						  asked nothing. Deep Dives now takes the first row with the
-						  mood chips beside it — the answer next to the question that
-						  produced it — then the resume strip, then search.
-
-						  The resume tile is gated on entries because ContinueReading
-						  returns null for an empty history — and an empty tile would
-						  render as a blank card, which reads as something failing to
-						  load.
+						  One results region (D-090). The three cards and the
+						  also-liked list are both outputs of the same answers, so
+						  they share one surface — cards left, list beside — with
+						  the mood chips on top as the region's FILTER, not a
+						  sibling tile: change a chip and everything under it
+						  re-ranks. Search left the grid for the page's head, and
+						  the resume strip follows the results rather than
+						  interrupting them.
 						*/}
-						<section className="bento__tile bento__tile--dives">
-							{/*
-							  The lead says what the shelf is, which the label alone
-							  did not. Three picks out of a hand-built catalogue is
-							  an editorial claim; unlabelled it reads as the whole of
-							  a thin library (D-056).
-							*/}
-							<SectionHeading
-								lead="Three from a catalogue we chose by hand, matched to your answers. They change every time you come back."
-								action={
-									<button
-										type="button"
-										onClick={shuffle}
-										className="tap text-micro uppercase tracking-label text-ink-faint hover:text-ink"
-									>
-										Show three more
-									</button>
-								}
-							>
-								Deep Dives
-							</SectionHeading>
+						<section className="bento__tile bento__results">
+							<div className="bento__filter">
+								<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
+									Tuned to your answers
+								</h2>
+								<p className="mb-3 text-caption text-ink-faint">
+									Change any answer without starting over.
+								</p>
+								<TasteChips
+									preferences={preferences}
+									onChange={save}
+									onStartOver={reset}
+								/>
+							</div>
 
-							<DeepDives picks={dives} preferences={preferences} />
+							<div className="bento__shelves">
+								<div className="bento__dives">
+									{/*
+									  The lead says what the shelf is, which the label
+									  alone did not. Three picks out of a hand-built
+									  catalogue is an editorial claim; unlabelled it
+									  reads as the whole of a thin library (D-056).
+									*/}
+									<SectionHeading
+										lead="Three from a catalogue we chose by hand, matched to your answers. They change every time you come back."
+										action={
+											<button
+												type="button"
+												onClick={shuffle}
+												className="tap text-micro uppercase tracking-label text-ink-faint hover:text-ink"
+											>
+												Show three more
+											</button>
+										}
+									>
+										Deep Dives
+									</SectionHeading>
+
+									<DeepDives picks={dives} preferences={preferences} />
+								</div>
+
+								<aside className="bento__also">
+									<SectionHeading lead="More from the same catalogue, ranked further down your answers.">
+										People also like
+									</SectionHeading>
+									<AlsoLiked picks={also} />
+								</aside>
+							</div>
 						</section>
-						<section className="bento__tile bento__tile--mood">
-							<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
-								Start from a mood
-							</h2>
-							{/* The search tile's lead already makes the offer; what is
-							    left is the part the lead does not say. */}
-							<p className="mb-3 text-caption text-ink-faint">
-								Change any answer without starting over.
-							</p>
-							<TasteChips
-								preferences={preferences}
-								onChange={save}
-								onStartOver={reset}
-							/>
-						</section>
+
+						{/*
+						  Gated on entries because ContinueReading returns null for
+						  an empty history — and an empty tile would render as a
+						  blank card, which reads as something failing to load.
+						*/}
 						{entries.length > 0 && (
-							<section className="bento__tile bento__tile--resume">
+							<section className="bento__tile bento__resume">
 								<ContinueReading
 									entries={entries}
 									onRemove={remove}
@@ -182,25 +208,6 @@ function Discovery() {
 								/>
 							</section>
 						)}
-						{/*
-						  The second way in (D-059's offer, reordered by D-089): the
-						  mood route now sits up top as the result's own controls, so
-						  this tile no longer announces a fork — it is the lookup, for
-						  the reader who arrived with a song already in mind.
-						*/}
-						<section className="bento__tile bento__tile--search">
-							<SectionHeading lead="Already have a song in mind? Look it up and start reading.">
-								Search
-							</SectionHeading>
-
-							<SearchField />
-						</section>
-						<section className="bento__tile bento__tile--also">
-							<SectionHeading lead="More from the same catalogue, ranked further down your answers.">
-								People also like
-							</SectionHeading>
-							<AlsoLiked picks={also} />
-						</section>
 					</motion.div>
 				)}
 			</AnimatePresence>

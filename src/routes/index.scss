@@ -53,25 +53,33 @@
 	}
 }
 
-// The bento (D-088, style match: bento-box-grid). The shelves used to be one
-// column with hairline rules between sections; now each block is a tile with
-// its own surface, and the card edge does the separating. Surfaces step DOWN
-// from the bright canvas — the same measured direction the search field
-// already used (styles.css: "on a bright ground the only direction with room
-// left is down").
+// The results deck (D-088 gave the landing its tiles; D-090 regrouped
+// them). Search is page chrome in the landing's head, the results are ONE
+// region — cards and the also-liked list are both outputs of the same
+// answers, with the mood chips on top as that region's filter — and the
+// resume strip follows. Surfaces still step DOWN from the bright canvas
+// (styles.css: "on a bright ground the only direction with room left is
+// down").
+.landing__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1.5rem 3rem;
+}
+
+// The seamless search (D-090): the pill alone on the canvas, no card. Wide
+// enough to invite a title, bounded so it reads as a control rather than a
+// second hero.
+.landing__find {
+	flex: 1 1 18rem;
+	max-width: 26rem;
+}
+
 .bento {
 	display: grid;
 	grid-template-columns: 1fr;
-	gap: 1rem;
-
-	@include m.from("md") {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 1.25rem;
-	}
-
-	@include m.from("lg") {
-		grid-template-columns: repeat(6, minmax(0, 1fr));
-	}
+	gap: 1.25rem;
 
 	&__tile {
 		min-width: 0;
@@ -79,11 +87,10 @@
 		border-radius: var(--radius-card);
 		background: var(--color-surface);
 		// shadow-1, not 2: the tiles sit in a field of siblings, and the deep
-		// drop the drawer uses would have six cards all floating at once.
+		// drop the drawer uses would have every card floating at once.
 		box-shadow: var(--shadow-1);
 
 		@include m.from("md") {
-			grid-column: span 2;
 			padding: 1.75rem;
 		}
 
@@ -94,45 +101,29 @@
 			border-top: 0;
 			padding-top: 0;
 		}
-
-		// The field sits ON the tile now, so its resting fill steps down one
-		// more level — same surface it already adopts on focus. Without this
-		// the input's fill matched the tile exactly and only the border said
-		// where to type.
-		.search__input {
-			background: var(--color-surface-raised);
-		}
-
-		// The also-liked list pairs rows two-up from `sm` — sized for the old
-		// full-width column. Inside a 2-of-6 tile the pairs crush each other
-		// into truncation; one row per line is the honest fit.
-		.also {
-			grid-template-columns: 1fr;
-		}
 	}
 
-	// D-089 reordered the rows: the fork's md pairing went with it — mood
-	// rides beside the result now, and every tile takes the full md width.
+	// The filter reads before the results it governs: chips up top, results
+	// under them, one surface saying one thing — these are YOUR picks.
+	&__filter {
+		margin-bottom: 2rem;
+	}
 
-	@include m.from("lg") {
-		&__tile--resume {
-			grid-column: span 6;
-		}
+	// Cards beside the list from lg; stacked below it. The also-liked list
+	// keeps its own column — it two-ups from `sm` in the component, which is
+	// right when stacked and wrong beside the cards.
+	&__shelves {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 2rem;
 
-		&__tile--search {
-			grid-column: span 4;
-		}
+		@include m.from("lg") {
+			grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+			gap: clamp(1.5rem, 3vw, 3rem);
 
-		&__tile--mood {
-			grid-column: span 2;
-		}
-
-		&__tile--dives {
-			grid-column: span 4;
-		}
-
-		&__tile--also {
-			grid-column: span 2;
+			.also {
+				grid-template-columns: 1fr;
+			}
 		}
 	}
 }
