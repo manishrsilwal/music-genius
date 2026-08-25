@@ -93,3 +93,11 @@
 		transition: none;
 	}
 }
+
+// Not on the track page (D-084, reversing D-059's "every page" for this one
+// case). The track page is a pushed-up sheet now, and its way home is the
+// cross that sends it back down — two home affordances in two corners is
+// chrome noise on a reading page. Everywhere else the guarantee stands.
+:root:has(.track-shell) .masthead {
+	display: none;
+}

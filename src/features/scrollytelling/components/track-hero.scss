@@ -143,9 +143,14 @@
 			width: min(16rem, 100%);
 		}
 
-		// Bounded in the rail: the cover is context, not the page.
+		// Bounded in the rail: the cover is context, not the page. Bounded by
+		// the viewport's height as well as the rail's width (D-084): the
+		// column below the disc got longer — title, credit, player, story
+		// button — and a three-line title on a short laptop needs the disc to
+		// give the room back. 24dvh keeps today's size on a tall display and
+		// shrinks first, before any control does, on a short one.
 		@include m.from("lg") {
-			width: min(15rem, 100%);
+			width: min(15rem, 24dvh);
 		}
 
 		img {

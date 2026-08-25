@@ -29,8 +29,23 @@
 	box-shadow: var(--shadow-2);
 	transition:
 		bottom 0.42s var(--ease-editorial),
-		background-color 0.22s var(--ease-editorial);
+		background-color 0.22s var(--ease-editorial),
+		opacity 0.32s var(--ease-editorial);
 	@include m.press;
+
+	// ── In the rail (D-084) ────────────────────────────────────────────
+	// From `lg` the button joins the hero's column, under the transport and
+	// on the player's own measure — the rail reads as one instrument and
+	// the lyrics column carries nothing but lyrics. Below `lg` it stays
+	// fixed: on a phone the column scrolls away, and the one feature the
+	// product is named after must not scroll away with it.
+	@include m.from("lg") {
+		position: static;
+		width: 100%;
+		max-width: 26rem;
+		margin-top: 1.25rem;
+		text-align: center;
+	}
 
 	&:hover:not(:disabled) {
 		background: var(--track-accent-soft);
@@ -336,6 +351,20 @@
 
 	transition: padding-right 0.42s var(--ease-editorial);
 
+	// The push-up's middle state (D-084). While the shell is mid-transform it
+	// is the containing block for its own `position: fixed` chrome, so the
+	// phone's pill measures its `bottom` from the article's foot — several
+	// viewports down — and would pop into the corner when the transform
+	// clears. Held invisible until the sheet lands, then faded in by the
+	// opacity transition it already has.
+	&[data-entering] {
+		@include m.until("lg") {
+			.discover {
+				opacity: 0;
+			}
+		}
+	}
+
 	// ── Split view (D-079) ──────────────────────────────────────────────
 	// From `lg` the page is a rail and a reading column: art, title and the
 	// player stay fixed on the left while the lyrics scroll on the right —
@@ -365,6 +394,24 @@
 			height: 100dvh;
 			min-height: 0;
 			padding-inline: clamp(1.5rem, 3vw, 3rem);
+			// The column got taller (D-084: the story button joined it) and a
+			// three-line title on a short laptop can overrun the pinned
+			// viewport. Scrolling inside the rail is the graceful failure;
+			// clipped controls are not.
+			overflow-y: auto;
+			overscroll-behavior: contain;
+
+			// Safe centring. The element's own `justify-center` clips
+			// overflow at an UNREACHABLE top edge — centring pushes half the
+			// excess above the scrollport, where no scrollbar goes. Auto
+			// block margins centre when there is room and collapse to zero
+			// when there is not, which `justify-content: safe center` also
+			// promises but with less support.
+			justify-content: flex-start;
+
+			> .hero__lockup {
+				margin-block: auto;
+			}
 		}
 
 		> .canvas {
@@ -389,13 +436,9 @@
 		@include m.from("lg") {
 			padding-right: var(--drawer-width);
 
-			// Padding moves the canvas but not the dock: `position: fixed`
-			// children ignore an ancestor's padding entirely. Without this the
-			// panel opened on top of the playback bar AND on top of the button
-			// that closes it, leaving Escape as the only way out (D-033).
-			.discover {
-				transform: translateX(calc(var(--drawer-width) * -1));
-			}
+			// The button used to need shifting out from under the panel here;
+			// in the rail (D-084) it is in-flow on the far side of the page,
+			// and the padding squeeze never touches it.
 
 			// The docked bar spans the viewport, so it ends short of the panel
 			// rather than sliding sideways out from under it.
@@ -482,5 +525,42 @@
 		// Same rule as the desktop panel: one scroll axis in a reading column.
 		overflow-x: clip;
 		padding: 0.5rem 1.5rem 2.5rem;
+	}
+}
+
+// The sheet's way down (D-084). Replaces the masthead on the track page: the
+// way home IS the dismissal, in the corner a pushed-up sheet is dismissed
+// from. Carries the masthead's own surface treatment — it is the same rank of
+// chrome, on the opposite shoulder.
+.track-close {
+	z-index: var(--layer-masthead);
+	top: calc(var(--dock-inset) * 0.75 + env(safe-area-inset-top, 0px));
+	right: var(--dock-inset);
+	display: grid;
+	place-items: center;
+	width: var(--masthead-height);
+	height: var(--masthead-height);
+	border-radius: 50%;
+	color: var(--color-ink-muted);
+	transition:
+		color 0.18s var(--ease-editorial),
+		background-color 0.18s var(--ease-editorial);
+
+	@include m.floating;
+	@include m.tap-target;
+	@include m.press;
+
+	// AFTER the mixins — `tap-target` sets `position: relative`, and fixed
+	// declared first would silently lose to it (the .track-home bug, D-059).
+	position: fixed;
+
+	&:hover,
+	&:focus-visible {
+		color: var(--color-ink);
+		background: var(--color-surface);
+	}
+
+	@include m.reduced-motion {
+		transition: none;
 	}
 }

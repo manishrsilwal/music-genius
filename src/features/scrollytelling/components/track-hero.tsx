@@ -26,6 +26,7 @@ export function TrackHero({
 	player,
 	notice,
 	playing = false,
+	discover,
 }: {
 	track: Track;
 	visuals: Promise<TrackVisuals>;
@@ -45,6 +46,12 @@ export function TrackHero({
 	 * copies of the same image splitting it.
 	 */
 	playing?: boolean;
+	/**
+	 * The story button, in the column on desktop (D-084). Passed in like the
+	 * player and the notice: the hero lays out the instrument, it does not
+	 * know what insights are.
+	 */
+	discover?: ReactNode;
 }) {
 	return (
 		<motion.header
@@ -159,6 +166,8 @@ export function TrackHero({
 					{notice}
 
 					{player}
+
+					{discover}
 				</div>
 			</div>
 		</motion.header>

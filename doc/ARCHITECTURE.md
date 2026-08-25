@@ -134,6 +134,53 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-084 — The track page is a sheet
+**Built 2026-08-25.** Three owner calls that turn out to be one idea: the
+story button joins the rail, the masthead yields to a cross, and the page
+itself pushes up like a scaffold when a song is opened.
+
+**"Discover the story" is in the rail from `lg`** — under the transport, on
+the player's 26rem measure, so the rail reads as one instrument and the
+lyrics column carries nothing but lyrics. Below `lg` it stays fixed (owner's
+pick from two options): on a phone the column scrolls away, and the one
+feature the product is named after must not scroll away with it. DOM-wise the
+button now lives in the hero's `discover` slot everywhere — CSS parts its
+visual position from its DOM position below `lg`, deliberately. The
+`InsightsAffordance` wrapper died of this: with the button in the hero's
+subtree and the drawer at shell level, the state they share moved up to the
+route, and a component whose whole job was co-locating them had no job.
+
+**The push (the scaffold effect).** The shell is a `motion.article`: it
+enters at `y: 100dvh` and rises on `transition.sheet` — the drawer's own
+spring, so opening a song and opening its story are one physical gesture at
+two scales. The cross (top-right, owner's pick; styled as the masthead's
+surface on the opposite shoulder) reverses the spring and navigates home when
+the sheet lands. Measured: mount at 844px down, 844→372→95→23→5→0 in ~500ms;
+dismiss 0→842 then the URL flips at ~600ms.
+
+Three traps, all found by measurement rather than review:
+- **Reduced motion lives in the transition, not the keys.** The server cannot
+  know the preference, so it always renders the pushed-down initial; a client
+  that then animates `opacity` instead of `y` never manages the SSR transform
+  and the page stays stranded a viewport down — the first cut failed exactly
+  this way under the harness's reduced-motion profile. Same keys everywhere;
+  the preference collapses the sweep to a cut.
+- **Mid-transform, the shell is the containing block for its own fixed
+  chrome.** The phone's pill would measure `bottom` from the article's foot —
+  several viewports down — and pop in from the wrong place when the transform
+  clears. `data-entering` holds it invisible until the sheet lands.
+- **`justify-center` clips overflow at an unreachable top.** The rail column
+  got taller and a three-line title on a short laptop overruns 100dvh; the
+  hero now scrolls internally, and auto block margins centre the lockup only
+  when there is room (`safe center` semantics, wider support).
+
+**The masthead is not on the track page** — the one deliberate reversal of
+D-059's "every page". The way home IS the dismissal now, and two home
+affordances in two corners is chrome noise on a reading page. Everywhere
+else (landing, 404, error) the guarantee stands. The rail also trades the
+fixed 15rem disc for `min(15rem, 24dvh)`: same size on a tall display, and
+on a short one the art gives the room back before any control does.
+
 ### D-083 — Disc on the centreline, kicker retired
 **Built 2026-08-25.** Two owner calls on D-082's player screen. The rail's
 disc moves to the centreline — left-set it read as a list item above the

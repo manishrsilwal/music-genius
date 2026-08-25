@@ -5,6 +5,7 @@ import {
 	Link,
 	notFound,
 } from "@tanstack/react-router";
+import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import { RouteError } from "@/components/route-error";
 import { RouteMessage } from "@/components/route-message";
@@ -14,13 +15,18 @@ import {
 	VariantNotice,
 } from "@/features/discovery/components/track-versions";
 import { useRecordVisit } from "@/features/discovery/hooks/use-history";
-import { InsightsAffordance } from "@/features/insights/components/insights-affordance";
+import {
+	DiscoverButton,
+	InsightsDrawer,
+} from "@/features/insights/components/insights-drawer";
+import { useInsights } from "@/features/insights/hooks/use-insights";
 import { CardAffordance } from "@/features/lyric-card/components/card-affordance";
 import { PlaybackBar } from "@/features/playback/components/playback-bar";
 import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
 import { PaletteStyle } from "@/features/scrollytelling/components/palette-style";
 import { TrackHero } from "@/features/scrollytelling/components/track-hero";
 import type { LinePosition } from "@/lib/lrc";
+import { transition } from "@/lib/motion";
 import { detectLang } from "@/lib/script";
 import {
 	getSiteOriginFn,
@@ -148,10 +154,31 @@ export const Route = createFileRoute("/track/$trackId")({
 
 function TrackPage() {
 	const { track, visuals, playback } = Route.useLoaderData();
+	const navigate = Route.useNavigate();
+	const reduceMotion = useReducedMotion();
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [syncPosition, setSyncPosition] = useState<LinePosition | null>(null);
 	// The hero's cover is the record now (D-080): it spins on this.
 	const [playing, setPlaying] = useState(false);
+
+	/*
+	 * The page is a sheet (D-084): it pushes up over discovery when a song is
+	 * opened, and the cross sends it back down before navigating. Two flags
+	 * rather than one because the middle state matters — `entered` gates the
+	 * fixed chrome, which anchors to the article instead of the viewport
+	 * while the article is mid-transform, and would otherwise pop in from the
+	 * wrong place when the transform clears.
+	 */
+	const [entered, setEntered] = useState(false);
+	const [leaving, setLeaving] = useState(false);
+
+	/*
+	 * Insight state lives here now, not in an affordance wrapper (D-084): the
+	 * button reads in the hero's column on desktop while the drawer stays at
+	 * shell level, and splitting one component across two subtrees means the
+	 * state they share has to sit above both.
+	 */
+	const { state: insightState, insight } = useInsights(track.id);
 
 	// Opening the page is the record — not scrolling, not finishing. A reader
 	// who opened something and left still wants to find it again (D-056).
@@ -179,13 +206,66 @@ function TrackPage() {
 	);
 
 	return (
-		<article
+		<motion.article
 			id="main"
 			className="track-shell"
 			data-track-scope={track.id}
 			data-script={script ?? undefined}
 			data-drawer={drawerOpen ? "open" : "closed"}
+			data-entering={entered ? undefined : ""}
+			/*
+			  The scaffold push (D-084). The whole shell slides up from the
+			  viewport's foot on the drawer's own spring, so opening a song and
+			  opening its story are one physical gesture at two scales.
+
+			  Reduced motion lives in the TRANSITION, not in the keys. The
+			  server cannot know the reader's preference, so it always renders
+			  the pushed-down initial; if the client then animated a different
+			  property, the SSR transform would never be managed and the page
+			  would stay stranded a viewport down — which is exactly how the
+			  first cut of this failed under the harness's reduced-motion
+			  profile. Same keys everywhere; the preference only collapses the
+			  sweep to an instant cut.
+			*/
+			initial={{ y: "100dvh" }}
+			animate={leaving ? { y: "100dvh" } : { y: 0 }}
+			transition={reduceMotion ? { duration: 0 } : transition.sheet}
+			onAnimationComplete={() => {
+				if (leaving) {
+					navigate({ to: "/" });
+				} else {
+					setEntered(true);
+				}
+			}}
 		>
+			{/*
+			  The sheet's way down (D-084). Replaces the masthead on this page —
+			  the mark yields the corner chrome to the control that undoes the
+			  push, and the way home IS the dismissal. Top-right, where a
+			  pushed-up sheet is dismissed from.
+			*/}
+			<button
+				type="button"
+				className="track-close"
+				aria-label="Close and return to discovery"
+				onClick={() => setLeaving(true)}
+			>
+				<svg
+					viewBox="0 0 14 14"
+					width="14"
+					height="14"
+					aria-hidden="true"
+					focusable="false"
+				>
+					<path
+						d="M2.5 2.5 L11.5 11.5 M11.5 2.5 L2.5 11.5"
+						stroke="currentColor"
+						strokeWidth="1.6"
+						strokeLinecap="round"
+					/>
+				</svg>
+			</button>
+
 			{/* Mounts alongside once the palette resolves, repainting every accent
 			    utility at once without disturbing anything already on screen. */}
 			<Await promise={visuals} fallback={null}>
@@ -203,6 +283,20 @@ function TrackPage() {
 				visuals={visuals}
 				playing={playing}
 				notice={<VariantNotice title={track.title} />}
+				/*
+				 * In the hero's column so the desktop rail reads as one
+				 * instrument, story button included (D-084). Below `lg` the
+				 * button's own CSS keeps it fixed over the lyrics — DOM
+				 * position and visual position part ways there, deliberately:
+				 * a reader deep in the lyrics still has the reach.
+				 */
+				discover={
+					<DiscoverButton
+						state={insightState}
+						open={drawerOpen}
+						onToggle={() => setDrawerOpen(!drawerOpen)}
+					/>
+				}
 				/*
 				 * The bar mounts on the first paint, not when the data arrives
 				 * (D-055).
@@ -274,7 +368,16 @@ function TrackPage() {
 				)}
 			</Await>
 
-			<InsightsAffordance trackId={track.id} onOpenChange={setDrawerOpen} />
+			{/* The drawer stays at shell level — its open state squeezes the
+			    canvas (data-drawer above); only its button moved into the
+			    hero's column (D-084). */}
+			{insight && (
+				<InsightsDrawer
+					insight={insight}
+					open={drawerOpen}
+					onClose={() => setDrawerOpen(false)}
+				/>
+			)}
 
 			<footer className="track-shell__foot px-6 text-center">
 				{/* Where to go when the song ends (D-076) — an offer, not a queue. */}
@@ -299,6 +402,6 @@ function TrackPage() {
 					Search another
 				</Link>
 			</footer>
-		</article>
+		</motion.article>
 	);
 }
