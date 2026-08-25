@@ -134,6 +134,17 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-106 — Chips only, and a hover that does not perform
+**Built 2026-08-25.** Two owner calls. The filter strip drops its words:
+with D-105's title carrying the reader's mood directly above, "Tuned to
+your answers" was the third restatement on one screen — the chips stand
+alone on the page's axis, the heading surviving `sr-only` for structure,
+and D-099's bar layout goes with it (nothing left to bar). And the dive
+cards stop bouncing: the 3px hover lift plus a deep shadow read as
+performance, and a reading page's cards should acknowledge the cursor, not
+perform for it — hover is a veil and a firmer edge now, with press
+feedback kept on the click itself.
+
 ### D-105 — The title greets by what the page knows
 **Built 2026-08-25.** The owner retired "Read the words properly" for copy
 that promises the product's three verbs and reflects the reader's choice —

@@ -81,16 +81,16 @@
 		@include m.surface;
 		transition:
 			border-color 0.22s var(--ease-editorial),
-			translate 0.22s var(--ease-editorial),
-			box-shadow 0.22s var(--ease-editorial),
 			background-color 0.22s var(--ease-editorial);
 
+		// A veil and a firmer edge, nothing that moves (D-106, owner's
+		// call): the 3px lift plus a deep shadow read as bounce, and a
+		// reading page's cards should acknowledge the cursor, not perform
+		// for it. Press feedback on the click itself stays.
 		&:hover,
 		&:focus-within {
-			border-color: var(--track-accent);
+			border-color: var(--color-ink-faint);
 			background: var(--color-hover);
-			translate: 0 -3px;
-			box-shadow: var(--shadow-2);
 		}
 
 		@include m.from("sm") {

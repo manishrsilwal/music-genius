@@ -109,31 +109,9 @@
 		}
 	}
 
-	// The filter is a chrome-less strip since D-098, and a BAR from lg
-	// (D-099): words left on the page's axis, chips right, one line. The
-	// note's stacked margin stands down in the row so the two sides centre
-	// on each other, and chips that must wrap stay ragged against the right
-	// edge rather than scattering.
-	&__filter {
-		@include m.from("lg") {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 1.5rem 2.5rem;
-
-			.bento__filter-note {
-				margin-bottom: 0;
-			}
-
-			.taste__row {
-				justify-content: flex-end;
-			}
-		}
-	}
-
-	&__filter-words {
-		flex: none;
-	}
+	// Chips only since D-106 (the words left with the owner's call — the
+	// title above carries the mood now). The strip stays chrome-less on the
+	// page's left axis; nothing remains to justify a bar layout.
 
 	// The region's action moved into the shelf itself (D-097): the ghost
 	// card in Deep Dives is the shuffle, and Retake rides in the chip

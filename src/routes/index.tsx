@@ -272,15 +272,14 @@ function Discovery() {
 						  wrapped right-aligned cluster under a left heading reads
 						  as broken, so the narrow layout never attempts it.
 						*/}
+						{/*
+						  Chips only (D-106, owner's call): the title directly
+						  above now carries the mood itself, so "Tuned to your
+						  answers" was the third restatement on one screen. The
+						  heading survives for structure, unseen.
+						*/}
 						<section className="bento__filter">
-							<div className="bento__filter-words">
-								<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
-									Tuned to your answers
-								</h2>
-								<p className="bento__filter-note mb-3 text-caption text-ink-faint">
-									Change any answer without starting over.
-								</p>
-							</div>
+							<h2 className="sr-only">Your answers</h2>
 							<TasteChips
 								preferences={preferences}
 								onChange={save}
