@@ -26,8 +26,17 @@ export const env = {
 	 */
 	siteUrl: read("SITE_URL")?.replace(/\/+$/, ""),
 
-	/** Genius API client access token — album art and metadata (OD-005). */
+	/** Genius API client access token — artwork fallback and playback (OD-005). */
 	geniusAccessToken: read("GENIUS_ACCESS_TOKEN"),
+
+	/**
+	 * Spotify client credentials — canonical album art (D-111). App-level
+	 * client-credentials flow only: no user ever logs in, so no Premium
+	 * requirement and no Development-mode user cap apply. The secret stays
+	 * server-side by the same rule as every other key here.
+	 */
+	spotifyClientId: read("SPOTIFY_CLIENT_ID"),
+	spotifyClientSecret: read("SPOTIFY_CLIENT_SECRET"),
 
 	/**
 	 * DeepSeek — the primary synthesis provider for the insights drawer
@@ -62,6 +71,11 @@ export const env = {
 export const features = {
 	get artwork(): boolean {
 		return Boolean(env.geniusAccessToken);
+	},
+
+	/** Spotify metadata. Needs both halves of the credential pair. */
+	get spotify(): boolean {
+		return Boolean(env.spotifyClientId && env.spotifyClientSecret);
 	},
 
 	/** A durable cache. Without it we fall back to a per-process map. */

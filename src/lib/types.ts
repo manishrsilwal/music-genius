@@ -23,14 +23,17 @@ export interface Stanza {
 }
 
 /**
- * Album art, sourced from Genius (OD-005). Null whenever no token is
- * configured or no confident match was found — a wrong hero image is worse
- * than no hero image.
+ * Album art — Spotify first for the canonical square sleeve, Genius as the
+ * fallback (D-111, OD-005). Null whenever no source is configured or no
+ * confident match was found — a wrong hero image is worse than no hero image.
  */
 export interface Artwork {
 	full: string;
 	thumbnail: string;
-	geniusId: number;
+	/** Which catalogue matched. Kept so bad art is traceable to its source. */
+	source: "spotify" | "genius";
+	/** Present only on Genius matches; carries the playback lookup (D-022). */
+	geniusId?: number;
 	/** 0–1 match confidence. Retained so bad matches are diagnosable. */
 	matchScore: number;
 }

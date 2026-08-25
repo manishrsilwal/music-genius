@@ -54,8 +54,9 @@ cp .env.example .env     # then fill in what you have
 
 **Every key is optional, and the app is built to run without any of them.** It
 degrades to the features it can actually serve rather than failing: with no
-`GENIUS_ACCESS_TOKEN` there is no album art and no playback, and lyrics and
-search work exactly as before. `src/server/env.ts` is the only module that
+`SPOTIFY_CLIENT_ID`/`SPOTIFY_CLIENT_SECRET` album art falls back to Genius,
+with no `GENIUS_ACCESS_TOKEN` there is no playback and no artwork fallback,
+and lyrics and search work exactly as before. `src/server/env.ts` is the only module that
 reads `process.env`, and it exposes a `features` object that the rest of the
 code asks instead of testing for keys itself.
 

@@ -466,6 +466,7 @@ export async function findArtwork(
 		return {
 			full,
 			thumbnail: best.song_art_image_thumbnail_url ?? full,
+			source: "genius",
 			geniusId: best.id,
 			matchScore: Number(bestScore.toFixed(3)),
 		};

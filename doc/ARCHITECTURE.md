@@ -134,6 +134,46 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-111 — Spotify supplies the sleeve; YouTube keeps the clock
+**Built 2026-08-25.** The owner arrived with Spotify app credentials and
+"replace the YouTube API with Spotify". Ruled with the constraint map on
+the table: every Spotify PLAYBACK path carries a cost this product cannot
+ask of its readers — the Web Playback SDK requires each listener to log
+in with a Premium account and a Development-mode app caps at 25
+allowlisted users; the anonymous iFrame embed plays ~30-second previews,
+which would strand line-by-line sync mid-song; and `preview_url` is gone
+from the Web API for apps created after late 2024, so there is no
+play-it-ourselves route either. The owner chose **metadata only**:
+Spotify becomes the artwork source, YouTube keeps feeding the sync clock,
+and nothing about the product's central feature changes.
+
+**Spotify leads, Genius answers when it cannot.** Spotify's sleeve is the
+canonical square at three known sizes (640/300/64); Genius art is
+routinely a video still or promo crop. `getTrackVisuals` tries Spotify
+first and falls back to Genius, so the degradation ladder is two rungs
+deep before a page goes without art — and with neither key configured the
+app still runs, per the standing rule. The full image is the hero; the
+thumbnail takes the MIDDLE size, because it feeds both the cover stamps
+(64px is under retina density at 2.25rem) and palette extraction (D-016).
+
+**Playback still rides the Genius match.** The YouTube id lives on the
+Genius song object (D-022), so `getTrackPlayback` reads the Genius entry
+always, never the Spotify one — `Artwork` gained `source` and its
+`geniusId` went optional to make that unmistakable in the types. The
+client reuses the whole Genius adjudication kit (`searchQuery`, the
+scoring, MATCH_THRESHOLD, the D-070 retry ladder), scoring against the
+best of Spotify's several credited artists for the same reason
+`creditedArtists` exists: a wrong sleeve from a cleaner catalogue is
+still a wrong sleeve. Cache keys bumped in the same commit as the shape
+change (D-049's lesson): `genius:v3→v4`, `visuals:v4→v5`; the app token
+is memoised per process rather than pushed through the shared cache — an
+hour-lived credential does not belong in a 30-day Redis store.
+
+**The credentials arrived by screenshot, secret visible.** Flagged for
+rotation on the dashboard before use; `.env.example` now says the same
+out loud. Only `SPOTIFY_CLIENT_ID`/`SPOTIFY_CLIENT_SECRET` names enter
+the repo, never values, per the standing security rules.
+
 ### D-110 — The hydration warning that libelled the server
 **Built 2026-08-25.** The owner's dev console: React 19 reporting
 `disabled={true}` client vs `disabled={null}` server on the playback
@@ -3846,7 +3886,7 @@ Open. **To be ruled on explicitly — never assumed.**
 
 
 
-| OD-005 | Genius auth strategy | `/api/track` | Server-held token; rate limits unverified |
+| OD-005 | Genius auth strategy | `/api/track` | Server-held token; rate limits unverified. The "second API key" question part-settled 2026-08-25: Spotify arrived for artwork (D-111), so a YouTube Data API key is now unlikely to ever be worth it |
 | OD-004 | Grounding provider — Tavily wired and verified; alternatives unevaluated | §3.5 | Researcher plan, 1000 searches/mo. Without a key there is no quote at all (D-021) |
 | OD-007 | Deployment target | Deploy | D-009 keeps this cheap to defer |
 | OD-008 | React Compiler (`compiler` add-on) — auto-memoization | Perf | Available but NOT enabled. Interaction with `motion` unverified |

@@ -25,6 +25,7 @@ import {
 	findPlayback,
 } from "./genius.server";
 import { extractPalette } from "./palette.server";
+import { findSpotifyArtwork } from "./spotify.server";
 
 // Select the cache backend before any read-through runs (OD-001).
 initCache();
@@ -44,12 +45,26 @@ const EMPTY_VISUALS: TrackVisuals = {
  * for playback (D-022), so both come from a single cached lookup.
  */
 function getGenius(title: string, artist: string) {
-	// v3: the search half only now. The media lookup moved to its own key so
-	// artwork stops waiting behind it (D-055).
+	// v4: the stored shape gained `source` (D-111). v3: the search half only
+	// now — the media lookup moved to its own key so artwork stops waiting
+	// behind it (D-055).
 	return cached(
-		`genius:v3:${artist.toLowerCase()}::${title.toLowerCase()}`,
+		`genius:v4:${artist.toLowerCase()}::${title.toLowerCase()}`,
 		TTL.track,
 		() => findArtwork(title, artist),
+	);
+}
+
+/**
+ * One Spotify lookup per recording, on the same 30-day, name-keyed terms as
+ * the Genius entry above (D-111). Misses are not stored — `cached` treats
+ * null as absence — which is the behaviour the Genius path already has.
+ */
+function getSpotify(title: string, artist: string) {
+	return cached(
+		`spotify:v1:${artist.toLowerCase()}::${title.toLowerCase()}`,
+		TTL.track,
+		() => findSpotifyArtwork(title, artist),
 	);
 }
 
@@ -76,13 +91,19 @@ export function getTrackVisuals(
 	title: string,
 	artist: string,
 ): Promise<TrackVisuals> {
-	// v4 alongside `genius:v3` — this wraps it, so bumping only the inner key
-	// would leave the stale outer entry serving the old result (D-049). The
-	// shape changed too: `youtubeId` left for `getTrackPlayback` (D-055).
-	const key = `visuals:v4:${artist.toLowerCase()}::${title.toLowerCase()}`;
+	// v5: Spotify leads (D-111) — a source change is a shape change as far as
+	// stored entries are concerned. v4 sat alongside `genius:v3` — this wraps
+	// the inner lookups, so bumping only an inner key would leave the stale
+	// outer entry serving the old result (D-049).
+	const key = `visuals:v5:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
 	return cached(key, TTL.track, async () => {
-		const artwork = await getGenius(title, artist);
+		// Spotify first: its sleeve is the canonical square at known sizes,
+		// where Genius art is routinely a video still or promo crop. Genius
+		// answers only when Spotify cannot, so the degradation ladder is
+		// two rungs deep before the page goes without art (D-111).
+		const artwork =
+			(await getSpotify(title, artist)) ?? (await getGenius(title, artist));
 		if (!artwork) return EMPTY_VISUALS;
 
 		// Extracted from the thumbnail, not the full image: enough pixels for
@@ -109,10 +130,12 @@ export function getTrackPlayback(
 	const key = `playback:v1:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
 	return cached(key, TTL.track, async () => {
-		// Shares the `genius:` entry with the visuals, so the search half is
-		// paid for once even though both operations need it.
+		// Always the GENIUS entry, never the Spotify one (D-111): the YouTube
+		// id lives on the Genius song object, so playback needs the Genius
+		// match even on tracks whose artwork Spotify won. The entry is shared
+		// with the visuals fallback, so the search half is paid for once.
 		const artwork = await getGenius(title, artist);
-		if (!artwork) return { youtubeId: null };
+		if (!artwork?.geniusId) return { youtubeId: null };
 		return { youtubeId: await findPlayback(artwork.geniusId) };
 	});
 }
