@@ -34,7 +34,23 @@ function formatDuration(seconds: number | null): string {
  * Album-art thumbnails are specified but need the Genius API, which is blocked
  * on OD-005. Rows are typographic until that resolves.
  */
-export function SearchField() {
+export function SearchField({
+	hideLabel = false,
+	autoFocus = false,
+}: {
+	/**
+	 * Visually hide the label (D-103). For contexts where a heading directly
+	 * above already says "Search for a song" — the explorer's title does —
+	 * and repeating it as a label is the same words twice on one screen. The
+	 * label element stays: it is the field's accessible name.
+	 */
+	hideLabel?: boolean;
+	/**
+	 * Focus the field on mount (D-103). Only for the page whose single
+	 * feature IS the search — anywhere else, stealing focus is rude.
+	 */
+	autoFocus?: boolean;
+} = {}) {
 	const [term, setTerm] = useState("");
 	const [highlighted, setHighlighted] = useState(0);
 	const navigate = useNavigate();
@@ -104,7 +120,11 @@ export function SearchField() {
 			*/}
 			<label
 				htmlFor={inputId}
-				className="mb-2 block text-micro uppercase tracking-label text-ink-faint"
+				className={
+					hideLabel
+						? "sr-only"
+						: "mb-2 block text-micro uppercase tracking-label text-ink-faint"
+				}
 			>
 				Search for a song
 			</label>
@@ -133,6 +153,8 @@ export function SearchField() {
 					results.length > 0 ? optionId(highlighted) : undefined
 				}
 				autoComplete="off"
+				// biome-ignore lint/a11y/noAutofocus: opt-in, only on the search-only page (D-103)
+				autoFocus={autoFocus}
 				className="search__input px-5 py-4 text-lead"
 			/>
 

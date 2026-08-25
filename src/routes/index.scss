@@ -287,6 +287,22 @@
 		}
 	}
 
+	// The feature's card (D-103): the search on its own surface, the input
+	// stepped one level down so the control still reads against the card —
+	// the same nesting direction every surface takes on this bright ground.
+	&__card {
+		width: 100%;
+
+		.search__input {
+			background: var(--color-surface-raised);
+		}
+
+		.explore__offer {
+			display: inline-block;
+			margin-top: 1rem;
+		}
+	}
+
 	&__resume {
 		width: 100%;
 		margin-top: 0.75rem;

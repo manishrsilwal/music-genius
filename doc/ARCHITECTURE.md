@@ -134,6 +134,24 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-103 — The explorer titles itself by its feature
+**Built 2026-08-25.** Owner's direction for the skip-all view: the search is
+the page's main feature and should carry it. Three moves, one identity kept:
+
+The title becomes "Search for a **song**" — the statement returns with the
+shelves — in the same mixed-face collision as "Read the words *properly*":
+the identity is the treatment, not the words. With the title naming the
+feature, the field's visible label above the input was the same words twice
+on one screen; `hideLabel` folds it to `sr-only` (the label element stays —
+it is the accessible name, D-060's contract intact). The search and the
+picks-offer link share one surface card — the page's one feature on the
+page's one surface — with the input stepped down to `--color-surface-raised`
+so the control reads against the card (the standing nesting direction). And
+`autoFocus`, opt-in on the component and used only here: on the page whose
+single feature IS the search, focus belongs in the field on arrival;
+anywhere else stealing focus is rude, which is why it is a prop and not a
+default.
+
 ### D-102 — Continue reading anchors on covers too; the explorer's gaps compensate
 **Built 2026-08-25.** Two owner asks on the skip-all view. Continue-reading
 rows carry the same 2.25rem cover stamp the also shelf got in D-101 —

@@ -121,8 +121,23 @@ function Discovery() {
 			*/}
 			<div className="landing__head">
 				<motion.h1 variants={riseVariants} className="landing__title text-ink">
-					<span className="landing__title-plain">Read the words</span>{" "}
-					<em className="landing__title-fancy">properly</em>
+					{/*
+					  The explorer titles itself by its one feature (D-103) —
+					  and the statement returns with the shelves. Same mixed-face
+					  collision either way; the identity is the treatment, not
+					  the words.
+					*/}
+					{unpersonalised ? (
+						<>
+							<span className="landing__title-plain">Search for a</span>{" "}
+							<em className="landing__title-fancy">song</em>
+						</>
+					) : (
+						<>
+							<span className="landing__title-plain">Read the words</span>{" "}
+							<em className="landing__title-fancy">properly</em>
+						</>
+					)}
 				</motion.h1>
 
 				{/*
@@ -163,20 +178,25 @@ function Discovery() {
 						animate={{ opacity: 1, y: 0 }}
 						transition={transition.editorial}
 					>
-						<SearchField />
-
 						{/*
-						  The one way back to personalisation. Quiet, because the
-						  page is otherwise empty and nothing competes with it —
-						  the opposite of the buried Start over D-091 fixed.
+						  The page's one feature gets the page's one surface
+						  (D-103): the search on a card, its label folded into the
+						  title above, focus already in the field. The offer link
+						  rides inside the card as the quiet second line — the way
+						  back to personalisation, unburied because nothing here
+						  competes with it.
 						*/}
-						<button
-							type="button"
-							onClick={reset}
-							className="explore__offer text-caption"
-						>
-							Rather have picks chosen for you? Answer three questions
-						</button>
+						<div className="bento__tile explore__card">
+							<SearchField hideLabel autoFocus />
+
+							<button
+								type="button"
+								onClick={reset}
+								className="explore__offer text-caption"
+							>
+								Rather have picks chosen for you? Answer three questions
+							</button>
+						</div>
 
 						{/* Their own trail, not personalisation — kept when it
 						    exists, absent on the clean first visit. */}
