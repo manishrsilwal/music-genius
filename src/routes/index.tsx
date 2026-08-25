@@ -121,56 +121,19 @@ function Discovery() {
 						transition={transition.editorial}
 					>
 						{/*
-						  The shelves are tiles now (D-088): each block carries its
-						  own surface, and the card edge does the separating that
-						  hairline rules used to. The reading order is unchanged —
-						  continue first (D-056), the two ways in, then the shelves.
+						  The result leads (D-089). With preferences answered this page
+						  IS a results page, and the first cut of the bento opened on
+						  the ways to ask again — the reader's picks sat entirely below
+						  the fold, so the answered state looked identical to having
+						  asked nothing. Deep Dives now takes the first row with the
+						  mood chips beside it — the answer next to the question that
+						  produced it — then the resume strip, then search.
 
-						  Gated on entries because ContinueReading returns null for
-						  an empty history — and an empty tile would render as a
-						  blank card, which reads as something failing to load.
+						  The resume tile is gated on entries because ContinueReading
+						  returns null for an empty history — and an empty tile would
+						  render as a blank card, which reads as something failing to
+						  load.
 						*/}
-						{entries.length > 0 && (
-							<section className="bento__tile bento__tile--resume">
-								<ContinueReading
-									entries={entries}
-									onRemove={remove}
-									onClear={clear}
-								/>
-							</section>
-						)}
-
-						{/*
-						  The two ways in are two adjacent tiles now (D-059's offer,
-						  D-088's geometry): the search's lead still names both
-						  routes at the moment of the choice, and the mood tile sits
-						  beside it rather than below a ruled "or" — the fork is
-						  spatial, not typographic.
-						*/}
-						<section className="bento__tile bento__tile--search">
-							<SectionHeading lead="Two ways in — look up a song you already love, or tell us how you want to feel and we will choose.">
-								Start reading
-							</SectionHeading>
-
-							<SearchField />
-						</section>
-
-						<section className="bento__tile bento__tile--mood">
-							<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
-								Start from a mood
-							</h2>
-							{/* The search tile's lead already makes the offer; what is
-							    left is the part the lead does not say. */}
-							<p className="mb-3 text-caption text-ink-faint">
-								Change any answer without starting over.
-							</p>
-							<TasteChips
-								preferences={preferences}
-								onChange={save}
-								onStartOver={reset}
-							/>
-						</section>
-
 						<section className="bento__tile bento__tile--dives">
 							{/*
 							  The lead says what the shelf is, which the label alone
@@ -195,7 +158,43 @@ function Discovery() {
 
 							<DeepDives picks={dives} preferences={preferences} />
 						</section>
+						<section className="bento__tile bento__tile--mood">
+							<h2 className="mb-1 text-micro font-semibold uppercase tracking-label text-ink">
+								Start from a mood
+							</h2>
+							{/* The search tile's lead already makes the offer; what is
+							    left is the part the lead does not say. */}
+							<p className="mb-3 text-caption text-ink-faint">
+								Change any answer without starting over.
+							</p>
+							<TasteChips
+								preferences={preferences}
+								onChange={save}
+								onStartOver={reset}
+							/>
+						</section>
+						{entries.length > 0 && (
+							<section className="bento__tile bento__tile--resume">
+								<ContinueReading
+									entries={entries}
+									onRemove={remove}
+									onClear={clear}
+								/>
+							</section>
+						)}
+						{/*
+						  The second way in (D-059's offer, reordered by D-089): the
+						  mood route now sits up top as the result's own controls, so
+						  this tile no longer announces a fork — it is the lookup, for
+						  the reader who arrived with a song already in mind.
+						*/}
+						<section className="bento__tile bento__tile--search">
+							<SectionHeading lead="Already have a song in mind? Look it up and start reading.">
+								Search
+							</SectionHeading>
 
+							<SearchField />
+						</section>
 						<section className="bento__tile bento__tile--also">
 							<SectionHeading lead="More from the same catalogue, ranked further down your answers.">
 								People also like

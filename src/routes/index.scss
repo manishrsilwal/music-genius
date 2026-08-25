@@ -111,13 +111,8 @@
 		}
 	}
 
-	// The fork is spatial now: search beside mood, no ruled "or" between.
-	@include m.from("md") {
-		&__tile--search,
-		&__tile--mood {
-			grid-column: span 1;
-		}
-	}
+	// D-089 reordered the rows: the fork's md pairing went with it — mood
+	// rides beside the result now, and every tile takes the full md width.
 
 	@include m.from("lg") {
 		&__tile--resume {

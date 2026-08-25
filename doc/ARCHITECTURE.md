@@ -134,6 +134,24 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-089 — The result leads the bento
+**Built 2026-08-25.** The owner's read, and a real UX finding: with
+preferences answered, the landing IS a results page — but D-088's first cut
+opened on the ways to ask again (resume, search, mood), and the reader's
+picks sat entirely below the fold. The answered state looked identical to
+having asked nothing.
+
+The rows reorder: **Deep Dives takes the first row with the mood chips
+beside it** — the answer next to the question that produced it, which is
+what makes "matched to your answers" checkable at a glance — then the
+resume strip, then search, now paired with the also-liked column. The
+search tile stops announcing a fork it no longer sits in: the mood route
+lives up top as the result's own controls, so its copy becomes the lookup
+("Already have a song in mind?"). D-056's continue-first ordering yields
+one row to the result; the strip is compact and still above every other
+way in. Verified at 1440×900 and 390×844: all three picks render above
+the fold on both.
+
 ### D-088 — The landing is a bento
 **Built 2026-08-25.** Owner's direction, via the ui-ux database (verified
 match: `bento-box-grid` — modular cards, varied spans, 4→2→1 responsive,
