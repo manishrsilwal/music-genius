@@ -134,6 +134,15 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-100 — A well under the second shelf
+**Built 2026-08-25.** Owner's ask: a subtle background for "People also
+like". It gets a nested well — `--color-surface-raised`, one step DOWN from
+the tile, the same direction every nested surface takes on this bright
+ground (the search input took it in D-088; the tokens' own comment: "on a
+bright ground the only direction with room left is down"). The surface is
+the boundary between the two shelves; no rule, `--radius-nested` for the
+inner corner.
+
 ### D-099 — The filter is a bar
 **Built 2026-08-25.** The owner's mock, one step further than D-098: from
 `lg` the strip becomes a single bar — the words on the page's left axis,

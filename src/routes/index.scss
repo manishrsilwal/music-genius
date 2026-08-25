@@ -148,6 +148,16 @@
 		grid-template-columns: 1fr;
 		gap: 2.5rem;
 
+		// A quiet well under the second shelf (D-100): one step DOWN from the
+		// tile, the same direction every nested surface takes on this bright
+		// ground (the search input, D-088). It separates the list from the
+		// cards above without a rule — the surface is the boundary.
+		.bento__also {
+			padding: 1.25rem 1.5rem 1.5rem;
+			border-radius: var(--radius-nested);
+			background: var(--color-surface-raised);
+		}
+
 		@include m.from("lg") {
 			.also {
 				grid-template-columns: repeat(3, minmax(0, 1fr));
