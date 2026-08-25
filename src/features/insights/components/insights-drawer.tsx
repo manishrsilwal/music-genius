@@ -123,30 +123,42 @@ export function InsightsDrawer({
 		};
 	}, [open]);
 
-	/**
-	 * One scroll owner at a time (D-048).
-	 *
-	 * The panel is its own scroll container and the page behind it kept
-	 * scrolling too, so both scrollbars sat against the right edge of the
-	 * viewport — reading as a rendering fault rather than as two regions.
-	 *
-	 * Desktop only. On mobile the sheet covers the bottom half by design and
-	 * the lyrics above it stay scrollable, which PRD §3.5 asks for explicitly.
-	 * `scrollbar-gutter: stable` on the document keeps the gutter reserved, so
-	 * locking does not shift the page sideways underneath the reader.
-	 */
-	useEffect(() => {
-		if (!open || !isDesktop) return;
-		const previous = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
-		return () => {
-			document.body.style.overflow = previous;
-		};
-	}, [open, isDesktop]);
-
 	const motionProps = prefersReducedMotion
 		? { initial: false as const, transition: { duration: 0 } }
 		: {};
+
+	/*
+	 * The panel's own dismissal (D-095). The rail button used to be the only
+	 * close, two columns away from the thing it closed — the owner's report.
+	 * Every surface owns its way out now, the same grammar as the track
+	 * sheet's cross.
+	 */
+	const head = (
+		<div className="drawer-head">
+			<p className="drawer-head__title text-micro">The story</p>
+			<button
+				type="button"
+				className="drawer-head__close"
+				aria-label="Close the story"
+				onClick={onClose}
+			>
+				<svg
+					viewBox="0 0 14 14"
+					width="12"
+					height="12"
+					aria-hidden="true"
+					focusable="false"
+				>
+					<path
+						d="M2.5 2.5 L11.5 11.5 M11.5 2.5 L2.5 11.5"
+						stroke="currentColor"
+						strokeWidth="1.6"
+						strokeLinecap="round"
+					/>
+				</svg>
+			</button>
+		</div>
+	);
 
 	return (
 		<AnimatePresence>
@@ -158,19 +170,19 @@ export function InsightsDrawer({
 						id={PANEL_ID}
 						className="drawer-panel"
 						aria-label="The story behind this song"
-						// Desktop locks the page behind it, so it behaves modally
-						// and must say so. The mobile sheet deliberately leaves
-						// the lyrics scrollable (PRD §3.5) and is therefore NOT
-						// modal — same component, honestly different semantics.
-						role="dialog"
-						aria-modal="true"
+						// A column in the spread (D-095), not a dialog over the
+						// page: the lyrics stay live beside it, so nothing here
+						// is modal any more — the body lock and aria-modal left
+						// with the overlay. The aside's implicit complementary
+						// role is the honest one.
 						tabIndex={-1}
-						initial={{ x: "100%" }}
-						animate={{ x: 0 }}
-						exit={{ x: "100%" }}
+						initial={{ opacity: 0, x: 24 }}
+						animate={{ opacity: 1, x: 0 }}
+						exit={{ opacity: 0, transition: transition.dismiss }}
 						transition={transition.editorial}
 						{...motionProps}
 					>
+						{head}
 						<InsightsContent insight={insight} />
 					</motion.aside>
 				) : (
@@ -217,6 +229,7 @@ export function InsightsDrawer({
 							onPointerDown={(event) => dragControls.start(event)}
 						/>
 						<div className="drawer-sheet__body">
+							{head}
 							<InsightsContent insight={insight} />
 						</div>
 					</motion.aside>

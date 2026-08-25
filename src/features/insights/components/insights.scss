@@ -318,24 +318,74 @@
 }
 
 // ── Desktop: a panel that compresses the canvas ─────────────────────────────
+// The spread column (D-095). The story is a grid column beside the lyrics
+// now, not an overlay over them: it scrolls its own content inside a sticky
+// viewport-height box, the way the rail does. No shadow — it is part of the
+// page's plane, and the hairline is the honest seam between two columns of
+// one spread.
 .drawer-panel {
-	position: fixed;
+	position: sticky;
 	top: 0;
-	right: 0;
-	z-index: var(--layer-overlay);
-	width: var(--drawer-width);
+	grid-column: 3;
+	grid-row: 1 / -1;
 	height: 100dvh;
+	min-width: 0;
 	overflow-y: auto;
+	// Thin, because the page's own scrollbar sits one gutter to the right —
+	// two full-width bars side by side read as a rendering fault (D-048's
+	// complaint, answered with size where it was answered with a body lock).
+	scrollbar-width: thin;
 	// A reading column has one scroll axis. `clip` rather than `hidden` so it
 	// cannot become a scroll container, and so nothing added later can quietly
 	// widen the panel the way the old bleeding gallery did (D-043).
 	overflow-x: clip;
-	padding: 5rem 1.75rem 3rem;
+	padding: 1.25rem 1.75rem 3rem;
 	background: var(--color-surface);
 	border-left: 1px solid var(--color-hairline);
-	// The panel slides over a page that keeps its own background, so the seam
-	// needs more than a hairline to read as a separate plane.
-	box-shadow: var(--shadow-3);
+}
+
+// The story's own head: its name, and its way out (D-095) — the same
+// dismissal grammar as the track sheet, on the surface it dismisses.
+.drawer-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1.25rem;
+
+	&__title {
+		margin: 0;
+		font-family: var(--font-ui);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-label);
+		color: var(--color-ink);
+	}
+
+	&__close {
+		@include m.tap-target;
+		@include m.press;
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 50%;
+		border: 1px solid var(--color-hairline);
+		color: var(--color-ink-muted);
+		transition:
+			color 0.18s var(--ease-editorial),
+			border-color 0.18s var(--ease-editorial);
+
+		&:hover {
+			color: var(--color-ink);
+			border-color: var(--color-ink-faint);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
 }
 
 // The canvas is squeezed rather than covered, so the reader keeps their place.
@@ -349,7 +399,6 @@
 .track-shell {
 	--discover-bottom: calc(var(--dock-inset) + var(--dock-safe));
 
-	transition: padding-right 0.42s var(--ease-editorial);
 
 	// The push-up's middle state (D-084). While the shell is mid-transform it
 	// is the containing block for its own `position: fixed` chrome, so the
@@ -433,21 +482,21 @@
 	}
 
 	&[data-drawer="open"] {
+		// The spread (D-095): a third column opens for the story, and the
+		// lyrics keep their place between rail and story. The old overlay's
+		// padding squeeze and its docked-bar compensation are gone with the
+		// overlay itself — the rail never docks in the split view.
 		@include m.from("lg") {
-			padding-right: var(--drawer-width);
+			grid-template-columns:
+				minmax(21rem, 26rem) minmax(0, 1fr)
+				minmax(22rem, 30rem);
 
-			// The button used to need shifting out from under the panel here;
-			// in the rail (D-084) it is in-flow on the far side of the page,
-			// and the padding squeeze never touches it.
-
-			// The docked bar spans the viewport, so it ends short of the panel
-			// rather than sliding sideways out from under it.
-			.playback[data-docked] {
-				inset-inline: 0 var(--drawer-width);
-				padding-inline: max(
-					1rem,
-					calc((100vw - var(--drawer-width) - var(--dock-measure)) / 2)
-				);
+			// One way out at a time. The page's fixed cross would sit exactly
+			// on the story's own close; while the story is open, closing the
+			// story is the decision in front of the reader.
+			.track-close {
+				opacity: 0;
+				pointer-events: none;
 			}
 		}
 

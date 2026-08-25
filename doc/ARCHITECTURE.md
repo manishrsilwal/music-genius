@@ -134,6 +134,34 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-095 — The story is a spread, and it closes itself
+**Built 2026-08-25.** The owner's report: the button that closed the
+right-hand story panel lived in the LEFT rail — the gesture and its target
+on opposite sides of the screen, and the panel the only surface in the app
+that did not own its dismissal. Offered four shapes; the owner chose the
+magazine spread.
+
+**At `lg` the story is a grid column, not an overlay.** The shell opens a
+third track (`minmax(22rem, 30rem)`) and the lyrics keep their place
+between rail and story — a spread, with the hairline as the honest seam
+between two columns of one page. The panel is sticky and scrolls its own
+content like the rail does; no shadow, because it is part of the page's
+plane now. With the overlay went its modality: the body lock, `role=dialog`
+and `aria-modal` are gone — the lyrics are live beside the story, and the
+aside's implicit complementary role is the honest one. D-048's
+two-scrollbars complaint is answered with `scrollbar-width: thin` where it
+was once answered with the lock.
+
+**Both presentations carry a head: "The story", and a cross** — the same
+dismissal grammar as the track sheet, on the surface it dismisses. The rail
+button remains as the opener (and a secondary toggle). While the story is
+open the page's own fixed cross yields (`opacity: 0`): it sat exactly where
+the story's cross now lives, and two stacked crosses closing different
+things is a misclick machine — closing the story is the decision in front
+of the reader. The overlay's dead rules went with it: the `padding-right`
+squeeze, its transition, and the docked-bar compensation for a dock that
+never happens in the split view.
+
 ### D-094 — The third bite: leadings, trackings and eases tree-shaken
 **Built 2026-08-25.** The owner's screenshot — a rail title with cavernous
 line spacing and a hole above the credit — was not a design mistake, it was
