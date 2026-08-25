@@ -417,15 +417,6 @@
   --text-caption: 0.875rem;
   --text-micro: 0.75rem;
 
-  --leading-hero: 0.92;
-  --leading-display: 1.02;
-  --leading-lyric: 1.62;
-  --leading-prose: 1.7;
-
-  --tracking-hero: -0.03em;
-  --tracking-display: -0.02em;
-  --tracking-label: 0.14em;
-
   /* --- Palette (D-064) -----------------------------------------------------
      OKLCH for perceptually even steps — matters when stanzas fade between
      opacity states and must not shift hue.
@@ -469,12 +460,6 @@
      have to know which ground they are on. The reading ground, where there is
      real room, gives it a real value (D-065). */
   --color-ink-faint: oklch(0.875 0.032 279.8);
-
-  /* --- Motion -------------------------------------------------------------
-     Mirrored in src/lib/motion.ts for JS-driven animation. */
-  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
 
   /* Rounder than before, and a full pill for controls. The reference language
      is soft and friendly; a 2px radius reads as software, a pill reads as a
@@ -543,6 +528,30 @@
    Lime is the primary accent — it is what the eye goes to. Sun is the
    secondary, for warmth, and never does the same job as lime in one view. */
 @theme static {
+  /* --- Type mechanics + motion (D-094) ------------------------------------
+     Leadings, trackings and eases are consumed almost entirely from .scss,
+     which Tailwind does not scan — the THIRD bite of the tree-shake trap
+     (D-064 accents, D-065 hover/well, now these). In plain @theme,
+     `--leading-hero`, `--leading-lyric`, `--tracking-hero` and `--ease-exit`
+     were silently dropped: an undefined var() is invalid at computed-value
+     time, and line-height INHERITS its fallback — so the hero title set at
+     the body's 1.7 prose leading instead of 0.92, measured at exactly
+     68px/40px. The survivors lived only because styles.css itself happened
+     to reference them. Whole groups live here now: luck is not a policy. */
+  --leading-hero: 0.92;
+  --leading-display: 1.02;
+  --leading-lyric: 1.62;
+  --leading-prose: 1.7;
+
+  --tracking-hero: -0.03em;
+  --tracking-display: -0.02em;
+  --tracking-label: 0.14em;
+
+  /* Mirrored in src/lib/motion.ts for JS-driven animation. */
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+
   /* The landing's measure (D-092), named so the masthead can align to the
      column's left edge instead of the viewport's corner. `--container-*`
      also makes `max-w-landing` a real utility, so the page and the mark

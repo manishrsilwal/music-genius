@@ -130,7 +130,7 @@ export function TrackHero({
 					  the measure occupies, so the same arithmetic fits the title
 					  to the narrower beside-column with no new numbers.
 					*/}
-					<div className="hero__measure mt-8">
+					<div className="hero__measure mt-4">
 						<motion.h1
 							variants={riseVariants}
 							transition={transition.cinematic}
@@ -145,9 +145,12 @@ export function TrackHero({
 						</motion.h1>
 					</div>
 
+					{/* mt-4, not mt-8 (D-094): both gaps were sized when the
+					    kicker sat between disc and title; without it they read
+					    as holes, the owner's yellow box. */}
 					<motion.p
 						variants={riseVariants}
-						className="mt-8 text-lead text-ink-muted"
+						className="mt-4 text-lead text-ink-muted"
 					>
 						{track.artist}
 						{/* Already null when it only repeats the artist or the title —

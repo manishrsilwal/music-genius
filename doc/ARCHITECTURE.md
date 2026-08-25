@@ -134,6 +134,33 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-094 — The third bite: leadings, trackings and eases tree-shaken
+**Built 2026-08-25.** The owner's screenshot — a rail title with cavernous
+line spacing and a hole above the credit — was not a design mistake, it was
+a build one. Measured: font 40px, line-height **68px = exactly 1.7×**, when
+the rule says `var(--leading-hero)` = 0.92. The leading, tracking and ease
+tokens lived in plain `@theme` and are consumed almost entirely from .scss,
+which Tailwind does not scan: `--leading-hero`, `--leading-lyric`,
+`--tracking-hero` and `--ease-exit` were silently dropped from the build. An
+undefined var() is invalid at computed-value time and line-height INHERITS
+its fallback — so the title took the body's 1.7 prose leading. This is the
+THIRD bite of the same trap (D-064 accents, D-065 hover/well tokens).
+
+Fixed structurally, not per token: a **broken-var sweep** over the built CSS
+(every `var(--x)` reference minus every `--x:` definition) found the full
+casualty list, and whole groups moved to `@theme static` — including the
+members that still survived, because they survived only by styles.css itself
+happening to reference them, and luck is not a policy. The sweep now reports
+only `--progress` and `--title-em`, which are set at runtime by design. Side
+effects of the restoration: hero titles regain their -0.03em tracking (the
+phone hero fits "Wish You Were Here" on one line again), the canvas regains
+its 1.62 lyric leading, and the intro's lift animation gets its exit ease
+back.
+
+The owner's yellow box was real too: both `mt-8` gaps around the title were
+sized when the kicker sat between disc and title (D-083 removed it); they
+are `mt-4` now. Rail title block measured 204px→110px, gaps 32px→16px.
+
 ### D-093 — Skip-all taken at its word
 **Built 2026-08-25.** "Skip all — just let me search" stores answered=true
 with every axis null, and the page used to respond with shelves "tuned to
