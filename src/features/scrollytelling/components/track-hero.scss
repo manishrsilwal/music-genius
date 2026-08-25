@@ -90,11 +90,17 @@
 
 		// In the desktop rail (D-079) the lockup stacks again — the rail is
 		// one narrow column, so "beside" has no room to mean anything. Art on
-		// top, words under it, everything on the rail's left axis.
+		// top, words under it, the words on the rail's left axis.
 		@include m.from("lg") {
 			grid-template-columns: 1fr;
 			align-items: start;
 			gap: 1.5rem;
+			// The disc back on the centreline (D-083). Left-set it read as a
+			// list item above the title; centred it is the reference's
+			// composition — art centred, words left — and the axis the
+			// spinning record already implies. The text block is full-width,
+			// so centring items moves only the disc.
+			justify-items: center;
 		}
 	}
 

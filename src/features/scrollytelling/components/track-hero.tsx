@@ -107,13 +107,14 @@ export function TrackHero({
 				</Await>
 
 				<div className="hero__text">
-					<motion.p
-						variants={riseVariants}
-						className="text-micro uppercase tracking-label text-ink-faint"
-					>
-						{track.synced ? "Time-synced" : "Lyrics"}
-					</motion.p>
-
+					{/*
+					  No kicker (D-083). "Time-synced" earned its slot when
+					  nothing else on the page said whether timings existed;
+					  the Sync button now renders exactly when they do, and
+					  "No timings" speaks when they don't. A label restating
+					  what a control already shows is the record redundancy
+					  again, one line smaller.
+					*/}
 					{/*
 					  The measure the title is fitted against. A container rather
 					  than the heading itself: an element cannot query its own

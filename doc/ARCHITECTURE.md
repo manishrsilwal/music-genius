@@ -134,6 +134,19 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-083 — Disc on the centreline, kicker retired
+**Built 2026-08-25.** Two owner calls on D-082's player screen. The rail's
+disc moves to the centreline — left-set it read as a list item above the
+title; centred over left-set words is the reference's own composition, and
+the axis a spinning record already implies. Only the `lg` lockup changes:
+`justify-items: center`, and the full-width text block keeps the words left.
+
+And the "Time-synced" kicker is gone. It earned its slot when nothing else on
+the page said whether timings existed; the Sync button now renders exactly
+when they do (D-080), and the "No timings" notice speaks when they don't. A
+label restating what a control already shows is the record redundancy again,
+one line smaller. Its alternate reading, "Lyrics", said even less.
+
 ### D-082 — The player screen's grammar
 **Built 2026-08-25.** The owner brought a reference (a dark neon mobile
 player) with the note that the design was "all over the place", and asked for
