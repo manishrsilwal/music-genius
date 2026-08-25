@@ -39,6 +39,20 @@ export const Route = createFileRoute("/")({
 function Discovery() {
 	const { today } = Route.useLoaderData();
 	const { preferences, answered, save, reset } = usePreferences();
+
+	/*
+	 * "Skip all — just let me search" taken at its word (D-093). The skip
+	 * stores answered=true with every axis null, and the page used to respond
+	 * with shelves "tuned to your answers" the reader never gave — the one
+	 * thing they had just declined. All-null is its own state now: the page
+	 * is the search. A reader who answered SOME questions keeps the shelves;
+	 * partial answers are still answers.
+	 */
+	const unpersonalised =
+		answered === true &&
+		!preferences.mood &&
+		!preferences.pull &&
+		!preferences.familiarity;
 	const { entries, remove, clear } = useHistory();
 	const { rotation, shuffle } = useRotation();
 
@@ -102,7 +116,7 @@ function Discovery() {
 				  a first visitor is mid-stepper and the field would compete with
 				  the questions.
 				*/}
-				{answered === true && (
+				{answered === true && !unpersonalised && (
 					<motion.div variants={riseVariants} className="landing__find">
 						<SearchField />
 					</motion.div>
@@ -125,6 +139,41 @@ function Discovery() {
 						transition={transition.editorial}
 					>
 						<PreferenceStepper onComplete={save} />
+					</motion.div>
+				) : unpersonalised ? (
+					<motion.div
+						key="explore"
+						className="explore mt-10"
+						initial={{ opacity: 0, y: 12 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={transition.editorial}
+					>
+						<SearchField />
+
+						{/*
+						  The one way back to personalisation. Quiet, because the
+						  page is otherwise empty and nothing competes with it —
+						  the opposite of the buried Start over D-091 fixed.
+						*/}
+						<button
+							type="button"
+							onClick={reset}
+							className="explore__offer text-caption"
+						>
+							Rather have picks chosen for you? Answer three questions
+						</button>
+
+						{/* Their own trail, not personalisation — kept when it
+						    exists, absent on the clean first visit. */}
+						{entries.length > 0 && (
+							<section className="bento__tile explore__resume">
+								<ContinueReading
+									entries={entries}
+									onRemove={remove}
+									onClear={clear}
+								/>
+							</section>
+						)}
 					</motion.div>
 				) : (
 					<motion.div

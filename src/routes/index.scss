@@ -166,3 +166,41 @@
 		}
 	}
 }
+
+// The explorer (D-093). Skip-all is a stated preference — no shelves, no
+// chips, the page IS the search. One column on the title's axis, at the
+// measure the old entry section used.
+.explore {
+	display: grid;
+	gap: 1.75rem;
+	justify-items: start;
+	max-width: 42rem;
+
+	&__offer {
+		font-family: var(--font-ui);
+		color: var(--color-ink-faint);
+		text-decoration: underline;
+		text-underline-offset: 0.3em;
+		text-decoration-thickness: 1px;
+		transition: color 0.18s var(--ease-editorial);
+		@include m.tap-target;
+
+		&:hover {
+			color: var(--color-ink);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__resume {
+		width: 100%;
+		margin-top: 1.5rem;
+	}
+
+	// The field is the page here: it takes the full measure.
+	.search {
+		width: 100%;
+	}
+}

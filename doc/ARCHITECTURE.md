@@ -134,6 +134,22 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-093 — Skip-all taken at its word
+**Built 2026-08-25.** "Skip all — just let me search" stores answered=true
+with every axis null, and the page used to respond with shelves "tuned to
+your answers" the reader never gave — the one thing they had just declined.
+
+All-null is its own state now, detected as
+`answered && !mood && !pull && !familiarity`: the page is the search. Title,
+one full-measure field on the title's axis, and a single quiet link back to
+personalisation ("Rather have picks chosen for you?" → `reset()`, which
+reopens the stepper). Quiet is safe here where D-091's buried Start over was
+not — the page is otherwise empty and nothing competes with it. The resume
+strip still renders when a history exists: the reader's own trail is not
+personalisation, and the clean first-visit view has no history anyway. A
+reader who answered SOME questions keeps the full shelves — partial answers
+are still answers.
+
 ### D-092 — The mark rides the content's line
 **Built 2026-08-25.** The owner drew a red line down the landing's left
 edge: every heading starts on it, and the masthead hung at the viewport's
