@@ -260,7 +260,12 @@
 // measure the old entry section used.
 .explore {
 	display: grid;
-	gap: 1.75rem;
+	// 1.25rem, not 1.75 (D-102): the search block reserves a hidden hint
+	// line below the input (a layout-shift guard), so every gap under it
+	// READS ~32px bigger than declared. Measured 69px to the link and 52px
+	// to the tile; the declared gap compensates for the reserve instead of
+	// stacking on it.
+	gap: 1.25rem;
 	justify-items: start;
 	max-width: 42rem;
 
@@ -284,7 +289,7 @@
 
 	&__resume {
 		width: 100%;
-		margin-top: 1.5rem;
+		margin-top: 0.75rem;
 	}
 
 	// The field is the page here: it takes the full measure.

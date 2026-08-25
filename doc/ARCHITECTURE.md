@@ -134,6 +134,19 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-102 — Continue reading anchors on covers too; the explorer's gaps compensate
+**Built 2026-08-25.** Two owner asks on the skip-all view. Continue-reading
+rows carry the same 2.25rem cover stamp the also shelf got in D-101 —
+`DiveArt` is exported and reused, so every list in the product anchors its
+rows the same way, on the same caches.
+
+The "spacing issue" had a measured anatomy: the search block reserves a
+hidden hint line under the input (a layout-shift guard), so every gap below
+it READS ~32px larger than declared — 69px to the offer link, 52px to the
+resume tile. The fix compensates rather than removing the guard: the
+explorer's gap drops to 1.25rem and the resume offset to 0.75rem, so the
+perceived rhythm is even while the reserve keeps doing its CLS job.
+
 ### D-101 — The second shelf folds, deepens, and anchors on covers
 **Built 2026-08-25.** Three owner directives in one sitting, all on "People
 also like": make it an accordion, give it its own Load more, and put a

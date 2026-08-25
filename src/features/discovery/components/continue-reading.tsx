@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { SectionHeading } from "@/components/section-heading";
+
+import { DiveArt } from "./deep-dives";
 import type { HistoryEntry } from "@/lib/history";
 import { riseVariants, staggerVariants } from "@/lib/motion";
 import "./continue-reading.scss";
@@ -59,6 +61,11 @@ export function ContinueReading({
 							params={{ trackId: entry.id }}
 							className="recent__link"
 						>
+							{/* The cover anchors the row, the same grammar as the
+							    also shelf (D-101/D-102). */}
+							<span className="recent__art">
+								<DiveArt title={entry.title} artist={entry.artist} />
+							</span>
 							<span className="recent__title text-caption">{entry.title}</span>
 							<span className="recent__artist text-micro">{entry.artist}</span>
 						</Link>

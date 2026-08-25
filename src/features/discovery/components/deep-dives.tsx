@@ -142,7 +142,7 @@ function joinReasons(reasons: string[]): string {
 }
 
 /** Same per-row artwork fetch as the autocomplete, deduped by TanStack Query. */
-function DiveArt({ title, artist }: { title: string; artist: string }) {
+export function DiveArt({ title, artist }: { title: string; artist: string }) {
 	const { data } = useQuery({
 		queryKey: ["artwork", artist.toLowerCase(), title.toLowerCase()],
 		queryFn: async ({ signal }): Promise<TrackVisuals> => {

@@ -31,6 +31,29 @@
 	// Same declared 44px as the `also` shelf (D-067). The link drives the
 	// row's height, so the contract lives here — the remove button beside it
 	// already carries its own `tap-target`.
+	// The row's cover (D-102) — the also shelf's stamp, same size, same
+	// corner, so every list in the product anchors its rows the same way.
+	&__art {
+		flex: none;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 0.5rem;
+		overflow: hidden;
+		background: var(--color-well);
+
+		.dives__art {
+			display: block;
+			width: 100%;
+			height: 100%;
+		}
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
 	&__link {
 		flex: 1;
 		min-width: 0;
