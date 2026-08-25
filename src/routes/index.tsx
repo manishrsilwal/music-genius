@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { SectionHeading } from "@/components/section-heading";
 import { ContinueReading } from "@/features/discovery/components/continue-reading";
 import {
@@ -74,14 +74,29 @@ function Discovery() {
 	// shelf.
 	const seen = useMemo(() => entries.map((entry) => entry.id), [entries]);
 
+	/*
+	 * The second shelf is an accordion with its own pagination (D-101).
+	 * Collapsed by default — it is the secondary shelf, and the owner has
+	 * been stripping this page's weight all day. The count survives both the
+	 * toggle and a shuffle: it is the reader's chosen depth, not the shelf's.
+	 */
+	const [alsoOpen, setAlsoOpen] = useState(false);
+	// Latches on first open: the collapse is CSS, so rows stay mounted, and
+	// the covers should neither fetch for a shelf nobody expanded nor pop
+	// out mid-close-animation (D-101).
+	const [alsoEverOpen, setAlsoEverOpen] = useState(false);
+	const [alsoCount, setAlsoCount] = useState(12);
+
 	const dives = useMemo(
 		() => pickDeepDives(preferences, seed, undefined, seen),
 		[preferences, seed, seen],
 	);
 	const also = useMemo(
-		() => pickAlsoLiked(preferences, seed, dives, undefined, seen),
-		[preferences, seed, dives, seen],
+		() => pickAlsoLiked(preferences, seed, dives, alsoCount, seen),
+		[preferences, seed, dives, alsoCount, seen],
 	);
+	// The pool is finite: fewer back than asked for means it is dry.
+	const alsoExhausted = also.length < alsoCount;
 
 	return (
 		<motion.main
@@ -274,11 +289,66 @@ function Discovery() {
 								  dead zone under them. Full width, the list runs
 								  three columns and the region closes flush.
 								*/}
-								<aside className="bento__also">
-									<SectionHeading lead="More from the same catalogue, ranked further down your answers.">
-										People also like
-									</SectionHeading>
-									<AlsoLiked picks={also} />
+								<aside
+									className="bento__also"
+									data-open={alsoOpen || undefined}
+								>
+									<button
+										type="button"
+										className="bento__also-toggle"
+										aria-expanded={alsoOpen}
+										aria-controls="also-liked"
+										onClick={() => {
+											setAlsoOpen(!alsoOpen);
+											if (!alsoOpen) setAlsoEverOpen(true);
+										}}
+									>
+										<span className="text-micro font-semibold uppercase tracking-label text-ink">
+											People also like
+										</span>
+										{/* The chevron says which way the row will move. */}
+										<svg
+											className="bento__also-chevron"
+											viewBox="0 0 12 12"
+											width="12"
+											height="12"
+											aria-hidden="true"
+											focusable="false"
+										>
+											<path
+												d="M2 4 L6 8 L10 4"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="1.6"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											/>
+										</svg>
+									</button>
+
+									<div id="also-liked" className="bento__also-body">
+										<div className="bento__also-inner">
+											<p className="mb-4 text-caption text-ink-faint">
+												More from the same catalogue, ranked further
+												down your answers.
+											</p>
+											<AlsoLiked picks={also} art={alsoEverOpen} />
+											{/*
+											  Deepens THIS shelf only (D-101) — the count
+											  is separate from the shuffle, which re-deals
+											  at the reader's chosen depth.
+											*/}
+											{!alsoExhausted && (
+												<button
+													type="button"
+													onClick={() => setAlsoCount((c) => c + 12)}
+													className="bento__also-more px-4 py-2 text-micro"
+												>
+													Load more
+												</button>
+											)}
+										</div>
+									</div>
 								</aside>
 							</motion.div>
 						</section>

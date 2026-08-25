@@ -148,14 +148,102 @@
 		grid-template-columns: 1fr;
 		gap: 2.5rem;
 
-		// A quiet well under the second shelf (D-100): one step DOWN from the
-		// tile, the same direction every nested surface takes on this bright
-		// ground (the search input, D-088). It separates the list from the
-		// cards above without a rule — the surface is the boundary.
+		// A quiet well under the second shelf (D-100), and an accordion since
+		// D-101: collapsed, it is one slim bar; open, the list unfolds inside
+		// the same well. One step DOWN from the tile, the direction every
+		// nested surface takes on this bright ground (the search input,
+		// D-088) — the surface is the boundary, no rule.
 		.bento__also {
-			padding: 1.25rem 1.5rem 1.5rem;
 			border-radius: var(--radius-nested);
 			background: var(--color-surface-raised);
+
+			// The open-state rules live HERE, on the aside, not as
+			// `.bento__also[data-open] &` inside the children — nested that
+			// deep, `&` expands the ancestor chain in the wrong order and
+			// the selector can never match (found by probe: aria-expanded
+			// true, rows still 0px).
+			&[data-open] {
+				.bento__also-chevron {
+					transform: rotate(180deg);
+				}
+
+				.bento__also-body {
+					grid-template-rows: 1fr;
+				}
+			}
+		}
+
+		// The whole header row is the control — a strip target, not a word.
+		.bento__also-toggle {
+			@include m.tap-target;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1rem;
+			width: 100%;
+			padding: 1.25rem 1.5rem;
+			text-align: start;
+		}
+
+		.bento__also-chevron {
+			flex: none;
+			color: var(--color-ink-faint);
+			transition: transform 0.32s var(--ease-editorial);
+
+			@include m.reduced-motion {
+				transition: none;
+			}
+		}
+
+		// The 0fr/1fr collapse: height animates without measurement, and the
+		// inner overflow-hidden is what makes the fraction actually clip.
+		.bento__also-body {
+			display: grid;
+			grid-template-rows: 0fr;
+			transition: grid-template-rows 0.42s var(--ease-editorial);
+
+			@include m.reduced-motion {
+				transition: none;
+			}
+		}
+
+		.bento__also-inner {
+			overflow: hidden;
+			min-height: 0;
+			padding-inline: 1.5rem;
+
+			// The padding lives here rather than on the body so the collapsed
+			// state closes to the toggle's own edge with nothing left over.
+			> :last-child {
+				margin-bottom: 1.5rem;
+			}
+		}
+
+		// Deepens the list in place: quiet, hairline, centred under it.
+		.bento__also-more {
+			@include m.tap-target;
+			@include m.press;
+			display: block;
+			margin: 1.25rem auto 0;
+			border-radius: var(--radius-pill);
+			border: 1px solid var(--color-hairline);
+			color: var(--color-ink-muted);
+			font-family: var(--font-ui);
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: var(--tracking-label);
+			transition:
+				color 0.18s var(--ease-editorial),
+				border-color 0.18s var(--ease-editorial);
+
+			&:hover {
+				color: var(--color-ink);
+				border-color: var(--color-ink-faint);
+			}
+
+			@include m.reduced-motion {
+				transition: none;
+			}
 		}
 
 		@include m.from("lg") {

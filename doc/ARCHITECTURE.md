@@ -134,6 +134,33 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-101 — The second shelf folds, deepens, and anchors on covers
+**Built 2026-08-25.** Three owner directives in one sitting, all on "People
+also like": make it an accordion, give it its own Load more, and put a
+small album art on each row "as the divider".
+
+**The accordion** collapses D-100's well to one slim bar — the whole header
+row is the control (`aria-expanded`/`aria-controls`, chevron saying which
+way the row will move), closed by default: it is the secondary shelf on a
+page the owner has spent the day lightening. The collapse is the 0fr→1fr
+grid-rows transition — no measurement, honest easing, `reduced-motion`
+cuts it. One SCSS lesson paid for: the open-state rules were first written
+as `.bento__also[data-open] &` deep inside the nesting, where `&` expands
+the ancestor chain in the wrong order and the selector can never match —
+found by probe (aria-expanded true, rows still 0px), fixed by scoping the
+state rules on the aside itself.
+
+**Load more deepens THIS shelf only**: `alsoCount` state feeds
+`pickAlsoLiked`'s count, +12 a press; the pool is finite so fewer back
+than asked means dry, and the button withdraws. The count is the reader's
+chosen depth — it survives both the toggle and a shuffle.
+
+**Covers anchor the rows.** Each entry starts on a 2.25rem cover (reusing
+DiveArt's cached query), which is what divides it from its neighbours
+without a rule — the owner's read. Gated on first-open: the collapse is
+CSS, rows stay mounted, and a shelf nobody expanded must not fetch a dozen
+covers; the latch also keeps thumbs from popping out mid-close.
+
 ### D-100 — A well under the second shelf
 **Built 2026-08-25.** Owner's ask: a subtle background for "People also
 like". It gets a nested well — `--color-surface-raised`, one step DOWN from

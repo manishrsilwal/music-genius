@@ -175,7 +175,19 @@ function DiveArt({ title, artist }: { title: string; artist: string }) {
  * quieter than the Deep Dives cards: this is a list to browse past, not three
  * things to weigh.
  */
-export function AlsoLiked({ picks }: { picks: CuratedTrack[] }) {
+export function AlsoLiked({
+	picks,
+	art = false,
+}: {
+	picks: CuratedTrack[];
+	/**
+	 * Whether rows carry a small album art (D-101). Off until the shelf has
+	 * actually been opened: the accordion collapses with CSS, so the rows
+	 * stay mounted — without this gate a shelf nobody expanded would still
+	 * fetch a dozen covers.
+	 */
+	art?: boolean;
+}) {
 	return (
 		<motion.div
 			className="also"
@@ -193,6 +205,14 @@ export function AlsoLiked({ picks }: { picks: CuratedTrack[] }) {
 						params={{ trackId: pick.lrclibId }}
 						className="also__row"
 					>
+						{/* The cover anchors the row — each entry starts on an
+						    image, which is what divides it from its neighbours
+						    without a rule (the owner's read). */}
+						{art && (
+							<span className="also__art">
+								<DiveArt title={pick.title} artist={pick.artist} />
+							</span>
+						)}
 						<span className="also__title text-caption">{pick.title}</span>
 						<span className="also__artist text-micro">{pick.artist}</span>
 					</Link>

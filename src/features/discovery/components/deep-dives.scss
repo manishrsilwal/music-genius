@@ -193,9 +193,34 @@
 	// alone got them to 43.99px, which is the kind of answer that depends on
 	// the line-height of whatever face is loaded; `min-height` states the
 	// contract and cannot drift when the type does.
+
+	// The row's cover (D-101): small, square-rounded, the thing that divides
+	// one entry from the next without a rule. Sized as a stamp, not a card.
+	&__art {
+		flex: none;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 0.5rem;
+		overflow: hidden;
+		background: var(--color-well);
+
+		.dives__art {
+			display: block;
+			width: 100%;
+			height: 100%;
+		}
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
 	&__row {
 		display: flex;
-		align-items: baseline;
+		// Center, not baseline, once a cover can sit in the row (D-101).
+		align-items: center;
 		gap: 0.625rem;
 		min-height: 2.75rem;
 		padding: 0.5rem 0.75rem;
