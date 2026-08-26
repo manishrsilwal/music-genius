@@ -25,7 +25,37 @@ export const Route = createFileRoute("/api/og")({
 	server: {
 		handlers: {
 			GET: async ({ request }) => {
-				const trackId = new URL(request.url).searchParams.get("trackId");
+				const params = new URL(request.url).searchParams;
+
+				// The party invitation's card (D-117). A room link is the
+				// feature's whole distribution mechanism, and it previewed as a
+				// bare URL. Same renderer as every other card — deliberately
+				// track-agnostic, so one CDN-cached image serves every invite
+				// and a room id never leaks into a crawler's fetch.
+				if (params.get("card") === "party") {
+					try {
+						const png = await renderCard({
+							lines: ["One queue, one clock —", "everyone reads along."],
+							title: "You're invited to a listen party",
+							artist: "Lyrical Explorer",
+							theme: themeById(null, "dusk"),
+						});
+						return new Response(png as unknown as BodyInit, {
+							headers: {
+								"Content-Type": "image/png",
+								"Cache-Control":
+									"public, max-age=86400, s-maxage=604800, immutable",
+							},
+						});
+					} catch (error) {
+						console.warn("[api/og] party card failed", error);
+						return new Response("Could not render the card", {
+							status: 500,
+						});
+					}
+				}
+
+				const trackId = params.get("trackId");
 				if (!trackId) {
 					return Response.json(
 						{ error: "trackId is required" },

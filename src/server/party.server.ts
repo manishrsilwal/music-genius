@@ -168,14 +168,71 @@ export async function addPartyTrack(
 	return { view: toView(next, now), serverNow: now };
 }
 
+/**
+ * End-of-track, fired by ANY member (D-117). It was the host's duty alone,
+ * which meant the party stalled the moment the host pocketed their phone —
+ * the current song ended and nothing could advance the queue. `advanceFrom`
+ * made advancing idempotent (D-116), and idempotency is what makes
+ * democratising it safe: five members hitting the end within a tick resolve
+ * to one advance and four no-ops. Transport stays the host's; the queue
+ * merely survives the host's absence.
+ *
+ * A no-op skips the write entirely, so a room full of punctual clients does
+ * not turn one song ending into a write storm.
+ */
+export async function advanceParty(
+	roomId: string,
+	memberId: string,
+	from: number,
+): Promise<PartyStateResponse> {
+	const now = Date.now();
+	const room = await requireRoom(roomId);
+	if (!room.members.some((m) => m.id === memberId)) {
+		throw new PartyError("Join the party first", 403);
+	}
+
+	const next = advanceFrom(room, Math.trunc(Number(from)), now);
+	if (next !== room) await writeRoom(next, now);
+	return { view: toView(next, now), serverNow: now };
+}
+
+/* -------------------------------------------------------------------------
+   Rate limiting (D-117)
+
+   The wire is unauthenticated by design — the link is the invitation — which
+   also means anyone can script it. Fixed-window counters per IP in the same
+   cache: approximate under concurrency (two requests can read the same count
+   in the same millisecond), which is the right trade for a limiter whose job
+   is stopping floods, not billing.
+   ---------------------------------------------------------------------- */
+
+const LIMITS = {
+	/** Rooms are cheap to mint and expensive to store; the tightest limit. */
+	create: { limit: 10, windowS: 600 },
+	join: { limit: 30, windowS: 600 },
+	/** Every add costs an upstream playback lookup; bounded accordingly. */
+	add: { limit: 120, windowS: 600 },
+} as const;
+
+export async function assertWithinLimit(
+	scope: keyof typeof LIMITS,
+	ip: string | null,
+): Promise<void> {
+	const { limit, windowS } = LIMITS[scope];
+	const bucket = Math.floor(Date.now() / (windowS * 1000));
+	const key = `party:rl:${scope}:${ip ?? "unknown"}:${bucket}`;
+	const count = (await getCache().get<number>(key)) ?? 0;
+	if (count >= limit) {
+		throw new PartyError("Slow down a moment — too many requests", 429);
+	}
+	await getCache().set(key, count + 1, windowS);
+}
+
 export type PartyOp =
 	| { op: "play" }
 	| { op: "pause" }
 	| { op: "seek"; position: number }
-	| { op: "select"; index: number }
-	// Conditional on `from`, so a repeated end-of-track advance is a no-op
-	// rather than a restart (D-115, the owner's looping-intro report).
-	| { op: "next"; from: number };
+	| { op: "select"; index: number };
 
 /** Transport is the host's (D-115): every control demands the key. */
 export async function controlParty(
@@ -202,9 +259,6 @@ export async function controlParty(
 			break;
 		case "select":
 			next = selectTrack(room, Math.trunc(Number(action.index)), now);
-			break;
-		case "next":
-			next = advanceFrom(room, Math.trunc(Number(action.from)), now);
 			break;
 	}
 	if (!next) throw new PartyError("Nothing at that spot in the queue", 400);

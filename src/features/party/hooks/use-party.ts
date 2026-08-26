@@ -99,9 +99,13 @@ export interface PartyRoomState {
 			| { op: "play" }
 			| { op: "pause" }
 			| { op: "seek"; position: number }
-			| { op: "select"; index: number }
-			| { op: "next"; from: number },
+			| { op: "select"; index: number },
 	) => Promise<void>;
+	/**
+	 * End-of-track, any member's to call (D-117): conditional on `from`
+	 * server-side, so everyone firing it together costs one advance.
+	 */
+	advance: (from: number) => Promise<void>;
 }
 
 export function usePartyRoom(roomId: string): PartyRoomState {
@@ -222,6 +226,20 @@ export function usePartyRoom(roomId: string): PartyRoomState {
 		[roomId, session, absorb],
 	);
 
+	const advance = useCallback(
+		async (from: number) => {
+			if (!session) return;
+			const payload = await post({
+				action: "advance",
+				room: roomId,
+				member: session.memberId,
+				from,
+			});
+			absorb(payload);
+		},
+		[roomId, session, absorb],
+	);
+
 	return {
 		view: state === undefined ? undefined : (state?.view ?? null),
 		gone,
@@ -231,5 +249,6 @@ export function usePartyRoom(roomId: string): PartyRoomState {
 		join,
 		add,
 		control,
+		advance,
 	};
 }

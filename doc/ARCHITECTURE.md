@@ -134,6 +134,51 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-117 — Shipping hardness for the party
+**Built 2026-08-26.** The code half of the ship list (the other half is
+the owner's: OD-007, Upstash provisioning, a real phone).
+
+**The queue survives the host's pocket.** End-of-track was the host's
+duty alone, so the party stalled when the host's tab slept. D-116's
+idempotent `advanceFrom` is what makes democratising it safe: a new
+member-level `advance` action (any member, conditional on `from`)
+means five punctual clients resolve to one advance and four no-ops —
+and a no-op skips the Redis write entirely, so one song ending never
+becomes a write storm. Transport (play/pause/seek/select) remains the
+host's alone. Verified on the wire: a guest advanced the queue; the
+stale repeat changed nothing.
+
+**Rate limits on an unauthenticated wire.** The link being the
+invitation also means anyone can script the API. Fixed-window per-IP
+counters in the same cache — create 10/10min (rooms are cheap to mint,
+expensive to store), join 30, add 120 (each add costs an upstream
+playback lookup); `advance` deliberately unlimited, since the `from`
+guard already makes floods free. Approximate under concurrency, which
+is the right trade for a limiter that stops floods rather than bills.
+Measured: the eleventh create from one address is a 429.
+
+**One tab sounds per member.** The same room in two tabs meant the
+song in unintentional stereo. Tabs talk over a BroadcastChannel: the
+newest claim wins, older tabs stand their player down ("This party is
+playing in another tab" + "Play here instead" to reclaim); membership
+and polling are untouched. Verified by injecting an impostor claim
+into a live member tab: player unmounted, pill withdrawn, reclaim
+restored both.
+
+**The invitation got its clothes.** A room link — the feature's whole
+distribution mechanism — previewed as a bare URL. `/api/og?card=party`
+renders one deliberately track-agnostic invite card through the same
+renderer as every Lyric Card (one CDN-cached image serves every
+invite; no room id ever reaches a crawler), and the room's head
+carries og tags via the D-051 siteUrl pattern while staying noindex:
+dressed for the friend it was sent to, invisible to search.
+
+**The wire got its own tests.** The model was pinned; the server
+operations were not. Fifteen tests now hold the host-key gate, the
+membership gates, the idempotent advance, the no-player refusal and
+the limiter — against the in-memory adapter, which is the store
+contract anything production honours.
+
 ### D-116 — The party learns its manners (four owner reports)
 **Built 2026-08-26.** The first hour of real use, four findings, all
 fixed and the mechanisms named:

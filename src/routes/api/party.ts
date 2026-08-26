@@ -13,6 +13,8 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import {
 	addPartyTrack,
+	advanceParty,
+	assertWithinLimit,
 	controlParty,
 	createParty,
 	joinParty,
@@ -21,6 +23,19 @@ import {
 } from "@/server/party.server";
 
 const NO_STORE = { "Cache-Control": "no-store" };
+
+/**
+ * The caller's address, for the rate limiter (D-117). Proxy headers first —
+ * every plausible deployment target fronts this with one — then null, which
+ * the limiter buckets as one shared "unknown" rather than waving through.
+ */
+function clientIp(request: Request): string | null {
+	return (
+		request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+		request.headers.get("x-real-ip") ||
+		null
+	);
+}
 
 function fail(error: unknown): Response {
 	if (error instanceof PartyError) {
@@ -70,6 +85,7 @@ export const Route = createFileRoute("/api/party")({
 				try {
 					switch (body.action) {
 						case "create": {
+							await assertWithinLimit("create", clientIp(request));
 							const created = await createParty(String(body.name ?? ""));
 							if (!created) {
 								return Response.json(
@@ -80,6 +96,7 @@ export const Route = createFileRoute("/api/party")({
 							return Response.json(created, { headers: NO_STORE });
 						}
 						case "join": {
+							await assertWithinLimit("join", clientIp(request));
 							const state = await joinParty(
 								String(body.room ?? ""),
 								String(body.name ?? ""),
@@ -99,10 +116,22 @@ export const Route = createFileRoute("/api/party")({
 									{ status: 400, headers: NO_STORE },
 								);
 							}
+							await assertWithinLimit("add", clientIp(request));
 							const state = await addPartyTrack(
 								String(body.room ?? ""),
 								String(body.member ?? ""),
 								track,
+							);
+							return Response.json(state, { headers: NO_STORE });
+						}
+						case "advance": {
+							// Unlimited on purpose: it fires from every member's
+							// clock at each track's end, and the server-side
+							// `from` guard already makes repeats free no-ops.
+							const state = await advanceParty(
+								String(body.room ?? ""),
+								String(body.member ?? ""),
+								Number(body.from),
 							);
 							return Response.json(state, { headers: NO_STORE });
 						}

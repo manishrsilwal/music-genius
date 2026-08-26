@@ -49,8 +49,44 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 
 	const current = view ? (view.queue[view.currentIndex] ?? null) : null;
 
+	/*
+	 * One tab plays per member (D-117). The same room open twice in one
+	 * browser meant two players following the same clock — the song in
+	 * unintentional stereo. Tabs talk over a BroadcastChannel: the newest
+	 * claim wins, older tabs stand their player down, and "Play here
+	 * instead" reclaims. Membership and polling are untouched — a superseded
+	 * tab still shows the room; it just does not sound.
+	 */
+	const [superseded, setSuperseded] = useState(false);
+	const tabId = useRef(Math.random().toString(36).slice(2));
+	const channelRef = useRef<BroadcastChannel | null>(null);
+	useEffect(() => {
+		if (!session || typeof BroadcastChannel === "undefined") return;
+		const channel = new BroadcastChannel(`tle:party-tab:${roomId}`);
+		channelRef.current = channel;
+		channel.onmessage = (event) => {
+			const data = event.data as { type?: string; tab?: string };
+			if (data?.type === "claim" && data.tab !== tabId.current) {
+				setSuperseded(true);
+			}
+		};
+		channel.postMessage({ type: "claim", tab: tabId.current });
+		return () => {
+			channelRef.current = null;
+			channel.close();
+		};
+	}, [session, roomId]);
+
+	const takeOver = () => {
+		channelRef.current?.postMessage({ type: "claim", tab: tabId.current });
+		setSuperseded(false);
+	};
+
 	const mountRef = useRef<HTMLDivElement>(null);
-	const player = useYouTubePlayer(current?.videoId ?? null, mountRef);
+	const player = useYouTubePlayer(
+		superseded ? null : (current?.videoId ?? null),
+		mountRef,
+	);
 	const playerRef = useRef(player);
 	playerRef.current = player;
 
@@ -101,7 +137,7 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 	// that CARRIES it, not wait for the next local tick.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: tick and view ARE the schedule
 	useEffect(() => {
-		if (!view || !current) return;
+		if (superseded || !view || !current) return;
 		const p = playerRef.current;
 		if (!p.ready) return;
 
@@ -119,25 +155,24 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 	}, [tick, view]);
 
 	/*
-	 * End of track — the HOST's duty alone, or every member would race to
-	 * advance the queue. The party's recorded duration is the reference;
-	 * three-quarters of a second early beats YouTube's own end screen.
-	 *
-	 * Guarded twice against the repeat-fire the owner heard as a looping
-	 * intro: `advancedFrom` stops this client re-sending while its own
-	 * request is in flight, and the server's `next` op is conditional on
-	 * `from`, so even a repeat that slips through is a no-op, not a restart.
+	 * End of track — EVERY member's duty now (D-117). Host-only advancing
+	 * stalled the party the moment the host pocketed their phone: the song
+	 * ended and nothing could move the queue. Democratising it is safe
+	 * because the server's advance is conditional on `from` (D-116) — five
+	 * punctual clients resolve to one advance and four free no-ops. The
+	 * recorded duration is the reference; three-quarters of a second early
+	 * beats YouTube's own end screen.
 	 */
 	const advancedFrom = useRef(-1);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: tick IS the schedule
 	useEffect(() => {
-		if (!isHost || !view || !current?.duration) return;
+		if (superseded || !view || !current?.duration) return;
 		if (!view.playback.playing) return;
 		if (position < current.duration - 0.75) return;
 		if (advancedFrom.current === view.currentIndex) return;
 
 		advancedFrom.current = view.currentIndex;
-		party.control({ op: "next", from: view.currentIndex }).catch(() => {
+		party.advance(view.currentIndex).catch(() => {
 			// Let the next tick retry rather than strand the queue.
 			advancedFrom.current = -1;
 		});
@@ -314,8 +349,25 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 							</p>
 						</div>
 
-						{/* Visible by requirement (D-036) — every member's own player. */}
+						{/* Visible by requirement (D-036) — every member's own player.
+						    Always in the tree (D-054); a superseded tab's hook gets a
+						    null id, so the box empties and `:empty` hides it. */}
 						<div ref={mountRef} className="party__video" />
+
+						{superseded && (
+							<>
+								<output className="text-micro text-ink-faint">
+									This party is playing in another tab.
+								</output>
+								<button
+									type="button"
+									className="party__share text-micro"
+									onClick={takeOver}
+								>
+									Play here instead
+								</button>
+							</>
+						)}
 
 						{/*
 						  The same Sync pill as the track page (D-085), because it
@@ -323,7 +375,7 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 						  follows the song, flat once the reader scrolls off on
 						  their own — and the way back when they do.
 						*/}
-						{track?.synced && (
+						{!superseded && track?.synced && (
 							<button
 								type="button"
 								onClick={toggleSync}
@@ -339,7 +391,7 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 							</button>
 						)}
 
-						{isHost ? (
+						{superseded ? null : isHost ? (
 							<div className="party__transport">
 								<button
 									type="button"
