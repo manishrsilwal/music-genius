@@ -134,6 +134,38 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-113 — The page never scrolls sideways; the root enforces it
+**Built 2026-08-26.** The owner's phone-width screenshot: a horizontal
+scrollbar on the track page, again — reported once before as D-109.
+Hunted first: overflow sweeps in headless Firefox at the exact width and
+track, at rest and polled at 100ms through the load-and-generate window,
+found NOTHING — `scrollWidth` never left the viewport. The only other
+browser on the machine is Safari, so that is what the screenshot shows,
+and Safari could not be probed (safaridriver needs a settings toggle
+only the owner can flip). An engine-specific overflow, invisible to the
+harness.
+
+The likeliest mechanism is already documented in the codebase's own
+words: while the track sheet is mid-transform, the shell is the
+containing block for its own `position: fixed` chrome (D-084's note), so
+the pill and the dock measure against the article and can overhang it —
+and engines disagree about how much of that window counts as scrollable.
+D-109's `overflow-x: clip` on the shell was scoped to `lg`; phone widths
+were never clipped.
+
+Two fixes, one ruling. The shell's clip now applies at EVERY width. And
+the invariant moves to the root: `html { overflow-x: clip }` — nothing
+in this product legitimately widens the document, wide content scrolls
+inside its own container, and twice now an overhanging descendant has
+handed the reader a sideways scrollbar that only some engines render.
+`clip`, never `hidden`: hidden would make the document itself a
+horizontal scroll container, the very bug it claims to fix (D-109's
+lesson). Verified after: clip computed on both elements at 450px and
+1280px, vertical scrolling alive, the desktop rail still sticky, the
+drawer spread still animating. The honest caveat stands in this entry:
+the fix is structural because the failure could not be reproduced in the
+harness engine — the owner's Safari is the verification that counts.
+
 ### D-112 — The reader picks the player
 **Built 2026-08-26.** The owner wanted the video preview gone now that
 Spotify was in the house — and the constraint map would not allow the

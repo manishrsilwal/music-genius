@@ -631,6 +631,18 @@
        insights panel is open cannot shift the layout sideways (D-048). */
     scrollbar-gutter: stable;
 
+    /* The page never scrolls sideways — an invariant, enforced (D-113).
+       Nothing in this product legitimately widens the document: wide content
+       scrolls inside its own container. Twice now an overhanging descendant
+       has handed the reader a horizontal scrollbar (D-109's drawer rail, then
+       the phone-width sheet in Safari), each visible only in some engines —
+       so the invariant moves to the root. `clip`, never `hidden`: hidden
+       would turn the document into a horizontal scroll container, which is
+       the very bug it would claim to fix (D-109). Vertical scrolling and
+       `position: sticky` are untouched, because clip creates no scroll
+       container. */
+    overflow-x: clip;
+
     /* WCAG 2.2 AA, Focus Not Obscured (D-060).
        This product fixes chrome to BOTH edges — the masthead on top, the
        player dock and the Discover button on the bottom — and a track page is

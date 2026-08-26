@@ -424,6 +424,15 @@
 .track-shell {
 	--discover-bottom: calc(var(--dock-inset) + var(--dock-safe));
 
+	// At EVERY width, not just from `lg` (D-113). The owner's phone-width
+	// horizontal scroll: while the sheet is mid-transform (below), the shell
+	// is the containing block for its own `position: fixed` chrome, so the
+	// pill and the dock measure against the article and can overhang it —
+	// and engines disagree about how much of that window is scrollable
+	// (Safari showed the scrollbar; Firefox never would). A true clip, not
+	// `hidden`: hidden is a scroll container gestures can still scroll in
+	// (D-109's lesson).
+	overflow-x: clip;
 
 	// The push-up's middle state (D-084). While the shell is mid-transform it
 	// is the containing block for its own `position: fixed` chrome, so the
@@ -452,9 +461,8 @@
 	// rail's minmax floor decides who absorbs the squeeze (the canvas does).
 	@include m.from("lg") {
 		display: grid;
-		// The belt for the rail's clip (D-109): no child of the shell may
-		// widen the page sideways, whatever future state overhangs.
-		overflow-x: clip;
+		// The belt for the rail's clip (D-109) now lives on the shell's base
+		// styles above, at every width (D-113).
 		// Three tracks ALWAYS (D-096): the story's track is 0 when closed and
 		// animates to its open width — track-count changes cannot interpolate,
 		// but a length can, and both states are plain lengths on purpose.
