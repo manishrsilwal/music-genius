@@ -93,6 +93,24 @@
 // The seamless search (D-090): the pill alone on the canvas, no card. Wide
 // enough to invite a title, bounded so it reads as a control rather than a
 // second hero.
+// The party's doorway (D-115): a caption at the page's end, not a tile.
+.landing__party {
+	margin-top: 3rem;
+	text-align: center;
+}
+
+.landing__party-link {
+	font-family: var(--font-ui);
+	color: var(--color-ink-faint);
+	transition: color 0.18s var(--ease-editorial);
+
+	&:hover {
+		color: var(--color-ink);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+}
+
 .landing__find {
 	flex: 1 1 18rem;
 	max-width: 26rem;

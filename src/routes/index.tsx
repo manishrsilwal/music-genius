@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { SectionHeading } from "@/components/section-heading";
@@ -481,6 +481,17 @@ function Discovery() {
 					</motion.div>
 				)}
 			</AnimatePresence>
+
+			{/*
+			  The party's doorway (D-115) — one quiet line at the page's end,
+			  deliberately outside the bento so the landing's composition is
+			  untouched. Placement is provisional; the room is the feature.
+			*/}
+			<p className="landing__party text-micro">
+				<Link to="/party" className="landing__party-link">
+					Listen together — start a party with friends
+				</Link>
+			</p>
 		</motion.main>
 	);
 }

@@ -16,8 +16,11 @@ import { Route as ApiArtworkRouteImport } from './routes/api/artwork'
 import { Route as ApiCardRouteImport } from './routes/api/card'
 import { Route as ApiInsightsRouteImport } from './routes/api/insights'
 import { Route as ApiOgRouteImport } from './routes/api/og'
+import { Route as ApiPartyRouteImport } from './routes/api/party'
 import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as ApiTrackRouteImport } from './routes/api/track'
+import { Route as PartyIndexRouteImport } from './routes/party.index'
+import { Route as PartyRoomIdRouteImport } from './routes/party.$roomId'
 import { Route as TrackTrackIdRouteImport } from './routes/track.$trackId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -55,6 +58,11 @@ const ApiOgRoute = ApiOgRouteImport.update({
   path: '/api/og',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPartyRoute = ApiPartyRouteImport.update({
+  id: '/api/party',
+  path: '/api/party',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSearchRoute = ApiSearchRouteImport.update({
   id: '/api/search',
   path: '/api/search',
@@ -63,6 +71,16 @@ const ApiSearchRoute = ApiSearchRouteImport.update({
 const ApiTrackRoute = ApiTrackRouteImport.update({
   id: '/api/track',
   path: '/api/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartyIndexRoute = PartyIndexRouteImport.update({
+  id: '/party/',
+  path: '/party/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartyRoomIdRoute = PartyRoomIdRouteImport.update({
+  id: '/party/$roomId',
+  path: '/party/$roomId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrackTrackIdRoute = TrackTrackIdRouteImport.update({
@@ -79,9 +97,12 @@ export interface FileRoutesByFullPath {
   '/api/card': typeof ApiCardRoute
   '/api/insights': typeof ApiInsightsRoute
   '/api/og': typeof ApiOgRoute
+  '/api/party': typeof ApiPartyRoute
   '/api/search': typeof ApiSearchRoute
   '/api/track': typeof ApiTrackRoute
+  '/party/$roomId': typeof PartyRoomIdRoute
   '/track/$trackId': typeof TrackTrackIdRoute
+  '/party/': typeof PartyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,9 +112,12 @@ export interface FileRoutesByTo {
   '/api/card': typeof ApiCardRoute
   '/api/insights': typeof ApiInsightsRoute
   '/api/og': typeof ApiOgRoute
+  '/api/party': typeof ApiPartyRoute
   '/api/search': typeof ApiSearchRoute
   '/api/track': typeof ApiTrackRoute
+  '/party/$roomId': typeof PartyRoomIdRoute
   '/track/$trackId': typeof TrackTrackIdRoute
+  '/party': typeof PartyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,9 +128,12 @@ export interface FileRoutesById {
   '/api/card': typeof ApiCardRoute
   '/api/insights': typeof ApiInsightsRoute
   '/api/og': typeof ApiOgRoute
+  '/api/party': typeof ApiPartyRoute
   '/api/search': typeof ApiSearchRoute
   '/api/track': typeof ApiTrackRoute
+  '/party/$roomId': typeof PartyRoomIdRoute
   '/track/$trackId': typeof TrackTrackIdRoute
+  '/party/': typeof PartyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,9 +145,12 @@ export interface FileRouteTypes {
     | '/api/card'
     | '/api/insights'
     | '/api/og'
+    | '/api/party'
     | '/api/search'
     | '/api/track'
+    | '/party/$roomId'
     | '/track/$trackId'
+    | '/party/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -130,9 +160,12 @@ export interface FileRouteTypes {
     | '/api/card'
     | '/api/insights'
     | '/api/og'
+    | '/api/party'
     | '/api/search'
     | '/api/track'
+    | '/party/$roomId'
     | '/track/$trackId'
+    | '/party'
   id:
     | '__root__'
     | '/'
@@ -142,9 +175,12 @@ export interface FileRouteTypes {
     | '/api/card'
     | '/api/insights'
     | '/api/og'
+    | '/api/party'
     | '/api/search'
     | '/api/track'
+    | '/party/$roomId'
     | '/track/$trackId'
+    | '/party/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -155,9 +191,12 @@ export interface RootRouteChildren {
   ApiCardRoute: typeof ApiCardRoute
   ApiInsightsRoute: typeof ApiInsightsRoute
   ApiOgRoute: typeof ApiOgRoute
+  ApiPartyRoute: typeof ApiPartyRoute
   ApiSearchRoute: typeof ApiSearchRoute
   ApiTrackRoute: typeof ApiTrackRoute
+  PartyRoomIdRoute: typeof PartyRoomIdRoute
   TrackTrackIdRoute: typeof TrackTrackIdRoute
+  PartyIndexRoute: typeof PartyIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -211,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/party': {
+      id: '/api/party'
+      path: '/api/party'
+      fullPath: '/api/party'
+      preLoaderRoute: typeof ApiPartyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/search': {
       id: '/api/search'
       path: '/api/search'
@@ -223,6 +269,20 @@ declare module '@tanstack/react-router' {
       path: '/api/track'
       fullPath: '/api/track'
       preLoaderRoute: typeof ApiTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/party/': {
+      id: '/party/'
+      path: '/party'
+      fullPath: '/party/'
+      preLoaderRoute: typeof PartyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/party/$roomId': {
+      id: '/party/$roomId'
+      path: '/party/$roomId'
+      fullPath: '/party/$roomId'
+      preLoaderRoute: typeof PartyRoomIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/track/$trackId': {
@@ -243,9 +303,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCardRoute: ApiCardRoute,
   ApiInsightsRoute: ApiInsightsRoute,
   ApiOgRoute: ApiOgRoute,
+  ApiPartyRoute: ApiPartyRoute,
   ApiSearchRoute: ApiSearchRoute,
   ApiTrackRoute: ApiTrackRoute,
+  PartyRoomIdRoute: PartyRoomIdRoute,
   TrackTrackIdRoute: TrackTrackIdRoute,
+  PartyIndexRoute: PartyIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

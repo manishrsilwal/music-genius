@@ -134,6 +134,60 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-115 — The listen party: one queue, one clock, no accounts
+**Built 2026-08-26.** The owner asked for listening together — rooms,
+a shared playlist, friends. Ruled before building: a party is
+synchronised STATE, never streamed audio (each member's browser plays
+its own visible player); no login on either side of the invitation; a
+room-based interface at `/party/$roomId`; and the owner accepted the
+recommended package — polling MVP, host-driven transport with guests
+building the queue, YouTube as the party's one player (signed-out
+Spotify guests would desync at the 30-second preview wall, and mixed
+sources mean the mixed cuts D-075 exists to catch), rooms that die
+after a day of quiet.
+
+**The clock math carries the sync, not the network.** The room records
+a claim — "position P as of server-time T" — and every client computes
+where the song is now, correcting its player only past a 3-second
+tolerance so following never reads as twitching. That is why a
+2-second poll is enough: the poll carries changes of mind, not ticks.
+The model is pure (`src/lib/party.ts`, pinned by tests): first queued
+track starts the party unasked, pause freezes the claim where it
+stands, ends stop rather than loop, the view never leaks the host key.
+The poll doubles as the heartbeat — members leave by absence
+(25s stale) — and identity is a localStorage member id, hosting a
+secret key returned once at creation. Everyone, host included, RUNS
+THE SAME FOLLOWER; the host's buttons just write to the room, which
+keeps one behaviour to reason about. End-of-track is the host's duty
+alone, or every member would race to advance the queue.
+
+**Reuse over invention.** The queue is built with the existing
+`SearchField` (it gained `onSelect`), recordings resolve through the
+existing `getTrackPlayback` at add time — a song with no player is
+refused with a sentence, never queued as a dead spot — and the lyrics
+are the existing `LyricCanvas` fed the party clock through the same
+`LinePosition` contract as the track page: the party reads together as
+it listens together. Rooms live in the SAME cache as the lyrics
+(Upstash in production; the memory fallback ends every party on
+restart — said in `.env.example`). Read-modify-write with no lock is
+the accepted MVP concurrency story, written on the server module.
+
+**Traps met while building:** flat-route naming made `party.tsx` the
+LAYOUT of `party.$roomId.tsx`, so every room URL rendered the create
+screen (fix: `party.index.tsx`); the long-lived dev server had to be
+restarted to absorb the rename; and adds sit ~4s on the playback
+lookup, so the wait says its name ("Adding …") instead of reading as a
+swallowed click. Verified live across two engines — Dia hosted through
+the real UI (create, search, queue two tracks), Firefox joined as a
+guest: both members on both screens, the same advancing clock
+(2:03→2:11 with wall time), and a host pause freezing the guest at
+2:26 across probes seven seconds apart. What headless cannot verify:
+guest audio needs a real tap ("Catch up with the party" is that
+gesture); script clicks carry no user activation. The landing doorway
+is one quiet line at the page's end — placement provisional, the room
+is the feature. Phase 2 candidates, not built: push transport (blocks
+on OD-007), host handoff, reactions, queue reordering.
+
 ### D-114 — The preview confesses through its clock
 **Built 2026-08-26.** The owner's report from a signed-out browser: the
 30-second experience arrived with no explanation and no way to know the

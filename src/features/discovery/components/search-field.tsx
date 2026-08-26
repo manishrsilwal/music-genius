@@ -37,6 +37,7 @@ function formatDuration(seconds: number | null): string {
 export function SearchField({
 	hideLabel = false,
 	autoFocus = false,
+	onSelect,
 }: {
 	/**
 	 * Visually hide the label (D-103). For contexts where a heading directly
@@ -50,6 +51,12 @@ export function SearchField({
 	 * feature IS the search — anywhere else, stealing focus is rude.
 	 */
 	autoFocus?: boolean;
+	/**
+	 * Claim the selection instead of navigating (D-115). The listen party
+	 * queues the chosen track in place; everywhere else, choosing a song IS
+	 * going to it, so navigation stays the default.
+	 */
+	onSelect?: (track: TrackSummary) => void;
 } = {}) {
 	const [term, setTerm] = useState("");
 	const [highlighted, setHighlighted] = useState(0);
@@ -80,6 +87,13 @@ export function SearchField({
 	const isOpen = (enabled && results.length > 0) || empty;
 
 	const open = (track: TrackSummary) => {
+		if (onSelect) {
+			// The field resets so the next add starts clean — the party's
+			// queue is built in bursts, not one navigation at a time.
+			setTerm("");
+			onSelect(track);
+			return;
+		}
 		navigate({ to: "/track/$trackId", params: { trackId: track.id } });
 	};
 
