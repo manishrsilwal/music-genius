@@ -238,6 +238,23 @@ export function advance(room: PartyRoom, now: number): PartyRoom {
 	return selectTrack(room, next, now) ?? room;
 }
 
+/**
+ * Advance only if the room still stands where the caller thought (D-115,
+ * amended). The host's end-of-track fires from a timer while its own request
+ * is in flight, so the same advance arrives more than once — un-guarded,
+ * each repeat re-selected the next track and reset its clock to zero, which
+ * the owner heard as the first seconds looping. A stale `from` makes the
+ * repeat a no-op instead of a restart.
+ */
+export function advanceFrom(
+	room: PartyRoom,
+	from: number,
+	now: number,
+): PartyRoom {
+	if (room.currentIndex !== from) return room;
+	return advance(room, now);
+}
+
 /** The room as members see it: pruned of ghosts, stripped of the secret. */
 export function toView(room: PartyRoom, now: number): PartyView {
 	const { hostKey: _hostKey, ...view } = room;

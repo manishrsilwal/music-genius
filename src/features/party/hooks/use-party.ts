@@ -99,7 +99,8 @@ export interface PartyRoomState {
 			| { op: "play" }
 			| { op: "pause" }
 			| { op: "seek"; position: number }
-			| { op: "select"; index: number },
+			| { op: "select"; index: number }
+			| { op: "next"; from: number },
 	) => Promise<void>;
 }
 
@@ -123,15 +124,21 @@ export function usePartyRoom(roomId: string): PartyRoomState {
 		setGone(null);
 	}, []);
 
-	// The poll — also the heartbeat, so it runs only once the tab is visible.
-	// A backgrounded phone stops polling, goes stale on the member list, and
-	// rejoins the moment the tab returns; that is the presence model.
+	/*
+	 * The poll — also the heartbeat. It runs in HIDDEN tabs too (D-115,
+	 * amended on the owner's report): a backgrounded tab keeps playing audio,
+	 * so it must keep receiving the room — the first cut skipped hidden tabs
+	 * and a host's "pause for everyone" waited until each guest looked at the
+	 * screen. Presence is unchanged: a member with audio running IS at the
+	 * party. Browsers throttle background timers, so a long-hidden tab may
+	 * react late; the visibilitychange poll below catches it up the moment it
+	 * returns.
+	 */
 	useEffect(() => {
 		if (session === undefined) return;
 		let cancelled = false;
 
 		const poll = async () => {
-			if (document.hidden) return;
 			try {
 				const member = session
 					? `&member=${encodeURIComponent(session.memberId)}`
@@ -156,9 +163,14 @@ export function usePartyRoom(roomId: string): PartyRoomState {
 
 		poll();
 		const timer = setInterval(poll, POLL_MS);
+		const onVisible = () => {
+			if (!document.hidden) poll();
+		};
+		document.addEventListener("visibilitychange", onVisible);
 		return () => {
 			cancelled = true;
 			clearInterval(timer);
+			document.removeEventListener("visibilitychange", onVisible);
 		};
 	}, [roomId, session, absorb]);
 

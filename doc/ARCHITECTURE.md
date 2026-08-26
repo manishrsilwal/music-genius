@@ -134,6 +134,44 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-116 — The party learns its manners (four owner reports)
+**Built 2026-08-26.** The first hour of real use, four findings, all
+fixed and the mechanisms named:
+
+**The scroll fight.** Scrolling up to reach the queue was yanked back
+to the synced verse — the canvas followed the party clock
+unconditionally. The track page solved this long ago:
+`useManualOverride` (wheel, touch, scroll keys = the reader is
+driving) now guards the party's `syncPosition`, and the SAME Sync pill
+— wave and all, `playback-bar.scss` imported rather than imitated —
+is the way back. Verified live: pill pressed → one wheel event → flat
+and released → click → following again.
+
+**The looping intro.** After a song ended, the next one's first
+seconds looped under the wrong lyrics. Mechanism: the host's
+end-of-track effect fires from a 500ms timer, and repeats while its
+own request is in flight — every un-guarded repeat re-selected the
+next track and reset its clock to zero. Two locks: a client ref stops
+re-sending until the index moves, and a new `next` op is conditional
+on `from` server-side (`advanceFrom`, pinned by test) so even a repeat
+that slips through is a no-op, not a restart. `select` remains for
+deliberate jumps.
+
+**Pause waited for an audience.** The poll skipped hidden tabs — meant
+as presence hygiene, but a hidden tab keeps PLAYING, so the host's
+pause waited until each guest looked at the screen. The poll runs
+hidden now (a member with audio running IS at the party), the follower
+re-runs on every arriving claim rather than only on local ticks, and a
+visibilitychange poll catches a throttled tab up the moment it
+returns. Honest limit: browsers throttle background timers hard after
+minutes; the push transport (OD-007) is the real cure.
+
+**Personality.** The pages now speak the landing's anatomy: the heavy
+geometric plain half with the display serif's wonky italic in lime
+("Listening *together*", "Join the listen *party*"), 0.98 leading per
+D-092's law, uppercase tracked CTAs in the Discover button's voice,
+bento-tile shadows on the cards, hairline member chips.
+
 ### D-115 — The listen party: one queue, one clock, no accounts
 **Built 2026-08-26.** The owner asked for listening together — rooms,
 a shared playlist, friends. Ruled before building: a party is

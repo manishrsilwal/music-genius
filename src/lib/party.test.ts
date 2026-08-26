@@ -4,6 +4,7 @@ import {
 	addMember,
 	addTrack,
 	advance,
+	advanceFrom,
 	cleanName,
 	createRoomState,
 	MEMBER_STALE_MS,
@@ -103,6 +104,18 @@ describe("queue", () => {
 		const done = r && advance(r, NOW + 1000);
 		expect(done?.currentIndex).toBe(0);
 		expect(done?.playback.playing).toBe(false);
+	});
+
+	it("a repeated advance is a no-op, not a restart", () => {
+		// The owner's loop report: the host's end-of-track timer re-fires
+		// while its request is in flight, and every un-guarded repeat reset
+		// the next song's clock to zero.
+		let r = addTrack(room(), track("a"), NOW);
+		r = r && addTrack(r, track("b"), NOW);
+		const once = r && advanceFrom(r, 0, NOW + 1000);
+		expect(once?.currentIndex).toBe(1);
+		const again = once && advanceFrom(once, 0, NOW + 4000);
+		expect(again).toBe(once);
 	});
 });
 

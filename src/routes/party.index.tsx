@@ -75,7 +75,9 @@ function StartParty() {
 			<p className="text-micro uppercase tracking-label text-ink-faint">
 				Listen together
 			</p>
-			<h1 className="mt-3 text-display">Start a listen party</h1>
+			<h1 className="party__title mt-3 text-ink">
+				Start a listen <em className="party__title-fancy">party</em>
+			</h1>
 			<p className="mt-4 max-w-prose text-caption text-ink-muted">
 				One queue, one clock: everyone hears the same song at the same moment,
 				with the lyrics following along on every screen. Share the room link —

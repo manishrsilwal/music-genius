@@ -25,6 +25,30 @@
 		flex-wrap: wrap;
 	}
 
+	// The landing's title anatomy, continued (D-115, amended on the owner's
+	// report): the heavy geometric plain half, the display serif's real
+	// italic with the wonk up, and the tight leading D-092 made law — no
+	// funny bigger line-height here either.
+	&__title {
+		font-size: clamp(2.25rem, 5.5vw, 3.5rem);
+		line-height: 0.98;
+		letter-spacing: -0.035em;
+		text-wrap: balance;
+		font-family: var(--font-ui);
+		font-weight: 700;
+	}
+
+	&__title-fancy {
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-style: italic;
+		font-variation-settings:
+			"SOFT" 60,
+			"WONK" 1,
+			"opsz" 120;
+		color: var(--color-lime);
+	}
+
 	&__share {
 		@include m.tap-target;
 		@include m.press;
@@ -58,16 +82,20 @@
 	&__member {
 		padding: 0.3rem 0.8rem;
 		border-radius: var(--radius-pill);
+		border: 1px solid var(--color-hairline);
 		background: var(--color-surface-raised);
 		color: var(--color-ink-muted);
 		font-family: var(--font-ui);
 	}
 
+	// The bento tile's anatomy (D-090): surface, card radius, the soft
+	// shadow — a party card is a tile from the same set.
 	&__now {
 		margin-top: 2.5rem;
 		padding: 1.5rem;
 		border-radius: var(--radius-card);
 		background: var(--color-surface);
+		box-shadow: var(--shadow-1);
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
@@ -105,6 +133,7 @@
 		flex-wrap: wrap;
 	}
 
+	// The Discover button's voice (D-084): uppercase label in a bright pill.
 	&__cta {
 		@include m.tap-target;
 		@include m.press(0.96);
@@ -115,6 +144,8 @@
 		font-family: var(--font-ui);
 		font-size: var(--text-caption);
 		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-label);
 		white-space: nowrap;
 	}
 

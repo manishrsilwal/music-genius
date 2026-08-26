@@ -1,8 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { SearchField } from "@/features/discovery/components/search-field";
+import { useManualOverride } from "@/features/playback/hooks/use-manual-override";
 import { useYouTubePlayer } from "@/features/playback/hooks/use-youtube-player";
 import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
+// For the Sync pill and its wave — the same control, the same anatomy, as
+// the track page's bar (D-115, amended: continuity over invention).
+import "@/features/playback/components/playback-bar.scss";
 import { linePositionAt } from "@/lib/lrc";
 import { positionAt } from "@/lib/party";
 import type { Track, TrackSummary } from "@/lib/types";
@@ -62,6 +66,28 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 		view && current ? positionAt(view.playback, now(), current.duration) : 0;
 
 	/*
+	 * The reader taking the wheel back (D-115, amended on the owner's
+	 * report): scrolling up to reach the queue was yanked straight back to
+	 * the synced verse, because the canvas followed the party clock
+	 * unconditionally. The same override the track page uses: a wheel, a
+	 * touch or a scroll key means the reader is driving, and the Sync pill —
+	 * the same pill, the same wave — is the way back to following.
+	 */
+	const partyPlaying = Boolean(view?.playback.playing);
+	const [wantSync, setWantSync] = useState(true);
+	const syncing = partyPlaying && wantSync;
+	const { manual, resume } = useManualOverride(syncing);
+	const followOn = syncing && !manual;
+	const toggleSync = () => {
+		if (followOn) {
+			setWantSync(false);
+		} else {
+			setWantSync(true);
+			resume();
+		}
+	};
+
+	/*
 	 * The follower — every member runs it, host included, so there is exactly
 	 * one behaviour to reason about. Play state is matched first; position is
 	 * corrected only past the tolerance, because a player that twitches every
@@ -70,14 +96,17 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 	 * `tick` drives it instead of a deps-of-everything list: following is a
 	 * repeated comparison, not a reaction to any single change.
 	 */
-	// biome-ignore lint/correctness/useExhaustiveDependencies: tick IS the schedule
+	// `view` is a dependency alongside the tick (D-115, amended): a hidden
+	// tab's timers are throttled, so the host's pause must apply on the poll
+	// that CARRIES it, not wait for the next local tick.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: tick and view ARE the schedule
 	useEffect(() => {
 		if (!view || !current) return;
 		const p = playerRef.current;
 		if (!p.ready) return;
 
 		if (view.playback.playing !== p.playing) {
-			// One nudge per tick. If the browser refuses (autoplay policy),
+			// One nudge per pass. If the browser refuses (autoplay policy),
 			// the "Catch up" button below is the reader's gesture.
 			p.toggle();
 		}
@@ -87,25 +116,31 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 		) {
 			p.seek(position);
 		}
-	}, [tick]);
+	}, [tick, view]);
 
 	/*
 	 * End of track — the HOST's duty alone, or every member would race to
 	 * advance the queue. The party's recorded duration is the reference;
 	 * three-quarters of a second early beats YouTube's own end screen.
+	 *
+	 * Guarded twice against the repeat-fire the owner heard as a looping
+	 * intro: `advancedFrom` stops this client re-sending while its own
+	 * request is in flight, and the server's `next` op is conditional on
+	 * `from`, so even a repeat that slips through is a no-op, not a restart.
 	 */
+	const advancedFrom = useRef(-1);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: tick IS the schedule
 	useEffect(() => {
 		if (!isHost || !view || !current?.duration) return;
 		if (!view.playback.playing) return;
 		if (position < current.duration - 0.75) return;
+		if (advancedFrom.current === view.currentIndex) return;
 
-		const nextIndex = view.currentIndex + 1;
-		if (nextIndex < view.queue.length) {
-			party.control({ op: "select", index: nextIndex });
-		} else {
-			party.control({ op: "pause" });
-		}
+		advancedFrom.current = view.currentIndex;
+		party.control({ op: "next", from: view.currentIndex }).catch(() => {
+			// Let the next tick retry rather than strand the queue.
+			advancedFrom.current = -1;
+		});
 	}, [tick]);
 
 	// The words, reading along with the room (D-115). Same canvas, same
@@ -125,10 +160,10 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 		staleTime: Number.POSITIVE_INFINITY,
 	});
 	const track = trackQuery.data ?? null;
+	// The canvas follows only while the reader has not taken the wheel —
+	// null hands the scroll back to them, exactly as on the track page.
 	const syncPosition =
-		track?.synced && view?.playback.playing
-			? linePositionAt(track.stanzas, position)
-			: null;
+		track?.synced && followOn ? linePositionAt(track.stanzas, position) : null;
 
 	const share = async () => {
 		try {
@@ -158,7 +193,7 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 	if (party.gone) {
 		return (
 			<main className="party party--gone">
-				<h1 className="text-display">{party.gone}</h1>
+				<h1 className="party__title text-ink">{party.gone}</h1>
 				<p className="mt-4 text-caption text-ink-muted">
 					Parties end after a day of quiet. Start a new one and share the fresh
 					link.
@@ -186,7 +221,9 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 				<p className="text-micro uppercase tracking-label text-ink-faint">
 					You are invited
 				</p>
-				<h1 className="mt-3 text-display">Join the listen party</h1>
+				<h1 className="party__title mt-3 text-ink">
+					Join the listen <em className="party__title-fancy">party</em>
+				</h1>
 				{view && view.members.length > 0 && (
 					<p className="mt-3 text-caption text-ink-muted">
 						{view.members.map((m) => m.name).join(", ")}{" "}
@@ -237,10 +274,10 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 			<header className="party__head">
 				<div>
 					<p className="text-micro uppercase tracking-label text-ink-faint">
-						Listen party
+						{isHost ? "Your listen party" : "A listen party"}
 					</p>
-					<h1 className="mt-1 text-display">
-						{isHost ? "Your room" : "The room"}
+					<h1 className="party__title mt-2 text-ink">
+						Listening <em className="party__title-fancy">together</em>
 					</h1>
 				</div>
 				<button
@@ -279,6 +316,28 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 
 						{/* Visible by requirement (D-036) — every member's own player. */}
 						<div ref={mountRef} className="party__video" />
+
+						{/*
+						  The same Sync pill as the track page (D-085), because it
+						  is the same promise: pressed and waving while the canvas
+						  follows the song, flat once the reader scrolls off on
+						  their own — and the way back when they do.
+						*/}
+						{track?.synced && (
+							<button
+								type="button"
+								onClick={toggleSync}
+								aria-pressed={followOn}
+								className="playback__sync px-3 py-1.5 text-micro"
+							>
+								<span className="playback__sync-wave" aria-hidden="true">
+									<span />
+									<span />
+									<span />
+								</span>
+								Sync
+							</button>
+						)}
 
 						{isHost ? (
 							<div className="party__transport">

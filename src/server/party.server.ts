@@ -17,6 +17,7 @@ import { getCache } from "../lib/cache";
 import {
 	addMember,
 	addTrack,
+	advanceFrom,
 	cleanName,
 	createRoomState,
 	newRoomId,
@@ -171,7 +172,10 @@ export type PartyOp =
 	| { op: "play" }
 	| { op: "pause" }
 	| { op: "seek"; position: number }
-	| { op: "select"; index: number };
+	| { op: "select"; index: number }
+	// Conditional on `from`, so a repeated end-of-track advance is a no-op
+	// rather than a restart (D-115, the owner's looping-intro report).
+	| { op: "next"; from: number };
 
 /** Transport is the host's (D-115): every control demands the key. */
 export async function controlParty(
@@ -198,6 +202,9 @@ export async function controlParty(
 			break;
 		case "select":
 			next = selectTrack(room, Math.trunc(Number(action.index)), now);
+			break;
+		case "next":
+			next = advanceFrom(room, Math.trunc(Number(action.from)), now);
 			break;
 	}
 	if (!next) throw new PartyError("Nothing at that spot in the queue", 400);
