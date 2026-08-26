@@ -7,6 +7,8 @@ import type { Stanza } from "@/lib/types";
 
 import { useDocked } from "../hooks/use-docked";
 import { useManualOverride } from "../hooks/use-manual-override";
+import { resolvePlayer, usePlaybackSource } from "../hooks/use-playback-source";
+import { useSpotifyPlayer } from "../hooks/use-spotify-player";
 import { useYouTubePlayer } from "../hooks/use-youtube-player";
 import { PauseIcon, PlayIcon } from "./player-icons";
 import { formatTime, Seekbar } from "./seekbar";
@@ -20,6 +22,7 @@ import "./playback-bar.scss";
  */
 export function PlaybackBar({
 	videoId,
+	spotifyId,
 	resolving,
 	title,
 	artist,
@@ -31,6 +34,12 @@ export function PlaybackBar({
 }: {
 	/** Null while the lookup is still running, and null if it found nothing. */
 	videoId: string | null;
+	/**
+	 * The Spotify track id, for the reader who chose the embed (D-112). Null
+	 * on the same terms as `videoId`; when only this is null the bar borrows
+	 * YouTube rather than going silent.
+	 */
+	spotifyId: string | null;
 	/**
 	 * Which of those two a null `videoId` means. Without it the bar cannot tell
 	 * "still looking" from "looked, and there is no recording" — and would have
@@ -58,8 +67,29 @@ export function PlaybackBar({
 	onPlayingChange?: (playing: boolean) => void;
 }) {
 	const mountRef = useRef<HTMLDivElement>(null);
+	const spotifyMountRef = useRef<HTMLDivElement>(null);
 	const sentinelRef = useRef<HTMLDivElement>(null);
 	const docked = useDocked(sentinelRef);
+
+	/*
+	 * Which player this reader listens through (D-112). Undecided — first
+	 * visit, or storage still being read — means the question renders where
+	 * the transport would, and NEITHER player is created: passing null ids
+	 * keeps both hooks dormant, and flipping the real id in after the answer
+	 * re-runs their effects against a mount node that exists by then.
+	 */
+	const { choice, choose } = usePlaybackSource();
+	const asking = choice === null;
+	const deciding = choice == null;
+	const { source, borrowed } = resolvePlayer(choice, spotifyId, videoId);
+	const youtube = useYouTubePlayer(
+		!deciding && source === "youtube" ? videoId : null,
+		mountRef,
+	);
+	const spotifyPlayer = useSpotifyPlayer(
+		!deciding && source === "spotify" ? spotifyId : null,
+		spotifyMountRef,
+	);
 	const {
 		status,
 		ready,
@@ -69,11 +99,13 @@ export function PlaybackBar({
 		duration,
 		toggle,
 		seek,
-	} = useYouTubePlayer(videoId, mountRef);
+	} = source === "spotify" ? spotifyPlayer : youtube;
+
 	// Three ways there is no player, and the reader is owed a different
 	// sentence for each (D-055).
-	const searching = resolving && !videoId;
-	const noRecording = !resolving && !videoId;
+	const activeId = source === "spotify" ? spotifyId : videoId;
+	const searching = resolving && !activeId;
+	const noRecording = !resolving && !activeId;
 	const unavailable = status === "unavailable" || noRecording;
 
 	// The linked upload is a different cut from the one the timings were made
@@ -167,7 +199,9 @@ export function PlaybackBar({
 							? "No timings"
 							: playing && manual
 								? "Manual scroll"
-								: null;
+								: borrowed
+									? "No Spotify match — playing from YouTube"
+									: null;
 
 	return (
 		<div className="playback-slot">
@@ -181,12 +215,57 @@ export function PlaybackBar({
 			<motion.div
 				className="playback"
 				data-docked={docked || undefined}
+				data-source={asking ? "choose" : source}
 				variants={riseVariants}
 				initial="hidden"
 				animate="visible"
 				transition={transition.editorial}
 			>
-				{!unavailable && (
+				{/*
+				  The question, standing where the transport will (D-112). Premium
+				  is a fact about the reader that nothing on our side can detect,
+				  and the two answers genuinely differ: the embed plays the full
+				  song only for a Premium browser and a preview for everyone
+				  else, where YouTube plays whole songs for all — with a small
+				  video the reader may not want. So the reader is asked once,
+				  told which way is better, and can change their mind below.
+				*/}
+				{asking && (
+					<div className="playback__choose">
+						<p className="playback__choose-title text-caption text-ink">
+							Do you listen on Spotify Premium?
+						</p>
+						<p className="playback__choose-hint text-micro">
+							Premium plays the full song in a clean audio card — no video.
+							Without it, YouTube plays every song.
+						</p>
+						<div className="playback__choose-row">
+							<button
+								type="button"
+								className="playback__choose-btn"
+								data-primary
+								onClick={() => choose("spotify")}
+							>
+								Yes — play with Spotify
+							</button>
+							<button
+								type="button"
+								className="playback__choose-btn"
+								onClick={() => choose("youtube")}
+							>
+								No — use YouTube
+							</button>
+						</div>
+					</div>
+				)}
+
+				{/*
+				  The play toggle and the scrub are YouTube furniture (D-112):
+				  the Spotify card carries its own transport, and a second set
+				  of controls driving the same song would leave the reader
+				  guessing which one is telling the truth.
+				*/}
+				{!asking && source === "youtube" && !unavailable && (
 					<button
 						type="button"
 						onClick={toggle}
@@ -221,7 +300,7 @@ export function PlaybackBar({
 				  An empty span still owns a grid row, and the empty row's gap
 				  pushed the status area around whenever a notice appeared.
 				*/}
-				{(docked || notice) && (
+				{!asking && (docked || notice) && (
 					<span className="playback__meta">
 						{docked && (
 							<span className="playback__title text-caption text-ink">
@@ -244,7 +323,7 @@ export function PlaybackBar({
 				  along with the dock. Times are decoration for the eye; the
 				  input's aria-valuetext is the accessible reading.
 				*/}
-				{!unavailable && (
+				{!asking && source === "youtube" && !unavailable && (
 					<div className="playback__scrub">
 						<span className="playback__time" aria-hidden="true">
 							{formatTime(currentTime)}
@@ -291,12 +370,22 @@ export function PlaybackBar({
 				<div ref={mountRef} className="playback__video" />
 
 				{/*
+				  The Spotify card's mount, on the same terms as the video's:
+				  always in the tree, never conditional, because the embed API
+				  replaces the node it is given and React must not be holding it
+				  when that happens (D-054). The hook fills it only when this
+				  reader chose Spotify; `:empty` hides it the rest of the time.
+				*/}
+				<div ref={spotifyMountRef} className="playback__spotify" />
+
+				{/*
 				  A way out of every dead end. With an id we know exactly which
 				  video the reader wanted; without one, Genius simply has no
 				  recording for this song, and a search is the honest next step
 				  rather than a link we cannot honour (D-055).
 				*/}
-				{unavailable &&
+				{!asking &&
+					unavailable &&
 					(videoId ? (
 						<a
 							href={`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`}
@@ -324,7 +413,7 @@ export function PlaybackBar({
 				  a reader who wants sync against a mismatched cut gets their
 				  choice, with the notice standing down once they have made it.
 				*/}
-				{synced && !unavailable && (
+				{!asking && synced && !unavailable && (
 					<button
 						type="button"
 						onClick={toggleSync}
@@ -347,6 +436,22 @@ export function PlaybackBar({
 							<span />
 						</span>
 						Sync
+					</button>
+				)}
+
+				{/*
+				  The way back from a one-time answer (D-112). A choice with no
+				  visible undo is a trap for the reader who mis-clicked or whose
+				  circumstances changed — Premium lapses, Premium arrives. Hero
+				  only: docked, the bar is down to essentials over the lyrics.
+				*/}
+				{!asking && !docked && choice && (
+					<button
+						type="button"
+						className="playback__switch text-micro"
+						onClick={() => choose(choice === "spotify" ? "youtube" : "spotify")}
+					>
+						{choice === "spotify" ? "Switch to YouTube" : "Switch to Spotify"}
 					</button>
 				)}
 			</motion.div>

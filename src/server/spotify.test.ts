@@ -28,6 +28,7 @@ function searchResponse(items: unknown[]) {
 
 function spotifyTrack(name: string, artists: string[], sizes = [640, 300, 64]) {
 	return {
+		id: "4uLU6hMCjMI75M1A2tKUQC",
 		name,
 		artists: artists.map((artist) => ({ name: artist })),
 		album: {
@@ -66,7 +67,9 @@ describe("findSpotifyArtwork", () => {
 		expect(artwork?.source).toBe("spotify");
 		expect(artwork?.full).toBe("https://img.example/640");
 		expect(artwork?.thumbnail).toBe("https://img.example/300");
-		// No Genius id: playback must never be attempted off this match.
+		// The embed player rides the same match (D-112).
+		expect(artwork?.spotifyId).toBe("4uLU6hMCjMI75M1A2tKUQC");
+		// No Genius id: playback lookup must never be attempted off this match.
 		expect(artwork?.geniusId).toBeUndefined();
 	});
 

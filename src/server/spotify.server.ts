@@ -84,6 +84,7 @@ interface SpotifyImage {
 }
 
 interface SpotifyTrack {
+	id: string;
 	name: string;
 	artists: Array<{ name: string }>;
 	album: { images: SpotifyImage[] };
@@ -214,6 +215,9 @@ export async function findSpotifyArtwork(
 		return {
 			...images,
 			source: "spotify",
+			// Carries the embed player (D-112) the way `geniusId` carries the
+			// YouTube lookup: the id rides with the match that vouched for it.
+			spotifyId: hit.track.id,
 			matchScore: Number(hit.score.toFixed(3)),
 		};
 	} catch (error) {

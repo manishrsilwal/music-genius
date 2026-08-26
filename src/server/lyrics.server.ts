@@ -61,8 +61,9 @@ function getGenius(title: string, artist: string) {
  * null as absence — which is the behaviour the Genius path already has.
  */
 function getSpotify(title: string, artist: string) {
+	// v2: the stored shape gained `spotifyId` for the embed player (D-112).
 	return cached(
-		`spotify:v1:${artist.toLowerCase()}::${title.toLowerCase()}`,
+		`spotify:v2:${artist.toLowerCase()}::${title.toLowerCase()}`,
 		TTL.track,
 		() => findSpotifyArtwork(title, artist),
 	);
@@ -91,13 +92,14 @@ export function getTrackVisuals(
 	title: string,
 	artist: string,
 ): Promise<TrackVisuals> {
-	// v6: v5 shipped before `i.scdn.co` was on the palette allowlist, so every
-	// Spotify-art track stored a null palette for 30 days — correct-looking
-	// entries produced by a bug are exactly what D-049 says a bump is for.
-	// v5: Spotify leads (D-111) — a source change is a shape change as far as
-	// stored entries are concerned; wraps the inner lookups, so bumping only
-	// an inner key would leave the stale outer entry serving the old result.
-	const key = `visuals:v6:${artist.toLowerCase()}::${title.toLowerCase()}`;
+	// v7: the artwork inside gained `spotifyId` (D-112). v6: v5 shipped before
+	// `i.scdn.co` was on the palette allowlist, so every Spotify-art track
+	// stored a null palette for 30 days — correct-looking entries produced by
+	// a bug are exactly what D-049 says a bump is for. v5: Spotify leads
+	// (D-111) — a source change is a shape change as far as stored entries
+	// are concerned; wraps the inner lookups, so bumping only an inner key
+	// would leave the stale outer entry serving the old result.
+	const key = `visuals:v7:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
 	return cached(key, TTL.track, async () => {
 		// Spotify first: its sleeve is the canonical square at known sizes,
@@ -128,17 +130,26 @@ export function getTrackVisuals(
 export function getTrackPlayback(
 	title: string,
 	artist: string,
-): Promise<{ youtubeId: string | null }> {
-	const key = `playback:v1:${artist.toLowerCase()}::${title.toLowerCase()}`;
+): Promise<{ youtubeId: string | null; spotifyId: string | null }> {
+	// v2: carries `spotifyId` alongside the YouTube id (D-112).
+	const key = `playback:v2:${artist.toLowerCase()}::${title.toLowerCase()}`;
 
 	return cached(key, TTL.track, async () => {
-		// Always the GENIUS entry, never the Spotify one (D-111): the YouTube
-		// id lives on the Genius song object, so playback needs the Genius
-		// match even on tracks whose artwork Spotify won. The entry is shared
-		// with the visuals fallback, so the search half is paid for once.
-		const artwork = await getGenius(title, artist);
-		if (!artwork?.geniusId) return { youtubeId: null };
-		return { youtubeId: await findPlayback(artwork.geniusId) };
+		// Both sources, resolved together (D-112): the reader's choice of
+		// player is made in the browser, after this has been fetched, so the
+		// server cannot know which id will be wanted and sends both.
+		//
+		// The YouTube id still rides the GENIUS entry, never the Spotify one
+		// (D-111) — it lives on the Genius song object. Both inner entries
+		// are shared with the visuals lookup, so each search is paid for once.
+		const [spotify, genius] = await Promise.all([
+			getSpotify(title, artist),
+			getGenius(title, artist),
+		]);
+		return {
+			youtubeId: genius?.geniusId ? await findPlayback(genius.geniusId) : null,
+			spotifyId: spotify?.spotifyId ?? null,
+		};
 	});
 }
 

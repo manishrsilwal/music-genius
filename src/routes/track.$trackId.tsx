@@ -330,6 +330,7 @@ function TrackPage() {
 						fallback={
 							<PlaybackBar
 								videoId={null}
+								spotifyId={null}
 								resolving
 								title={track.title}
 								artist={track.artist}
@@ -341,9 +342,10 @@ function TrackPage() {
 							/>
 						}
 					>
-						{({ youtubeId }) => (
+						{({ youtubeId, spotifyId }) => (
 							<PlaybackBar
 								videoId={youtubeId}
+								spotifyId={spotifyId}
 								resolving={false}
 								title={track.title}
 								artist={track.artist}

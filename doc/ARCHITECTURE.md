@@ -134,6 +134,57 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-112 — The reader picks the player
+**Built 2026-08-26.** The owner wanted the video preview gone now that
+Spotify was in the house — and the constraint map would not allow the
+obvious version of that: Spotify's Web API moves no audio, hiding the
+YouTube player while its audio runs violates the embed terms this app
+deliberately honours (D-036), and removing playback entirely would have
+killed sync, the product's centre. The owner's ruling cut through it:
+**ask the reader**. Premium is a fact about the reader that nothing on
+our side can detect, and the two answers genuinely differ.
+
+**One question, asked where the transport will stand.** "Do you listen
+on Spotify Premium?" — with the trade said out loud: Premium plays the
+full song in a clean audio card with no video anywhere; without it,
+YouTube plays every song. The answer persists as `tle:playback-source`
+on the same local-only terms as the taste answers, and a quiet "Switch
+to …" line under the bar is the way back — a one-time answer with no
+visible undo is a trap for the mis-click and for the lapsed (or newly
+arrived) subscription.
+
+**The Spotify iFrame Embed drives sync for the reader who chose it.**
+No API key, no user cap; its `playback_update` events carry the playhead
+in milliseconds, so `useSpotifyPlayer` honours the exact `PlaybackState`
+contract `useYouTubePlayer` does and the sync engine cannot tell the two
+apart. The embed card carries its own transport, so ours stands down in
+that mode — our toggle and scrub are YouTube furniture now; two sets of
+controls driving one song would leave the reader guessing which is
+telling the truth. The Sync pill, the notices and the docked title stay:
+they are the bar's own facts. Both mount nodes follow the D-054 rule —
+always in the tree, handed a node React never rendered, `:empty`-hidden.
+
+**No match never means silence (D-055).** `resolvePlayer` is a pinned
+pure table: Spotify chosen with no Spotify match borrows YouTube and
+says so ("No Spotify match — playing from YouTube"); neither id falls
+through to the existing no-recording sentences. While the question is
+unanswered NEITHER player is created — the hooks get null ids, which
+also re-runs their effects correctly once the answer flips the real id
+in against a mount node that exists by then.
+
+**The video, when it is YouTube, is at the D-109 floor.** 8rem flat
+(measured live: 128×72) — the smallest box that clears YouTube's own
+~68×48 chrome; the owner asked for the smallest. Server side,
+`getTrackPlayback` now resolves both ids in parallel — the choice is
+made in the browser after the fetch, so the server sends both — and the
+shape change bumps `playback:v2`, `spotify:v2`, `visuals:v7` (D-049).
+Verified live over BiDi: chooser on a fresh profile, embed alive with
+the right track and no timeout destruction at 14s, YouTube mode with
+both ids swapped by the switch, zero console entries. What headless
+cannot verify is full-song depth: the embed plays previews for a
+browser not logged into Spotify, so the "full song" half of the promise
+rides the reader's own account — by design, and said in the chooser.
+
 ### D-111 — Spotify supplies the sleeve; YouTube keeps the clock
 **Built 2026-08-25.** The owner arrived with Spotify app credentials and
 "replace the YouTube API with Spotify". Ruled with the constraint map on

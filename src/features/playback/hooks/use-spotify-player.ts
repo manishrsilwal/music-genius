@@ -1,0 +1,236 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import type { PlaybackState, PlaybackStatus } from "./use-youtube-player";
+
+/**
+ * Spotify iFrame Embed player (D-112).
+ *
+ * The embed is an audio-shaped card — cover, title, play control, scrubber —
+ * which is exactly why it exists here: the reader who chose Spotify chose no
+ * video. It needs no API key and no user cap; what it costs is decided by the
+ * reader's own browser: logged into Spotify there, the full track plays;
+ * logged out, roughly thirty seconds of preview. That trade is the reader's
+ * to make, which is why the bar asks instead of assuming (D-112).
+ *
+ * The Embed API pushes `playback_update` events carrying the playhead in
+ * milliseconds — the same clock `useYouTubePlayer` polls for, so this hook
+ * honours the same `PlaybackState` contract and the sync engine cannot tell
+ * the two apart.
+ *
+ * Minimal local typings, as with the YouTube hook: we use five members.
+ */
+
+interface EmbedController {
+	togglePlay(): void;
+	seek(seconds: number): void;
+	destroy(): void;
+	addListener(
+		event: "ready" | "playback_update",
+		listener: (payload?: PlaybackUpdate) => void,
+	): void;
+}
+
+interface PlaybackUpdate {
+	data: {
+		isPaused: boolean;
+		isBuffering: boolean;
+		/** Milliseconds, both of them. */
+		duration: number;
+		position: number;
+	};
+}
+
+interface IframeApi {
+	createController(
+		element: HTMLElement,
+		options: { uri: string; width: string | number; height: string | number },
+		callback: (controller: EmbedController) => void,
+	): void;
+}
+
+declare global {
+	interface Window {
+		onSpotifyIframeApiReady?: (api: IframeApi) => void;
+	}
+}
+
+const API_SRC = "https://open.spotify.com/embed/iframe-api/v1";
+
+/**
+ * Same shape and same reasoning as the YouTube loader: a tracker blocker or a
+ * bad connection leaves the script hanging rather than failing, and a promise
+ * that never settles renders as "Loading" forever (D-054).
+ */
+const API_TIMEOUT_MS = 8_000;
+const READY_TIMEOUT_MS = 12_000;
+
+/**
+ * The embed card's fixed height — Spotify's compact variant. Exported so the
+ * stylesheet's reserve and the controller agree on one number.
+ */
+export const EMBED_HEIGHT = 80;
+
+/** Resolves to the API object once; shared across every mount. */
+let apiReady: Promise<IframeApi> | null = null;
+
+function loadApi(): Promise<IframeApi> {
+	if (apiReady) return apiReady;
+
+	apiReady = new Promise<IframeApi>((resolve, reject) => {
+		const timer = setTimeout(
+			() => reject(new Error("timed out loading the Spotify embed API")),
+			API_TIMEOUT_MS,
+		);
+
+		// Unlike YouTube's, this callback HANDS OVER the API object rather than
+		// announcing a global — so the resolved promise is the only place it
+		// lives, and every later mount must come through here.
+		window.onSpotifyIframeApiReady = (api) => {
+			clearTimeout(timer);
+			resolve(api);
+		};
+
+		const existing = document.querySelector<HTMLScriptElement>(
+			`script[src="${API_SRC}"]`,
+		);
+		if (!existing) {
+			const script = document.createElement("script");
+			script.src = API_SRC;
+			script.async = true;
+			script.onerror = () => {
+				clearTimeout(timer);
+				reject(new Error("the Spotify embed could not be loaded"));
+			};
+			document.head.appendChild(script);
+		}
+	});
+
+	// A rejected promise must not be cached, or one blocked request would make
+	// every later track in the session fail instantly without retrying.
+	apiReady.catch(() => {
+		apiReady = null;
+	});
+
+	return apiReady;
+}
+
+export function useSpotifyPlayer(
+	trackId: string | null,
+	mountRef: React.RefObject<HTMLDivElement | null>,
+): PlaybackState {
+	const controllerRef = useRef<EmbedController | null>(null);
+	const [status, setStatus] = useState<PlaybackStatus>("loading");
+	const [reason, setReason] = useState<string | null>(null);
+	const [playing, setPlaying] = useState(false);
+	const [currentTime, setCurrentTime] = useState(0);
+	const [duration, setDuration] = useState(0);
+
+	useEffect(() => {
+		if (!trackId || !mountRef.current) return;
+
+		let cancelled = false;
+		let readyTimer: ReturnType<typeof setTimeout> | undefined;
+
+		setStatus("loading");
+		setReason(null);
+
+		const fail = (why: string) => {
+			if (cancelled) return;
+			if (readyTimer) clearTimeout(readyTimer);
+			console.warn(`[playback] ${why}`);
+			setStatus("unavailable");
+			setReason(why);
+			setTimeout(() => {
+				try {
+					controllerRef.current?.destroy();
+				} catch {
+					// Never initialised; nothing to destroy.
+				}
+				controllerRef.current = null;
+				mountRef.current?.replaceChildren();
+			}, 0);
+		};
+
+		loadApi().then((api) => {
+			if (cancelled || !mountRef.current) return;
+
+			// Hand Spotify a node React has never heard of — `createController`
+			// replaces the element it is given, the same ownership fight
+			// `useYouTubePlayer` documents (D-054).
+			const host = document.createElement("div");
+			mountRef.current.replaceChildren(host);
+
+			readyTimer = setTimeout(
+				() => fail("the Spotify player did not start"),
+				READY_TIMEOUT_MS,
+			);
+
+			api.createController(
+				host,
+				{
+					uri: `spotify:track:${trackId}`,
+					width: "100%",
+					height: EMBED_HEIGHT,
+				},
+				(controller) => {
+					if (cancelled) return;
+					controllerRef.current = controller;
+
+					controller.addListener("ready", () => {
+						if (cancelled) return;
+						if (readyTimer) clearTimeout(readyTimer);
+						setStatus("ready");
+					});
+
+					// The embed pushes the clock instead of being polled for it.
+					// Updates arrive on state changes and periodically during
+					// playback — coarser than the YouTube poll, still well inside
+					// a lyric line's duration.
+					controller.addListener("playback_update", (payload) => {
+						if (cancelled || !payload) return;
+						const { isPaused, duration: ms, position } = payload.data;
+						setPlaying(!isPaused);
+						setCurrentTime(position / 1000);
+						if (ms > 0) setDuration(ms / 1000);
+					});
+				},
+			);
+		}, fail);
+
+		return () => {
+			cancelled = true;
+			if (readyTimer) clearTimeout(readyTimer);
+			try {
+				controllerRef.current?.destroy();
+			} catch {
+				// `destroy` throws if the controller never finished initialising,
+				// which is exactly the case this cleanup exists to handle.
+			}
+			controllerRef.current = null;
+			mountRef.current?.replaceChildren();
+			setStatus("loading");
+			setReason(null);
+			setPlaying(false);
+			setCurrentTime(0);
+		};
+	}, [trackId, mountRef]);
+
+	const toggle = useCallback(() => {
+		controllerRef.current?.togglePlay();
+	}, []);
+
+	const seek = useCallback((seconds: number) => {
+		controllerRef.current?.seek(seconds);
+	}, []);
+
+	return {
+		status,
+		ready: status === "ready",
+		reason,
+		playing,
+		currentTime,
+		duration,
+		toggle,
+		seek,
+	};
+}

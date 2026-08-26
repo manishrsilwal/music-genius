@@ -59,7 +59,8 @@
 		grid-template-areas:
 			"scrub scrub scrub"
 			"sync toggle video"
-			"meta meta meta";
+			"meta meta meta"
+			"switch switch switch";
 		row-gap: 0.85rem;
 		column-gap: 1.25rem;
 		height: auto;
@@ -103,10 +104,45 @@
 			margin-inline-start: 0;
 			// Sized for YouTube's own chrome (D-109): the docked height calc
 			// gave ~76×43px here, and YT's play control is a fixed ~68×48 —
-			// it rendered cropped, the owner's broken preview. At 8-10rem
-			// wide the embed clears its own furniture.
+			// it rendered cropped, the owner's broken preview. 8rem is the
+			// floor D-109 measured as the smallest box that clears its own
+			// furniture, and the owner asked for the smallest (D-112).
 			height: auto;
-			width: clamp(8rem, 32vw, 10rem);
+			width: 8rem;
+		}
+
+		.playback__switch {
+			grid-area: switch;
+			justify-self: center;
+		}
+
+		// ── The Spotify card in the composition (D-112) ─────────────────
+		// The embed carries its own transport, so our toggle and scrub do
+		// not render: the card takes the full row where the scrub stood,
+		// and the sync pill keeps the line below with the notices.
+		&[data-source="spotify"] {
+			grid-template-areas:
+				"embed embed embed"
+				"sync sync sync"
+				"meta meta meta"
+				"switch switch switch";
+
+			.playback__sync {
+				justify-self: center;
+			}
+		}
+
+		.playback__spotify {
+			grid-area: embed;
+			width: 100%;
+		}
+
+		// ── The question (D-112) ────────────────────────────────────────
+		// One column, centred where the transport will stand once answered.
+		&[data-source="choose"] {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
 		}
 
 		// Renders only when the toggle does not (playback failed), so the
@@ -427,6 +463,122 @@
 			width: 100%;
 			height: 100%;
 			border: 0;
+		}
+	}
+
+	// ── The Spotify card (D-112) ───────────────────────────────────────────
+	// An audio-shaped embed with its own transport; ours stands down while it
+	// plays. Same emptiness rule as the video: nothing inside means this
+	// reader chose the other player, and an empty box must not own space.
+	&__spotify {
+		&:empty {
+			display: none;
+		}
+
+		flex: none;
+		width: 100%;
+		border-radius: var(--radius-nested);
+		overflow: hidden;
+
+		iframe {
+			display: block;
+			width: 100%;
+			// The compact embed's own height; the container defers to it.
+			height: 80px;
+			border: 0;
+		}
+	}
+
+	// Docked, the card shares the row with the title instead of owning one.
+	&[data-docked] &__spotify {
+		flex: 1 1 16rem;
+		max-width: 24rem;
+	}
+
+	// ── The question (D-112) ───────────────────────────────────────────────
+	&__choose {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.35rem;
+		width: 100%;
+		text-align: center;
+	}
+
+	&__choose-title {
+		font-family: var(--font-display);
+	}
+
+	&__choose-hint {
+		font-family: var(--font-ui);
+		color: var(--color-ink-faint);
+		max-width: 24rem;
+	}
+
+	&__choose-row {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.6rem;
+		margin-top: 0.65rem;
+	}
+
+	&__choose-btn {
+		@include m.tap-target;
+		@include m.press(0.96);
+		padding: 0.5rem 1.1rem;
+		border-radius: var(--radius-pill);
+		border: 1px solid var(--color-hairline);
+		color: var(--color-ink-muted);
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		font-weight: 600;
+		white-space: nowrap;
+		transition:
+			color 0.18s var(--ease-editorial),
+			border-color 0.18s var(--ease-editorial),
+			background-color 0.18s var(--ease-editorial);
+
+		&:hover {
+			color: var(--color-ink);
+			border-color: var(--track-accent);
+			background: var(--color-hover);
+		}
+
+		// The better answer leads (D-112): filled like the play toggle,
+		// because for the reader who has Premium it is simply the better
+		// experience — and the other button remains one tap away.
+		&[data-primary] {
+			@include m.bright;
+			border-color: transparent;
+
+			&:hover {
+				background: var(--track-accent-soft);
+				color: var(--color-on-bright);
+			}
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	// ── The way back (D-112) ───────────────────────────────────────────────
+	// Quiet on purpose: a settings affordance, not a control. It earns
+	// attention only from the reader looking for it.
+	&__switch {
+		font-family: var(--font-ui);
+		color: var(--color-ink-faint);
+		transition: color 0.18s var(--ease-editorial);
+
+		&:hover {
+			color: var(--color-ink);
+			text-decoration: underline;
+			text-underline-offset: 0.2em;
+		}
+
+		@include m.reduced-motion {
+			transition: none;
 		}
 	}
 

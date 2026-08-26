@@ -34,6 +34,8 @@ export interface Artwork {
 	source: "spotify" | "genius";
 	/** Present only on Genius matches; carries the playback lookup (D-022). */
 	geniusId?: number;
+	/** Present only on Spotify matches; carries the embed player (D-112). */
+	spotifyId?: string;
 	/** 0–1 match confidence. Retained so bad matches are diagnosable. */
 	matchScore: number;
 }
@@ -94,6 +96,13 @@ export interface TrackPlayback {
 	 * Genius knows no video for this song — a real outcome, not a failure.
 	 */
 	youtubeId: string | null;
+	/**
+	 * Spotify track id, for the reader who chose the Spotify embed (D-112).
+	 * From the same match that vouched for the artwork. Null when Spotify has
+	 * no confident match — the bar falls back to YouTube rather than to
+	 * silence.
+	 */
+	spotifyId: string | null;
 }
 
 /** One thing the synthesis was built from (PRD §3.5, "The Source Gallery"). */
