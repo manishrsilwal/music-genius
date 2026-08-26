@@ -134,6 +134,30 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-114 — The preview confesses through its clock
+**Built 2026-08-26.** The owner's report from a signed-out browser: the
+30-second experience arrived with no explanation and no way to know the
+full song existed one sign-in away. The embed cannot be asked whether it
+is serving a preview — it is a cross-origin iframe — but it confesses
+through `playback_update`: ~30 seconds of duration against lyrics timed
+for a whole track. `looksLikePreview` pins the reading (≤35s duration,
+lyrics recorded over 60s — a 30-second song exists, so without a
+full-length reference it accuses no one).
+
+Two consumers. The NOTICE: before first play the bar says "Full songs
+play with a Spotify Premium sign-in" — self-erasing for the Premium
+reader, whose first play proves full length and silences it; once a
+preview is detected it sharpens to "Preview — sign in to Spotify Premium
+for the full song". And the DRIFT DETECTOR (D-075), which would read the
+same 30-vs-180 mismatch as "timings from another cut" — a wrong
+diagnosis with a wrong remedy, defaulting sync off for a clock that is
+correct for as long as it runs. Previews are excluded from drift: sync
+follows the thirty seconds it has.
+
+Verified in a signed-out headless Chromium by clicking the embed's own
+play control with trusted CDP input: standing note before, preview
+notice after, and the Sync pill still pressed through the preview.
+
 ### D-113 — The page never scrolls sideways; the root enforces it
 **Built 2026-08-26.** The owner's phone-width screenshot: a horizontal
 scrollbar on the track page, again — reported once before as D-109.

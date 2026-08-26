@@ -8,7 +8,10 @@ import type { Stanza } from "@/lib/types";
 import { useDocked } from "../hooks/use-docked";
 import { useManualOverride } from "../hooks/use-manual-override";
 import { resolvePlayer, usePlaybackSource } from "../hooks/use-playback-source";
-import { useSpotifyPlayer } from "../hooks/use-spotify-player";
+import {
+	looksLikePreview,
+	useSpotifyPlayer,
+} from "../hooks/use-spotify-player";
 import { useYouTubePlayer } from "../hooks/use-youtube-player";
 import { PauseIcon, PlayIcon } from "./player-icons";
 import { formatTime, Seekbar } from "./seekbar";
@@ -108,13 +111,23 @@ export function PlaybackBar({
 	const noRecording = !resolving && !activeId;
 	const unavailable = status === "unavailable" || noRecording;
 
+	/*
+	 * The signed-out Spotify preview, confessed by its own clock (D-114). It
+	 * must be told apart from drift below: a 30-second duration against
+	 * three-minute timings is not "another cut", it is the same cut with the
+	 * tap turned off early — the clock is right for as long as it runs, so
+	 * sync stays on and the notice says how to get the rest of the song.
+	 */
+	const preview =
+		source === "spotify" && looksLikePreview(duration, lyricsDuration);
+
 	// The linked upload is a different cut from the one the timings were made
 	// for (D-075). Sync is withheld rather than run wrong: a canvas scrolling
 	// to lines tens of seconds from the voice is worse than one that says why
 	// it stopped following. Detection only — shifting the timestamps by the
 	// difference would assume all the extra time is intro, which an official
 	// video does not promise.
-	const drifted = synced && timingsDrift(duration, lyricsDuration);
+	const drifted = synced && !preview && timingsDrift(duration, lyricsDuration);
 
 	/*
 	 * Whether the reader WANTS the canvas following the song (D-080).
@@ -199,9 +212,13 @@ export function PlaybackBar({
 							? "No timings"
 							: playing && manual
 								? "Manual scroll"
-								: borrowed
-									? "No Spotify match — playing from YouTube"
-									: null;
+								: preview
+									? "Preview — sign in to Spotify Premium for the full song"
+									: source === "spotify" && duration === 0
+										? "Full songs play with a Spotify Premium sign-in"
+										: borrowed
+											? "No Spotify match — playing from YouTube"
+											: null;
 
 	return (
 		<div className="playback-slot">

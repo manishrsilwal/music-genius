@@ -70,6 +70,36 @@ const READY_TIMEOUT_MS = 12_000;
  */
 export const EMBED_HEIGHT = 80;
 
+/**
+ * Spotify's signed-out preview runs ~30 seconds; nothing under this is a
+ * whole song the lyrics were timed against.
+ */
+const PREVIEW_MAX_S = 35;
+
+/** Below this, a short duration might BE the whole song, not a preview. */
+const REAL_TRACK_MIN_S = 60;
+
+/**
+ * Whether the embed is serving the signed-out preview rather than the song
+ * (D-114). The embed cannot be asked directly — it is a cross-origin iframe —
+ * but it confesses through its clock: `playback_update` reports ~30 seconds
+ * of duration against lyrics timed for a whole track. The distinction
+ * matters twice over: the reader is owed "sign in for the full song" rather
+ * than silence at the fade-out, and the drift detector (D-075) would read
+ * the same mismatch as "timings from another cut" — a wrong diagnosis with a
+ * wrong remedy, since it defaults sync off for a clock that is actually
+ * correct for as long as it runs.
+ */
+export function looksLikePreview(
+	duration: number,
+	lyricsDuration: number | null,
+): boolean {
+	if (duration <= 0 || duration > PREVIEW_MAX_S) return false;
+	// Without a recorded lyrics duration, a short clock is unjudgeable — a
+	// 30-second song exists. Say nothing rather than accuse.
+	return lyricsDuration !== null && lyricsDuration > REAL_TRACK_MIN_S;
+}
+
 /** Resolves to the API object once; shared across every mount. */
 let apiReady: Promise<IframeApi> | null = null;
 
