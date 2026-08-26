@@ -213,9 +213,9 @@ export function PlaybackBar({
 							: playing && manual
 								? "Manual scroll"
 								: preview
-									? "Preview — sign in to Spotify Premium for the full song"
+									? "Preview only — sign in to Premium"
 									: source === "spotify" && duration === 0
-										? "Full songs play with a Spotify Premium sign-in"
+										? "Spotify Premium plays full songs"
 										: borrowed
 											? "No Spotify match — playing from YouTube"
 											: null;

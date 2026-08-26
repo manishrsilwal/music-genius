@@ -159,6 +159,14 @@
 			align-items: center;
 			text-align: center;
 		}
+
+		// Room to finish the sentence (D-114): the owner's phone cut "Full
+		// songs play with a Spotify Premium…" mid-claim. The hero bar has
+		// auto height, so a notice may take a second line here; the docked
+		// bar keeps the one-line clamp, because its height is fixed.
+		.playback__status {
+			@include m.line-clamp(2);
+		}
 	}
 	// Solid since D-065. A translucent bar over a full-bleed hero took its
 	// contrast from the album art behind it, which is a different colour on

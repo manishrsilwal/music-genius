@@ -144,11 +144,16 @@ for a whole track. `looksLikePreview` pins the reading (≤35s duration,
 lyrics recorded over 60s — a 30-second song exists, so without a
 full-length reference it accuses no one).
 
-Two consumers. The NOTICE: before first play the bar says "Full songs
-play with a Spotify Premium sign-in" — self-erasing for the Premium
-reader, whose first play proves full length and silences it; once a
-preview is detected it sharpens to "Preview — sign in to Spotify Premium
-for the full song". And the DRIFT DETECTOR (D-075), which would read the
+Two consumers. The NOTICE: before first play the bar says "Spotify
+Premium plays full songs" — self-erasing for the Premium reader, whose
+first play proves full length and silences it; once a preview is
+detected it sharpens to "Preview only — sign in to Premium". (First cut
+of the copy ran long: the owner's phone clipped it to "Full songs play
+with a Spotify Premium…" mid-claim — an uppercase, letter-spaced notice
+against a one-line clamp. Shorter sentences now, and the hero bar's
+caption may wrap to two lines, where the bar's height is its own; the
+docked clamp stays at one, because the dock's height is fixed.) And the
+DRIFT DETECTOR (D-075), which would read the
 same 30-vs-180 mismatch as "timings from another cut" — a wrong
 diagnosis with a wrong remedy, defaulting sync off for a clock that is
 correct for as long as it runs. Previews are excluded from drift: sync
