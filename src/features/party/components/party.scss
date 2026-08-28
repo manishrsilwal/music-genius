@@ -5,7 +5,9 @@
 
 .party {
 	width: 100%;
-	max-width: 44rem;
+	// One number shared with the masthead's alignment rule (D-118) — the
+	// mark rides this column's left edge, not the viewport's corner (D-092).
+	max-width: var(--container-party);
 	margin-inline: auto;
 	padding: calc(var(--masthead-reach, 4rem) + 2rem) 1.25rem 6rem;
 
@@ -86,6 +88,22 @@
 		background: var(--color-surface-raised);
 		color: var(--color-ink-muted);
 		font-family: var(--font-ui);
+
+		// The reader's own chip (D-118): the accent's hairline, not its fill —
+		// "You" should be findable at a glance without shouting over the list.
+		&[data-you] {
+			border-color: var(--color-lime);
+			color: var(--color-ink);
+		}
+	}
+
+	// The pre-party state is a SENTENCE, not a card (D-118). Boxed, it sat
+	// above the search field as a second rounded slab — a card holding one
+	// line and an input holding one line are the same shape, and the owner
+	// could not tell which was which. Chrome belongs to the card once it has
+	// a player to hold; an instruction is just told.
+	&__start {
+		margin-top: 2.5rem;
 	}
 
 	// The bento tile's anatomy (D-090): surface, card radius, the soft

@@ -9,6 +9,7 @@ import {
 	createRoomState,
 	MEMBER_STALE_MS,
 	newRoomId,
+	orderMembers,
 	positionAt,
 	pruneMembers,
 	QUEUE_LIMIT,
@@ -149,6 +150,24 @@ describe("members", () => {
 		let r = addMember(room(), { id: "m1", name: "Asha", host: true }, NOW);
 		r = addMember(r, { id: "m1", name: "Asha", host: true }, NOW + 5000);
 		expect(r.members).toHaveLength(1);
+	});
+
+	it("orders the reader first, then the host, then join order", () => {
+		let r = addMember(room(), { id: "h", name: "Asha", host: true }, NOW);
+		r = addMember(r, { id: "g1", name: "Bo", host: false }, NOW + 1);
+		r = addMember(r, { id: "g2", name: "Chi", host: false }, NOW + 2);
+		// A guest reading the list sees themselves before the host.
+		expect(orderMembers(r.members, "g2").map((m) => m.id)).toEqual([
+			"g2",
+			"h",
+			"g1",
+		]);
+		// The host reading it is both self and host — one chip, first.
+		expect(orderMembers(r.members, "h").map((m) => m.id)).toEqual([
+			"h",
+			"g1",
+			"g2",
+		]);
 	});
 });
 

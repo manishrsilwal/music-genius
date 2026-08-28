@@ -15,6 +15,17 @@
 		var(--dock-inset),
 		calc((100vw - var(--container-landing)) / 2 + var(--dock-inset))
 	);
+
+	// The party pages read in a narrower column (D-118), and the owner's
+	// line from D-092 still rules: the mark rides the CONTENT's left edge,
+	// whichever container the page composes in. The party column's own
+	// padding is 1.25rem, so that is the inset added back.
+	:root:has(.party) & {
+		left: max(
+			var(--dock-inset),
+			calc((100vw - var(--container-party)) / 2 + 1.25rem)
+		);
+	}
 	display: inline-flex;
 	align-items: center;
 	gap: 0.6rem;

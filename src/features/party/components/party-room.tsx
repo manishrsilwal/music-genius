@@ -8,7 +8,7 @@ import { LyricCanvas } from "@/features/scrollytelling/components/lyric-canvas";
 // the track page's bar (D-115, amended: continuity over invention).
 import "@/features/playback/components/playback-bar.scss";
 import { linePositionAt } from "@/lib/lrc";
-import { positionAt } from "@/lib/party";
+import { orderMembers, positionAt } from "@/lib/party";
 import type { Track, TrackSummary } from "@/lib/types";
 import { readStoredName, usePartyRoom } from "../hooks/use-party";
 import "./party.scss";
@@ -324,16 +324,31 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 				</button>
 			</header>
 
+			{/*
+			  You first, then the host, then join order (D-118): the first
+			  question a member asks this list is "am I in?", so their own chip
+			  leads and says so in the first person.
+			*/}
 			<ul className="party__members" aria-label="At the party">
-				{view?.members.map((member) => (
-					<li key={member.id} className="party__member text-micro">
-						{member.name}
-						{member.host ? " · host" : ""}
-					</li>
-				))}
+				{orderMembers(view?.members ?? [], session.memberId).map((member) => {
+					const you = member.id === session.memberId;
+					return (
+						<li
+							key={member.id}
+							className="party__member text-micro"
+							data-you={you || undefined}
+						>
+							{you ? "You" : member.name}
+							{member.host ? " · host" : ""}
+						</li>
+					);
+				})}
 			</ul>
 
-			<section className="party__now" aria-label="Now playing">
+			<section
+				className={current ? "party__now" : "party__start"}
+				aria-label="Now playing"
+			>
 				{current ? (
 					<>
 						<div className="party__now-meta">

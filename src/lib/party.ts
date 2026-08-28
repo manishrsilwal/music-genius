@@ -260,3 +260,18 @@ export function toView(room: PartyRoom, now: number): PartyView {
 	const { hostKey: _hostKey, ...view } = room;
 	return { ...view, members: pruneMembers(room.members, now) };
 }
+
+/**
+ * The reader first, then the host, then everyone else in join order (D-118).
+ * A member list is read egocentrically — "am I in?" is the first question a
+ * joiner asks it — so the self chip leads even when the self is a guest.
+ * Stable sort, so join order survives within each rank.
+ */
+export function orderMembers(
+	members: PartyMember[],
+	selfId: string | null,
+): PartyMember[] {
+	const rank = (member: PartyMember) =>
+		member.id === selfId ? 0 : member.host ? 1 : 2;
+	return [...members].sort((a, b) => rank(a) - rank(b));
+}

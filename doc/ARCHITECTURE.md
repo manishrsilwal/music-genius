@@ -134,6 +134,33 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-118 — The party page answers three owner reports
+**Built 2026-08-28.** All three from one screenshot.
+
+**The mark rides the party's line.** D-092's rule — the masthead sits
+on the CONTENT's left edge, never the viewport's corner — was written
+against the landing's 72rem measure, and the party reads in a narrower
+column, so the mark hung far left of everything. `--container-party:
+44rem` now lives in `@theme static` (the tree-shake trap's fourth
+near-miss: SCSS-only consumers again), and both the column and a
+`:root:has(.party)` masthead rule derive from it. Measured: masthead
+left 308, content left 308.
+
+**A card holding one line and an input holding one line are the same
+shape.** The pre-party "queue the first song" card sat above the
+search field as a second rounded slab, and the owner could not tell
+card from field. Ruling: chrome belongs to the card once it has a
+player to hold; an instruction is just told. The empty state is a
+plain sentence now, and the remaining grammar separates cleanly —
+cards are radius-card with a shadow and no border, fields are
+hairline-bordered pills.
+
+**"You" leads the member list.** The first question a member asks the
+list is "am I in?", so their own chip comes first and says so in the
+first person — then the host, then join order (`orderMembers`, pure
+and pinned, stable within ranks). The self chip wears the accent's
+hairline rather than its fill: findable at a glance, not shouting.
+
 ### D-117 — Shipping hardness for the party
 **Built 2026-08-26.** The code half of the ship list (the other half is
 the owner's: OD-007, Upstash provisioning, a real phone).
