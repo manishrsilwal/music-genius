@@ -171,6 +171,22 @@ thin — 1 kept (Salaijyo, Nepathya, synced, verified). The Nepali
 shelf's bottleneck is the lyrics commons, not the model, which is
 exactly why the empty state must stay honest.
 
+**The first blessing, same day.** The owner saw the empty Nepali shelf
+live and asked where the songs were — so the pipeline was run in
+anger: repeated harvests (a streaming-era bias added to the prompt,
+since fans sync what they stream; a stamp-per-run filename after the
+first afternoon run overwrote the morning's keepers; cross-file dedupe
+so reruns dig instead of re-proposing) yielded EIGHT verified tracks —
+Nepathya ×3, Narayan Gopal, 1974 AD, Sushant KC, The Edge Band, Bipul
+Chettri. Every id re-fetched and confirmed synced, axes and notes
+drafted for the owner, blessed as a batch, merged, and the full
+catalogue audit ran clean over all 64 entries. Two tests retired
+honourably: the "unstocked language" fixture moved from Nepali to
+Korean (may every language retire from it), and the also-liked wander
+learned that a grown catalogue can fill twelve in-mood slots. The
+audit also re-flagged the pre-existing "Musafir Hoon Yaaron" LoFi
+pointer (OD-028 class) — the owner's hand, no clean auto-suggestion.
+
 ### D-119 — One container, every page
 **Built 2026-08-28.** The owner's report: the content column shifts
 between pages. Audited at 1295px — the landing composed at 72rem with

@@ -67,6 +67,7 @@ const prompt = `You are helping stock a hand-curated catalogue of songs whose LY
 
 Rules:
 - Well-known enough that lyric databases carry them; original studio recordings, no remixes or covers.
+- Prefer songs popular on streaming platforms — fan communities sync lyrics for what they stream, so a streaming-era hit is far likelier to verify than an equally great song that lives on cassettes. Use the exact title spelling the streaming release uses.
 - Spread across moods ${moodArg ? `— all "${moodArg}"` : `(${MOODS.join(", ")})`} and pulls (${PULLS.join(", ")}).
 - familiarity: "canon" for classics everyone knows, "deep" for worthy lesser-known cuts. Never "surprise".
 - era: "classic" or "modern".
@@ -112,7 +113,22 @@ async function propose(): Promise<Candidate[]> {
 
 /* ------------------------------------------------------------------ */
 
+// Shelved entries AND anything already sitting in a proposal file awaiting
+// blessing — repeated harvest runs must dig deeper, not re-propose the pile.
 const known = new Set(CATALOGUE.map((track) => track.lrclibId));
+try {
+	const { readdirSync, readFileSync } = await import("node:fs");
+	for (const name of readdirSync("doc")) {
+		if (!name.startsWith("proposed-catalogue-")) continue;
+		for (const match of readFileSync(`doc/${name}`, "utf8").matchAll(
+			/lrclibId: "(\d+)"/g,
+		)) {
+			if (match[1]) known.add(match[1]);
+		}
+	}
+} catch {
+	// No doc directory yet; nothing proposed before.
+}
 const proposed: string[] = [];
 const dropped: string[] = [];
 
@@ -192,13 +208,15 @@ for (const line of dropped) console.log(`DROPPED  ${line}`);
 
 /* ------------------------------------------------------------------ */
 
-const date = new Date().toISOString().slice(0, 10);
-const file = `doc/proposed-catalogue-${language}-${date}.ts.txt`;
+// Stamped to the minute: repeated harvest runs on one day must accumulate
+// files, not overwrite the morning's keepers with the afternoon's.
+const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
+const file = `doc/proposed-catalogue-${language}-${stamp}.ts.txt`;
 mkdirSync("doc", { recursive: true });
 writeFileSync(
 	file,
 	[
-		`// Proposed ${language} catalogue entries — ${date} (D-120)`,
+		`// Proposed ${language} catalogue entries — ${stamp} (D-120)`,
 		`// ${proposed.length} kept of ${candidates.length} proposed; ${dropped.length} dropped by verification.`,
 		`// EVERY entry verified on LRCLIB with synced lyrics. Notes are DRAFTS:`,
 		`// rewrite each before blessing (D-045 — notes are written, not generated).`,

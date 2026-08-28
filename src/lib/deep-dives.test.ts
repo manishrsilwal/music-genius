@@ -145,7 +145,11 @@ describe("pickAlsoLiked", () => {
 	});
 
 	it("still reaches beyond them, so it reads as a wander", () => {
-		const picks = pickAlsoLiked({ ...NONE, mood: "defiant" }, seed);
+		// At the default count a deep-enough shelf may legitimately stay in
+		// mood (D-120 grew the catalogue past twelve defiant-adjacent picks);
+		// the looseness contract is that the wander CAN cross moods, pinned
+		// at a depth the single mood cannot fill alone.
+		const picks = pickAlsoLiked({ ...NONE, mood: "defiant" }, seed, [], 24);
 		expect(new Set(picks.map((t) => t.mood)).size).toBeGreaterThan(1);
 	});
 });
@@ -404,7 +408,9 @@ describe("languages (D-120)", () => {
 	});
 
 	it("returns an empty shelf, not a substitution, for an unstocked language", () => {
-		const prefs = { ...NONE, languages: ["nepali" as const] };
+		// Korean, since the first blessing stocked Nepali the same day this
+		// test was written — may every language retire from this test.
+		const prefs = { ...NONE, languages: ["korean" as const] };
 		expect(pickDeepDives(prefs, seed)).toHaveLength(0);
 		expect(pickAlsoLiked(prefs, seed)).toHaveLength(0);
 	});
