@@ -33,6 +33,7 @@ import { isVariant } from "../src/lib/ranking";
 import { env } from "../src/server/env";
 import { MATCH_THRESHOLD, scoreNames } from "../src/server/genius.server";
 import { searchLyrics } from "../src/server/lyrics.server";
+import { lyricsFor, tagMoods } from "./mood-tagger";
 
 const [, , languageArg, ...rest] = process.argv;
 const language = languageArg as Language;
@@ -172,12 +173,34 @@ for (const candidate of candidates) {
 	}
 	known.add(match.id);
 
+	// Moods come from the ACTUAL lyrics when they can (D-121): the proposer
+	// names songs from memory, but the tagger reads the verified text — the
+	// same text the reader will read. The proposer's guess survives only as
+	// the fallback when lyrics or the tagger fail.
+	let mood = candidate.mood as CuratedTrack["mood"];
+	let moodAlso: CuratedTrack["moodAlso"];
+	let moodSource = "proposer's guess — lyric tagging failed";
+	try {
+		const lyrics = await lyricsFor(match.id);
+		const tags = lyrics
+			? await tagMoods(match.title, match.artist, language, lyrics)
+			: null;
+		if (tags) {
+			mood = tags.mood;
+			moodAlso = tags.moodAlso ?? undefined;
+			moodSource = `lyric-read: ${tags.reason}`;
+		}
+	} catch {
+		// Fallback already set.
+	}
+
 	const entry: CuratedTrack = {
 		title: match.title,
 		artist: match.artist,
 		lrclibId: match.id,
 		note: candidate.note.slice(0, 200),
-		mood: candidate.mood as CuratedTrack["mood"],
+		mood,
+		...(moodAlso ? { moodAlso } : {}),
 		pull: candidate.pull as CuratedTrack["pull"],
 		familiarity: candidate.familiarity as CuratedTrack["familiarity"],
 		language,
@@ -192,7 +215,11 @@ for (const candidate of candidates) {
 			`\t\tlrclibId: ${JSON.stringify(entry.lrclibId)},`,
 			`\t\t// DRAFT NOTE — model-written; rewrite before blessing (D-045).`,
 			`\t\tnote: ${JSON.stringify(entry.note)},`,
+			`\t\t// mood ${moodSource.replace(/\n/g, " ")}`,
 			`\t\tmood: ${JSON.stringify(entry.mood)},`,
+			...(entry.moodAlso
+				? [`\t\tmoodAlso: ${JSON.stringify(entry.moodAlso)},`]
+				: []),
 			`\t\tpull: ${JSON.stringify(entry.pull)},`,
 			`\t\tfamiliarity: ${JSON.stringify(entry.familiarity)},`,
 			`\t\tlanguage: ${JSON.stringify(entry.language)},`,
