@@ -193,6 +193,24 @@ Signatures and cache keys are untouched: new moods mint new signature
 values, old ones keep their cached work; taste never enters a cache
 key because it never leaves the client.
 
+**The retag blessing, same day.** The tagger read all 64 entries; 62
+answered (two JSON hiccups — Blinding Lights and Once in a Lifetime —
+kept their tags, which the lyrics support anyway), 53 changed. The
+reviewer flagged two proposals as doubtful (Nights' longing →
+defiant+restless; Zindagi Ka Safar's restless → defiant) and the owner
+ruled: bless all 53 as proposed — one method, no hand-picking. The
+clearest vindications: Yeh Jo Des Hai Tera's "defiant" became the
+homeland-longing its lyrics are, Creep gained heartbroken, Aane Wala
+Pal became nostalgic, Bhedako Oon Jasto's celebration became joyful.
+After application every one of the seven moods can fill a shelf
+(nostalgic thinnest at 5 matchable, joyful 7); tender/wordplay went
+EMPTY and restless/imagery survives only through secondary tags — the
+words were never where the old grid said. The per-cell coverage test
+retired for its successor: every OFFERED mood must hold at least a
+shelf's worth of stock, and per-pull behaviour is pinned by the shelf
+tests. The network audit ran clean over all 64 (the Musafir Hoon
+Yaaron LoFi pointer remains the one standing flag, OD-028 class).
+
 ### D-120 — Language is a filter, and the AI proposes but never publishes
 **Built 2026-08-28.** The owner's testers, quoted: "why is a Hindi song
 recommended for me?" — and "what about Nepali songs?". Two rulings.

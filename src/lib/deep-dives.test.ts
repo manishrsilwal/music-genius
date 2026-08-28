@@ -37,19 +37,18 @@ describe("catalogue", () => {
 		expect(new Set(keys).size).toBe(CATALOGUE.length);
 	});
 
-	it("covers every founding mood × pull cell", () => {
-		// The founding four are the catalogue's backbone and stay fully
-		// stocked. The D-121 moods (heartbroken, joyful, nostalgic) grow via
-		// retagging and harvests — until a cell fills, the shelf runs
-		// honestly short rather than substituting (pinned below).
-		const FOUNDING = ["longing", "defiant", "tender", "restless"] as const;
-		for (const mood of FOUNDING) {
-			for (const pull of PULLS) {
-				const cell = CATALOGUE.filter(
-					(t) => t.mood === mood && t.pull === pull,
-				);
-				expect(cell.length, `empty cell: ${mood}/${pull}`).toBeGreaterThan(0);
-			}
+	it("every offered mood can fill its shelf", () => {
+		// The successor to the old per-cell coverage test, which pinned the
+		// pre-D-121 grid: the lyric-read retag moved tags to where the words
+		// actually are, and cells now shift as readings land. What must never
+		// shift is the offer — a mood in the stepper with fewer tracks than a
+		// shelf would make the mood promise an empty one on day one. Per-pull
+		// behaviour is pinned by the stocked mood × pull test below.
+		for (const mood of MOODS) {
+			const stock = CATALOGUE.filter((t) => matchesMood(t, mood)).length;
+			expect(stock, `mood ${mood} cannot fill a shelf`).toBeGreaterThanOrEqual(
+				DEEP_DIVE_COUNT,
+			);
 		}
 	});
 
