@@ -150,10 +150,21 @@
 		}
 	}
 
+	// Always in the corner, grey until chosen (D-122's second report): the
+	// mark never appears or vanishes, it only changes its mind about colour.
 	&__tick {
 		position: absolute;
 		top: 0.65rem;
 		inset-inline-end: 0.65rem;
+		color: var(--color-ink-faint);
+		transition: color 0.18s var(--ease-editorial);
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__option[data-selected] &__tick {
 		color: var(--color-lime);
 	}
 

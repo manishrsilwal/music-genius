@@ -184,7 +184,10 @@ export function TasteChips({
 											data-selected={selected || undefined}
 											onClick={() => toggleLanguage(option.value)}
 										>
-											{selected && <Tick className="taste__tick" />}
+											{/* Always in the layout, grey until chosen —
+											    an appearing mark would shift the row
+											    (D-122's second report). */}
+											<Tick className="taste__tick" />
 											<span className="taste__option-label text-caption">
 												{option.label}
 											</span>
@@ -204,8 +207,7 @@ export function TasteChips({
 											choose(open as Exclude<Axis, "languages">, option.value)
 										}
 									>
-										{preferences[open as Exclude<Axis, "languages">] ===
-											option.value && <Tick className="taste__tick" />}
+										<Tick className="taste__tick" />
 										<span className="taste__option-label text-caption">
 											{option.label}
 										</span>

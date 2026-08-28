@@ -276,8 +276,12 @@ export function PreferenceChat({
 									onClick={() => toggleLanguage(option.value)}
 								>
 									{/* The tick says "chosen" at a glance — the lime
-									    hairline alone was not obvious (owner's report). */}
-									{selected && <Tick className="chat__tick" />}
+									    hairline alone was not obvious (owner's report).
+									    ALWAYS rendered, grey until chosen: a mark that
+									    appears on tap would shift the label sideways,
+									    and a control must not move under the finger
+									    that just pressed it. */}
+									<Tick className="chat__tick" />
 									{option.label}
 								</button>
 							);

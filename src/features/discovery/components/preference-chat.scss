@@ -152,9 +152,20 @@
 	}
 
 	// The green mark the owner asked for: unmissable at a glance where the
-	// hairline was not.
+	// hairline was not. Grey by default — a disabled-looking placeholder —
+	// so the mark is ALWAYS in the layout and turning it on never shifts
+	// the label (owner's second report).
 	&__tick {
 		flex: none;
+		color: var(--color-ink-faint);
+		transition: color 0.18s var(--ease-editorial);
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	&__chip[data-selected] &__tick {
 		color: var(--color-lime);
 	}
 
