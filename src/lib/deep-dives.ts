@@ -26,9 +26,75 @@ export type Mood = (typeof MOODS)[number];
 export type Pull = (typeof PULLS)[number];
 export type Familiarity = (typeof FAMILIARITIES)[number];
 
-/** Language and era are still recorded, but deliberately NOT scored — see D-027. */
-export type Language = "english" | "hindi";
+/**
+ * Language is a FILTER now, not a score (D-120, overturning D-027's "recorded
+ * but not scored"). The testers said it plainly: "why is a Hindi song
+ * recommended for me?" — a wrong-language pick is not a weaker match, it is a
+ * miss. D-027's original disease — a single-select that forced a bilingual
+ * reader to pick a side — is cured by multi-select, not by silence.
+ *
+ * The union is the OFFERED list, wider than the catalogue's current stock on
+ * purpose: a language whose shelf is still empty gets an honest empty state,
+ * never a silent substitution.
+ */
+export type Language =
+	| "english"
+	| "hindi"
+	| "nepali"
+	| "punjabi"
+	| "tamil"
+	| "spanish"
+	| "korean";
 export type Era = "classic" | "modern";
+
+export const LANGUAGES = [
+	"english",
+	"hindi",
+	"nepali",
+	"punjabi",
+	"tamil",
+	"spanish",
+	"korean",
+] as const satisfies readonly Language[];
+
+export interface LanguageOption {
+	value: Language;
+	label: string;
+	/** BCP 47 primary subtags, for ordering by the browser's own locales. */
+	tags: readonly string[];
+}
+
+export const LANGUAGE_OPTIONS: LanguageOption[] = [
+	{ value: "english", label: "English", tags: ["en"] },
+	{ value: "hindi", label: "Hindi", tags: ["hi"] },
+	{ value: "nepali", label: "Nepali", tags: ["ne"] },
+	{ value: "punjabi", label: "Punjabi", tags: ["pa"] },
+	{ value: "tamil", label: "Tamil", tags: ["ta"] },
+	{ value: "spanish", label: "Spanish", tags: ["es"] },
+	{ value: "korean", label: "Korean", tags: ["ko"] },
+];
+
+/**
+ * The offered languages, with the reader's own first (D-120).
+ *
+ * "Priority based on location" without a location: `navigator.languages` is
+ * the device's ORDERED list of preferred languages — no geolocation service,
+ * no permission prompt, nothing sent anywhere, which is this product's way.
+ * A Kathmandu phone usually says `ne` before a geo-IP database would; stable
+ * sort keeps the curated order among languages the device did not mention.
+ */
+export function orderLanguagesByLocale(
+	locales: readonly string[],
+): LanguageOption[] {
+	const primaries = locales.map(
+		(locale) => locale.toLowerCase().split("-")[0] ?? "",
+	);
+	const rank = (option: LanguageOption) => {
+		const hit = primaries.findIndex((tag) => option.tags.includes(tag));
+		return hit === -1 ? primaries.length : hit;
+	};
+	return [...LANGUAGE_OPTIONS].sort((a, b) => rank(a) - rank(b));
+}
 
 export interface Preferences {
 	/**
@@ -39,6 +105,14 @@ export interface Preferences {
 	mood: Mood | null;
 	pull: Pull | null;
 	familiarity: Familiarity | null;
+	/**
+	 * MULTI-select, the deliberate exception to D-032 (D-120): people are
+	 * genuinely multilingual, and a single-select here is D-027's forced
+	 * side-picking again. It sits last in the stepper, where its Continue
+	 * button is also the flow's natural exit. Null, empty, or absent (every
+	 * pre-D-120 stored object) all mean anything.
+	 */
+	languages?: Language[] | null;
 }
 
 export interface CuratedTrack {
@@ -717,8 +791,15 @@ function score(track: CuratedTrack, preferences: Preferences): number {
  */
 export function preferenceSignature(preferences: Preferences): string {
 	const { mood, pull, familiarity } = preferences;
-	if (!mood && !pull && !familiarity) return "none";
-	return [mood ?? "-", pull ?? "-", familiarity ?? "-"].join(".");
+	const languages = preferences.languages ?? [];
+	if (!mood && !pull && !familiarity && languages.length === 0) return "none";
+	const base = [mood ?? "-", pull ?? "-", familiarity ?? "-"].join(".");
+	// Sorted, so {english, nepali} and {nepali, english} are one identity —
+	// and absent entirely when unset, so every pre-D-120 signature (and its
+	// cached work) survives unchanged.
+	return languages.length > 0
+		? `${base}.${[...languages].sort().join("+")}`
+		: base;
 }
 
 /**
@@ -739,10 +820,26 @@ export function normalisePreferences(value: unknown): Preferences {
 			: null;
 	};
 
+	// Deduped and enum-checked one by one; junk entries drop rather than
+	// poison the array. Empty after cleaning means "anything" — null.
+	const rawLanguages = raw.languages;
+	const languages = Array.isArray(rawLanguages)
+		? [
+				...new Set(
+					rawLanguages.filter(
+						(entry): entry is Language =>
+							typeof entry === "string" &&
+							(LANGUAGES as readonly string[]).includes(entry),
+					),
+				),
+			]
+		: [];
+
 	return {
 		mood: pick("mood", MOODS),
 		pull: pick("pull", PULLS),
 		familiarity: pick("familiarity", FAMILIARITIES),
+		languages: languages.length > 0 ? languages : null,
 	};
 }
 
@@ -764,10 +861,23 @@ export function parsePreferences(params: URLSearchParams): Preferences {
 			: null;
 	};
 
+	// `languages=english+nepali` — enum-checked entry by entry, deduped,
+	// empty-after-cleaning collapses to null exactly as normalise does.
+	const languages = [
+		...new Set(
+			(params.get("languages") ?? "")
+				.split(/[+,\s]+/)
+				.filter((entry): entry is Language =>
+					(LANGUAGES as readonly string[]).includes(entry),
+				),
+		),
+	];
+
 	return {
 		mood: pick("mood", MOODS),
 		pull: pick("pull", PULLS),
 		familiarity: pick("familiarity", FAMILIARITIES),
+		languages: languages.length > 0 ? languages : null,
 	};
 }
 
@@ -883,15 +993,28 @@ interface Ranked {
  */
 const SEEN_PENALTY = 100_000;
 
+/**
+ * The catalogue the reader's languages admit (D-120). A hard filter BEFORE
+ * ranking, not a score: a wrong-language pick is a miss, not a weaker match —
+ * and `selectDiverse` actively rewards language variety, so a mere score
+ * bump would be fought by the diversity pass and lose.
+ */
+function languagePool(preferences: Preferences): CuratedTrack[] {
+	const languages = preferences.languages;
+	if (!languages || languages.length === 0) return CATALOGUE;
+	return CATALOGUE.filter((track) => languages.includes(track.language));
+}
+
 function rankAll(
 	preferences: Preferences,
 	seed: number,
 	seen: ReadonlySet<string> = new Set(),
 ): Ranked[] {
-	const order = seededOrder(CATALOGUE.length, seed);
+	const pool = languagePool(preferences);
+	const order = seededOrder(pool.length, seed);
 	return order
 		.map((index, position) => {
-			const track = CATALOGUE[index] as CuratedTrack;
+			const track = pool[index] as CuratedTrack;
 			// Position breaks ties, keeping the rotation visible when several
 			// tracks score identically.
 			let rank = score(track, preferences) * 1000 - position;

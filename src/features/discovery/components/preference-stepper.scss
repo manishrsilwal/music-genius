@@ -62,6 +62,13 @@
 		border-radius: var(--radius-card);
 		@include m.surface;
 		text-align: left;
+
+		// The language step's options are TOGGLES (D-120), the one step whose
+		// cards can sit selected — the lime hairline is the same "this one is
+		// yours" mark the party's You-chip wears.
+		&[data-selected] {
+			border-color: var(--color-lime);
+		}
 		transition:
 			border-color 0.22s var(--ease-editorial),
 			translate 0.22s var(--ease-editorial),
@@ -107,6 +114,25 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 0.75rem 1.25rem;
+	}
+
+	// The language step's exit (D-120): the one Continue in the flow, and it
+	// doubles as the flow's finish line — the bright fill says "this is the
+	// button", where D-032's removed mid-flow Continue only said "more form".
+	&__continue {
+		align-self: flex-start;
+		display: inline-flex;
+		align-items: center;
+		padding: 0.8rem 1.5rem;
+		border-radius: var(--radius-pill);
+		@include m.bright;
+		font-family: var(--font-ui);
+		font-size: var(--text-caption);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-label);
+		@include m.tap-target;
+		@include m.press(0.96);
 	}
 
 	&__bail {

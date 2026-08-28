@@ -19,6 +19,7 @@ export const EMPTY_PREFERENCES: Preferences = {
 	mood: null,
 	pull: null,
 	familiarity: null,
+	languages: null,
 };
 
 export interface PreferencesState {
@@ -38,16 +39,20 @@ export function usePreferences(): PreferencesState {
 		try {
 			const stored = window.localStorage.getItem(KEY);
 			if (stored) {
-				const { moods, ...parsed } = JSON.parse(
+				const { moods, language, ...parsed } = JSON.parse(
 					stored,
 				) as Partial<Preferences> & {
 					moods?: Mood[];
+					/** The pre-D-027 singular; unrelated to D-120's `languages`. */
+					language?: string;
 				};
-				// Saves have used `moods: Mood[]` and, before that, language and
-				// era fields. Take the first of a stored array and drop the rest.
-				// `moods` is destructured off rather than spread through, so the
-				// legacy key dies on the next save instead of being carried
-				// forward forever. Anything unrecognised falls back to empty.
+				// Saves have used `moods: Mood[]` and, before that, a singular
+				// `language` and era fields. Take the first of a stored array and
+				// drop the rest. Legacy keys are destructured off rather than
+				// spread through, so they die on the next save instead of being
+				// carried forward forever. Anything unrecognised falls back to
+				// empty; `languages` (D-120) rides the spread and defaults null.
+				void language;
 				setPreferences({
 					...EMPTY_PREFERENCES,
 					...parsed,

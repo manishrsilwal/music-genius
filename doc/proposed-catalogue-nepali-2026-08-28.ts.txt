@@ -1,0 +1,20 @@
+// Proposed nepali catalogue entries — 2026-08-28 (D-120)
+// 1 kept of 12 proposed; 11 dropped by verification.
+// EVERY entry verified on LRCLIB with synced lyrics. Notes are DRAFTS:
+// rewrite each before blessing (D-045 — notes are written, not generated).
+// To bless: rewrite notes, paste entries into CATALOGUE, then run
+//   bun run scripts/audit-catalogue.ts
+
+	{
+		title: "Salaijyo",
+		artist: "Nepathya",
+		lrclibId: "11539833",
+		// DRAFT NOTE — model-written; rewrite before blessing (D-045).
+		note: "Uses a roadside flower to meditate on impermanence and memory.",
+		mood: "tender",
+		pull: "imagery",
+		familiarity: "canon",
+		language: "nepali",
+		era: "classic",
+		// verified: lrclib 11539833, synced, 279s — proposed as "Salaijyo" / "Nepathya"
+	},

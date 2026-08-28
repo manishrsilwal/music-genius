@@ -105,7 +105,10 @@ function Discovery() {
 		answered === true &&
 		!preferences.mood &&
 		!preferences.pull &&
-		!preferences.familiarity;
+		!preferences.familiarity &&
+		// Languages count as an answer too (D-120): a reader who only said
+		// "Nepali" has personalised, and owes the shelves a chance to say so.
+		!preferences.languages;
 	const { entries, remove, clear } = useHistory();
 	const { rotation, shuffle } = useRotation();
 
@@ -383,11 +386,29 @@ function Discovery() {
 									  it re-picks, and both shelves still re-enter
 									  together on the rotation key (D-091).
 									*/}
-									<DeepDives
-										picks={dives}
-										preferences={preferences}
-										onShuffle={shuffle}
-									/>
+									{dives.length > 0 ? (
+										<DeepDives
+											picks={dives}
+											preferences={preferences}
+											onShuffle={shuffle}
+										/>
+									) : (
+										/*
+										  The honest empty shelf (D-120). A chosen
+										  language with no stock must SAY so — the
+										  testers' complaint was the silent
+										  substitution, and a quietly refilled shelf
+										  in the wrong language is that complaint
+										  restated. Search still reaches every song
+										  on LRCLIB, and the sentence says where the
+										  door is.
+										*/
+										<p className="bento__empty text-caption text-ink-muted">
+											Our shelf for your languages is still being stocked —
+											nothing worth recommending yet. Search reaches every song,
+											in every language.
+										</p>
+									)}
 								</div>
 
 								{/*
@@ -395,72 +416,80 @@ function Discovery() {
 								  column always outran the three cards and left a
 								  dead zone under them. Full width, the list runs
 								  three columns and the region closes flush.
+
+								  Gated on having anything to hold (D-120): an
+								  accordion opening onto an empty list with a Load
+								  more under it would be furniture for a room with
+								  no stock — the empty-shelf sentence above already
+								  owns that state.
 								*/}
-								<aside
-									className="bento__also"
-									data-open={alsoOpen || undefined}
-								>
-									<button
-										type="button"
-										className="bento__also-toggle"
-										aria-expanded={alsoOpen}
-										aria-controls="also-liked"
-										onClick={() => setAlsoOpen(!alsoOpen)}
+								{also.length > 0 && (
+									<aside
+										className="bento__also"
+										data-open={alsoOpen || undefined}
 									>
-										{/*
+										<button
+											type="button"
+											className="bento__also-toggle"
+											aria-expanded={alsoOpen}
+											aria-controls="also-liked"
+											onClick={() => setAlsoOpen(!alsoOpen)}
+										>
+											{/*
 										  "More for you", not "People also like" (D-104):
 										  nothing measures what people like — OD-024 is
 										  deliberately unresolved — and the shelf is ranked
 										  down the reader's own answers, as its lead says.
 										  The heading now claims only what the code does.
 										*/}
-										<span className="text-micro font-semibold uppercase tracking-label text-ink">
-											More for you
-										</span>
-										{/* The chevron says which way the row will move. */}
-										<svg
-											className="bento__also-chevron"
-											viewBox="0 0 12 12"
-											width="12"
-											height="12"
-											aria-hidden="true"
-											focusable="false"
-										>
-											<path
-												d="M2 4 L6 8 L10 4"
-												fill="none"
-												stroke="currentColor"
-												strokeWidth="1.6"
-												strokeLinecap="round"
-												strokeLinejoin="round"
-											/>
-										</svg>
-									</button>
+											<span className="text-micro font-semibold uppercase tracking-label text-ink">
+												More for you
+											</span>
+											{/* The chevron says which way the row will move. */}
+											<svg
+												className="bento__also-chevron"
+												viewBox="0 0 12 12"
+												width="12"
+												height="12"
+												aria-hidden="true"
+												focusable="false"
+											>
+												<path
+													d="M2 4 L6 8 L10 4"
+													fill="none"
+													stroke="currentColor"
+													strokeWidth="1.6"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												/>
+											</svg>
+										</button>
 
-									<div id="also-liked" className="bento__also-body">
-										<div className="bento__also-inner">
-											<p className="mb-4 text-caption text-ink-faint">
-												More from the same catalogue, ranked further down your
-												answers.
-											</p>
-											<AlsoLiked picks={also} art />
-											{/*
+										<div id="also-liked" className="bento__also-body">
+											<div className="bento__also-inner">
+												<p className="mb-4 text-caption text-ink-faint">
+													More from the same catalogue, ranked further down your
+													answers.
+												</p>
+												<AlsoLiked picks={also} art />
+												{/*
 											  Deepens THIS shelf only (D-101) — the count
 											  is separate from the shuffle, which re-deals
 											  at the reader's chosen depth.
 											*/}
-											{!alsoExhausted && (
-												<button
-													type="button"
-													onClick={() => setAlsoCount((c) => c + 12)}
-													className="bento__also-more px-4 py-2 text-micro"
-												>
-													Load more
-												</button>
-											)}
+												{!alsoExhausted && (
+													<button
+														type="button"
+														onClick={() => setAlsoCount((c) => c + 12)}
+														className="bento__also-more px-4 py-2 text-micro"
+													>
+														Load more
+													</button>
+												)}
+											</div>
 										</div>
-									</div>
-								</aside>
+									</aside>
+								)}
 							</motion.div>
 						</section>
 

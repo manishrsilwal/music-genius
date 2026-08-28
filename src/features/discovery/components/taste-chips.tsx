@@ -1,7 +1,14 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
-import type { Familiarity, Mood, Preferences, Pull } from "@/lib/deep-dives";
+import {
+	type Familiarity,
+	LANGUAGE_OPTIONS,
+	type Language,
+	type Mood,
+	type Preferences,
+	type Pull,
+} from "@/lib/deep-dives";
 import { transition } from "@/lib/motion";
 
 import {
@@ -25,7 +32,7 @@ import "./taste-chips.scss";
  * the reader asked for.
  */
 
-type Axis = "mood" | "pull" | "familiarity";
+type Axis = "mood" | "pull" | "familiarity" | "languages";
 
 const AXES: {
 	key: Axis;
@@ -39,6 +46,17 @@ const AXES: {
 
 /** The stated answer, or an honest blank. */
 function labelFor(axis: Axis, preferences: Preferences): string {
+	if (axis === "languages") {
+		const chosen = preferences.languages ?? [];
+		if (chosen.length === 0) return "Any";
+		const labels = LANGUAGE_OPTIONS.filter((option) =>
+			chosen.includes(option.value),
+		).map((option) => option.label);
+		// Two fit a chip; more become a count rather than a paragraph.
+		return labels.length <= 2
+			? labels.join(" + ")
+			: `${labels[0]} + ${labels.length - 1} more`;
+	}
 	const value = preferences[axis];
 	if (!value) return "Any";
 	const found = AXES.find((a) => a.key === axis)?.options.find(
@@ -73,6 +91,19 @@ export function TasteChips({
 		setOpen(null);
 	};
 
+	/*
+	 * Languages TOGGLE and the panel stays open (D-120): a multilingual
+	 * reader is mid-thought after the first tap, and closing on them turns
+	 * "English and Nepali" into three trips through the same menu.
+	 */
+	const toggleLanguage = (value: Language) => {
+		const current = preferences.languages ?? [];
+		const next = current.includes(value)
+			? current.filter((entry) => entry !== value)
+			: [...current, value];
+		onChange({ ...preferences, languages: next.length > 0 ? next : null });
+	};
+
 	return (
 		<div className="taste">
 			<div className="taste__row">
@@ -91,6 +122,19 @@ export function TasteChips({
 						</span>
 					</button>
 				))}
+
+				<button
+					type="button"
+					className="taste__chip text-micro"
+					data-open={open === "languages" || undefined}
+					aria-expanded={open === "languages"}
+					onClick={() => setOpen(open === "languages" ? null : "languages")}
+				>
+					<span className="taste__chip-label">Languages</span>
+					<span className="taste__chip-value">
+						{labelFor("languages", preferences)}
+					</span>
+				</button>
 
 				<button
 					type="button"
@@ -128,22 +172,47 @@ export function TasteChips({
 						exit={{ opacity: 0, y: -6, transition: transition.dismiss }}
 						transition={transition.editorial}
 					>
-						{AXES.find((a) => a.key === open)?.options.map((option) => (
-							<button
-								key={option.value}
-								type="button"
-								className="taste__option"
-								data-selected={preferences[open] === option.value || undefined}
-								onClick={() => choose(open, option.value)}
-							>
-								<span className="taste__option-label text-caption">
-									{option.label}
-								</span>
-								<span className="taste__option-hint text-micro">
-									{option.hint}
-								</span>
-							</button>
-						))}
+						{open === "languages"
+							? LANGUAGE_OPTIONS.map((option) => {
+									const selected = (preferences.languages ?? []).includes(
+										option.value,
+									);
+									return (
+										<button
+											key={option.value}
+											type="button"
+											className="taste__option"
+											aria-pressed={selected}
+											data-selected={selected || undefined}
+											onClick={() => toggleLanguage(option.value)}
+										>
+											<span className="taste__option-label text-caption">
+												{option.label}
+											</span>
+										</button>
+									);
+								})
+							: AXES.find((a) => a.key === open)?.options.map((option) => (
+									<button
+										key={option.value}
+										type="button"
+										className="taste__option"
+										data-selected={
+											preferences[open as Exclude<Axis, "languages">] ===
+												option.value || undefined
+										}
+										onClick={() =>
+											choose(open as Exclude<Axis, "languages">, option.value)
+										}
+									>
+										<span className="taste__option-label text-caption">
+											{option.label}
+										</span>
+										<span className="taste__option-hint text-micro">
+											{option.hint}
+										</span>
+									</button>
+								))}
 					</motion.div>
 				)}
 			</AnimatePresence>

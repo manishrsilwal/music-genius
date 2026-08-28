@@ -134,6 +134,43 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-120 — Language is a filter, and the AI proposes but never publishes
+**Built 2026-08-28.** The owner's testers, quoted: "why is a Hindi song
+recommended for me?" — and "what about Nepali songs?". Two rulings.
+
+**Language became the fourth axis, as a HARD FILTER.** This overturns
+D-027's "recorded but not scored" — a wrong-language pick is a miss,
+not a weaker match — and it must be a filter because `selectDiverse`
+actively REWARDS language variety: a score bump would be fought by the
+diversity pass and lose. D-027's original disease (a binary
+single-select forcing bilingual readers to pick a side) is cured by
+MULTI-select, the one deliberate exception to D-032's no-buttons rule:
+toggles plus a Continue, placed last so the Continue is also the
+flow's finish line ("Show my songs" / "Any language is fine"). The
+offered list orders itself by `navigator.languages` — the device's own
+ordered preference list, no geolocation service, no permission, nothing
+sent anywhere — so a Kathmandu phone leads with Nepali. Offered wider
+than stocked on purpose: an unstocked language gets the HONEST empty
+shelf ("still being stocked — search reaches every song"), never the
+silent substitution the testers were actually complaining about. The
+taste chips grew a Languages chip whose panel stays open while
+toggling; signatures append sorted languages only when set, so every
+pre-D-120 cache entry survives.
+
+**The AI proposes; the owner publishes.** `scripts/expand-catalogue.ts`
+points DeepSeek (the metered provider already in the house, D-050) at
+the THIN CELLS of the language×mood grid and then lets code adjudicate
+every candidate the way this repo always has: found on LRCLIB with
+synced lyrics, matched by the same scoring that vouches for artwork
+(MATCH_THRESHOLD), not a variant cut, not already shelved. Survivors
+land in `doc/proposed-catalogue-*.ts.txt` with DRAFT-marked notes
+(D-045: notes are written, not generated) for the owner's blessing.
+The first real run is its own lesson: 12 Nepali proposals, 11 dropped
+— all real songs, but LRCLIB's user-contributed Nepali coverage is
+thin — 1 kept (Salaijyo, Nepathya, synced, verified). The Nepali
+shelf's bottleneck is the lyrics commons, not the model, which is
+exactly why the empty state must stay honest.
+
 ### D-119 — One container, every page
 **Built 2026-08-28.** The owner's report: the content column shifts
 between pages. Audited at 1295px — the landing composed at 72rem with

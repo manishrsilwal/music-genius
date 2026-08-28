@@ -6,8 +6,10 @@ import {
 	DEEP_DIVE_COUNT,
 	explainPick,
 	FAMILIARITIES,
+	LANGUAGES,
 	MOODS,
 	normalisePreferences,
+	orderLanguagesByLocale,
 	type Preferences,
 	PULLS,
 	parsePreferences,
@@ -273,6 +275,7 @@ describe("preference plumbing", () => {
 			mood: null,
 			pull: null,
 			familiarity: null,
+			languages: null,
 		});
 		expect(preferenceSignature(parsePreferences(junk))).toBe("none");
 	});
@@ -282,7 +285,12 @@ describe("preference plumbing", () => {
 			for (const pull of PULLS) {
 				for (const familiarity of FAMILIARITIES) {
 					const params = new URLSearchParams({ mood, pull, familiarity });
-					expect(parsePreferences(params)).toEqual({ mood, pull, familiarity });
+					expect(parsePreferences(params)).toEqual({
+						mood,
+						pull,
+						familiarity,
+						languages: null,
+					});
 				}
 			}
 		}
@@ -295,11 +303,13 @@ describe("preference plumbing", () => {
 			mood: "longing",
 			pull: null,
 			familiarity: null,
+			languages: null,
 		});
 		expect(normalisePreferences(undefined)).toEqual({
 			mood: null,
 			pull: null,
 			familiarity: null,
+			languages: null,
 		});
 	});
 });
@@ -371,5 +381,72 @@ describe("already read", () => {
 		for (const id of read) {
 			expect(also.map((t) => t.lrclibId)).not.toContain(id);
 		}
+	});
+});
+
+/**
+ * Language is a hard filter, not a score (D-120) — a wrong-language pick is
+ * the one recommendation the testers named as a miss, so every promise here
+ * is absolute: nothing outside the chosen languages, an honest empty shelf
+ * over a silent substitution, and the reader's own locale leading the list.
+ */
+describe("languages (D-120)", () => {
+	const seed = seedFromDate("2026-08-28");
+
+	it("recommends only within the chosen languages", () => {
+		const prefs = { ...NONE, languages: ["hindi" as const] };
+		for (const track of pickDeepDives(prefs, seed)) {
+			expect(track.language).toBe("hindi");
+		}
+		for (const track of pickAlsoLiked(prefs, seed)) {
+			expect(track.language).toBe("hindi");
+		}
+	});
+
+	it("returns an empty shelf, not a substitution, for an unstocked language", () => {
+		const prefs = { ...NONE, languages: ["nepali" as const] };
+		expect(pickDeepDives(prefs, seed)).toHaveLength(0);
+		expect(pickAlsoLiked(prefs, seed)).toHaveLength(0);
+	});
+
+	it("treats null and empty as anything", () => {
+		expect(pickDeepDives({ ...NONE, languages: null }, seed)).toHaveLength(3);
+		expect(pickDeepDives({ ...NONE, languages: [] }, seed)).toHaveLength(3);
+	});
+
+	it("orders the offered languages by the device's own locales", () => {
+		const ordered = orderLanguagesByLocale(["ne-NP", "hi"]);
+		expect(ordered[0]?.value).toBe("nepali");
+		expect(ordered[1]?.value).toBe("hindi");
+		// Unmentioned languages keep the curated order behind them.
+		expect(orderLanguagesByLocale([]).map((o) => o.value)).toEqual([
+			...LANGUAGES,
+		]);
+	});
+
+	it("parses languages off a query string, enum-checked and deduped", () => {
+		const params = new URLSearchParams(
+			"languages=english+nepali+english+klingon",
+		);
+		expect(parsePreferences(params).languages).toEqual(["english", "nepali"]);
+		expect(
+			parsePreferences(new URLSearchParams("languages=klingon")).languages,
+		).toBeNull();
+	});
+
+	it("normalises junk arrays the same way", () => {
+		expect(
+			normalisePreferences({ languages: ["hindi", 7, "x", "hindi"] }).languages,
+		).toEqual(["hindi"]);
+		expect(normalisePreferences({ languages: "hindi" }).languages).toBeNull();
+	});
+
+	it("signs languages sorted, and leaves old signatures untouched", () => {
+		expect(
+			preferenceSignature({ ...NONE, languages: ["nepali", "english"] }),
+		).toBe("-.-.-.english+nepali");
+		expect(
+			preferenceSignature({ mood: "longing", pull: null, familiarity: null }),
+		).toBe("longing.-.-");
 	});
 });
