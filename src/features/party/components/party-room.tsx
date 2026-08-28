@@ -338,7 +338,8 @@ export function PartyRoom({ roomId }: { roomId: string }) {
 							className="party__member text-micro"
 							data-you={you || undefined}
 						>
-							{you ? "You" : member.name}
+							{member.name}
+							{you ? " · you" : ""}
 							{member.host ? " · host" : ""}
 						</li>
 					);

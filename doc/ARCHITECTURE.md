@@ -156,10 +156,13 @@ cards are radius-card with a shadow and no border, fields are
 hairline-bordered pills.
 
 **"You" leads the member list.** The first question a member asks the
-list is "am I in?", so their own chip comes first and says so in the
-first person — then the host, then join order (`orderMembers`, pure
-and pinned, stable within ranks). The self chip wears the accent's
-hairline rather than its fill: findable at a glance, not shouting.
+list is "am I in?", so their own chip comes first — then the host,
+then join order (`orderMembers`, pure and pinned, stable within
+ranks). The chip keeps the NAME with the pronoun ("Manish · you", the
+owner's follow-up: a bare "You" dropped the name the rest of the party
+sees them by), suffixed in the same grammar as "· host". The self chip
+wears the accent's hairline rather than its fill: findable at a
+glance, not shouting.
 
 ### D-117 — Shipping hardness for the party
 **Built 2026-08-26.** The code half of the ship list (the other half is
