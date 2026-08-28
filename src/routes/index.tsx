@@ -545,12 +545,17 @@ function Discovery() {
 			  The party's doorway (D-115) — one quiet line at the page's end,
 			  deliberately outside the bento so the landing's composition is
 			  untouched. Placement is provisional; the room is the feature.
+			  Not on the first-visit state (D-122): the chat's doorway row
+			  already holds the party, and a second, page-wide-centred copy
+			  floated disconnected beside the left-set tile (owner's review).
 			*/}
-			<p className="landing__party text-micro">
-				<Link to="/party" className="landing__party-link">
-					Listen together — start a party with friends
-				</Link>
-			</p>
+			{answered !== false && (
+				<p className="landing__party text-micro">
+					<Link to="/party" className="landing__party-link">
+						Listen together — start a party with friends
+					</Link>
+				</p>
+			)}
 		</motion.main>
 	);
 }

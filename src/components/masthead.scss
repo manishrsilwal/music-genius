@@ -56,6 +56,30 @@
 	// correctly.
 	position: fixed;
 
+	// A scrim, not a box (D-122, owner's screenshot: the hero's own words
+	// scrolled straight through the wordmark). D-086 removed the PILL — a
+	// surface that made the identity read as a button — and that ruling
+	// stands: this is a full-width fade from the canvas colour, painting
+	// the top band of the page so scrolled content dissolves before it
+	// reaches the mark. Invisible at scroll 0, where the band and the
+	// canvas are the same colour.
+	&::before {
+		content: "";
+		position: fixed;
+		inset-inline: 0;
+		top: 0;
+		height: calc(
+			var(--masthead-height) + var(--dock-inset) * 0.75 +
+				env(safe-area-inset-top, 0px) + 1.25rem
+		);
+		background: linear-gradient(
+			var(--color-canvas) 55%,
+			transparent
+		);
+		pointer-events: none;
+		z-index: -1;
+	}
+
 	// Colour only — a hover that paints a box back on would give back the
 	// button reading the box's removal just took away (D-086).
 	&:hover,

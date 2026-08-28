@@ -1,5 +1,7 @@
+import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+
 import { Tick } from "@/components/tick";
 import {
 	FAMILIARITY_OPTIONS,
@@ -38,6 +40,13 @@ import "./preference-chat.scss";
  * validates, the reader blesses. When the wire fails, a local keyword
  * reader answers instead, and when neither hears anything, the chips are
  * still right there — the conversation never dead-ends.
+ *
+ * Anatomy after the owner's layout review: the tile is a MESSENGER, not a
+ * form — a named header, quick-reply chips that live inside the thread
+ * under the question they answer, a typing indicator while the AI reads,
+ * and a round send. The two ways OUT of the conversation (skip-to-search,
+ * the party) are doorways BELOW the tile, not controls inside it: leaving
+ * the chat should not look like part of the chat.
  *
  * Every visible word is written here, never generated: the interpreter
  * returns enums only, and `heardLabels` re-speaks them in the option
@@ -83,13 +92,13 @@ export function PreferenceChat({
 	);
 
 	const endRef = useRef<HTMLDivElement>(null);
-	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll follows the thread, not the flags
+	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll follows the whole exchange — bubbles, the typing dots, and each step's fresh chips
 	useEffect(() => {
 		endRef.current?.scrollIntoView({
 			behavior: reduce ? "auto" : "smooth",
 			block: "nearest",
 		});
-	}, [bubbles, busy]);
+	}, [bubbles, busy, stage]);
 
 	function say(from: Bubble["from"], text: string) {
 		setBubbles((current) => [...current, { id: nextId.current++, from, text }]);
@@ -218,150 +227,222 @@ export function PreferenceChat({
 
 	return (
 		<div className="chat">
-			{/* aria-live, so the bot's next question is announced without the
-			    thread stealing focus from the chips. */}
-			<div className="chat__thread" role="log" aria-live="polite">
-				{bubbles.map((bubble) => (
-					<motion.p
-						key={bubble.id}
-						className="chat__bubble"
-						data-from={bubble.from}
-						initial={{ opacity: 0, y: 8 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={transition.editorial}
-					>
-						{bubble.text}
-					</motion.p>
-				))}
-				{busy && (
-					<p className="chat__bubble chat__bubble--waiting" data-from="bot">
-						Reading that…
-					</p>
-				)}
-				<div ref={endRef} />
-			</div>
+			<div className="chat__tile">
+				{/* A conversation has a counterpart; naming it is what makes
+				    the surface read as a chat rather than a styled form. */}
+				<header className="chat__head">
+					<span className="chat__avatar" aria-hidden="true">
+						<svg viewBox="0 0 14 14" width="14" height="14" focusable="false">
+							<rect x="1" y="2.5" width="12" height="2" rx="1" />
+							<rect
+								x="1"
+								y="6"
+								width="9"
+								height="2"
+								rx="1"
+								className="chat__avatar-accent"
+							/>
+							<rect x="1" y="9.5" width="12" height="2" rx="1" />
+						</svg>
+					</span>
+					<div>
+						<p className="chat__name">The Explorer</p>
+						<p className="chat__status text-micro">turns feelings into songs</p>
+					</div>
+				</header>
 
-			<div className="chat__chips">
-				{axis === "mood" &&
-					MOOD_OPTIONS.map((option) => (
-						<Chip
-							key={option.value}
-							option={option}
-							onTap={() => tap(option, step)}
-						/>
+				{/* aria-live, so the bot's next question is announced without the
+				    thread stealing focus from the chips. */}
+				<div className="chat__thread" role="log" aria-live="polite">
+					{bubbles.map((bubble) => (
+						<motion.p
+							key={bubble.id}
+							className="chat__bubble"
+							data-from={bubble.from}
+							initial={{ opacity: 0, y: 8 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={transition.editorial}
+						>
+							{bubble.text}
+						</motion.p>
 					))}
-				{axis === "pull" &&
-					PULL_OPTIONS.map((option) => (
-						<Chip
-							key={option.value}
-							option={option}
-							onTap={() => tap(option, step)}
-						/>
-					))}
-				{axis === "familiarity" &&
-					FAMILIARITY_OPTIONS.map((option) => (
-						<Chip
-							key={option.value}
-							option={option}
-							onTap={() => tap(option, step)}
-						/>
-					))}
-				{axis === "languages" && (
-					<>
-						{languageOptions.map((option) => {
-							const selected = (draft.languages ?? []).includes(option.value);
-							return (
+
+					{busy && (
+						<p
+							className="chat__bubble chat__bubble--typing"
+							data-from="bot"
+							aria-label="Reading that"
+						>
+							<span className="chat__dot" />
+							<span className="chat__dot" />
+							<span className="chat__dot" />
+						</p>
+					)}
+
+					{/*
+					  Quick replies live IN the thread, under the question they
+					  answer — a separate chip band below the conversation read
+					  as a form bolted to a chat (owner's review). They scroll
+					  with the exchange, the way replies do everywhere else the
+					  reader chats.
+					*/}
+					{!busy && (
+						<div className="chat__replies">
+							{axis === "mood" &&
+								MOOD_OPTIONS.map((option) => (
+									<Chip
+										key={option.value}
+										option={option}
+										onTap={() => tap(option, step)}
+									/>
+								))}
+							{axis === "pull" &&
+								PULL_OPTIONS.map((option) => (
+									<Chip
+										key={option.value}
+										option={option}
+										onTap={() => tap(option, step)}
+									/>
+								))}
+							{axis === "familiarity" &&
+								FAMILIARITY_OPTIONS.map((option) => (
+									<Chip
+										key={option.value}
+										option={option}
+										onTap={() => tap(option, step)}
+									/>
+								))}
+							{axis === "languages" && (
+								<>
+									{languageOptions.map((option) => {
+										const selected = (draft.languages ?? []).includes(
+											option.value,
+										);
+										return (
+											<button
+												key={option.value}
+												type="button"
+												className="chat__chip"
+												aria-pressed={selected}
+												data-selected={selected || undefined}
+												onClick={() => toggleLanguage(option.value)}
+											>
+												{/* Always in the layout, grey until chosen:
+												    an appearing mark would shift the label
+												    under the finger that pressed it. */}
+												<Tick className="chat__tick" />
+												{option.label}
+											</button>
+										);
+									})}
+									<button
+										type="button"
+										className="chat__chip chat__chip--bright"
+										onClick={finishLanguages}
+									>
+										{(draft.languages ?? []).length > 0
+											? "Show my songs"
+											: "Any language is fine"}
+									</button>
+								</>
+							)}
+							{stage.kind === "ask" && axis !== "languages" && (
 								<button
-									key={option.value}
 									type="button"
-									className="chat__chip"
-									aria-pressed={selected}
-									data-selected={selected || undefined}
-									onClick={() => toggleLanguage(option.value)}
+									className="chat__chip chat__chip--quiet"
+									onClick={() => skip(step)}
 								>
-									{/* The tick says "chosen" at a glance — the lime
-									    hairline alone was not obvious (owner's report).
-									    ALWAYS rendered, grey until chosen: a mark that
-									    appears on tap would shift the label sideways,
-									    and a control must not move under the finger
-									    that just pressed it. */}
-									<Tick className="chat__tick" />
-									{option.label}
+									Skip this one
 								</button>
-							);
-						})}
-						<button
-							type="button"
-							className="chat__chip chat__chip--bright"
-							onClick={finishLanguages}
-						>
-							{(draft.languages ?? []).length > 0
-								? "Show my songs"
-								: "Any language is fine"}
-						</button>
-					</>
-				)}
-				{stage.kind === "ask" && axis !== "languages" && (
+							)}
+							{stage.kind === "confirm" && (
+								<>
+									<button
+										type="button"
+										className="chat__chip chat__chip--bright"
+										onClick={() => confirmHeard(stage.heard)}
+									>
+										That's right — show my songs
+									</button>
+									<button
+										type="button"
+										className="chat__chip"
+										onClick={rejectHeard}
+									>
+										Not quite — let me choose
+									</button>
+								</>
+							)}
+						</div>
+					)}
+					<div ref={endRef} />
+				</div>
+
+				<form className="chat__composer" onSubmit={submitText}>
+					<input
+						className="chat__input"
+						type="text"
+						value={text}
+						maxLength={400}
+						placeholder="Say it in your own words — “just went through a breakup”"
+						aria-label="Tell us how you're feeling"
+						onChange={(event) => setText(event.target.value)}
+					/>
+					{/* Round, iconic, at the line's end: the send everyone's
+					    thumb already knows. A wide SEND pill read as a search
+					    button (owner's review). */}
 					<button
-						type="button"
-						className="chat__chip chat__chip--quiet"
-						onClick={() => skip(step)}
+						type="submit"
+						className="chat__send"
+						aria-label="Send"
+						disabled={busy || text.trim().length === 0}
 					>
-						Skip this one
-					</button>
-				)}
-				{stage.kind === "confirm" && (
-					<>
-						<button
-							type="button"
-							className="chat__chip chat__chip--bright"
-							onClick={() => confirmHeard(stage.heard)}
+						<svg
+							viewBox="0 0 14 14"
+							width="15"
+							height="15"
+							aria-hidden="true"
+							focusable="false"
 						>
-							That's right — show my songs
-						</button>
-						<button type="button" className="chat__chip" onClick={rejectHeard}>
-							Not quite — let me choose
-						</button>
-					</>
-				)}
-			</div>
+							<path
+								d="M7 11.5 V2.5 M3.2 6 L7 2.2 L10.8 6"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="1.8"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							/>
+						</svg>
+					</button>
+				</form>
 
-			<form className="chat__composer" onSubmit={submitText}>
-				<input
-					className="chat__input"
-					type="text"
-					value={text}
-					maxLength={400}
-					placeholder="Say it in your own words — “just went through a breakup”"
-					aria-label="Tell us how you're feeling"
-					onChange={(event) => setText(event.target.value)}
-				/>
-				<button
-					type="submit"
-					className="chat__send"
-					disabled={busy || text.trim().length === 0}
-				>
-					Send
-				</button>
-			</form>
-
-			{/*
-			  The privacy split, said where it applies: chips are local like
-			  everything else here; typed words are the ONE thing that crosses
-			  the wire, and only to be read. One escape, not three (D-064).
-			*/}
-			<div className="chat__foot">
+				{/* The privacy split, said where it applies — beside the one
+				    control that crosses the wire. */}
 				<p className="chat__privacy text-micro">
 					Taps stay on this device. Typed words are sent once to be understood,
 					and not kept.
 				</p>
+			</div>
+
+			{/*
+			  The ways OUT of the conversation, below the surface they leave
+			  (owner's layout review — leaving the chat should not look like
+			  part of the chat). Two peer doorways: the search (D-064's one
+			  full escape, unchanged in rank) and the party (D-115's doorway,
+			  moved up from the page's end where the chat had pushed it out
+			  of the first view).
+			*/}
+			<div className="chat__doors">
 				<button
 					type="button"
-					className="chat__bail"
+					className="chat__door"
 					onClick={() => onComplete(draft)}
 				>
 					Skip all — just let me search
 				</button>
+				<Link to="/party" className="chat__door">
+					Listen together — start a party
+				</Link>
 			</div>
 		</div>
 	);
