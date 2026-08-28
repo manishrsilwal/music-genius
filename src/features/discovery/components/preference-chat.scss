@@ -1,28 +1,49 @@
 @use "styles/mixins" as m;
 
-// The feelings chat (D-122) — the stepper's anatomy, worn as a conversation.
-// Same brief as ever: tactile and soothing, never gamified. The thread is
-// quiet editorial text, the chips carry the stepper's card manners at pill
-// size, and the one bright control is always the flow's exit.
+// The feelings chat (D-122, restyled after the owner's first look) — the
+// stepper's anatomy, worn as a conversation.
+//
+// The first cut floated bubbles straight on the canvas and they read as
+// scattered furniture, not a conversation. The whole exchange now lives on
+// ONE tile — the same surface anatomy as the results bento — so the thread,
+// the chips and the composer are visibly parts of a single object. Same
+// brief as ever: tactile and soothing, never gamified.
 
 .chat {
-	display: grid;
-	gap: 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.125rem;
+	padding: 1.25rem;
+	border-radius: var(--radius-card);
+	@include m.surface;
+	box-shadow: var(--shadow-1);
 
+	@include m.from("md") {
+		padding: 1.5rem;
+	}
+
+	// Flex, not grid: a grid with headroom spreads its rows apart
+	// (align-content stretch), which is exactly the scattered look the
+	// owner flagged. A column keeps bubbles in conversation distance.
 	&__thread {
-		display: grid;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
 		gap: 0.625rem;
-		// Enough for the conversation to breathe without pushing the chips
-		// below the fold (the D-028 lesson, inherited): older bubbles scroll
-		// away, the current question and its answers stay on screen.
-		max-height: 19rem;
+		max-height: 18rem;
 		overflow-y: auto;
-		padding-block: 0.25rem;
+		overscroll-behavior: contain;
+		padding-inline-end: 0.5rem;
+
+		// The system scrollbar was a grey plank through the middle of the
+		// page; thin and tinted, it belongs to the tile instead.
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-hover-strong) transparent;
 	}
 
 	&__bubble {
 		max-width: 85%;
-		width: fit-content;
+		margin: 0;
 		padding: 0.7rem 1rem;
 		border-radius: var(--radius-card);
 		font-family: var(--font-ui);
@@ -30,14 +51,14 @@
 		line-height: 1.5;
 
 		&[data-from="bot"] {
-			justify-self: start;
+			align-self: flex-start;
 			background: var(--color-surface-raised);
 			color: var(--color-ink);
 			border-start-start-radius: var(--radius-nested);
 		}
 
 		&[data-from="reader"] {
-			justify-self: end;
+			align-self: flex-end;
 			@include m.bright;
 			border-start-end-radius: var(--radius-nested);
 		}
@@ -54,14 +75,18 @@
 		gap: 0.5rem;
 	}
 
-	// The stepper card's manners at pill size: surface, hairline, a lift on
-	// hover, the lime "this one is yours" mark when a toggle sits selected.
+	// The stepper card's manners at pill size, sitting one step DOWN from
+	// the tile so each chip has an edge of its own.
 	&__chip {
 		@include m.tap-target;
 		@include m.press(0.97);
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
 		padding: 0.6rem 1rem;
+		border: 1px solid var(--color-hairline);
 		border-radius: var(--radius-pill);
-		@include m.surface;
+		background: var(--color-surface-raised);
 		font-family: var(--font-ui);
 		font-size: var(--text-caption);
 		color: var(--color-ink);
@@ -77,6 +102,9 @@
 			translate: 0 -1px;
 		}
 
+		// A chosen toggle says so twice (the owner's report: a hairline
+		// alone was not obvious): the lime edge AND the tick the markup
+		// adds — colour for the glance, the mark for certainty.
 		&[data-selected] {
 			border-color: var(--color-lime);
 		}
@@ -87,6 +115,12 @@
 			text-transform: uppercase;
 			font-size: var(--text-micro);
 			letter-spacing: var(--tracking-label);
+
+			&:hover,
+			&:focus-visible {
+				border-color: transparent;
+				background: var(--track-accent);
+			}
 		}
 
 		&--quiet {
@@ -117,14 +151,21 @@
 		}
 	}
 
-	// The composer sits a step DOWN from the canvas, the direction every
-	// nested surface takes here (D-088's search input, the also-well).
+	// The green mark the owner asked for: unmissable at a glance where the
+	// hairline was not.
+	&__tick {
+		flex: none;
+		color: var(--color-lime);
+	}
+
+	// The composer sits in a well, a step further down than the chips —
+	// the same descent every nested input takes here (D-088).
 	&__composer {
 		display: flex;
 		gap: 0.5rem;
 		padding: 0.375rem;
 		border-radius: var(--radius-pill);
-		background: var(--color-surface-raised);
+		background: var(--color-well);
 	}
 
 	&__input {

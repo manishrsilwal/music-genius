@@ -183,6 +183,19 @@ win as the reader's latest word, silent axes keep their answers.
 understood, and not kept." Typed feelings are the ONE thing that
 crosses this wire; taps never do, and nothing is stored server-side.
 
+**Restyled on the owner's first look, same day.** Two reports. The
+selected state was not obvious — a lime hairline alone does not read
+as "chosen" at a glance — so every toggle that sits selected now says
+so twice: the edge for the glance plus a lime TICK (`components/
+tick.tsx`, shared with the taste chips' panels, whose ring had the
+same disease). And the chat was not attractive: the first cut
+floated bubbles straight on the canvas, where a grid with headroom
+spread its rows apart (align-content stretch) and the system
+scrollbar cut a grey plank through the page. The whole exchange now
+lives on ONE tile — the bento's surface anatomy — with the thread as
+a flex column at conversation distance, a thin tinted scrollbar, and
+the composer in a well one step further down (D-088's descent).
+
 ### D-121 — The mood is a promise, read from the lyrics, corrected by the reader
 **Built 2026-08-28.** The owner's ask: "if someone wants to listen sad
 song, they really get that sad songs." The audit found four leaks, and

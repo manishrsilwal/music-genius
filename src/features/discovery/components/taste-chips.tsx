@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-
+import { Tick } from "@/components/tick";
 import {
 	FAMILIARITY_OPTIONS,
 	type Familiarity,
@@ -184,6 +184,7 @@ export function TasteChips({
 											data-selected={selected || undefined}
 											onClick={() => toggleLanguage(option.value)}
 										>
+											{selected && <Tick className="taste__tick" />}
 											<span className="taste__option-label text-caption">
 												{option.label}
 											</span>
@@ -203,6 +204,8 @@ export function TasteChips({
 											choose(open as Exclude<Axis, "languages">, option.value)
 										}
 									>
+										{preferences[open as Exclude<Axis, "languages">] ===
+											option.value && <Tick className="taste__tick" />}
 										<span className="taste__option-label text-caption">
 											{option.label}
 										</span>

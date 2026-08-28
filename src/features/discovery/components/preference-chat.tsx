@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-
+import { Tick } from "@/components/tick";
 import {
 	FAMILIARITY_OPTIONS,
 	LANGUAGE_OPTIONS,
@@ -275,6 +275,9 @@ export function PreferenceChat({
 									data-selected={selected || undefined}
 									onClick={() => toggleLanguage(option.value)}
 								>
+									{/* The tick says "chosen" at a glance — the lime
+									    hairline alone was not obvious (owner's report). */}
+									{selected && <Tick className="chat__tick" />}
 									{option.label}
 								</button>
 							);

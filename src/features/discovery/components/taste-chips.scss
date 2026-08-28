@@ -125,6 +125,7 @@
 	}
 
 	&__option {
+		position: relative;
 		display: grid;
 		gap: 0.1rem;
 		text-align: start;
@@ -137,7 +138,9 @@
 		}
 
 		// A ring rather than a fill: the row is already a target, and filling it
-		// would make the current answer look like the hovered one.
+		// would make the current answer look like the hovered one. The corner
+		// tick joined in D-122 — the owner's report on the chat's toggles
+		// applies here too: an outline alone was not obvious at a glance.
 		&[data-selected] {
 			box-shadow: inset 0 0 0 2px var(--track-accent);
 		}
@@ -145,6 +148,13 @@
 		@include m.reduced-motion {
 			transition: none;
 		}
+	}
+
+	&__tick {
+		position: absolute;
+		top: 0.65rem;
+		inset-inline-end: 0.65rem;
+		color: var(--color-lime);
 	}
 
 	&__option-label {
