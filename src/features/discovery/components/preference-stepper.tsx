@@ -40,6 +40,9 @@ export const MOOD_OPTIONS: Option<Mood>[] = [
 	{ value: "defiant", label: "Defiant", hint: "Anger with somewhere to go" },
 	{ value: "tender", label: "Tender", hint: "Quiet, close, unguarded" },
 	{ value: "restless", label: "Restless", hint: "Motion, nerve, escape" },
+	{ value: "heartbroken", label: "Heartbroken", hint: "The wound, still open" },
+	{ value: "joyful", label: "Joyful", hint: "Lightness that means it" },
+	{ value: "nostalgic", label: "Nostalgic", hint: "Looking back, softly" },
 ];
 
 export const PULL_OPTIONS: Option<Pull>[] = [

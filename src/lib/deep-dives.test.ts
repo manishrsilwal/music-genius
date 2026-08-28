@@ -8,6 +8,7 @@ import {
 	FAMILIARITIES,
 	LANGUAGES,
 	MOODS,
+	matchesMood,
 	normalisePreferences,
 	orderLanguagesByLocale,
 	type Preferences,
@@ -36,13 +37,32 @@ describe("catalogue", () => {
 		expect(new Set(keys).size).toBe(CATALOGUE.length);
 	});
 
-	it("covers every mood × pull cell", () => {
-		for (const mood of MOODS) {
+	it("covers every founding mood × pull cell", () => {
+		// The founding four are the catalogue's backbone and stay fully
+		// stocked. The D-121 moods (heartbroken, joyful, nostalgic) grow via
+		// retagging and harvests — until a cell fills, the shelf runs
+		// honestly short rather than substituting (pinned below).
+		const FOUNDING = ["longing", "defiant", "tender", "restless"] as const;
+		for (const mood of FOUNDING) {
 			for (const pull of PULLS) {
 				const cell = CATALOGUE.filter(
 					(t) => t.mood === mood && t.pull === pull,
 				);
 				expect(cell.length, `empty cell: ${mood}/${pull}`).toBeGreaterThan(0);
+			}
+		}
+	});
+
+	it("only ever carries moods from the vocabulary, on both tags", () => {
+		for (const track of CATALOGUE) {
+			expect(MOODS).toContain(track.mood);
+			if (track.moodAlso) {
+				expect(MOODS).toContain(track.moodAlso);
+				// A secondary tag repeating the primary would be padding, and
+				// padding is what the optional field exists to refuse.
+				expect(track.moodAlso, `${track.title} repeats its mood`).not.toBe(
+					track.mood,
+				);
 			}
 		}
 	});
@@ -72,24 +92,30 @@ describe("pickDeepDives", () => {
 		expect(a.map((t) => t.title)).not.toEqual(b.map((t) => t.title));
 	});
 
-	it("honours a single mood", () => {
+	it("keeps the mood promise: every pick carries the asked-for mood (D-121)", () => {
+		// The promise that replaced back-filling: answer a mood and the shelf
+		// holds only songs that carry it — primarily or secondarily — or runs
+		// honestly short. An off-mood pick here is the "wanted sad, got
+		// clever" failure this ruling exists to end.
 		for (const mood of MOODS) {
 			const picks = pickDeepDives({ ...NONE, mood }, seed);
 			expect(
-				picks.every((t) => t.mood === mood),
-				`mood ${mood}`,
+				picks.every((t) => matchesMood(t, mood)),
+				`mood ${mood} shelf contains an off-mood pick`,
 			).toBe(true);
 		}
 	});
 
-	it("fills the shelf for every mood, so no answer is a dead end", () => {
-		// Mood is single-select (D-032) and carries the heaviest weight, so a
-		// thin cell would show as a short or repetitive shelf.
+	it("fills the shelf wherever the catalogue can honour it", () => {
+		// For a stocked mood a short shelf would mean the picker is losing
+		// tracks it has; for a thin mood a FULL shelf would mean it is
+		// padding with tracks the reader refused. Both directions pinned.
 		for (const mood of MOODS) {
-			expect(
-				pickDeepDives({ ...NONE, mood }, seed),
-				`mood ${mood}`,
-			).toHaveLength(DEEP_DIVE_COUNT);
+			const stock = CATALOGUE.filter((t) => matchesMood(t, mood)).length;
+			const picks = pickDeepDives({ ...NONE, mood }, seed);
+			expect(picks, `mood ${mood} (stock ${stock})`).toHaveLength(
+				Math.min(stock, DEEP_DIVE_COUNT),
+			);
 		}
 	});
 
@@ -107,13 +133,37 @@ describe("pickDeepDives", () => {
 		}
 	});
 
-	it("fills the shelf for every mood × pull combination", () => {
+	it("fills the shelf for every stocked mood × pull combination", () => {
+		// Within a mood the pull answer never starves the shelf: the top-tier
+		// fallback reaches down for other pulls — but now only WITHIN the
+		// mood, which is the D-121 change of jurisdiction.
 		for (const mood of MOODS) {
+			const stock = CATALOGUE.filter((t) => matchesMood(t, mood)).length;
+			if (stock < DEEP_DIVE_COUNT) continue;
 			for (const pull of PULLS) {
 				const picks = pickDeepDives({ mood, pull, familiarity: "deep" }, seed);
 				expect(picks, `${mood}/${pull}`).toHaveLength(DEEP_DIVE_COUNT);
+				expect(
+					picks.every((t) => matchesMood(t, mood)),
+					`${mood}/${pull} broke the mood promise`,
+				).toBe(true);
 			}
 		}
+	});
+
+	it("a mood beats pull and familiarity combined", () => {
+		// The weight flip at the heart of D-121: at the old weights a track
+		// matching pull AND familiarity (2 + 1.5) outranked one matching only
+		// the mood (3), so the reader who asked for sad songs led with clever
+		// un-sad ones. The shelf-level promise pins the outcome; this pins the
+		// arithmetic through the loose shelf, which has no filter to hide
+		// behind: with all three answered, mood-true tracks must dominate.
+		const picks = pickAlsoLiked(
+			{ mood: "longing", pull: "wordplay", familiarity: "canon" },
+			seed,
+		);
+		const onMood = picks.filter((t) => matchesMood(t, "longing")).length;
+		expect(onMood / picks.length).toBeGreaterThan(0.5);
 	});
 
 	it("treats 'surprise me' as no preference, not as a filter", () => {
@@ -154,6 +204,81 @@ describe("pickAlsoLiked", () => {
 	});
 });
 
+describe("taste (D-121)", () => {
+	// Three tracks by one artist, so likes have somewhere visible to pull.
+	const nepathya = CATALOGUE.filter((t) => t.artist === "Nepathya").map(
+		(t) => t.lrclibId,
+	);
+	if (nepathya.length < 3) throw new Error("taste fixture needs 3 Nepathya");
+
+	it("never recommends a hidden track on either shelf", () => {
+		const target = pickDeepDives(NONE, seed)[0];
+		if (!target) throw new Error("no baseline pick");
+		const taste = { hidden: [target.lrclibId] };
+		const dives = pickDeepDives(NONE, seed, undefined, [], taste);
+		const also = pickAlsoLiked(NONE, seed, dives, 24, [], taste);
+		expect(dives.some((t) => t.lrclibId === target.lrclibId)).toBe(false);
+		expect(also.some((t) => t.lrclibId === target.lrclibId)).toBe(false);
+	});
+
+	it("hiding never breaks the mood promise with a substitute", () => {
+		// Removing a mood-true track must shrink the pool, not widen it: the
+		// slot it held is filled by another mood-true track or not at all.
+		const baseline = pickDeepDives({ ...NONE, mood: "longing" }, seed);
+		const hidden = baseline.map((t) => t.lrclibId);
+		const picks = pickDeepDives(
+			{ ...NONE, mood: "longing" },
+			seed,
+			undefined,
+			[],
+			{
+				hidden,
+			},
+		);
+		expect(picks.every((t) => matchesMood(t, "longing"))).toBe(true);
+		expect(picks.some((t) => hidden.includes(t.lrclibId))).toBe(false);
+	});
+
+	it("liking pulls similar tracks forward in the wander", () => {
+		// Like two of the artist's songs; the third should surface — shared
+		// artist is the strongest thing "more like this" can mean.
+		const liked = nepathya.slice(0, 2);
+		const picks = pickAlsoLiked(NONE, seed, [], 12, [], { liked });
+		expect(
+			picks.some((t) => t.artist === "Nepathya" && !liked.includes(t.lrclibId)),
+		).toBe(true);
+	});
+
+	it("an answered mood still outranks every accumulated like", () => {
+		// The affinity cap (3) sits below the mood weight (4) so a stack of
+		// likes can never quietly overrule what the reader answered today.
+		const liked = CATALOGUE.filter((t) => t.mood === "longing")
+			.slice(0, 5)
+			.map((t) => t.lrclibId);
+		const picks = pickAlsoLiked(
+			{ ...NONE, mood: "defiant" },
+			seed,
+			[],
+			12,
+			[],
+			{
+				liked,
+			},
+		);
+		const onMood = picks.filter((t) => matchesMood(t, "defiant")).length;
+		expect(onMood / picks.length).toBeGreaterThan(0.5);
+	});
+
+	it("hidden beats liked when a track is somehow both", () => {
+		const id = nepathya[0] as string;
+		const taste = { hidden: [id], liked: [id] };
+		const dives = pickDeepDives(NONE, seed, undefined, [], taste);
+		const also = pickAlsoLiked(NONE, seed, dives, 24, [], taste);
+		expect(dives.some((t) => t.lrclibId === id)).toBe(false);
+		expect(also.some((t) => t.lrclibId === id)).toBe(false);
+	});
+});
+
 describe("explainPick", () => {
 	const track = CATALOGUE.find((t) => t.title === "Wish You Were Here");
 	if (!track) throw new Error("fixture track missing from the catalogue");
@@ -189,6 +314,22 @@ describe("explainPick", () => {
 		expect(explainPick(track, NONE).matched).toEqual([]);
 	});
 
+	it("claims the mood for a secondary match too (D-121)", () => {
+		// The reader asked for heartbreak and the song carries it — which tag
+		// it carries it on is bookkeeping, not a reason.
+		const twoMooded = {
+			...track,
+			mood: "longing" as const,
+			moodAlso: "heartbroken" as const,
+		};
+		const { matched } = explainPick(twoMooded, {
+			mood: "heartbroken",
+			pull: null,
+			familiarity: null,
+		});
+		expect(matched).toEqual(["heartbreak"]);
+	});
+
 	/**
 	 * The point of deriving the explanation from the same conditions as
 	 * `score`: a reason may never be claimed for a track the scoring did not
@@ -208,7 +349,9 @@ describe("explainPick", () => {
 			for (const candidate of CATALOGUE) {
 				const { matched } = explainPick(candidate, preferences);
 				const scored =
-					(preferences.mood === candidate.mood ? 1 : 0) +
+					(preferences.mood && matchesMood(candidate, preferences.mood)
+						? 1
+						: 0) +
 					(preferences.pull === candidate.pull ? 1 : 0) +
 					(preferences.familiarity !== "surprise" &&
 					preferences.familiarity === candidate.familiarity

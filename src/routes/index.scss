@@ -153,6 +153,30 @@
 	// title above carries the mood now). The strip stays chrome-less on the
 	// page's left axis; nothing remains to justify a bar layout.
 
+	// The hide contract's undo (D-121): one quiet line under the chips,
+	// present only while something is hidden. The action is a text link in
+	// the accent — permanence with a visible door back.
+	&__hidden {
+		margin: 0.625rem 0 0;
+	}
+
+	&__hidden-restore {
+		@include m.press;
+		color: var(--color-lime);
+		font-weight: 600;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+		transition: color 0.18s var(--ease-editorial);
+
+		&:hover {
+			color: var(--color-ink);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
 	// The region's action moved into the shelf itself (D-097): the ghost
 	// card in Deep Dives is the shuffle, and Retake rides in the chip
 	// cluster — no corner controls left to stack.

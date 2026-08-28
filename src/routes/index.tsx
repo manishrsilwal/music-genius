@@ -13,6 +13,7 @@ import { TasteChips } from "@/features/discovery/components/taste-chips";
 import { useHistory } from "@/features/discovery/hooks/use-history";
 import { usePreferences } from "@/features/discovery/hooks/use-preferences";
 import { useRotation } from "@/features/discovery/hooks/use-rotation";
+import { useTaste } from "@/features/discovery/hooks/use-taste";
 import {
 	MOOD_TITLE_NOUN,
 	pickAlsoLiked,
@@ -111,6 +112,9 @@ function Discovery() {
 		!preferences.languages;
 	const { entries, remove, clear } = useHistory();
 	const { rotation, shuffle } = useRotation();
+	// The reader's own verdicts (D-121): hides are removals, likes are pulls.
+	const { taste, hiddenCount, isLiked, hide, toggleLike, restoreHidden } =
+		useTaste();
 
 	/*
 	 * The day, plus how many times this reader has been here (D-072).
@@ -144,12 +148,12 @@ function Discovery() {
 	const [alsoCount, setAlsoCount] = useState(12);
 
 	const dives = useMemo(
-		() => pickDeepDives(preferences, seed, undefined, seen),
-		[preferences, seed, seen],
+		() => pickDeepDives(preferences, seed, undefined, seen, taste),
+		[preferences, seed, seen, taste],
 	);
 	const also = useMemo(
-		() => pickAlsoLiked(preferences, seed, dives, alsoCount, seen),
-		[preferences, seed, dives, alsoCount, seen],
+		() => pickAlsoLiked(preferences, seed, dives, alsoCount, seen, taste),
+		[preferences, seed, dives, alsoCount, seen, taste],
 	);
 	// The pool is finite: fewer back than asked for means it is dry.
 	const alsoExhausted = also.length < alsoCount;
@@ -353,6 +357,26 @@ function Discovery() {
 								onChange={save}
 								onStartOver={reset}
 							/>
+							{/*
+							  The hide contract's undo (D-121): permanence with a
+							  door back. It lives with the chips because both are
+							  the reader's standing words to the shelves — and it
+							  only exists while there is something to bring back.
+							*/}
+							{hiddenCount > 0 && (
+								<p className="bento__hidden text-micro text-ink-muted">
+									{hiddenCount === 1
+										? "1 song hidden from your shelves."
+										: `${hiddenCount} songs hidden from your shelves.`}{" "}
+									<button
+										type="button"
+										className="bento__hidden-restore"
+										onClick={restoreHidden}
+									>
+										Bring them back
+									</button>
+								</p>
+							)}
 						</section>
 
 						<section className="bento__tile bento__results">
@@ -391,22 +415,24 @@ function Discovery() {
 											picks={dives}
 											preferences={preferences}
 											onShuffle={shuffle}
+											verdicts={{ isLiked, onLike: toggleLike, onHide: hide }}
 										/>
 									) : (
 										/*
-										  The honest empty shelf (D-120). A chosen
-										  language with no stock must SAY so — the
-										  testers' complaint was the silent
-										  substitution, and a quietly refilled shelf
-										  in the wrong language is that complaint
-										  restated. Search still reaches every song
-										  on LRCLIB, and the sentence says where the
-										  door is.
+										  The honest empty shelf (D-120, widened by
+										  D-121). A chosen language OR mood with no
+										  stock must SAY so — the testers' complaint
+										  was the silent substitution, and a quietly
+										  refilled shelf full of songs the reader did
+										  not ask for is that complaint restated.
+										  Search still reaches every song on LRCLIB,
+										  and the sentence says where the door is.
 										*/
 										<p className="bento__empty text-caption text-ink-muted">
-											Our shelf for your languages is still being stocked —
-											nothing worth recommending yet. Search reaches every song,
-											in every language.
+											Nothing on our shelf is true to your answers yet — we
+											would rather leave it short than fill it with songs you
+											did not ask for. Search reaches every song, in every
+											language.
 										</p>
 									)}
 								</div>
@@ -471,7 +497,7 @@ function Discovery() {
 													More from the same catalogue, ranked further down your
 													answers.
 												</p>
-												<AlsoLiked picks={also} art />
+												<AlsoLiked picks={also} art onHide={hide} />
 												{/*
 											  Deepens THIS shelf only (D-101) — the count
 											  is separate from the shuffle, which re-deals

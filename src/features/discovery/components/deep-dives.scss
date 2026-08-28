@@ -64,8 +64,46 @@
 	// stretched the WRAPPER and the card inside it kept its content height —
 	// which is why three cards with different amounts of text ended at three
 	// different depths. The wrapper now passes the stretch through.
+	//
+	// A column since the verdict row (D-121): the card grows to keep the
+	// shared baseline, the verdicts sit beneath it outside the link.
 	&__slot {
 		display: flex;
+		flex-direction: column;
+
+		> .dives__card {
+			flex: 1;
+		}
+	}
+
+	// The reader's margin notes on a pick (D-121): quiet text controls, not
+	// part of the card's pitch. The liked state answers in the accent.
+	&__verdicts {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 0.125rem 0.875rem 0;
+	}
+
+	&__verdict {
+		@include m.tap-target;
+		@include m.press;
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		color: var(--color-ink-faint);
+		transition: color 0.18s var(--ease-editorial);
+
+		&:hover {
+			color: var(--color-ink);
+		}
+
+		&[data-active] {
+			color: var(--color-lime);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
 	}
 
 	// A card is artwork, a title and an artist, and nothing else (D-069).
@@ -217,8 +255,18 @@
 		}
 	}
 
+	// Link and its "not for me" side by side (D-121) — the control lives
+	// BESIDE the row's link, never inside it.
+	&__item {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
 	&__row {
 		display: flex;
+		flex: 1;
+		min-width: 0;
 		// Center, not baseline, once a cover can sit in the row (D-101).
 		align-items: center;
 		gap: 0.625rem;
@@ -228,6 +276,33 @@
 		transition: background-color 0.18s var(--ease-editorial);
 
 		&:hover {
+			background: var(--color-hover);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
+	// "Not for me" on a row (D-121): present but quiet — twelve of these on
+	// a shelf must read as margin, not furniture. Full tap height, so the
+	// dismissal is as pressable as the row it dismisses (D-035).
+	&__hide {
+		@include m.press;
+		flex: none;
+		width: 2rem;
+		min-height: 2.75rem;
+		border-radius: var(--radius-pill);
+		color: var(--color-ink-faint);
+		font-family: var(--font-ui);
+		font-size: var(--text-caption);
+		line-height: 1;
+		transition:
+			color 0.18s var(--ease-editorial),
+			background-color 0.18s var(--ease-editorial);
+
+		&:hover {
+			color: var(--color-ink);
 			background: var(--color-hover);
 		}
 

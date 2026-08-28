@@ -19,10 +19,21 @@ import "./deep-dives.scss";
  * come from the reader's stated preferences, or from the day's rotation when
  * they skipped the stepper.
  */
+/**
+ * The reader's verdict controls on a recommendation (D-121). Optional as a
+ * set: a caller without taste storage renders plain cards.
+ */
+export interface Verdicts {
+	isLiked: (lrclibId: string) => boolean;
+	onLike: (lrclibId: string) => void;
+	onHide: (lrclibId: string) => void;
+}
+
 export function DeepDives({
 	picks,
 	preferences,
 	onShuffle,
+	verdicts,
 }: {
 	picks: CuratedTrack[];
 	preferences: Preferences;
@@ -33,6 +44,7 @@ export function DeepDives({
 	 * misstated.
 	 */
 	onShuffle?: () => void;
+	verdicts?: Verdicts;
 }) {
 	/*
 	 * The reasons the picks have in common, said once above the row (D-069).
@@ -99,6 +111,35 @@ export function DeepDives({
 								</span>
 							</span>
 						</Link>
+
+						{/*
+						  The verdict row (D-121), OUTSIDE the link — a button
+						  inside an anchor is invalid HTML and a fight over every
+						  tap. Quiet on purpose: these are margin notes on the
+						  card, not part of the card's pitch.
+						*/}
+						{verdicts && (
+							<span className="dives__verdicts">
+								<button
+									type="button"
+									className="dives__verdict"
+									aria-pressed={verdicts.isLiked(pick.lrclibId)}
+									data-active={verdicts.isLiked(pick.lrclibId) || undefined}
+									onClick={() => verdicts.onLike(pick.lrclibId)}
+								>
+									{verdicts.isLiked(pick.lrclibId)
+										? "More like this ✓"
+										: "More like this"}
+								</button>
+								<button
+									type="button"
+									className="dives__verdict"
+									onClick={() => verdicts.onHide(pick.lrclibId)}
+								>
+									Not for me
+								</button>
+							</span>
+						)}
 					</motion.div>
 				))}
 
@@ -174,6 +215,7 @@ export function DiveArt({ title, artist }: { title: string; artist: string }) {
 export function AlsoLiked({
 	picks,
 	art = false,
+	onHide,
 }: {
 	picks: CuratedTrack[];
 	/**
@@ -182,6 +224,8 @@ export function AlsoLiked({
 	 * out; the landing passes it always now that the shelf opens expanded.
 	 */
 	art?: boolean;
+	/** "Not for me" on a row (D-121). Optional: no taste storage, no control. */
+	onHide?: (lrclibId: string) => void;
 }) {
 	return (
 		<motion.div
@@ -194,6 +238,7 @@ export function AlsoLiked({
 				<motion.div
 					key={`${pick.artist}-${pick.title}`}
 					variants={riseVariants}
+					className="also__item"
 				>
 					<Link
 						to="/track/$trackId"
@@ -211,6 +256,19 @@ export function AlsoLiked({
 						<span className="also__title text-caption">{pick.title}</span>
 						<span className="also__artist text-micro">{pick.artist}</span>
 					</Link>
+					{/* Beside the link, never inside it — same reasoning as the
+					    card's verdict row. */}
+					{onHide && (
+						<button
+							type="button"
+							className="also__hide"
+							aria-label={`Not for me: ${pick.title}`}
+							title="Not for me"
+							onClick={() => onHide(pick.lrclibId)}
+						>
+							×
+						</button>
+					)}
 				</motion.div>
 			))}
 		</motion.div>

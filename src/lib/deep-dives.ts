@@ -13,7 +13,22 @@
  * and check the cell-coverage tests still pass.
  */
 
-export const MOODS = ["longing", "defiant", "tender", "restless"] as const;
+/**
+ * Seven registers, grown from four (D-121). "Sad" was the reader's word the
+ * original list could not say back: heartbroken is that answer, joyful its
+ * missing opposite, nostalgic the sweeter cousin longing was covering for.
+ * Order is the stepper's order — the original four keep their places so a
+ * returning reader's muscle memory survives.
+ */
+export const MOODS = [
+	"longing",
+	"defiant",
+	"tender",
+	"restless",
+	"heartbroken",
+	"joyful",
+	"nostalgic",
+] as const;
 export const PULLS = [
 	"storytelling",
 	"wordplay",
@@ -127,6 +142,14 @@ export interface CuratedTrack {
 	 */
 	note: string;
 	mood: Mood;
+	/**
+	 * A second register the lyric genuinely carries, when it carries one
+	 * (D-121). Songs are rarely one feeling — "Wish You Were Here" is longing
+	 * AND nostalgic — and a single tag made the second feeling invisible to
+	 * the reader who asked for it. Optional: a song that is one thing should
+	 * say one thing, not be padded to two.
+	 */
+	moodAlso?: Mood;
 	pull: Pull;
 	familiarity: Exclude<Familiarity, "surprise">;
 	language: Language;
@@ -853,6 +876,16 @@ export const DEEP_DIVE_COUNT = 3;
 export const ALSO_LIKED_COUNT = 12;
 
 /**
+ * Does this track carry the asked-for mood at all — primarily or secondarily?
+ * The one predicate the promise (D-121) is built on: scoring, filtering and
+ * explaining must all agree on what "matches the mood" means, so they all
+ * call this.
+ */
+export function matchesMood(track: CuratedTrack, mood: Mood): boolean {
+	return track.mood === mood || track.moodAlso === mood;
+}
+
+/**
  * Score a track against stated preferences.
  *
  * Partial credit, never filtering. Language and era are excluded on purpose:
@@ -860,10 +893,19 @@ export const ALSO_LIKED_COUNT = 12;
  * likes both English and Hindi should see both. They are used for diversity
  * instead (see `selectDiverse`), so the shelf mixes without the reader having
  * to choose a side.
+ *
+ * Mood outweighs everything else combined (4 > 2 + 1.5), by ruling (D-121):
+ * at weight 3 a track matching pull AND familiarity outranked one matching
+ * only the mood, so the reader who asked for sad songs got clever un-sad ones
+ * — the emotional axis, the one answered with the most feeling, was the one
+ * that lost the tiebreak. A secondary mood is a true but weaker match: it
+ * keeps the promise, and yields to any track that leads with the feeling.
  */
 function score(track: CuratedTrack, preferences: Preferences): number {
 	let total = 0;
-	if (preferences.mood && track.mood === preferences.mood) total += 3;
+	if (preferences.mood && track.mood === preferences.mood) total += 4;
+	else if (preferences.mood && matchesMood(track, preferences.mood))
+		total += 2.5;
 	if (preferences.pull && track.pull === preferences.pull) total += 2;
 	// "surprise" is a real answer meaning "no preference", so it scores nothing
 	// rather than being treated as unanswered.
@@ -1007,6 +1049,9 @@ export const MOOD_TITLE_NOUN: Record<Mood, string> = {
 	defiant: "defiance",
 	tender: "tenderness",
 	restless: "restlessness",
+	heartbroken: "heartbreak",
+	joyful: "joy",
+	nostalgic: "nostalgia",
 };
 
 const MOOD_LABEL: Record<Mood, string> = {
@@ -1014,6 +1059,9 @@ const MOOD_LABEL: Record<Mood, string> = {
 	defiant: "something defiant",
 	tender: "something tender",
 	restless: "restlessness",
+	heartbroken: "heartbreak",
+	joyful: "something joyful",
+	nostalgic: "nostalgia",
 };
 
 const PULL_LABEL: Record<Pull, string> = {
@@ -1035,8 +1083,10 @@ export function explainPick(
 	const matched: string[] = [];
 
 	// Same conditions as `score`, in the same weight order, so the sentence
-	// cannot claim a reason the scoring did not use.
-	if (preferences.mood && track.mood === preferences.mood) {
+	// cannot claim a reason the scoring did not use. A secondary-mood match
+	// earns the same label: the reader asked for heartbreak and the song
+	// carries it — WHICH tag it carries it on is bookkeeping, not a reason.
+	if (preferences.mood && matchesMood(track, preferences.mood)) {
 		matched.push(MOOD_LABEL[preferences.mood]);
 	}
 	if (preferences.pull && track.pull === preferences.pull) {
@@ -1089,30 +1139,94 @@ interface Ranked {
 const SEEN_PENALTY = 100_000;
 
 /**
+ * What the reader has told the shelves directly (D-121) — stored locally,
+ * like preferences; nothing leaves the browser.
+ *
+ * `hidden` is a contract, not a hint: "Not for me" removes the track from
+ * every recommendation shelf permanently (search still reaches it — the
+ * reader refused the recommendation, not the song's existence). A rejected
+ * song that resurfaces reads as not listening, which is the disease this
+ * whole decision treats.
+ *
+ * `liked` is "more like this": each liked track lends its attributes a
+ * small pull on everything similar.
+ */
+export interface Taste {
+	hidden?: readonly string[];
+	liked?: readonly string[];
+}
+
+/**
+ * How much everything the reader has liked pulls on this track.
+ *
+ * Shared artist counts most — "more like this" most often means "more of
+ * them" — then the mood the liked song carries, then its pull and language.
+ * CAPPED below the mood weight (3 < 4) on purpose: accumulated taste nudges,
+ * but a question the reader answered TODAY outranks every like they have
+ * ever made. Without the cap, a dozen likes would quietly overrule the
+ * stepper, and the reader would have no idea why their answers stopped
+ * working.
+ */
+function affinity(track: CuratedTrack, liked: readonly CuratedTrack[]): number {
+	let total = 0;
+	for (const other of liked) {
+		if (other.lrclibId === track.lrclibId) continue;
+		if (other.artist === track.artist) total += 1.5;
+		if (
+			matchesMood(track, other.mood) ||
+			(other.moodAlso && matchesMood(track, other.moodAlso))
+		) {
+			total += 1;
+		}
+		if (other.pull === track.pull) total += 0.5;
+		if (other.language === track.language) total += 0.5;
+	}
+	return Math.min(total, 3);
+}
+
+/** Resolve liked ids to catalogue entries; unknown ids simply carry nothing. */
+function likedTracks(taste: Taste | undefined): CuratedTrack[] {
+	const ids = taste?.liked;
+	if (!ids || ids.length === 0) return [];
+	const wanted = new Set(ids);
+	return CATALOGUE.filter((track) => wanted.has(track.lrclibId));
+}
+
+/**
  * The catalogue the reader's languages admit (D-120). A hard filter BEFORE
  * ranking, not a score: a wrong-language pick is a miss, not a weaker match —
  * and `selectDiverse` actively rewards language variety, so a mere score
  * bump would be fought by the diversity pass and lose.
  */
-function languagePool(preferences: Preferences): CuratedTrack[] {
+function languagePool(preferences: Preferences, taste?: Taste): CuratedTrack[] {
 	const languages = preferences.languages;
-	if (!languages || languages.length === 0) return CATALOGUE;
-	return CATALOGUE.filter((track) => languages.includes(track.language));
+	// "Not for me" is honoured before anything is ranked (D-121): a hidden
+	// track is not a weak candidate, it is not a candidate.
+	const hidden = new Set(taste?.hidden ?? []);
+	const pool =
+		hidden.size > 0
+			? CATALOGUE.filter((track) => !hidden.has(track.lrclibId))
+			: CATALOGUE;
+	if (!languages || languages.length === 0) return pool;
+	return pool.filter((track) => languages.includes(track.language));
 }
 
 function rankAll(
 	preferences: Preferences,
 	seed: number,
 	seen: ReadonlySet<string> = new Set(),
+	taste?: Taste,
 ): Ranked[] {
-	const pool = languagePool(preferences);
+	const pool = languagePool(preferences, taste);
+	const liked = likedTracks(taste);
 	const order = seededOrder(pool.length, seed);
 	return order
 		.map((index, position) => {
 			const track = pool[index] as CuratedTrack;
 			// Position breaks ties, keeping the rotation visible when several
 			// tracks score identically.
-			let rank = score(track, preferences) * 1000 - position;
+			let rank =
+				(score(track, preferences) + affinity(track, liked)) * 1000 - position;
 			// Recommending a song the reader has already opened is the one
 			// suggestion that cannot possibly help them explore.
 			if (seen.has(track.lrclibId)) rank -= SEEN_PENALTY;
@@ -1128,8 +1242,8 @@ function rankAll(
  * shelf of three has four times as many candidates as slots.
  *
  * Weighting the shuffle against the score does not work here, and the
- * arithmetic says why: `score` moves in steps of 1.5 to 3, which the ×1000
- * scale turns into gaps of 1500–3000, while the shuffled position spans 0–55.
+ * arithmetic says why: `score` moves in steps of 1.5 to 4, which the ×1000
+ * scale turns into gaps of 1500–4000, while the shuffled position spans 0–55.
  * Any multiplier small enough to preserve relevance is far too small to move
  * anything, and any multiplier large enough to move something has thrown
  * relevance away. A reader who answered all three questions saw FOUR distinct
@@ -1164,8 +1278,12 @@ function topTier(
 	ranked: Ranked[],
 	preferences: Preferences,
 	count: number,
+	/** Liked tracks, so the cliff is cut on the same number `rankAll` used. */
+	liked: readonly CuratedTrack[] = [],
 ): Ranked[] {
-	const scores = ranked.map((entry) => score(entry.track, preferences));
+	const scores = ranked.map(
+		(entry) => score(entry.track, preferences) + affinity(entry.track, liked),
+	);
 	const best = Math.max(...scores, 0);
 
 	const tier = ranked.filter((_, index) => scores[index] === best);
@@ -1223,16 +1341,29 @@ export function pickDeepDives(
 	count = DEEP_DIVE_COUNT,
 	/** LRCLIB ids the reader has already opened, pushed to the back. */
 	seen: readonly string[] = [],
+	/** What the reader has hidden and liked (D-121). */
+	taste?: Taste,
 ): CuratedTrack[] {
-	const ranked = rankAll(preferences, seed, new Set(seen));
+	let ranked = rankAll(preferences, seed, new Set(seen), taste);
+
+	// The mood is a PROMISE on this shelf (D-121), the way language already is
+	// (D-120): answer "heartbroken" and every headline pick carries heartbreak,
+	// or the shelf runs short and says so — never padded with songs the reader
+	// just said they did not want. `topTier`'s reach-down fallback now reaches
+	// only within the mood. Exploration still lives in "People also like",
+	// which stays loose by design.
+	const mood = preferences.mood;
+	if (mood) ranked = ranked.filter((entry) => matchesMood(entry.track, mood));
 
 	// Relevance decides WHICH tracks are eligible; the rotation decides which
 	// of them appear. Re-ranking the shortlist by shuffled position alone is
 	// what makes a second visit worth making.
-	const shortlist = topTier(ranked, preferences, count).map((entry) => ({
-		...entry,
-		rank: -entry.position,
-	}));
+	const shortlist = topTier(ranked, preferences, count, likedTracks(taste)).map(
+		(entry) => ({
+			...entry,
+			rank: -entry.position,
+		}),
+	);
 
 	return selectDiverse(shortlist, count);
 }
@@ -1251,11 +1382,14 @@ export function pickAlsoLiked(
 	count = ALSO_LIKED_COUNT,
 	/** LRCLIB ids the reader has already opened, pushed to the back. */
 	seen: readonly string[] = [],
+	/** What the reader has hidden and liked (D-121). */
+	taste?: Taste,
 ): CuratedTrack[] {
 	const taken = new Set(exclude.map((track) => track.lrclibId));
-	const pool = rankAll(preferences, seed + 1, new Set(seen)).filter(
+	const pool = rankAll(preferences, seed + 1, new Set(seen), taste).filter(
 		(entry) => !taken.has(entry.track.lrclibId),
 	);
+	const liked = likedTracks(taste);
 
 	// Weighted sample: everything stays reachable, but tracks matching the
 	// reader's answers surface far more often.
@@ -1264,6 +1398,7 @@ export function pickAlsoLiked(
 		track: entry.track,
 		weight:
 			score(entry.track, preferences) +
+			affinity(entry.track, liked) +
 			1 +
 			((index * 37) % 11) / 10 -
 			// `rankAll` already sank these, but the weighting below recomputes

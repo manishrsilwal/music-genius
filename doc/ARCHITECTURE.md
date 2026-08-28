@@ -134,6 +134,65 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-121 — The mood is a promise, read from the lyrics, corrected by the reader
+**Built 2026-08-28.** The owner's ask: "if someone wants to listen sad
+song, they really get that sad songs." The audit found four leaks, and
+the ruling plugs each one.
+
+**There was no "sad."** The vocabulary grew from four moods to seven —
+heartbroken (the reader's "sad"), joyful (its missing opposite),
+nostalgic (the sweeter cousin longing was covering for; owner chose
+seven over six knowing it thins cells). Each track now carries a
+primary `mood` plus an optional `moodAlso` — songs are rarely one
+feeling, and a single tag made the second feeling invisible to the
+reader who asked for it. `matchesMood` is the one predicate scoring,
+filtering and explaining all share.
+
+**Mood could be outvoted.** At weight 3, a track matching pull AND
+familiarity (2 + 1.5) outranked one matching only the mood — the axis
+answered with the most feeling lost the tiebreak. Mood now weighs 4,
+more than everything else combined; a secondary-mood match earns 2.5,
+true but yielding to any track that leads with the feeling.
+
+**The shelf back-filled past the mood.** `topTier`'s reach-down
+fallback padded thin cells with songs the reader had just declined.
+The headline shelf now hard-filters on the mood the way D-120 filters
+language: every pick carries the asked-for mood or the shelf runs
+honestly short (the D-120 empty-state copy widened to cover both
+axes). "People also like" stays loose by design — that is where
+exploration lives. The old "no answer is a dead end" tests were
+retired FOR CAUSE: they pinned the padding.
+
+**Tags were curators' one-word guesses.** `scripts/mood-tagger.ts` +
+`scripts/retag-moods.ts` re-read every entry's ACTUAL lyric text from
+LRCLIB — the same text the reader reads — and propose tags against the
+seven-word vocabulary (same hints the stepper shows; tagger and reader
+must mean the same thing by each word). Same contract as D-120: model
+proposes, code enum-validates, owner blesses via
+`doc/proposed-retag-moods-*.md`. `expand-catalogue.ts` now tags every
+future harvest from lyrics at verification time, keeping the
+proposer's guess only as a marked fallback.
+
+**Nothing learned.** The taste layer (`use-taste`, `tle:taste` in
+localStorage — local like everything else, nothing leaves the browser)
+adds two verdicts to recommendation cards. "Not for me" hides the
+track from every shelf PERMANENTLY (owner's ruling: hide forever
+beats sink-and-resurface, which reads as not listening) — search still
+reaches it, and a "Bring them back" line under the taste chips is the
+door back; a hide also clears any like on the same track. "More like
+this" lends the liked track's attributes a pull on similar songs —
+shared artist 1.5, carried mood 1, pull and language 0.5 each — CAPPED
+at 3, deliberately below the mood weight 4, so accumulated likes can
+never quietly overrule what the reader answered today. Hides filter
+before ranking; affinity joins the score in both pickers and in the
+tier cut, so liked-similar tracks earn shortlist membership, not just
+reordering. Verdict buttons live OUTSIDE the card links (a button
+inside an anchor is invalid HTML and a fight over every tap).
+
+Signatures and cache keys are untouched: new moods mint new signature
+values, old ones keep their cached work; taste never enters a cache
+key because it never leaves the client.
+
 ### D-120 — Language is a filter, and the AI proposes but never publishes
 **Built 2026-08-28.** The owner's testers, quoted: "why is a Hindi song
 recommended for me?" — and "what about Nepali songs?". Two rulings.
