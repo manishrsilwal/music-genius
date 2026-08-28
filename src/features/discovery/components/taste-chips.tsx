@@ -2,21 +2,19 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
 import {
+	FAMILIARITY_OPTIONS,
 	type Familiarity,
 	LANGUAGE_OPTIONS,
 	type Language,
+	MOOD_OPTIONS,
 	type Mood,
+	type Option,
 	type Preferences,
+	PULL_OPTIONS,
 	type Pull,
 } from "@/lib/deep-dives";
 import { transition } from "@/lib/motion";
 
-import {
-	FAMILIARITY_OPTIONS,
-	MOOD_OPTIONS,
-	type Option,
-	PULL_OPTIONS,
-} from "./preference-stepper";
 import "./taste-chips.scss";
 
 /**

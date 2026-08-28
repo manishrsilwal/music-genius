@@ -7,7 +7,7 @@ import {
 	AlsoLiked,
 	DeepDives,
 } from "@/features/discovery/components/deep-dives";
-import { PreferenceStepper } from "@/features/discovery/components/preference-stepper";
+import { PreferenceChat } from "@/features/discovery/components/preference-chat";
 import { SearchField } from "@/features/discovery/components/search-field";
 import { TasteChips } from "@/features/discovery/components/taste-chips";
 import { useHistory } from "@/features/discovery/hooks/use-history";
@@ -250,20 +250,22 @@ function Discovery() {
 
 			<AnimatePresence mode="wait">
 				{/* `answered` is null until localStorage has been read. Reserving
-				    the space avoids both a layout jump and flashing the stepper at
+				    the space avoids both a layout jump and flashing the chat at
 				    a returning reader who already answered. */}
 				{answered === null ? (
 					<div key="waiting" className="mt-8 h-64" />
 				) : answered === false ? (
 					<motion.div
-						key="stepper"
+						key="chat"
 						className="mt-8 max-w-2xl"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0, y: -12 }}
 						transition={transition.editorial}
 					>
-						<PreferenceStepper onComplete={save} />
+						{/* The stepper's successor (D-122): same questions, same
+						    skips, now a conversation with a free-text door. */}
+						<PreferenceChat onComplete={save} />
 					</motion.div>
 				) : unpersonalised ? (
 					<motion.div
@@ -289,7 +291,7 @@ function Discovery() {
 								onClick={reset}
 								className="explore__offer text-caption"
 							>
-								Rather have picks chosen for you? Answer three questions
+								Rather have picks chosen for you? Tell us how you're feeling
 							</button>
 						</div>
 

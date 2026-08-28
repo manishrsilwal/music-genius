@@ -134,6 +134,55 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-122 — The stepper becomes a conversation, and feelings become enums
+**Built 2026-08-28.** The owner's ask: "a chat system where user just
+selects in a chat and expresses their feelings which evidently
+recommends the music." Rulings: HYBRID (chips as the spine, free text
+through AI, interpretation always confirmed before it filters) and the
+chat REPLACES the stepper as the whole personalisation flow.
+
+The chat is a skin over the same `Preferences` object — the mood
+promise, language filter, taste verdicts and every ranking test
+carry through untouched. The stepper's rulings survive as chat
+manners: chips advance on tap (D-032), the languages step keeps its
+multi-select-plus-finish exception (D-120), one full escape ("Skip
+all — just let me search", D-064), and skipping is still a real
+answer. The stepper's option lists moved to `deep-dives.ts` beside
+LANGUAGE_OPTIONS — three surfaces speak them now (chat chips, taste
+chips, the interpreter's echo). `preference-stepper.tsx` is deleted.
+
+**The interpretation contract is the catalogue pipeline's, at reader
+level: the model proposes, code validates, the reader blesses.**
+`POST /api/interpret {message}` sends the typed words — nothing else —
+to DeepSeek (thinking disabled, temperature 0.1, 10s timeout because
+the reader is watching this wait, unlike the drawer's 30s), which
+returns enums only; `heardFromUntrusted` gate-checks them like every
+untrusted shape. The chat then speaks a WRITTEN sentence around the
+validated labels — "Sounds like heartbroken, in Nepali — did I hear
+that right?" — and NOTHING filters until "That's right." Every visible
+word is written, never generated (D-045's spirit); the model's whole
+contribution is enum values. A message merely WRITTEN in English
+implies no language (English is the interface's default writing
+language — inferring it would lock a Nepali reader typing English to
+English shelves), but a message written in Hindi or Nepali does imply
+its language, and Devanagari reads fine. Measured: "मन साह्रै दुखेको छ"
+→ heartbroken + nepali; "give me happy nepali classics" → joyful +
+canon + nepali.
+
+**Failure never dead-ends.** No key, offline, timeout, junk, or a
+message that names no axis → `interpretLocally`, a deliberately small
+keyword reader in `feelings.ts` ("sad" → heartbroken works on an
+aeroplane); when that also shrugs, the bot says "I couldn't quite
+catch that" and the chips are right there. Rate-limited 20/600s per
+IP (the party's fixed-window shape, D-117) because every call is a
+metered model request. Merging is refinement, not reset: spoken axes
+win as the reader's latest word, silent axes keep their answers.
+
+**The privacy split is said where it applies**, under the composer:
+"Taps stay on this device. Typed words are sent once to be
+understood, and not kept." Typed feelings are the ONE thing that
+crosses this wire; taps never do, and nothing is stored server-side.
+
 ### D-121 — The mood is a promise, read from the lyrics, corrected by the reader
 **Built 2026-08-28.** The owner's ask: "if someone wants to listen sad
 song, they really get that sad songs." The audit found four leaks, and

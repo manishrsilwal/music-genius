@@ -90,6 +90,54 @@ export const LANGUAGE_OPTIONS: LanguageOption[] = [
 ];
 
 /**
+ * The offered answers for the three single-select axes, with the words the
+ * reader sees. Lived in the stepper component until the chat replaced it
+ * (D-122); they belong with the rest of the vocabulary now, because three
+ * surfaces speak it — the chat's chips, the taste chips, and the
+ * interpreter's echo of what it heard.
+ */
+export interface Option<T> {
+	value: T;
+	label: string;
+	hint: string;
+}
+
+export const MOOD_OPTIONS: Option<Mood>[] = [
+	{ value: "longing", label: "Longing", hint: "Distance, memory, ache" },
+	{ value: "defiant", label: "Defiant", hint: "Anger with somewhere to go" },
+	{ value: "tender", label: "Tender", hint: "Quiet, close, unguarded" },
+	{ value: "restless", label: "Restless", hint: "Motion, nerve, escape" },
+	{ value: "heartbroken", label: "Heartbroken", hint: "The wound, still open" },
+	{ value: "joyful", label: "Joyful", hint: "Lightness that means it" },
+	{ value: "nostalgic", label: "Nostalgic", hint: "Looking back, softly" },
+];
+
+export const PULL_OPTIONS: Option<Pull>[] = [
+	{
+		value: "storytelling",
+		label: "The story",
+		hint: "Songs that happen to someone",
+	},
+	{
+		value: "wordplay",
+		label: "The craft",
+		hint: "Rhyme, turn, double meaning",
+	},
+	{
+		value: "confession",
+		label: "The honesty",
+		hint: "Said plainly, unguarded",
+	},
+	{ value: "imagery", label: "The imagery", hint: "Pictures over statements" },
+];
+
+export const FAMILIARITY_OPTIONS: Option<Familiarity>[] = [
+	{ value: "canon", label: "The canon", hint: "Songs worth rereading" },
+	{ value: "deep", label: "Deep cuts", hint: "Things you may not know" },
+	{ value: "surprise", label: "Surprise me", hint: "No preference" },
+];
+
+/**
  * The offered languages, with the reader's own first (D-120).
  *
  * "Priority based on location" without a location: `navigator.languages` is
