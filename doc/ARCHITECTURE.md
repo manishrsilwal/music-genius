@@ -196,6 +196,26 @@ lives on ONE tile — the bento's surface anatomy — with the thread as
 a flex column at conversation distance, a thin tinted scrollbar, and
 the composer in a well one step further down (D-088's descent).
 
+**The layout review, same day.** Four more rulings from the owner's
+screenshot. (1) A chat needs a COUNTERPART: the tile gained a named
+header ("The Explorer", an avatar wearing the mark's constant lime
+bar), the quick-reply chips moved INSIDE the thread under the
+question they answer (a chip band below the conversation read as a
+form bolted to a chat), the AI's wait became breathing typing dots
+(held steady under reduced motion), and the wide SEND pill became a
+round iconic send — the pill read as a search button. (2) The ways
+OUT leave the surface: skip-to-search (D-064, unchanged in rank) and
+the party doorway are peer pills BELOW the tile, and the page-end
+party caption yields on this state — a page-wide-centred line floated
+disconnected beside the left-set tile. (3) The always-rendered ticks
+became GHOSTS (opacity 0.35) until chosen: at full grey, all seven
+language chips looked ticked at once. (4) The masthead gained a
+SCRIM, not a box: the hero's own words scrolled straight through the
+wordmark. D-086's ruling stands — no pill returns; a full-width fade
+from the canvas colour dissolves scrolled content before it reaches
+the mark, and at scroll 0 the band is indistinguishable from the
+canvas it matches.
+
 ### D-121 — The mood is a promise, read from the lyrics, corrected by the reader
 **Built 2026-08-28.** The owner's ask: "if someone wants to listen sad
 song, they really get that sad songs." The audit found four leaks, and
