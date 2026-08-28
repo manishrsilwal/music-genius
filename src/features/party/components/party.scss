@@ -5,11 +5,21 @@
 
 .party {
 	width: 100%;
-	// One number shared with the masthead's alignment rule (D-118) — the
-	// mark rides this column's left edge, not the viewport's corner (D-092).
-	max-width: var(--container-party);
+	// The LANDING's container and gutter (D-119): every page composes on
+	// the same line, so nothing — content or mark — shifts on navigation.
+	// D-092 said it first: every heading starts where the landing container
+	// starts. The party's narrower reading measure survives as an INNER cap
+	// on the sections below, left-aligned to the shared line.
+	max-width: var(--container-landing);
 	margin-inline: auto;
-	padding: calc(var(--masthead-reach, 4rem) + 2rem) 1.25rem 6rem;
+	padding-inline: 1.5rem;
+	// The landing's vertical rhythm, verbatim — the first line of type
+	// lands at the same height on both pages.
+	padding-block: calc(var(--masthead-reach, 4rem) + 1.75rem) 5rem;
+
+	@include m.from("md") {
+		padding-block: calc(var(--masthead-reach, 4rem) + 2.75rem) 6rem;
+	}
 
 	&--gone,
 	&--door {
@@ -104,6 +114,17 @@
 	// a player to hold; an instruction is just told.
 	&__start {
 		margin-top: 2.5rem;
+	}
+
+	// The party's reading measure (D-119): the page composes in the landing
+	// container, but a card, a queue and a form still read best narrow —
+	// capped and LEFT-ALIGNED to the shared line, never re-centred, so the
+	// column never moves between pages.
+	&__now,
+	&__start,
+	&__queue,
+	&__join {
+		max-width: var(--container-party);
 	}
 
 	// The bento tile's anatomy (D-090): surface, card radius, the soft

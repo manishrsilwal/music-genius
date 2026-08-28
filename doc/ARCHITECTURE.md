@@ -134,6 +134,24 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-119 — One container, every page
+**Built 2026-08-28.** The owner's report: the content column shifts
+between pages. Audited at 1295px — the landing composed at 72rem with
+a 24px gutter (content-left ~95px), the party pages at 44rem with 20px
+(~315px), and the masthead, taught by D-118 to chase the party's
+column, jumped with them on every navigation.
+
+D-118's masthead patch is hereby reverted as symptom-treatment: D-092
+already ruled that every heading starts where the landing container
+starts, and the party pages were the violation. Now every page
+composes in `--container-landing` with the landing's own gutter and
+vertical rhythm, the mark holds ONE line under one formula, and the
+party's 44rem reading measure survives as an INNER cap on its cards,
+queue and forms — left-aligned to the shared line, never re-centred.
+The 404 stays a centred composition on purpose: it is a message, not
+a flowing page. The track sheet remains full-bleed with the masthead
+hidden (D-084) — its own world by ruling, not by drift.
+
 ### D-118 — The party page answers three owner reports
 **Built 2026-08-28.** All three from one screenshot.
 
