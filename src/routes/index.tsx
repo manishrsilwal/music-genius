@@ -257,7 +257,9 @@ function Discovery() {
 				) : answered === false ? (
 					<motion.div
 						key="chat"
-						className="mt-8 max-w-2xl"
+						// mt-6, not the shelves' mt-10: the chat must clear the fold
+						// with the hero above it (D-028's constraint, D-122's tile).
+						className="mt-6 max-w-2xl"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0, y: -12 }}

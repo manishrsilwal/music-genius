@@ -52,8 +52,13 @@ interface Bubble {
 
 type Stage = { kind: "ask"; step: number } | { kind: "confirm"; heard: Heard };
 
-const GREETING =
-	"Tell me how you're feeling — type it in your own words, or tap your way through. Your shelves tune to whatever you give me.";
+/**
+ * One opening bubble, not a greeting plus a question (owner's report: the
+ * chat pushed its own skip and the page's party doorway below the fold —
+ * D-028's lesson, relearned in chat clothes). Every bubble the first view
+ * does not need is fold the reader loses.
+ */
+const OPENING = `Tell me how you're feeling — in your own words, or a tap at a time. ${CHAT_STEPS[0].question}`;
 
 export function PreferenceChat({
 	onComplete,
@@ -66,10 +71,9 @@ export function PreferenceChat({
 	const [busy, setBusy] = useState(false);
 	const [text, setText] = useState("");
 	const [bubbles, setBubbles] = useState<Bubble[]>([
-		{ id: 0, from: "bot", text: GREETING },
-		{ id: 1, from: "bot", text: CHAT_STEPS[0].question },
+		{ id: 0, from: "bot", text: OPENING },
 	]);
-	const nextId = useRef(2);
+	const nextId = useRef(1);
 
 	/* The reader's own languages first (D-120), read once (stable list). */
 	const [languageOptions] = useState(() =>

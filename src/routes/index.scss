@@ -94,8 +94,10 @@
 // enough to invite a title, bounded so it reads as a control rather than a
 // second hero.
 // The party's doorway (D-115): a caption at the page's end, not a tile.
+// 2rem, was 3 (D-122 fold report): on the first-visit state the chat sits
+// above this line, and the extra rem was part of what pushed it out of view.
 .landing__party {
-	margin-top: 3rem;
+	margin-top: 2rem;
 	text-align: center;
 }
 
