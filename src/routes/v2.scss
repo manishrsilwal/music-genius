@@ -539,6 +539,44 @@
 			min-height: 0;
 		}
 
+		// One decision per row (owner's review: SYNC sat beside pause at
+		// equal size and fill, reading as a second transport button, and
+		// the provider switch was dressed as a call-to-action). The bar's
+		// own grid areas get a new map: the transport row holds ONE
+		// button — play/pause leads, the timeline is information, the
+		// video is a media chip — and the two mode decisions (sync, the
+		// provider switch) share a quiet settings row at the foot, where
+		// neither competes with playing the song.
+		.playback:not([data-docked]) {
+			grid-template-columns: auto minmax(0, 1fr) auto;
+			grid-template-areas:
+				"toggle scrub video"
+				"meta meta meta"
+				"sync sync switch";
+			align-items: center;
+			max-width: none;
+		}
+
+		.playback__toggle {
+			justify-self: start;
+			min-width: 3.4rem;
+			min-height: 3.4rem;
+		}
+
+		.playback__video {
+			justify-self: end;
+		}
+
+		.playback__sync {
+			justify-self: start;
+			font-size: 0.68rem;
+			padding-block: 0.3rem;
+		}
+
+		.playback__switch {
+			justify-self: end;
+		}
+
 		// The bar's own controls, re-cut in the style card's anatomy:
 		// hard 2px borders, hard mini-shadows, bold labels. Colours ride
 		// the token overrides above; these lines add the physique.
