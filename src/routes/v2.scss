@@ -79,11 +79,16 @@
 	font-family: var(--v2-text);
 
 	// Scrollbars in costume (owner's call: they should imitate the UI).
-	// Firefox gets the colours — rose thumb on the muted rail (the
-	// property inherits, so every inner scroller matches). WebKit gets
-	// the full sticker: a pill thumb with the hard black border, riding
-	// a railed track; hover flips it to the engagement blue.
-	scrollbar-color: var(--v2-rose) var(--v2-muted);
+	// WebKit gets the full sticker: a squared thumb with the hard black
+	// border and inset shadow, riding a railed track; hover flips it to
+	// the engagement blue. `scrollbar-color` is FIREFOX-ONLY here, gated
+	// behind the support query below — since Chrome 121, setting the
+	// standard property makes Chromium DISCARD all ::-webkit-scrollbar
+	// styling, which is exactly how the costume failed to show (owner's
+	// screenshot).
+	@supports not selector(::-webkit-scrollbar) {
+		scrollbar-color: var(--v2-rose) var(--v2-muted);
+	}
 
 	::-webkit-scrollbar {
 		width: 12px;
@@ -175,7 +180,11 @@
 // same :has scope that benches the masthead dresses it: a wider cut of
 // the same costume, and v1 pages keep the browser's own.
 :root:has(.v2) {
-	scrollbar-color: #e11d48 #f0ecf2;
+	// Firefox-only, same reasoning as inside .v2: the standard property
+	// switches Chromium's custom scrollbars off.
+	@supports not selector(::-webkit-scrollbar) {
+		scrollbar-color: #e11d48 #f0ecf2;
+	}
 
 	&::-webkit-scrollbar {
 		width: 15px;
