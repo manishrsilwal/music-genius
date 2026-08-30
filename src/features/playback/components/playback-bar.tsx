@@ -214,7 +214,8 @@ export function PlaybackBar({
 								? // Says what happened AND where the way back is (the
 									// owner's review of "Manual scroll": a state label
 									// with no exit reads as a warning, not a status).
-									"You scrolled away — Sync follows the lyrics again"
+									// Short enough for the clamp — D-114's lesson.
+									"Scrolled away — Sync rejoins the lyrics"
 								: preview
 									? "Preview only — sign in to Premium"
 									: source === "spotify" && duration === 0

@@ -128,105 +128,110 @@ function ReadV2() {
 							)}
 						</div>
 					))}
-
-					{/*
-					  The meaning, where a reader lands after the words — v1's
-					  insight engine (synthesis, the artist's own quote, the
-					  resonance written to this reader), in v2 clothes. Absent
-					  entirely when the deployment has no model configured;
-					  honest about a failed generation.
-					*/}
-					{insightState !== "unavailable" && (
-						<section className="v2read__meaning">
-							<h2 className="v2read__meaning-title">What it means</h2>
-							{insightState === "generating" && (
-								<p className="v2read__meaning-p">Reading between the lines…</p>
-							)}
-							{insightState === "failed" && (
-								<p className="v2read__meaning-p">
-									The meaning didn't load this time — the words above still say
-									plenty.
-								</p>
-							)}
-							{insight && (
-								<>
-									{insight.synthesis.split("\n\n").map((para) => (
-										<p key={para.slice(0, 32)} className="v2read__meaning-p">
-											{para}
-										</p>
-									))}
-									{insight.quote && (
-										<blockquote className="v2read__meaning-quote">
-											“{insight.quote.text}”
-											<cite>— {insight.quote.attribution}</cite>
-										</blockquote>
-									)}
-									{insight.resonance && (
-										<div className="v2read__meaning-you">
-											<p className="v2read__meaning-you-label">For you</p>
-											{insight.resonance.lines.map((line) => (
-												<p key={line} className="v2read__meaning-line">
-													{line}
-												</p>
-											))}
-											<p className="v2read__meaning-p">
-												{insight.resonance.text}
-											</p>
-										</div>
-									)}
-								</>
-							)}
-						</section>
-					)}
 				</div>
 
-				<div className="v2read__player">
-					{/*
+				{/*
+				  The rail (owner's request): player on top, the meaning right
+				  under it — visible without reaching the words' end. The rail
+				  is sticky as a whole; the meaning card scrolls INSIDE itself,
+				  so the page keeps its one scrollbar.
+				*/}
+				<aside className="v2read__rail">
+					<div className="v2read__player">
+						{/*
 					  The whole playback deal, said once up top (owner's ask):
 					  what Spotify gives, what Premium unlocks, what YouTube
 					  trades — so the switch below is an informed choice, not
 					  a mystery lever. Written copy; the bar's own status line
 					  still reports the live specifics underneath.
 					*/}
-					<div className="v2read__player-head">
-						<h2 className="v2read__player-title">Play it here</h2>
-						<p className="v2read__player-note">
-							Spotify plays a 30-second preview — with Premium signed in on this
-							browser, it's the full song. YouTube plays everything as a video,
-							intros and all. Switch between them below, free, anytime.
-						</p>
+						<div className="v2read__player-head">
+							<h2 className="v2read__player-title">Play it here</h2>
+							<p className="v2read__player-note">
+								Spotify plays a 30-second preview — with Premium signed in on
+								this browser, it's the full song. YouTube plays everything as a
+								video, intros and all. Switch between them below, free, anytime.
+							</p>
+						</div>
+						<Await
+							promise={playback}
+							fallback={
+								<PlaybackBar
+									videoId={null}
+									spotifyId={null}
+									resolving
+									title={track.title}
+									artist={track.artist}
+									stanzas={track.stanzas}
+									synced={track.synced}
+									lyricsDuration={track.duration}
+									onSyncChange={setPosition}
+								/>
+							}
+						>
+							{({ youtubeId, spotifyId }) => (
+								<PlaybackBar
+									videoId={youtubeId}
+									spotifyId={spotifyId}
+									resolving={false}
+									title={track.title}
+									artist={track.artist}
+									stanzas={track.stanzas}
+									synced={track.synced}
+									lyricsDuration={track.duration}
+									onSyncChange={setPosition}
+								/>
+							)}
+						</Await>
 					</div>
-					<Await
-						promise={playback}
-						fallback={
-							<PlaybackBar
-								videoId={null}
-								spotifyId={null}
-								resolving
-								title={track.title}
-								artist={track.artist}
-								stanzas={track.stanzas}
-								synced={track.synced}
-								lyricsDuration={track.duration}
-								onSyncChange={setPosition}
-							/>
-						}
-					>
-						{({ youtubeId, spotifyId }) => (
-							<PlaybackBar
-								videoId={youtubeId}
-								spotifyId={spotifyId}
-								resolving={false}
-								title={track.title}
-								artist={track.artist}
-								stanzas={track.stanzas}
-								synced={track.synced}
-								lyricsDuration={track.duration}
-								onSyncChange={setPosition}
-							/>
-						)}
-					</Await>
-				</div>
+
+					{insightState !== "unavailable" && (
+						<section className="v2read__meaning">
+							<h2 className="v2read__meaning-title">What it means</h2>
+							<div className="v2read__meaning-body">
+								{insightState === "generating" && (
+									<p className="v2read__meaning-p">
+										Reading between the lines…
+									</p>
+								)}
+								{insightState === "failed" && (
+									<p className="v2read__meaning-p">
+										The meaning didn't load this time — the words still say
+										plenty.
+									</p>
+								)}
+								{insight && (
+									<>
+										{insight.synthesis.split("\n\n").map((para) => (
+											<p key={para.slice(0, 32)} className="v2read__meaning-p">
+												{para}
+											</p>
+										))}
+										{insight.quote && (
+											<blockquote className="v2read__meaning-quote">
+												“{insight.quote.text}”
+												<cite>— {insight.quote.attribution}</cite>
+											</blockquote>
+										)}
+										{insight.resonance && (
+											<div className="v2read__meaning-you">
+												<p className="v2read__meaning-you-label">For you</p>
+												{insight.resonance.lines.map((line) => (
+													<p key={line} className="v2read__meaning-line">
+														{line}
+													</p>
+												))}
+												<p className="v2read__meaning-p">
+													{insight.resonance.text}
+												</p>
+											</div>
+										)}
+									</>
+								)}
+							</div>
+						</section>
+					)}
+				</aside>
 			</div>
 		</main>
 	);

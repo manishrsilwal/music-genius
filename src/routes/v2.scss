@@ -475,14 +475,47 @@
 		}
 	}
 
-	// The meaning panel at the words' end (owner's review: v2 shipped
-	// without it). A card of its own, one register quieter than the dock.
+	// The rail (owner's request): player, then the meaning right under it.
+	// Sticky as a WHOLE from lg and capped to the viewport, so the meaning
+	// is visible without reaching the words' end; the meaning card scrolls
+	// inside itself and the page keeps its one scrollbar.
+	&__rail {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		min-width: 0;
+
+		@include m.from("lg") {
+			position: sticky;
+			top: 1.25rem;
+			max-height: calc(100dvh - 2.5rem);
+		}
+	}
+
+	// A card of its own, one register quieter than the dock.
 	&__meaning {
-		margin-top: 2.5rem;
+		margin-top: 0;
 		border: var(--v2-border);
 		box-shadow: var(--v2-shadow);
 		background: var(--v2-card);
 		padding: 1.25rem 1.4rem;
+	}
+
+	&__meaning-body {
+		min-height: 0;
+		overflow-y: auto;
+		padding-inline-end: 0.375rem;
+		scrollbar-width: thin;
+		scrollbar-color: var(--v2-line) transparent;
+	}
+
+	@include m.from("lg") {
+		&__meaning {
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+			min-height: 0;
+		}
 	}
 
 	&__meaning-title {
@@ -598,17 +631,12 @@
 		--font-display: var(--v2-display);
 
 		@include m.from("lg") {
-			// The owner's pick between a full-height panel and a centred
-			// card: CENTRED. A top-to-bottom panel holds ~300px of content
-			// and would re-invent the empty slab at full height; this card
-			// keeps every pixel earned and floats at the viewport's middle,
-			// balancing the text mass on the left. Sticky at half the
-			// viewport, pulled up half its own height = optically centred,
-			// riding along as the words scroll. `bottom` sticky remains the
+			// The rail is the sticky thing now (owner's request put the
+			// meaning beside the player); the card sheds its own stickiness
+			// and simply leads the stack. `bottom` sticky remains the
 			// below-lg phone behaviour.
-			bottom: auto;
-			top: 50dvh;
-			translate: 0 -50%;
+			position: static;
+			flex: none;
 			max-width: none;
 		}
 
@@ -809,6 +837,15 @@
 		.playback__status {
 			color: var(--v2-body);
 			font-weight: 600;
+		}
+
+		// Sentence case for the status (owner's screenshot: the uppercase
+		// tracked line clipped mid-sentence — D-114's clamp, relearned):
+		// words that explain deserve the room words need.
+		.playback__status {
+			text-transform: none;
+			letter-spacing: 0.01em;
+			font-size: 0.75rem;
 		}
 	}
 }
