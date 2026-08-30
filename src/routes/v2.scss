@@ -439,6 +439,33 @@
 	&__player {
 		position: sticky;
 		bottom: 0.75rem;
+		max-width: 42rem;
+
+		// A dock, not a ghost (owner's screenshot: the bar floated
+		// TRANSPARENT over the lyrics, its chrome painted in colours mixed
+		// for v1's dark canvas). Two moves: an OPAQUE neubrutal card behind
+		// everything the bar renders, and v1's design tokens re-pointed
+		// inside this scope — the bar re-skins itself through the same
+		// variables it always read, and its own files stay untouched.
+		border: var(--v2-border);
+		box-shadow: var(--v2-shadow);
+		background: var(--v2-card);
+		padding: 0.75rem 1rem;
+
+		--color-ink: #0a0a0a;
+		--color-ink-muted: #334155;
+		--color-ink-faint: #64748b;
+		--color-surface: #ffffff;
+		--color-surface-raised: #f0ecf2;
+		--color-hairline: #0a0a0a;
+		--color-hover: rgba(10, 10, 10, 0.06);
+		--color-hover-strong: rgba(10, 10, 10, 0.12);
+		--color-well: rgba(10, 10, 10, 0.08);
+		// The lime that carries v1's accent text is unreadable on this warm
+		// light ground; the palette card's blue takes its seat here.
+		--color-lime: #2563eb;
+		--track-accent: #e11d48;
+		--color-on-bright: #ffffff;
 	}
 }
 
