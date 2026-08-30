@@ -408,6 +408,21 @@
 		color: var(--v2-rose);
 	}
 
+	// Words left, player right from lg (owner's dock review): the panel
+	// lives in the half that sat empty, so overlap is impossible. One
+	// column below lg, where the player docks at the screen's bottom.
+	&__grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 2rem;
+		align-items: start;
+
+		@include m.from("lg") {
+			grid-template-columns: minmax(0, 65ch) minmax(20rem, 27rem);
+			gap: 3.5rem;
+		}
+	}
+
 	// The reading focus: bold, big, one measure (UX cards: 65–75ch line
 	// length, 1.5+ line-height — lyric lines are short, so the measure
 	// mostly guards the odd long line).
@@ -415,7 +430,13 @@
 		display: grid;
 		gap: 0.55rem;
 		max-width: 65ch;
+		// Clearance for the bottom dock below lg; beside the words from lg
+		// the dock cannot cover them and the run-out shrinks.
 		margin-bottom: 7rem;
+
+		@include m.from("lg") {
+			margin-bottom: 3rem;
+		}
 	}
 
 	&__stanza-gap {
@@ -492,9 +513,67 @@
 		--dock-height: auto;
 		--dock-pad: 0.4rem;
 
+		// v1's font tokens too — Epilogue for controls, Anton wherever the
+		// bar reaches for display type. Without these the dock spoke v2's
+		// colours in v1's voice (owner's review).
+		--font-ui: var(--v2-text);
+		--font-display: var(--v2-display);
+
+		@include m.from("lg") {
+			// The right rail: sticky from the top, in the half that sat
+			// empty. `bottom` sticky is the below-lg phone behaviour.
+			bottom: auto;
+			top: 1.25rem;
+			max-width: none;
+		}
+
 		.playback-slot {
 			margin-top: 0;
 			min-height: 0;
+		}
+
+		// The bar's own controls, re-cut in the style card's anatomy:
+		// hard 2px borders, hard mini-shadows, bold labels. Colours ride
+		// the token overrides above; these lines add the physique.
+		.playback__sync,
+		.playback__choose-btn,
+		.playback__elsewhere {
+			border: 2px solid var(--v2-black);
+			border-radius: 999px;
+			box-shadow: 3px 3px 0 var(--v2-black);
+			background: var(--v2-card);
+			color: var(--v2-black);
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+
+		.playback__toggle {
+			border: 2px solid var(--v2-black);
+			box-shadow: 3px 3px 0 var(--v2-black);
+		}
+
+		.playback__video {
+			border: 2px solid var(--v2-black);
+			border-radius: 0;
+			box-shadow: 3px 3px 0 var(--v2-black);
+		}
+
+		.playback__switch {
+			color: var(--v2-black);
+			font-weight: 700;
+			text-decoration: underline;
+			text-underline-offset: 0.2em;
+		}
+
+		.playback__seek {
+			accent-color: var(--v2-rose);
+		}
+
+		.playback__time,
+		.playback__status {
+			color: var(--v2-body);
+			font-weight: 600;
 		}
 	}
 }

@@ -97,57 +97,67 @@ function ReadV2() {
 				<span className="v2read__artist">{track.artist}</span>
 			</header>
 
-			<div className="v2read__lines">
-				{track.stanzas.map((stanza, s) => (
-					<div key={stanza.id} className="contents">
-						{s > 0 && <div className="v2read__stanza-gap" aria-hidden="true" />}
-						{stanza.lines.map((line, l) =>
-							line.text.trim().length > 0 ? (
-								<p
-									key={lineKey(s, l)}
-									id={`v2line-${lineKey(s, l)}`}
-									className="v2read__line"
-									data-active={position?.key === lineKey(s, l) || undefined}
-								>
-									{line.text}
-								</p>
-							) : null,
-						)}
-					</div>
-				))}
-			</div>
+			{/*
+			  Two columns from lg (owner's dock review): the words keep their
+			  left measure, and the player takes the right half that sat
+			  empty — a sticky panel that can never overlap a lyric. Below
+			  lg the player returns to the bottom of the screen, compact.
+			*/}
+			<div className="v2read__grid">
+				<div className="v2read__lines">
+					{track.stanzas.map((stanza, s) => (
+						<div key={stanza.id} className="contents">
+							{s > 0 && (
+								<div className="v2read__stanza-gap" aria-hidden="true" />
+							)}
+							{stanza.lines.map((line, l) =>
+								line.text.trim().length > 0 ? (
+									<p
+										key={lineKey(s, l)}
+										id={`v2line-${lineKey(s, l)}`}
+										className="v2read__line"
+										data-active={position?.key === lineKey(s, l) || undefined}
+									>
+										{line.text}
+									</p>
+								) : null,
+							)}
+						</div>
+					))}
+				</div>
 
-			<div className="v2read__player">
-				<Await
-					promise={playback}
-					fallback={
-						<PlaybackBar
-							videoId={null}
-							spotifyId={null}
-							resolving
-							title={track.title}
-							artist={track.artist}
-							stanzas={track.stanzas}
-							synced={track.synced}
-							lyricsDuration={track.duration}
-							onSyncChange={setPosition}
-						/>
-					}
-				>
-					{({ youtubeId, spotifyId }) => (
-						<PlaybackBar
-							videoId={youtubeId}
-							spotifyId={spotifyId}
-							resolving={false}
-							title={track.title}
-							artist={track.artist}
-							stanzas={track.stanzas}
-							synced={track.synced}
-							lyricsDuration={track.duration}
-							onSyncChange={setPosition}
-						/>
-					)}
-				</Await>
+				<div className="v2read__player">
+					<Await
+						promise={playback}
+						fallback={
+							<PlaybackBar
+								videoId={null}
+								spotifyId={null}
+								resolving
+								title={track.title}
+								artist={track.artist}
+								stanzas={track.stanzas}
+								synced={track.synced}
+								lyricsDuration={track.duration}
+								onSyncChange={setPosition}
+							/>
+						}
+					>
+						{({ youtubeId, spotifyId }) => (
+							<PlaybackBar
+								videoId={youtubeId}
+								spotifyId={spotifyId}
+								resolving={false}
+								title={track.title}
+								artist={track.artist}
+								stanzas={track.stanzas}
+								synced={track.synced}
+								lyricsDuration={track.duration}
+								onSyncChange={setPosition}
+							/>
+						)}
+					</Await>
+				</div>
 			</div>
 		</main>
 	);
