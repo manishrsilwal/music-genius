@@ -155,6 +155,12 @@ function Discovery() {
 		() => pickAlsoLiked(preferences, seed, dives, alsoCount, seen, taste),
 		[preferences, seed, dives, alsoCount, seen, taste],
 	);
+	// The first visit's "while you decide" rail (D-124): five from today's
+	// rotation, before any question is answered.
+	const teaser = useMemo(
+		() => pickAlsoLiked(preferences, seed, [], 5, seen, taste),
+		[preferences, seed, seen, taste],
+	);
 	// The pool is finite: fewer back than asked for means it is dry.
 	const alsoExhausted = also.length < alsoCount;
 
@@ -259,7 +265,7 @@ function Discovery() {
 						key="chat"
 						// mt-6, not the shelves' mt-10: the chat must clear the fold
 						// with the hero above it (D-028's constraint, D-122's tile).
-						className="mt-6 max-w-2xl"
+						className="landing__welcome mt-6"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0, y: -12 }}
@@ -268,6 +274,25 @@ function Discovery() {
 						{/* The stepper's successor (D-122): same questions, same
 						    skips, now a conversation with a free-text door. */}
 						<PreferenceChat onComplete={save} />
+
+						{/*
+						  The right half was dead canvas on a desktop (D-124, the
+						  owner's review): the chat caps at a reading measure, so
+						  from lg the first visit earns a second column — today's
+						  rotation, tappable before a single question is answered.
+						  The same honest offer as "Skip all" (D-064), made as
+						  songs instead of a button; absent below lg, where the
+						  fold belongs to the chat alone.
+						*/}
+						<aside className="landing__teaser">
+							<h2 className="landing__teaser-title text-micro">
+								While you decide
+							</h2>
+							<p className="landing__teaser-lead text-caption">
+								Today's rotation from our shelf — no questions needed.
+							</p>
+							<AlsoLiked picks={teaser} art rail />
+						</aside>
 					</motion.div>
 				) : unpersonalised ? (
 					<motion.div

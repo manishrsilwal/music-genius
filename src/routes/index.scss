@@ -118,6 +118,48 @@
 	max-width: 26rem;
 }
 
+// The first visit's two halves (D-124): the chat at its reading measure,
+// and — from lg, where the right half was dead canvas — a quiet rail of
+// today's rotation beside it. One column below lg: the fold belongs to
+// the chat alone there (D-028).
+.landing__welcome {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	align-items: start;
+
+	@include m.from("lg") {
+		grid-template-columns: minmax(0, 42rem) minmax(16rem, 24rem);
+		gap: 3.5rem;
+	}
+}
+
+.landing__teaser {
+	display: none;
+
+	@include m.from("lg") {
+		display: grid;
+		align-content: start;
+		gap: 0.375rem;
+		// Optical: the rail's title aligns with the chat tile's header, not
+		// its border edge.
+		padding-top: 0.5rem;
+	}
+}
+
+.landing__teaser-title {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: var(--tracking-label);
+	color: var(--color-ink);
+}
+
+.landing__teaser-lead {
+	margin: 0 0 0.625rem;
+	color: var(--color-ink-muted);
+}
+
 .bento {
 	display: grid;
 	grid-template-columns: 1fr;

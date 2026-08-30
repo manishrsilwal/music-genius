@@ -228,8 +228,14 @@ export function PreferenceChat({
 	return (
 		<div className="chat">
 			<div className="chat__tile">
-				{/* A conversation has a counterpart; naming it is what makes
-				    the surface read as a chat rather than a styled form. */}
+				{/*
+				  A conversation has a counterpart — but the counterpart is the
+				  product, and the masthead already says its name (owner's
+				  review: a repeated brand crowds a small tile, and a second
+				  three-bar mark read as a second hamburger menu that opens
+				  nothing). So: ONE role line, and an avatar of the brand's own
+				  idea — a musical repeat sign, the line that returns.
+				*/}
 				<header className="chat__head">
 					<span className="chat__avatar" aria-hidden="true">
 						<svg
@@ -239,22 +245,20 @@ export function PreferenceChat({
 							aria-hidden="true"
 							focusable="false"
 						>
-							<rect x="1" y="2.5" width="12" height="2" rx="1" />
+							<circle cx="3.6" cy="4.9" r="1.15" />
+							<circle cx="3.6" cy="9.1" r="1.15" />
+							<rect x="7.2" y="2" width="1.4" height="10" rx="0.7" />
 							<rect
-								x="1"
-								y="6"
-								width="9"
-								height="2"
-								rx="1"
+								x="10.2"
+								y="2"
+								width="2.4"
+								height="10"
+								rx="0.9"
 								className="chat__avatar-accent"
 							/>
-							<rect x="1" y="9.5" width="12" height="2" rx="1" />
 						</svg>
 					</span>
-					<div>
-						<p className="chat__name">Refrain</p>
-						<p className="chat__status text-micro">turns feelings into songs</p>
-					</div>
+					<p className="chat__role">Turns feelings into songs</p>
 				</header>
 
 				{/* aria-live, so the bot's next question is announced without the

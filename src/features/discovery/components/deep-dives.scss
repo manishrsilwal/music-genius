@@ -225,6 +225,12 @@
 		gap: 0.375rem 1.5rem;
 	}
 
+	// The rail variant (D-124): one column at every width. The attribute
+	// selector outweighs the media rule above, so no counter-query needed.
+	&[data-rail] {
+		grid-template-columns: 1fr;
+	}
+
 	// 44px, DECLARED rather than arrived at (D-067). These rows measured 40px
 	// at 390px — a dozen of them, and the main way into a track on a phone,
 	// every one under the size this product holds itself to (D-035). Padding

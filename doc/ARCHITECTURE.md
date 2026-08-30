@@ -134,6 +134,31 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-124 — The first visit earns its right half, and the mark stops repeating
+**Built 2026-08-30.** The owner's design review of the first-visit
+screen, three findings.
+
+**Two hamburger menus that open nothing.** The chat avatar wore the
+masthead's three-bar stanza mark, so the page showed the same
+menu-looking icon twice, neither one a menu. The counterpart now has
+its own face — a musical REPEAT SIGN (two dots, thin bar, thick bar
+in the constant lime), which is the brand's own idea drawn: Refrain,
+the line that returns. One identity, two drawings.
+
+**The brand said twice.** The chat nameplate repeated the name the
+masthead already carries, inside a tile with no room to spare. The
+header is now one role line ("Turns feelings into songs"), no name:
+identity is said once, by the masthead.
+
+**Dead canvas on the right.** The chat caps at a reading measure, so
+on a desktop the first visit's right half was empty blue. From lg it
+now holds a quiet rail — "While you decide": five rows of today's
+rotation, tappable before a single question is answered. The same
+honest offer as "Skip all" (D-064), made as songs instead of a
+button. It reuses the also-liked rows via a `rail` single-column
+variant; below lg it is absent entirely, because there the fold
+belongs to the chat alone (D-028).
+
 ### D-123 — The product is named Refrain
 **Decided 2026-08-30.** The owner chose "Refrain" from a creative
 slate ahead of hosting: the line that returns — the part of a song

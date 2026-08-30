@@ -216,6 +216,7 @@ export function AlsoLiked({
 	picks,
 	art = false,
 	onHide,
+	rail = false,
 }: {
 	picks: CuratedTrack[];
 	/**
@@ -226,10 +227,17 @@ export function AlsoLiked({
 	art?: boolean;
 	/** "Not for me" on a row (D-121). Optional: no taste storage, no control. */
 	onHide?: (lrclibId: string) => void;
+	/**
+	 * Single-column rail (D-124): the first visit's "while you decide"
+	 * column runs these rows one-up beside the chat, where the two-up
+	 * grid would crush them.
+	 */
+	rail?: boolean;
 }) {
 	return (
 		<motion.div
 			className="also"
+			data-rail={rail || undefined}
 			variants={staggerVariants}
 			initial="hidden"
 			animate="visible"

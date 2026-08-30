@@ -49,23 +49,20 @@
 		fill: var(--color-ink);
 	}
 
-	// The mark's lime middle bar — the same constant accent the masthead
-	// wears; the counterpart IS the product, and says so quietly.
+	// The repeat sign's thick barline in the constant lime — the same
+	// accent the masthead's mark wears; one identity, two drawings.
 	&__avatar-accent {
 		fill: var(--color-lime);
 	}
 
-	&__name {
+	// One role line, no nameplate: the masthead already says the name
+	// (owner's review — a repeated brand crowds a small tile).
+	&__role {
 		margin: 0;
 		font-family: var(--font-ui);
 		font-size: var(--text-caption);
-		font-weight: 600;
-		color: var(--color-ink);
-	}
-
-	&__status {
-		margin: 0;
-		color: var(--color-ink-faint);
+		font-weight: 500;
+		color: var(--color-ink-muted);
 	}
 
 	// Flex, not grid: a grid with headroom spreads its rows apart
