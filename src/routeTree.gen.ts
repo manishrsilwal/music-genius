@@ -15,6 +15,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ApiArtworkRouteImport } from './routes/api/artwork'
 import { Route as ApiCardRouteImport } from './routes/api/card'
 import { Route as ApiInsightsRouteImport } from './routes/api/insights'
+import { Route as ApiInterpretRouteImport } from './routes/api/interpret'
 import { Route as ApiOgRouteImport } from './routes/api/og'
 import { Route as ApiPartyRouteImport } from './routes/api/party'
 import { Route as ApiSearchRouteImport } from './routes/api/search'
@@ -51,6 +52,11 @@ const ApiCardRoute = ApiCardRouteImport.update({
 const ApiInsightsRoute = ApiInsightsRouteImport.update({
   id: '/api/insights',
   path: '/api/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiInterpretRoute = ApiInterpretRouteImport.update({
+  id: '/api/interpret',
+  path: '/api/interpret',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiOgRoute = ApiOgRouteImport.update({
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/api/artwork': typeof ApiArtworkRoute
   '/api/card': typeof ApiCardRoute
   '/api/insights': typeof ApiInsightsRoute
+  '/api/interpret': typeof ApiInterpretRoute
   '/api/og': typeof ApiOgRoute
   '/api/party': typeof ApiPartyRoute
   '/api/search': typeof ApiSearchRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/api/artwork': typeof ApiArtworkRoute
   '/api/card': typeof ApiCardRoute
   '/api/insights': typeof ApiInsightsRoute
+  '/api/interpret': typeof ApiInterpretRoute
   '/api/og': typeof ApiOgRoute
   '/api/party': typeof ApiPartyRoute
   '/api/search': typeof ApiSearchRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/api/artwork': typeof ApiArtworkRoute
   '/api/card': typeof ApiCardRoute
   '/api/insights': typeof ApiInsightsRoute
+  '/api/interpret': typeof ApiInterpretRoute
   '/api/og': typeof ApiOgRoute
   '/api/party': typeof ApiPartyRoute
   '/api/search': typeof ApiSearchRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/api/artwork'
     | '/api/card'
     | '/api/insights'
+    | '/api/interpret'
     | '/api/og'
     | '/api/party'
     | '/api/search'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/api/artwork'
     | '/api/card'
     | '/api/insights'
+    | '/api/interpret'
     | '/api/og'
     | '/api/party'
     | '/api/search'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/api/artwork'
     | '/api/card'
     | '/api/insights'
+    | '/api/interpret'
     | '/api/og'
     | '/api/party'
     | '/api/search'
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   ApiArtworkRoute: typeof ApiArtworkRoute
   ApiCardRoute: typeof ApiCardRoute
   ApiInsightsRoute: typeof ApiInsightsRoute
+  ApiInterpretRoute: typeof ApiInterpretRoute
   ApiOgRoute: typeof ApiOgRoute
   ApiPartyRoute: typeof ApiPartyRoute
   ApiSearchRoute: typeof ApiSearchRoute
@@ -241,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/api/insights'
       fullPath: '/api/insights'
       preLoaderRoute: typeof ApiInsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/interpret': {
+      id: '/api/interpret'
+      path: '/api/interpret'
+      fullPath: '/api/interpret'
+      preLoaderRoute: typeof ApiInterpretRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/og': {
@@ -302,6 +322,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiArtworkRoute: ApiArtworkRoute,
   ApiCardRoute: ApiCardRoute,
   ApiInsightsRoute: ApiInsightsRoute,
+  ApiInterpretRoute: ApiInterpretRoute,
   ApiOgRoute: ApiOgRoute,
   ApiPartyRoute: ApiPartyRoute,
   ApiSearchRoute: ApiSearchRoute,
