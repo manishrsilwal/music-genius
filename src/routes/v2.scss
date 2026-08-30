@@ -78,6 +78,33 @@
 	color: var(--v2-body);
 	font-family: var(--v2-text);
 
+	// Scrollbars in costume (owner's call: they should imitate the UI).
+	// Firefox gets the colours — rose thumb on the muted rail (the
+	// property inherits, so every inner scroller matches). WebKit gets
+	// the full sticker: a pill thumb with the hard black border, riding
+	// a railed track; hover flips it to the engagement blue.
+	scrollbar-color: var(--v2-rose) var(--v2-muted);
+
+	::-webkit-scrollbar {
+		width: 12px;
+		height: 12px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: var(--v2-muted);
+		border-inline-start: 2px solid var(--v2-black);
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: var(--v2-rose);
+		border: 2px solid var(--v2-black);
+		border-radius: 999px;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: var(--v2-blue);
+	}
+
 	&__frame {
 		max-width: 72rem;
 		margin-inline: auto;
@@ -138,6 +165,32 @@
 // mechanism the track sheet uses).
 :root:has(.v2) .masthead {
 	display: none;
+}
+
+// The PAGE scrollbar belongs to the document, outside .v2's reach — the
+// same :has scope that benches the masthead dresses it: a wider cut of
+// the same costume, and v1 pages keep the browser's own.
+:root:has(.v2) {
+	scrollbar-color: #e11d48 #f0ecf2;
+
+	&::-webkit-scrollbar {
+		width: 15px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: #f0ecf2;
+		border-left: 3px solid #0a0a0a;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: #e11d48;
+		border: 3px solid #0a0a0a;
+		border-radius: 999px;
+	}
+
+	&::-webkit-scrollbar-thumb:hover {
+		background: #2563eb;
+	}
 }
 
 // The first-paint splash wears v2's clothes on v2 pages (owner's report:
@@ -505,8 +558,6 @@
 		min-height: 0;
 		overflow-y: auto;
 		padding-inline-end: 0.375rem;
-		scrollbar-width: thin;
-		scrollbar-color: var(--v2-line) transparent;
 	}
 
 	@include m.from("lg") {
@@ -1115,7 +1166,6 @@
 		flex-direction: column;
 		gap: 0.45rem;
 		padding-inline-end: 0.375rem;
-		scrollbar-width: thin;
 	}
 
 	&__msg {
