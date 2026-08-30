@@ -140,6 +140,24 @@
 	display: none;
 }
 
+// The first-paint splash wears v2's clothes on v2 pages (owner's report:
+// v1's blue greeted the loud cut). The intro paints itself entirely from
+// v1 tokens, so re-pointing them in this scope re-dresses it — warm
+// ground, black mark, the accent rule in rose — without touching the
+// component. Same skeleton, different outfit.
+:root:has(.v2) .intro {
+	--color-canvas: #fff1f2;
+	--color-ink: #0a0a0a;
+	--color-ink-muted: #881337;
+	--color-lime: #e11d48;
+	background: #fff1f2;
+
+	.intro__word {
+		font-family: "Anton", "Arial Narrow", sans-serif;
+		letter-spacing: 0.08em;
+	}
+}
+
 // ---------- Discover ----------
 .disco {
 	&__hero {
@@ -466,6 +484,18 @@
 		--color-lime: #2563eb;
 		--track-accent: #e11d48;
 		--color-on-bright: #ffffff;
+
+		// The bar sizes itself from the dock tokens; inside this card they
+		// meant a hero's worth of air (owner's screenshot: a half-viewport
+		// slab). Compacted: the slot's 3rem approach run and reserved
+		// height go, and the bar hugs its content.
+		--dock-height: auto;
+		--dock-pad: 0.4rem;
+
+		.playback-slot {
+			margin-top: 0;
+			min-height: 0;
+		}
 	}
 }
 
