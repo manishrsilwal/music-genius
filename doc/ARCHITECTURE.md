@@ -345,6 +345,13 @@ Korean (may every language retire from it), and the also-liked wander
 learned that a grown catalogue can fill twelve in-mood slots. The
 audit also re-flagged the pre-existing "Musafir Hoon Yaaron" LoFi
 pointer (OD-028 class) — the owner's hand, no clean auto-suggestion.
+Resolved 2026-08-30 by a manual sweep: LRCLIB holds NO original
+Kishore recording with synced lyrics — only the "Lofi"-titled upload
+(Kishore's voice, and at 254s the Parichay original's own length, so
+the tag reads as re-upload branding), a Shaan cover, and an unsynced
+live cut. The id is now an ACCEPTED variant in the audit script,
+with the reason beside it; delete that line and re-run whenever
+LRCLIB might have grown a better copy.
 
 ### D-119 — One container, every page
 **Built 2026-08-28.** The owner's report: the content column shifts

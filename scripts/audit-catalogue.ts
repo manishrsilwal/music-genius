@@ -18,6 +18,23 @@ import { CATALOGUE } from "../src/lib/deep-dives";
 import { isVariant } from "../src/lib/ranking";
 import { getTrack, searchLyrics } from "../src/server/lyrics.server";
 
+/**
+ * Variant-titled ids that are ACCEPTED, each with its reason. An entry
+ * lands here only after the search for a clean alternative has been run
+ * and come back empty — this is a recorded decision, not a mute button.
+ * Re-audit a listed id whenever LRCLIB might have grown a better copy:
+ * delete the line and run the audit.
+ */
+const ACCEPTED_VARIANTS: Record<string, string> = {
+	// Checked 2026-08-30: LRCLIB holds NO original Kishore recording of
+	// Musafir Hoon Yaaron with synced lyrics — only this "Lofi"-titled
+	// upload (Kishore's own voice, and at 254s it is the Parichay
+	// original's length, so the tag reads as re-upload branding), a Shaan
+	// cover, and an unsynced live cut. The least-wrong pointer that
+	// exists.
+	"18472648": "no clean original on LRCLIB; Kishore's voice at the original's 254s",
+};
+
 let wrong = 0;
 let missing = 0;
 
@@ -31,6 +48,12 @@ for (const entry of CATALOGUE) {
 	}
 
 	if (!isVariant(current.title)) continue;
+
+	const accepted = ACCEPTED_VARIANTS[entry.lrclibId];
+	if (accepted) {
+		console.log(`ACCEPTED ${entry.title} — ${entry.artist}  (${accepted})`);
+		continue;
+	}
 
 	wrong++;
 	console.log(`\nVARIANT  ${entry.title} — ${entry.artist}`);
