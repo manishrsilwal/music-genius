@@ -1442,52 +1442,336 @@
 	}
 
 	&__party-link {
+		display: inline-flex;
+		align-items: center;
+		border: 2px solid var(--v2-black);
+		border-radius: 999px;
+		box-shadow: 3px 3px 0 var(--v2-black);
+		background: var(--v2-card);
+		padding: 0.55rem 1.2rem;
 		font-weight: 700;
-		color: var(--v2-ink);
+		color: var(--v2-black);
+
+		&:hover,
+		&:focus-visible {
+			translate: -1px -1px;
+			box-shadow: 4px 4px 0 var(--v2-black);
+			background: #fde68a;
+		}
+
+		&:active {
+			translate: 1px 1px;
+			box-shadow: 2px 2px 0 var(--v2-black);
+		}
+	}
+}
+
+// ---------- Full v2 tailoring of the reused v1 components (D-126, second
+// pass — the owner's ruling: NO v1 UI shows through). The tokens above set
+// the colours; everything below re-cuts the ANATOMY: hard borders, offset
+// shadows, filled brights, squared art. Same components, zero v1 look.
+.v2 {
+	// — The feelings chat —
+	.chat__tile {
+		border: var(--v2-border);
+		box-shadow: var(--v2-shadow);
+		background: var(--v2-card);
+	}
+
+	.chat__head {
+		border-bottom: 2px solid var(--v2-black);
+	}
+
+	.chat__avatar {
+		background: var(--v2-card);
+		border: 2px solid var(--v2-black);
+	}
+
+	.chat__role {
+		font-weight: 700;
+		color: var(--v2-black);
+	}
+
+	.chat__bubble {
+		border: 2px solid var(--v2-black);
+		border-radius: 0.5rem;
+		font-weight: 600;
+
+		&[data-from="bot"] {
+			background: var(--v2-card);
+			color: var(--v2-black);
+			box-shadow: 3px 3px 0 var(--v2-black);
+		}
+
+		&[data-from="reader"] {
+			background: var(--v2-rose);
+			color: #fff;
+			box-shadow: 3px 3px 0 var(--v2-black);
+		}
+	}
+
+	.chat__dot {
+		background: var(--v2-rose);
+	}
+
+	.chat__chip {
+		border: 2px solid var(--v2-black);
+		box-shadow: 3px 3px 0 var(--v2-black);
+		background: var(--v2-card);
+		color: var(--v2-black);
+		font-weight: 700;
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--v2-black);
+			background: var(--v2-card);
+			translate: -1px -1px;
+			box-shadow: 4px 4px 0 var(--v2-black);
+		}
+
+		&:active {
+			translate: 1px 1px;
+			box-shadow: 2px 2px 0 var(--v2-black);
+		}
+
+		&[data-selected] {
+			border-color: var(--v2-black);
+			background: #fde68a;
+		}
+
+		&--bright {
+			background: var(--v2-rose);
+			color: #fff;
+
+			&:hover,
+			&:focus-visible {
+				background: var(--v2-rose);
+			}
+		}
+
+		&--quiet {
+			border-color: transparent;
+			box-shadow: none;
+			background: none;
+			color: var(--v2-black);
+			text-decoration: underline;
+			text-underline-offset: 0.2em;
+
+			&:hover,
+			&:focus-visible {
+				background: none;
+				color: var(--v2-rose);
+				translate: none;
+				box-shadow: none;
+			}
+		}
+	}
+
+	.chat__tick {
+		color: var(--v2-black);
+	}
+
+	.chat__chip[data-selected] .chat__tick {
+		color: var(--v2-rose);
+	}
+
+	.chat__composer {
+		border: 2px solid var(--v2-black);
+		background: var(--v2-card);
+		border-radius: 999px;
+	}
+
+	.chat__send {
+		background: var(--v2-rose);
+		border: 2px solid var(--v2-black);
+		box-shadow: 2px 2px 0 var(--v2-black);
+		color: #fff;
+	}
+
+	.chat__skip-all {
+		border: 2px solid var(--v2-black);
+		box-shadow: 3px 3px 0 var(--v2-black);
+		background: var(--v2-card);
+		font-weight: 700;
+	}
+
+	// — Deep Dives cards —
+	.dives__card {
+		border: var(--v2-border);
+		box-shadow: var(--v2-shadow);
+		background: var(--v2-card);
+		border-radius: 0.5rem;
+		transition:
+			translate 0.15s ease,
+			box-shadow 0.15s ease;
+
+		&:hover,
+		&:focus-within {
+			border-color: var(--v2-black);
+			background: var(--v2-card);
+			translate: -2px -2px;
+			box-shadow: var(--v2-shadow-up);
+		}
+	}
+
+	.dives__art {
+		border: 2px solid var(--v2-black);
+		border-radius: 0.25rem;
+	}
+
+	.dives__title {
+		font-family: var(--v2-display);
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+	}
+
+	.dives__more {
+		border: 2px dashed var(--v2-black);
+		border-radius: 0.5rem;
+		color: var(--v2-rose);
+		font-weight: 700;
+
+		&:hover {
+			border-color: var(--v2-black);
+			background: #fde68a;
+		}
+	}
+
+	.dives__verdict {
+		font-weight: 700;
+		color: var(--v2-black);
 		text-decoration: underline;
 		text-underline-offset: 0.2em;
 
 		&:hover {
 			color: var(--v2-rose);
 		}
-	}
-}
 
-// Physique for the reused v1 components inside .v2 (the tokens above set
-// their colours; these lines add the hard edges the style card demands).
-.v2 {
-	.chat__tile,
-	.dives__card,
-	.taste__options {
-		border: var(--v2-border);
-		box-shadow: var(--v2-shadow);
-	}
-
-	.dives__card {
-		background: var(--v2-card);
-	}
-
-	.also__row {
-		border: 2px solid transparent;
-
-		&:hover {
-			border-color: var(--v2-black);
-			background: var(--v2-card);
+		&[data-active] {
+			color: var(--v2-rose);
 		}
 	}
 
+	.dives__shared {
+		font-weight: 600;
+	}
+
+	.dives__shared-value {
+		color: var(--v2-rose);
+	}
+
+	// — People also like rows —
+	.also__row {
+		border: 2px solid var(--v2-black);
+		border-radius: 0.5rem;
+		background: var(--v2-card);
+		box-shadow: 2px 2px 0 var(--v2-black);
+		transition:
+			translate 0.15s ease,
+			box-shadow 0.15s ease;
+
+		&:hover {
+			background: var(--v2-card);
+			translate: -1px -1px;
+			box-shadow: 3px 3px 0 var(--v2-black);
+		}
+	}
+
+	.also {
+		gap: 0.625rem;
+	}
+
+	.also__art {
+		border: 2px solid var(--v2-black);
+		border-radius: 0.25rem;
+	}
+
+	.also__title {
+		font-weight: 700;
+	}
+
+	.also__hide {
+		border: 2px solid var(--v2-black);
+		background: var(--v2-card);
+		color: var(--v2-black);
+		font-weight: 700;
+
+		&:hover {
+			background: var(--v2-rose);
+			color: #fff;
+		}
+	}
+
+	// — Taste chips —
 	.taste__chip {
 		border: 2px solid var(--v2-black);
 		box-shadow: 3px 3px 0 var(--v2-black);
 		background: var(--v2-card);
+		font-weight: 700;
 	}
 
-	.search__input,
-	.search input[type="search"],
-	.search input {
+	.taste__reset {
+		border: 2px solid var(--v2-black);
+		border-radius: 999px;
+		box-shadow: 3px 3px 0 var(--v2-black);
+		background: var(--v2-card);
+		padding: 0.4rem 0.9rem;
+		color: var(--v2-black);
+	}
+
+	.taste__options {
 		border: var(--v2-border);
 		box-shadow: var(--v2-shadow);
 		background: var(--v2-card);
+	}
+
+	.taste__option[data-selected] {
+		box-shadow: inset 0 0 0 2px var(--v2-rose);
+	}
+
+	// — Search field + its flyout —
+	.search__input {
+		border: var(--v2-border);
+		box-shadow: var(--v2-shadow);
+		background: var(--v2-card);
+		border-radius: 0;
+		font-weight: 600;
+		color: var(--v2-black);
+	}
+
+	.search__results {
+		border: var(--v2-border);
+		box-shadow: var(--v2-shadow);
+		background: var(--v2-card);
+		border-radius: 0;
+	}
+
+	.search__option[data-highlighted],
+	.search__option:hover {
+		background: #fde68a;
+	}
+
+	// — Continue reading rows —
+	.recent__row {
+		border: 2px solid var(--v2-black);
+		border-radius: 0.5rem;
+		background: var(--v2-card);
+		box-shadow: 2px 2px 0 var(--v2-black);
+	}
+
+	.recent__art {
+		border: 2px solid var(--v2-black);
+	}
+
+	.recent__remove {
+		border: 2px solid var(--v2-black);
+		background: var(--v2-card);
+		font-weight: 700;
+
+		&:hover {
+			background: var(--v2-rose);
+			color: #fff;
+		}
 	}
 }
 
