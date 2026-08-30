@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
+import { useInsights } from "@/features/insights/hooks/use-insights";
 import { PlaybackBar } from "@/features/playback/components/playback-bar";
 import { type LinePosition, lineKey } from "@/lib/lrc";
 import { getTrackFn, getTrackPlaybackFn } from "@/server/lyrics.functions";
@@ -54,6 +55,9 @@ const MANUAL_HOLD_MS = 4_000;
 function ReadV2() {
 	const { track, playback } = Route.useLoaderData();
 	const [position, setPosition] = useState<LinePosition | null>(null);
+	// The meaning (owner's review: it was missing from v2 entirely) — the
+	// same engine as v1's drawer, worn as a panel after the words.
+	const { state: insightState, insight } = useInsights(track.id);
 
 	/*
 	 * Follow the song unless the reader just took the wheel — the same
@@ -124,6 +128,56 @@ function ReadV2() {
 							)}
 						</div>
 					))}
+
+					{/*
+					  The meaning, where a reader lands after the words — v1's
+					  insight engine (synthesis, the artist's own quote, the
+					  resonance written to this reader), in v2 clothes. Absent
+					  entirely when the deployment has no model configured;
+					  honest about a failed generation.
+					*/}
+					{insightState !== "unavailable" && (
+						<section className="v2read__meaning">
+							<h2 className="v2read__meaning-title">What it means</h2>
+							{insightState === "generating" && (
+								<p className="v2read__meaning-p">Reading between the lines…</p>
+							)}
+							{insightState === "failed" && (
+								<p className="v2read__meaning-p">
+									The meaning didn't load this time — the words above still say
+									plenty.
+								</p>
+							)}
+							{insight && (
+								<>
+									{insight.synthesis.split("\n\n").map((para) => (
+										<p key={para.slice(0, 32)} className="v2read__meaning-p">
+											{para}
+										</p>
+									))}
+									{insight.quote && (
+										<blockquote className="v2read__meaning-quote">
+											“{insight.quote.text}”
+											<cite>— {insight.quote.attribution}</cite>
+										</blockquote>
+									)}
+									{insight.resonance && (
+										<div className="v2read__meaning-you">
+											<p className="v2read__meaning-you-label">For you</p>
+											{insight.resonance.lines.map((line) => (
+												<p key={line} className="v2read__meaning-line">
+													{line}
+												</p>
+											))}
+											<p className="v2read__meaning-p">
+												{insight.resonance.text}
+											</p>
+										</div>
+									)}
+								</>
+							)}
+						</section>
+					)}
 				</div>
 
 				<div className="v2read__player">

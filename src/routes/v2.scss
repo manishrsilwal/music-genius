@@ -475,6 +475,84 @@
 		}
 	}
 
+	// The meaning panel at the words' end (owner's review: v2 shipped
+	// without it). A card of its own, one register quieter than the dock.
+	&__meaning {
+		margin-top: 2.5rem;
+		border: var(--v2-border);
+		box-shadow: var(--v2-shadow);
+		background: var(--v2-card);
+		padding: 1.25rem 1.4rem;
+	}
+
+	&__meaning-title {
+		margin: 0 0 0.7rem;
+		font-family: var(--v2-display);
+		font-size: 1.35rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--v2-black);
+	}
+
+	&__meaning-p {
+		margin: 0 0 0.8rem;
+		font-size: 0.95rem;
+		font-weight: 500;
+		line-height: 1.65;
+		color: var(--v2-body);
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&__meaning-quote {
+		margin: 1rem 0;
+		padding: 0.8rem 1rem;
+		border: 2px solid var(--v2-black);
+		background: var(--v2-muted);
+		font-size: 0.95rem;
+		font-weight: 600;
+		line-height: 1.55;
+		color: var(--v2-black);
+
+		cite {
+			display: block;
+			margin-top: 0.4rem;
+			font-style: normal;
+			font-size: 0.8rem;
+			color: var(--v2-ink);
+		}
+	}
+
+	&__meaning-you {
+		margin-top: 1.1rem;
+		padding-top: 0.9rem;
+		border-top: 2px solid var(--v2-black);
+	}
+
+	&__meaning-you-label {
+		margin: 0 0 0.5rem;
+		font-family: var(--v2-display);
+		font-size: 0.9rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--v2-rose);
+	}
+
+	// The reader's own lines, marked the way the sung line is — the same
+	// grammar meaning the same thing.
+	&__meaning-line {
+		width: fit-content;
+		margin: 0 0 0.4rem;
+		padding: 0.15rem 0.5rem;
+		background: var(--v2-rose);
+		border: 2px solid var(--v2-black);
+		color: #fff;
+		font-weight: 700;
+		font-size: 0.9rem;
+	}
+
 	&__player {
 		position: sticky;
 		bottom: 0.75rem;
@@ -574,10 +652,13 @@
 		// neither competes with playing the song.
 		.playback:not([data-docked]) {
 			grid-template-columns: auto minmax(0, 1fr) auto;
+			// The status sits BETWEEN the switch and the sync it points at
+			// (owner's review: "manual scroll" floated alone mid-card, a
+			// warning divorced from its remedy). One foot row: the switch
+			// opens it, the words explain, sync closes it.
 			grid-template-areas:
 				"toggle scrub video"
-				"meta meta meta"
-				"switch switch sync";
+				"switch meta sync";
 			align-items: center;
 			max-width: none;
 
@@ -598,8 +679,7 @@
 			&[data-source="spotify"] {
 				grid-template-areas:
 					"embed embed embed"
-					"meta meta meta"
-					"switch switch sync";
+					"switch meta sync";
 
 				.playback__sync {
 					justify-self: end;

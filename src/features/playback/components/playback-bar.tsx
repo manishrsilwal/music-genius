@@ -211,7 +211,10 @@ export function PlaybackBar({
 						: playing && !synced
 							? "No timings"
 							: playing && manual
-								? "Manual scroll"
+								? // Says what happened AND where the way back is (the
+									// owner's review of "Manual scroll": a state label
+									// with no exit reads as a warning, not a status).
+									"You scrolled away — Sync follows the lyrics again"
 								: preview
 									? "Preview only — sign in to Premium"
 									: source === "spotify" && duration === 0
