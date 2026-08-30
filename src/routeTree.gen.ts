@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as V2RouteImport } from './routes/v2'
 import { Route as ApiArtworkRouteImport } from './routes/api/artwork'
 import { Route as ApiCardRouteImport } from './routes/api/card'
 import { Route as ApiInsightsRouteImport } from './routes/api/insights'
@@ -23,6 +24,10 @@ import { Route as ApiTrackRouteImport } from './routes/api/track'
 import { Route as PartyIndexRouteImport } from './routes/party.index'
 import { Route as PartyRoomIdRouteImport } from './routes/party.$roomId'
 import { Route as TrackTrackIdRouteImport } from './routes/track.$trackId'
+import { Route as V2IndexRouteImport } from './routes/v2.index'
+import { Route as V2PartyIndexRouteImport } from './routes/v2.party.index'
+import { Route as V2PartyRoomIdRouteImport } from './routes/v2.party.$roomId'
+import { Route as V2TrackTrackIdRouteImport } from './routes/v2.track.$trackId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -37,6 +42,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V2Route = V2RouteImport.update({
+  id: '/v2',
+  path: '/v2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiArtworkRoute = ApiArtworkRouteImport.update({
@@ -94,11 +104,32 @@ const TrackTrackIdRoute = TrackTrackIdRouteImport.update({
   path: '/track/$trackId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const V2IndexRoute = V2IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => V2Route,
+} as any)
+const V2PartyIndexRoute = V2PartyIndexRouteImport.update({
+  id: '/party/',
+  path: '/party/',
+  getParentRoute: () => V2Route,
+} as any)
+const V2PartyRoomIdRoute = V2PartyRoomIdRouteImport.update({
+  id: '/party/$roomId',
+  path: '/party/$roomId',
+  getParentRoute: () => V2Route,
+} as any)
+const V2TrackTrackIdRoute = V2TrackTrackIdRouteImport.update({
+  id: '/track/$trackId',
+  path: '/track/$trackId',
+  getParentRoute: () => V2Route,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/v2': typeof V2RouteWithChildren
   '/api/artwork': typeof ApiArtworkRoute
   '/api/card': typeof ApiCardRoute
   '/api/insights': typeof ApiInsightsRoute
@@ -110,6 +141,10 @@ export interface FileRoutesByFullPath {
   '/party/$roomId': typeof PartyRoomIdRoute
   '/track/$trackId': typeof TrackTrackIdRoute
   '/party/': typeof PartyIndexRoute
+  '/v2/': typeof V2IndexRoute
+  '/v2/party/$roomId': typeof V2PartyRoomIdRoute
+  '/v2/track/$trackId': typeof V2TrackTrackIdRoute
+  '/v2/party/': typeof V2PartyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,12 +161,17 @@ export interface FileRoutesByTo {
   '/party/$roomId': typeof PartyRoomIdRoute
   '/track/$trackId': typeof TrackTrackIdRoute
   '/party': typeof PartyIndexRoute
+  '/v2': typeof V2IndexRoute
+  '/v2/party/$roomId': typeof V2PartyRoomIdRoute
+  '/v2/track/$trackId': typeof V2TrackTrackIdRoute
+  '/v2/party': typeof V2PartyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/v2': typeof V2RouteWithChildren
   '/api/artwork': typeof ApiArtworkRoute
   '/api/card': typeof ApiCardRoute
   '/api/insights': typeof ApiInsightsRoute
@@ -143,6 +183,10 @@ export interface FileRoutesById {
   '/party/$roomId': typeof PartyRoomIdRoute
   '/track/$trackId': typeof TrackTrackIdRoute
   '/party/': typeof PartyIndexRoute
+  '/v2/': typeof V2IndexRoute
+  '/v2/party/$roomId': typeof V2PartyRoomIdRoute
+  '/v2/track/$trackId': typeof V2TrackTrackIdRoute
+  '/v2/party/': typeof V2PartyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -150,6 +194,7 @@ export interface FileRouteTypes {
     | '/'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/v2'
     | '/api/artwork'
     | '/api/card'
     | '/api/insights'
@@ -161,6 +206,10 @@ export interface FileRouteTypes {
     | '/party/$roomId'
     | '/track/$trackId'
     | '/party/'
+    | '/v2/'
+    | '/v2/party/$roomId'
+    | '/v2/track/$trackId'
+    | '/v2/party/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -177,11 +226,16 @@ export interface FileRouteTypes {
     | '/party/$roomId'
     | '/track/$trackId'
     | '/party'
+    | '/v2'
+    | '/v2/party/$roomId'
+    | '/v2/track/$trackId'
+    | '/v2/party'
   id:
     | '__root__'
     | '/'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/v2'
     | '/api/artwork'
     | '/api/card'
     | '/api/insights'
@@ -193,12 +247,17 @@ export interface FileRouteTypes {
     | '/party/$roomId'
     | '/track/$trackId'
     | '/party/'
+    | '/v2/'
+    | '/v2/party/$roomId'
+    | '/v2/track/$trackId'
+    | '/v2/party/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  V2Route: typeof V2RouteWithChildren
   ApiArtworkRoute: typeof ApiArtworkRoute
   ApiCardRoute: typeof ApiCardRoute
   ApiInsightsRoute: typeof ApiInsightsRoute
@@ -233,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v2': {
+      id: '/v2'
+      path: '/v2'
+      fullPath: '/v2'
+      preLoaderRoute: typeof V2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/artwork': {
@@ -312,13 +378,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackTrackIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/v2/': {
+      id: '/v2/'
+      path: '/'
+      fullPath: '/v2/'
+      preLoaderRoute: typeof V2IndexRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/party/': {
+      id: '/v2/party/'
+      path: '/party'
+      fullPath: '/v2/party/'
+      preLoaderRoute: typeof V2PartyIndexRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/party/$roomId': {
+      id: '/v2/party/$roomId'
+      path: '/party/$roomId'
+      fullPath: '/v2/party/$roomId'
+      preLoaderRoute: typeof V2PartyRoomIdRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/track/$trackId': {
+      id: '/v2/track/$trackId'
+      path: '/track/$trackId'
+      fullPath: '/v2/track/$trackId'
+      preLoaderRoute: typeof V2TrackTrackIdRouteImport
+      parentRoute: typeof V2Route
+    }
   }
 }
+
+interface V2RouteChildren {
+  V2IndexRoute: typeof V2IndexRoute
+  V2PartyRoomIdRoute: typeof V2PartyRoomIdRoute
+  V2TrackTrackIdRoute: typeof V2TrackTrackIdRoute
+  V2PartyIndexRoute: typeof V2PartyIndexRoute
+}
+
+const V2RouteChildren: V2RouteChildren = {
+  V2IndexRoute: V2IndexRoute,
+  V2PartyRoomIdRoute: V2PartyRoomIdRoute,
+  V2TrackTrackIdRoute: V2TrackTrackIdRoute,
+  V2PartyIndexRoute: V2PartyIndexRoute,
+}
+
+const V2RouteWithChildren = V2Route._addFileChildren(V2RouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  V2Route: V2RouteWithChildren,
   ApiArtworkRoute: ApiArtworkRoute,
   ApiCardRoute: ApiCardRoute,
   ApiInsightsRoute: ApiInsightsRoute,

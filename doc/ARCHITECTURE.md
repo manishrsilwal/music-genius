@@ -134,6 +134,50 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-125 — v2: the loud cut, living beside v1
+**Built 2026-08-30.** The owner commissioned a second version to
+compare against v1 and choose later. v2 lives at /v2 as a route
+namespace: same backend, same catalogue, same party rooms — a v1
+friend and a v2 friend land in the SAME session — and keeping one
+later is a route deletion, not a rebuild.
+
+**Built strictly from UI/UX Pro Max cards, confirmed by the owner
+before generating** (the brief's own rule): style `neubrutalism`
+(3px black borders, 4px hard offset shadows, no gradients, bold
+type, high-saturation pop), palette "Social Media App" (rose
+#E11D48, blue #2563EB, warm ground #FFF1F2), fonts "Gen Z Brutal"
+(Anton display + Epilogue body, Google Fonts with real fallback
+stacks). UX cards applied: Search/Autocomplete (debounced, no enter
+needed), Search/No-Results (suggestions, never a dead end),
+Typography line-length 65ch and line-height 1.5 on the reading
+view, and Accessibility/Contextual-Live-Badge (presence is ONE
+atomic status — an <output>, not a chorus of live regions). v2
+commits to a single bright look on purpose; everything scoped
+under .v2, nothing leaks into v1. v1's masthead stands down on v2
+pages (the track-sheet mechanism); v2 carries its own bar.
+
+**Three surfaces.** Discover: mood/era/language chips over the
+catalogue plus plain search reaching all of LRCLIB; sticker cards
+(alternating tilt, straightened by the pointer) sharing v1's
+artwork cache keys so covers fetch once for both cuts. Lyrics view:
+big bold lines, the current line marked HARD in the accent (a
+bordered marker, not a glow), auto-follow that yields to a manual
+scroll for 4s; reuses v1's PlaybackBar wholesale — the bar reports
+LinePosition, the page only decides how the sung line looks. Listen
+party: the same follower/advance contracts as v1's room (D-115/116/
+117 copied, not reinvented) plus the social layer — sticker-avatar
+presence, live reactions, a side chat, and a host bar (play/pause/
+skip for everyone).
+
+**The party model grew chat and reactions for every skin.** Chat: a
+room, not an archive — 50 lines, 280 chars, members only. Reactions:
+a burst, not a badge — a fixed six-emoji vocabulary (enum-checked
+like everything untrusted), pruned at 8s from every write and every
+view. Rate limits: chat 60/600s, react 180/600s per IP. The stored
+shape changed, so the room key bumped to party:v2 the same commit
+(D-049); v1 rooms were 24-hour ephemera by design. v1's room simply
+does not display the new fields.
+
 ### D-124 — The first visit earns its right half, and the mark stops repeating
 **Built 2026-08-30.** The owner's design review of the first-visit
 screen, three findings.
