@@ -1,5 +1,44 @@
 @use "styles/mixins" as m;
 
+// The neubrutal press, everywhere interactive: lift on hover, thud on
+// press — the shadow is the physics. A mixin, not a placeholder: @extend
+// inside a nested scope emits selector unions that are hard to reason
+// about, and this file has no cascade to spare.
+@mixin v2-pressable {
+	border: var(--v2-border);
+	box-shadow: var(--v2-shadow);
+	background: var(--v2-card);
+	cursor: pointer;
+	transition:
+		translate 0.15s ease,
+		box-shadow 0.15s ease;
+
+	&:hover,
+	&:focus-visible {
+		translate: -2px -2px;
+		box-shadow: var(--v2-shadow-up);
+	}
+
+	&:active {
+		translate: 2px 2px;
+		box-shadow: 2px 2px 0 var(--v2-black);
+	}
+
+	&:focus-visible {
+		outline: 3px solid var(--v2-blue);
+		outline-offset: 2px;
+	}
+
+	@include m.reduced-motion {
+		transition: none;
+
+		&:hover,
+		&:active {
+			translate: none;
+		}
+	}
+}
+
 // ============================================================
 // REFRAIN v2 (D-125) — built strictly from the UI/UX Pro Max cards
 // the owner confirmed:
@@ -39,47 +78,6 @@
 	color: var(--v2-body);
 	font-family: var(--v2-text);
 
-	// The neubrutal press, everywhere interactive: lift on hover, thud on
-	// press — the shadow is the physics.
-	%thing {
-		border: var(--v2-border);
-		box-shadow: var(--v2-shadow);
-		background: var(--v2-card);
-		transition:
-			translate 0.15s ease,
-			box-shadow 0.15s ease;
-	}
-
-	%pressable {
-		@extend %thing;
-		cursor: pointer;
-
-		&:hover,
-		&:focus-visible {
-			translate: -2px -2px;
-			box-shadow: var(--v2-shadow-up);
-		}
-
-		&:active {
-			translate: 2px 2px;
-			box-shadow: 2px 2px 0 var(--v2-black);
-		}
-
-		&:focus-visible {
-			outline: 3px solid var(--v2-blue);
-			outline-offset: 2px;
-		}
-
-		@include m.reduced-motion {
-			transition: none;
-
-			&:hover,
-			&:active {
-				translate: none;
-			}
-		}
-	}
-
 	&__frame {
 		max-width: 72rem;
 		margin-inline: auto;
@@ -96,12 +94,12 @@
 	}
 
 	&__logo {
-		@extend %pressable;
-		padding: 0.35rem 0.9rem;
+		@include v2-pressable;
+		padding: 0.4rem 1rem;
 		background: var(--v2-rose);
 		color: #fff;
 		font-family: var(--v2-display);
-		font-size: 1.5rem;
+		font-size: 1.75rem;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 		rotate: -2deg;
@@ -122,7 +120,7 @@
 	}
 
 	&__nav-pill {
-		@extend %pressable;
+		@include v2-pressable;
 		padding: 0.5rem 1.1rem;
 		border-radius: 999px;
 		font-weight: 700;
@@ -268,7 +266,6 @@
 	}
 
 	&__card {
-		@extend %thing !optional;
 		display: block;
 		border: var(--v2-border);
 		box-shadow: var(--v2-shadow);

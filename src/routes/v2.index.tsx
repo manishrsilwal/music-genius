@@ -31,6 +31,16 @@ const ERAS: { value: Era; label: string }[] = [
 	{ value: "modern", label: "New-ish" },
 ];
 
+/**
+ * Only languages the shelf actually stocks (owner's ruling: Tamil and
+ * Spanish out for now) — a filter chip that can only ever produce an empty
+ * grid is a dead end wearing a button. Derived, not listed, so the day a
+ * Punjabi batch is blessed the chip appears on its own.
+ */
+const OFFERED_LANGUAGES = LANGUAGE_OPTIONS.filter((option) =>
+	CATALOGUE.some((track) => track.language === option.value),
+);
+
 function Discover() {
 	const [mood, setMood] = useState<Mood | null>(null);
 	const [era, setEra] = useState<Era | null>(null);
@@ -132,7 +142,7 @@ function Discover() {
 					</div>
 					<div className="disco__row">
 						<span className="disco__label">Lang</span>
-						{LANGUAGE_OPTIONS.map((option) => (
+						{OFFERED_LANGUAGES.map((option) => (
 							<button
 								key={option.value}
 								type="button"
