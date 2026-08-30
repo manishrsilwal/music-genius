@@ -1436,33 +1436,10 @@
 		}
 	}
 
-	&__party {
-		margin: 2.5rem 0 0;
-		text-align: center;
-	}
-
-	&__party-link {
-		display: inline-flex;
-		align-items: center;
-		border: 2px solid var(--v2-black);
-		border-radius: 999px;
-		box-shadow: 3px 3px 0 var(--v2-black);
-		background: var(--v2-card);
-		padding: 0.55rem 1.2rem;
-		font-weight: 700;
-		color: var(--v2-black);
-
-		&:hover,
-		&:focus-visible {
-			translate: -1px -1px;
-			box-shadow: 4px 4px 0 var(--v2-black);
-			background: #fde68a;
-		}
-
-		&:active {
-			translate: 1px 1px;
-			box-shadow: 2px 2px 0 var(--v2-black);
-		}
+	&__teaser-search {
+		display: grid;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
 	}
 }
 
@@ -1514,38 +1491,51 @@
 		background: var(--v2-rose);
 	}
 
+	// Quick replies are OPTIONS in a conversation, not a wall of buttons
+	// (owner's review: "too many pills"). One register down from the
+	// bubbles: thin border, no shadow, smaller type — the loud anatomy is
+	// reserved for the tile, the bubbles and the send. Choosing answers
+	// in rose; the ONE bright chip (the flow's finish line) keeps its
+	// fill.
 	.chat__chip {
-		border: 2px solid var(--v2-black);
-		box-shadow: 3px 3px 0 var(--v2-black);
+		border: 1.5px solid var(--v2-black);
+		box-shadow: none;
 		background: var(--v2-card);
 		color: var(--v2-black);
-		font-weight: 700;
+		font-weight: 600;
+		font-size: 0.85rem;
+		padding: 0.45rem 0.85rem;
 
 		&:hover,
 		&:focus-visible {
 			border-color: var(--v2-black);
-			background: var(--v2-card);
-			translate: -1px -1px;
-			box-shadow: 4px 4px 0 var(--v2-black);
+			background: #fde68a;
+			translate: none;
+			box-shadow: none;
 		}
 
 		&:active {
 			translate: 1px 1px;
-			box-shadow: 2px 2px 0 var(--v2-black);
+			box-shadow: none;
 		}
 
 		&[data-selected] {
-			border-color: var(--v2-black);
-			background: #fde68a;
+			background: var(--v2-rose);
+			color: #fff;
 		}
 
 		&--bright {
+			border-width: 2px;
+			box-shadow: 3px 3px 0 var(--v2-black);
 			background: var(--v2-rose);
 			color: #fff;
+			font-weight: 700;
 
 			&:hover,
 			&:focus-visible {
 				background: var(--v2-rose);
+				translate: -1px -1px;
+				box-shadow: 4px 4px 0 var(--v2-black);
 			}
 		}
 
@@ -1553,7 +1543,8 @@
 			border-color: transparent;
 			box-shadow: none;
 			background: none;
-			color: var(--v2-black);
+			color: var(--v2-body);
+			font-weight: 600;
 			text-decoration: underline;
 			text-underline-offset: 0.2em;
 
@@ -1572,7 +1563,7 @@
 	}
 
 	.chat__chip[data-selected] .chat__tick {
-		color: var(--v2-rose);
+		color: #fff;
 	}
 
 	.chat__composer {
@@ -1593,6 +1584,12 @@
 		box-shadow: 3px 3px 0 var(--v2-black);
 		background: var(--v2-card);
 		font-weight: 700;
+
+		// From lg the rail's live search IS the escape (owner's call);
+		// below lg the rail does not render and this button remains.
+		@include m.from("lg") {
+			display: none;
+		}
 	}
 
 	// — Deep Dives cards —

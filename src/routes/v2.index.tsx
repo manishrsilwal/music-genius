@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
 import { ContinueReading } from "@/features/discovery/components/continue-reading";
@@ -92,6 +92,14 @@ function DiscoverV2() {
 					    free-text door, same stored answers both cuts read. */}
 					<PreferenceChat onComplete={save} />
 					<aside className="v2disco__teaser">
+						{/* The escape IS the thing itself here (owner's call): a
+						    live search instead of a "skip to search" button. The
+						    chat's own skip survives below lg, where this rail
+						    does not render — D-064 keeps its phone escape. */}
+						<div className="v2disco__teaser-search">
+							<h2 className="v2disco__teaser-title">Know it already?</h2>
+							<SearchField hideLabel trackTo="/v2/track/$trackId" />
+						</div>
 						<h2 className="v2disco__teaser-title">While you decide</h2>
 						<AlsoLiked
 							picks={also.slice(0, 5)}
@@ -206,12 +214,6 @@ function DiscoverV2() {
 					)}
 				</div>
 			)}
-
-			<p className="v2disco__party">
-				<Link to="/v2/party" className="v2disco__party-link">
-					Listen together — start a party with friends
-				</Link>
-			</p>
 		</main>
 	);
 }
