@@ -95,10 +95,14 @@
 		border-inline-start: 2px solid var(--v2-black);
 	}
 
+	// Pointed like the cards, not a pill (owner's call), and the hard
+	// shadow drawn INSET along the inner right-and-bottom edge — a thumb
+	// clips anything outside its box, so the offset shadow moves indoors.
 	::-webkit-scrollbar-thumb {
 		background: var(--v2-rose);
 		border: 2px solid var(--v2-black);
-		border-radius: 999px;
+		border-radius: 0;
+		box-shadow: inset -3px -3px 0 0 var(--v2-black);
 	}
 
 	::-webkit-scrollbar-thumb:hover {
@@ -185,7 +189,8 @@
 	&::-webkit-scrollbar-thumb {
 		background: #e11d48;
 		border: 3px solid #0a0a0a;
-		border-radius: 999px;
+		border-radius: 0;
+		box-shadow: inset -4px -4px 0 0 #0a0a0a;
 	}
 
 	&::-webkit-scrollbar-thumb:hover {
