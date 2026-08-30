@@ -137,10 +137,9 @@ function ReadV2() {
 					<div className="v2read__player-head">
 						<h2 className="v2read__player-title">Play it here</h2>
 						<p className="v2read__player-note">
-							Spotify plays a 30-second preview — with Premium signed in
-							on this browser, it's the full song. YouTube plays
-							everything as a video, intros and all. Switch between them
-							below, free, anytime.
+							Spotify plays a 30-second preview — with Premium signed in on this
+							browser, it's the full song. YouTube plays everything as a video,
+							intros and all. Switch between them below, free, anytime.
 						</p>
 					</div>
 					<Await
