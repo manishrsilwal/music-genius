@@ -29,11 +29,15 @@ export interface Verdicts {
 	onHide: (lrclibId: string) => void;
 }
 
+/** Which track route the cards open — v2 passes its own (D-126). */
+type TrackTo = "/track/$trackId" | "/v2/track/$trackId";
+
 export function DeepDives({
 	picks,
 	preferences,
 	onShuffle,
 	verdicts,
+	trackTo = "/track/$trackId",
 }: {
 	picks: CuratedTrack[];
 	preferences: Preferences;
@@ -45,6 +49,7 @@ export function DeepDives({
 	 */
 	onShuffle?: () => void;
 	verdicts?: Verdicts;
+	trackTo?: TrackTo;
 }) {
 	/*
 	 * The reasons the picks have in common, said once above the row (D-069).
@@ -88,7 +93,7 @@ export function DeepDives({
 						variants={riseVariants}
 					>
 						<Link
-							to="/track/$trackId"
+							to={trackTo}
 							params={{ trackId: pick.lrclibId }}
 							className="dives__card"
 						>
@@ -217,6 +222,7 @@ export function AlsoLiked({
 	art = false,
 	onHide,
 	rail = false,
+	trackTo = "/track/$trackId",
 }: {
 	picks: CuratedTrack[];
 	/**
@@ -233,6 +239,7 @@ export function AlsoLiked({
 	 * grid would crush them.
 	 */
 	rail?: boolean;
+	trackTo?: TrackTo;
 }) {
 	return (
 		<motion.div
@@ -249,7 +256,7 @@ export function AlsoLiked({
 					className="also__item"
 				>
 					<Link
-						to="/track/$trackId"
+						to={trackTo}
 						params={{ trackId: pick.lrclibId }}
 						className="also__row"
 					>

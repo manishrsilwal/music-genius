@@ -78,6 +78,28 @@
 	color: var(--v2-body);
 	font-family: var(--v2-text);
 
+	// v1's whole flow renders inside v2 now (D-126) — the chat, the taste
+	// chips, both shelves, continue reading, the search — and every one of
+	// those components paints itself from v1's tokens. Re-pointing the
+	// tokens here re-dresses them all at once, the same trick that
+	// re-skinned the playback bar: same components, same logic, v2's
+	// palette and voice.
+	--color-canvas: #fff1f2;
+	--color-surface: #ffffff;
+	--color-surface-raised: #f0ecf2;
+	--color-ink: #0a0a0a;
+	--color-ink-muted: #334155;
+	--color-ink-faint: #64748b;
+	--color-hairline: #0a0a0a;
+	--color-hover: rgba(10, 10, 10, 0.05);
+	--color-hover-strong: rgba(10, 10, 10, 0.12);
+	--color-well: rgba(10, 10, 10, 0.06);
+	--color-lime: #e11d48;
+	--track-accent: #e11d48;
+	--color-on-bright: #ffffff;
+	--font-ui: var(--v2-text);
+	--font-display: var(--v2-display);
+
 	// Scrollbars in costume (owner's call: they should imitate the UI).
 	// WebKit gets the full sticker: a squared thumb with the hard black
 	// border and inset shadow, riding a railed track; hover flips it to
@@ -1280,6 +1302,192 @@
 		font-size: 1.2rem;
 		letter-spacing: 0.15em;
 		color: var(--v2-rose);
+	}
+}
+
+// ---------- Discover, the v1 flow in costume (D-126) ----------
+.v2panel {
+	border: var(--v2-border);
+	box-shadow: var(--v2-shadow);
+	background: var(--v2-card);
+	padding: 1.25rem 1.4rem;
+}
+
+.v2disco {
+	&__welcome {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 2rem;
+		align-items: start;
+
+		@include m.from("lg") {
+			grid-template-columns: minmax(0, 42rem) minmax(16rem, 24rem);
+			gap: 3.5rem;
+		}
+	}
+
+	&__teaser {
+		display: none;
+
+		@include m.from("lg") {
+			display: grid;
+			align-content: start;
+			gap: 0.625rem;
+		}
+	}
+
+	&__teaser-title {
+		margin: 0;
+		font-family: var(--v2-display);
+		font-size: 1.05rem;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: var(--v2-ink);
+	}
+
+	&__explore {
+		display: grid;
+		gap: 1.5rem;
+		max-width: 42rem;
+	}
+
+	&__offer {
+		margin-top: 0.9rem;
+		font-weight: 700;
+		font-size: 0.85rem;
+		color: var(--v2-blue);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--v2-rose);
+		}
+	}
+
+	&__bento {
+		display: grid;
+		gap: 1.75rem;
+	}
+
+	&__filter {
+		display: grid;
+		gap: 0.5rem;
+	}
+
+	&__hidden {
+		margin: 0;
+		font-size: 0.8rem;
+		font-weight: 600;
+	}
+
+	&__hidden-restore {
+		color: var(--v2-rose);
+		font-weight: 700;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--v2-blue);
+		}
+	}
+
+	&__search {
+		max-width: 40rem;
+	}
+
+	&__shelf-title {
+		margin: 0 0 0.25rem;
+		font-family: var(--v2-display);
+		font-size: 1.35rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--v2-black);
+	}
+
+	&__shelf-lead {
+		margin: 0 0 1rem;
+		font-size: 0.85rem;
+		font-weight: 500;
+	}
+
+	&__more {
+		margin-top: 1rem;
+		border: 2px solid var(--v2-black);
+		box-shadow: 3px 3px 0 var(--v2-black);
+		background: var(--v2-card);
+		border-radius: 999px;
+		padding: 0.45rem 1.1rem;
+		font-weight: 700;
+		font-size: 0.85rem;
+		color: var(--v2-black);
+		cursor: pointer;
+
+		&:hover,
+		&:focus-visible {
+			translate: -1px -1px;
+			box-shadow: 4px 4px 0 var(--v2-black);
+		}
+
+		&:active {
+			translate: 1px 1px;
+			box-shadow: 2px 2px 0 var(--v2-black);
+		}
+	}
+
+	&__party {
+		margin: 2.5rem 0 0;
+		text-align: center;
+	}
+
+	&__party-link {
+		font-weight: 700;
+		color: var(--v2-ink);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+
+		&:hover {
+			color: var(--v2-rose);
+		}
+	}
+}
+
+// Physique for the reused v1 components inside .v2 (the tokens above set
+// their colours; these lines add the hard edges the style card demands).
+.v2 {
+	.chat__tile,
+	.dives__card,
+	.taste__options {
+		border: var(--v2-border);
+		box-shadow: var(--v2-shadow);
+	}
+
+	.dives__card {
+		background: var(--v2-card);
+	}
+
+	.also__row {
+		border: 2px solid transparent;
+
+		&:hover {
+			border-color: var(--v2-black);
+			background: var(--v2-card);
+		}
+	}
+
+	.taste__chip {
+		border: 2px solid var(--v2-black);
+		box-shadow: 3px 3px 0 var(--v2-black);
+		background: var(--v2-card);
+	}
+
+	.search__input,
+	.search input[type="search"],
+	.search input {
+		border: var(--v2-border);
+		box-shadow: var(--v2-shadow);
+		background: var(--v2-card);
 	}
 }
 

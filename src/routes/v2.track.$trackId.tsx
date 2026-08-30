@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
+import { useRecordVisit } from "@/features/discovery/hooks/use-history";
 import { useInsights } from "@/features/insights/hooks/use-insights";
 import { PlaybackBar } from "@/features/playback/components/playback-bar";
 import { type LinePosition, lineKey } from "@/lib/lrc";
@@ -58,6 +59,9 @@ function ReadV2() {
 	// The meaning (owner's review: it was missing from v2 entirely) — the
 	// same engine as v1's drawer, worn as a panel after the words.
 	const { state: insightState, insight } = useInsights(track.id);
+	// The same reading trail v1 keeps (D-126): this visit joins Continue
+	// reading, and the shelves push what was read to the back.
+	useRecordVisit({ id: track.id, title: track.title, artist: track.artist });
 
 	/*
 	 * Follow the song unless the reader just took the wheel — the same

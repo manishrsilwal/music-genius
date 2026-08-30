@@ -38,6 +38,7 @@ export function SearchField({
 	hideLabel = false,
 	autoFocus = false,
 	onSelect,
+	trackTo = "/track/$trackId",
 }: {
 	/**
 	 * Visually hide the label (D-103). For contexts where a heading directly
@@ -57,6 +58,8 @@ export function SearchField({
 	 * going to it, so navigation stays the default.
 	 */
 	onSelect?: (track: TrackSummary) => void;
+	/** Which track route a chosen song opens — v2 passes its own (D-126). */
+	trackTo?: "/track/$trackId" | "/v2/track/$trackId";
 } = {}) {
 	const [term, setTerm] = useState("");
 	const [highlighted, setHighlighted] = useState(0);
@@ -94,7 +97,7 @@ export function SearchField({
 			onSelect(track);
 			return;
 		}
-		navigate({ to: "/track/$trackId", params: { trackId: track.id } });
+		navigate({ to: trackTo, params: { trackId: track.id } });
 	};
 
 	const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {

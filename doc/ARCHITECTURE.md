@@ -134,6 +134,33 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-126 — v2 gets v1's flow, not just its surfaces
+**Built 2026-08-31.** The owner's ruling on the loud cut: "I like
+this design but the functionality is nowhere near v1 — implement
+the same flow, not UI." So v2's Discover is now v1's Discovery
+VERBATIM in structure and logic: the feelings chat for a first
+visit (with the while-you-decide teaser), the mood-promise Deep
+Dives with their shared-reason line and rotation shuffle, People
+also like with load-more, taste chips with Retake, the
+More-like-this / Not-for-me verdicts with the hidden-songs door
+back, continue reading, search with autocomplete, the personalised
+headline (Songs for your heartbreak), the skip-all explore state,
+and the party doorway. The v2 track page records visits the same
+way, so the trail and the seen-pushback work across both cuts.
+
+Implemented by REUSE, not duplication: v1's own components
+(PreferenceChat, TasteChips, DeepDives, AlsoLiked, ContinueReading,
+SearchField) and hooks render inside .v2, re-dressed by one
+token-re-point block — the same trick that re-skinned the playback
+bar — plus a thin physique layer (hard borders and shadows on the
+cards). The linkable components gained a typed `trackTo` prop so
+picks open /v2/track/* while v1 keeps its default. One identity,
+two cuts: the hooks read the same localStorage, so answers, taste
+verdicts and reading history made in either version personalise
+both. The filter-chip Discover this replaces (mood/era/language
+single-selects) is retired — the taste chips carry the same job
+with v1's grammar.
+
 ### D-125 — v2: the loud cut, living beside v1
 **Built 2026-08-30.** The owner commissioned a second version to
 compare against v1 and choose later. v2 lives at /v2 as a route

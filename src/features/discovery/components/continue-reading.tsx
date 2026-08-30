@@ -18,12 +18,14 @@ import "./continue-reading.scss";
  */
 export function ContinueReading({
 	entries,
+	trackTo = "/track/$trackId",
 	onRemove,
 	onClear,
 }: {
 	entries: HistoryEntry[];
 	onRemove: (id: string) => void;
 	onClear: () => void;
+	trackTo?: "/track/$trackId" | "/v2/track/$trackId";
 }) {
 	if (entries.length === 0) return null;
 
@@ -56,7 +58,7 @@ export function ContinueReading({
 						className="recent__row"
 					>
 						<Link
-							to="/track/$trackId"
+							to={trackTo}
 							params={{ trackId: entry.id }}
 							className="recent__link"
 						>
