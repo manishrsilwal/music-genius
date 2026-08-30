@@ -552,9 +552,34 @@
 			grid-template-areas:
 				"toggle scrub video"
 				"meta meta meta"
-				"sync sync switch";
+				"switch switch sync";
 			align-items: center;
 			max-width: none;
+
+			// The settings row reads as one space-between line (owner's
+			// call): the provider switch at the start, sync at the end.
+			// Nested at the component's own specificity, because its
+			// per-variant `justify-self: center` outweighs flat overrides.
+			.playback__sync {
+				justify-self: end;
+			}
+
+			.playback__switch {
+				justify-self: start;
+			}
+
+			// The Spotify card has no toggle/scrub/video row; its map gets
+			// the same space-between settings line.
+			&[data-source="spotify"] {
+				grid-template-areas:
+					"embed embed embed"
+					"meta meta meta"
+					"switch switch sync";
+
+				.playback__sync {
+					justify-self: end;
+				}
+			}
 		}
 
 		.playback__toggle {
@@ -568,13 +593,8 @@
 		}
 
 		.playback__sync {
-			justify-self: start;
 			font-size: 0.68rem;
 			padding-block: 0.3rem;
-		}
-
-		.playback__switch {
-			justify-self: end;
 		}
 
 		// The bar's own controls, re-cut in the style card's anatomy:
