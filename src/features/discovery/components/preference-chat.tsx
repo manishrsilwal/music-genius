@@ -232,7 +232,13 @@ export function PreferenceChat({
 				    the surface read as a chat rather than a styled form. */}
 				<header className="chat__head">
 					<span className="chat__avatar" aria-hidden="true">
-						<svg viewBox="0 0 14 14" width="14" height="14" focusable="false">
+						<svg
+							viewBox="0 0 14 14"
+							width="14"
+							height="14"
+							aria-hidden="true"
+							focusable="false"
+						>
 							<rect x="1" y="2.5" width="12" height="2" rx="1" />
 							<rect
 								x="1"
@@ -268,14 +274,15 @@ export function PreferenceChat({
 					))}
 
 					{busy && (
-						<p
-							className="chat__bubble chat__bubble--typing"
-							data-from="bot"
-							aria-label="Reading that"
-						>
-							<span className="chat__dot" />
-							<span className="chat__dot" />
-							<span className="chat__dot" />
+						<p className="chat__bubble chat__bubble--typing" data-from="bot">
+							{/* The words for ears, the dots for eyes: a paragraph
+							    cannot carry aria-label, and the live region reads
+							    this text aloud the way sighted readers read the
+							    dots. */}
+							<span className="sr-only">Reading that…</span>
+							<span className="chat__dot" aria-hidden="true" />
+							<span className="chat__dot" aria-hidden="true" />
+							<span className="chat__dot" aria-hidden="true" />
 						</p>
 					)}
 
