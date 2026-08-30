@@ -106,6 +106,10 @@ export interface PartyRoomState {
 	 * server-side, so everyone firing it together costs one advance.
 	 */
 	advance: (from: number) => Promise<void>;
+	/** Say something in the side chat (D-125). */
+	chat: (text: string) => Promise<void>;
+	/** React with one of REACTIONS (D-125). */
+	react: (emoji: string) => Promise<void>;
 }
 
 export function usePartyRoom(roomId: string): PartyRoomState {
@@ -240,6 +244,34 @@ export function usePartyRoom(roomId: string): PartyRoomState {
 		[roomId, session, absorb],
 	);
 
+	const chat = useCallback(
+		async (text: string) => {
+			if (!session) throw new Error("Join the party before chatting");
+			const payload = await post({
+				action: "chat",
+				room: roomId,
+				member: session.memberId,
+				text,
+			});
+			absorb(payload);
+		},
+		[roomId, session, absorb],
+	);
+
+	const react = useCallback(
+		async (emoji: string) => {
+			if (!session) return;
+			const payload = await post({
+				action: "react",
+				room: roomId,
+				member: session.memberId,
+				emoji,
+			});
+			absorb(payload);
+		},
+		[roomId, session, absorb],
+	);
+
 	return {
 		view: state === undefined ? undefined : (state?.view ?? null),
 		gone,
@@ -250,5 +282,7 @@ export function usePartyRoom(roomId: string): PartyRoomState {
 		add,
 		control,
 		advance,
+		chat,
+		react,
 	};
 }

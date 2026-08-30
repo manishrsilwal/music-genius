@@ -15,10 +15,12 @@ import {
 	addPartyTrack,
 	advanceParty,
 	assertWithinLimit,
+	chatParty,
 	controlParty,
 	createParty,
 	joinParty,
 	PartyError,
+	reactParty,
 	syncParty,
 } from "@/server/party.server";
 
@@ -132,6 +134,24 @@ export const Route = createFileRoute("/api/party")({
 								String(body.room ?? ""),
 								String(body.member ?? ""),
 								Number(body.from),
+							);
+							return Response.json(state, { headers: NO_STORE });
+						}
+						case "chat": {
+							await assertWithinLimit("chat", clientIp(request));
+							const state = await chatParty(
+								String(body.room ?? ""),
+								String(body.member ?? ""),
+								String(body.text ?? ""),
+							);
+							return Response.json(state, { headers: NO_STORE });
+						}
+						case "react": {
+							await assertWithinLimit("react", clientIp(request));
+							const state = await reactParty(
+								String(body.room ?? ""),
+								String(body.member ?? ""),
+								String(body.emoji ?? ""),
 							);
 							return Response.json(state, { headers: NO_STORE });
 						}

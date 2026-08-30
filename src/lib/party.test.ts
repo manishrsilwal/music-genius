@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { PartyTrack } from "./party";
 import {
 	addMember,
+	addMessage,
+	addReaction,
 	addTrack,
 	advance,
 	advanceFrom,
@@ -188,5 +190,64 @@ describe("names and ids", () => {
 	it("mints distinct room ids", () => {
 		expect(newRoomId()).not.toBe(newRoomId());
 		expect(newRoomId()).toHaveLength(10);
+	});
+});
+
+describe("chat and reactions (D-125)", () => {
+	const withMember = () => {
+		const room = createRoomState("room1", "secret", NOW);
+		return addMember(room, { id: "m1", name: "Asha", host: true }, NOW);
+	};
+
+	it("members can talk; strangers cannot", () => {
+		const room = withMember();
+		const spoke = addMessage(room, "m1", "  this bridge!!  ", NOW + 10);
+		expect(spoke?.messages).toHaveLength(1);
+		expect(spoke?.messages[0]?.text).toBe("this bridge!!");
+		expect(spoke?.messages[0]?.name).toBe("Asha");
+		expect(addMessage(room, "ghost", "hi", NOW)).toBeNull();
+	});
+
+	it("refuses blank and oversized messages", () => {
+		const room = withMember();
+		expect(addMessage(room, "m1", "   ", NOW)).toBeNull();
+		expect(addMessage(room, "m1", "x".repeat(300), NOW)).toBeNull();
+	});
+
+	it("keeps a room's worth of talk, not a transcript", () => {
+		let room = withMember();
+		for (let i = 0; i < 60; i++) {
+			const next = addMessage(room, "m1", `line ${i}`, NOW + i);
+			if (next) room = next;
+		}
+		expect(room.messages).toHaveLength(50);
+		expect(room.messages[0]?.text).toBe("line 10");
+	});
+
+	it("reactions are enum-checked and expire from the view", () => {
+		const room = withMember();
+		expect(addReaction(room, "m1", "💣", NOW)).toBeNull();
+		const reacted = addReaction(room, "m1", "🔥", NOW);
+		expect(reacted?.reactions).toHaveLength(1);
+		if (!reacted) throw new Error("reaction refused");
+		// Fresh in the view now, gone once the burst ages out.
+		expect(toView(reacted, NOW + 1000).reactions).toHaveLength(1);
+		expect(toView(reacted, NOW + 9000).reactions).toHaveLength(0);
+	});
+
+	it("a write prunes stale reactions rather than hoarding them", () => {
+		const room = withMember();
+		const first = addReaction(room, "m1", "🔥", NOW);
+		if (!first) throw new Error("reaction refused");
+		const second = addReaction(first, "m1", "💜", NOW + 10_000);
+		expect(second?.reactions).toHaveLength(1);
+		expect(second?.reactions[0]?.emoji).toBe("💜");
+	});
+
+	it("the view still never leaks the host key", () => {
+		const room = withMember();
+		const spoke = addMessage(room, "m1", "hello", NOW);
+		if (!spoke) throw new Error("message refused");
+		expect("hostKey" in toView(spoke, NOW)).toBe(false);
 	});
 });

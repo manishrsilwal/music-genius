@@ -16,6 +16,8 @@
 import { getCache } from "../lib/cache";
 import {
 	addMember,
+	addMessage,
+	addReaction,
 	addTrack,
 	advanceFrom,
 	cleanName,
@@ -34,7 +36,10 @@ import {
 } from "../lib/party";
 import { getTrackPlayback } from "./lyrics.server";
 
-const key = (id: string) => `party:v1:${id}`;
+// v2: rooms gained `messages` and `reactions` (D-125) — a stored-shape
+// change bumps the key the same commit (D-049). v1 rooms die unread; they
+// were 24-hour ephemera by design.
+const key = (id: string) => `party:v2:${id}`;
 
 async function readRoom(id: string): Promise<PartyRoom | null> {
 	return getCache().get<PartyRoom>(key(id));
@@ -196,6 +201,38 @@ export async function advanceParty(
 	return { view: toView(next, now), serverNow: now };
 }
 
+/** Say something in the side chat (D-125). Members only. */
+export async function chatParty(
+	roomId: string,
+	memberId: string,
+	text: string,
+): Promise<PartyStateResponse> {
+	const now = Date.now();
+	const room = await requireRoom(roomId);
+	const next = addMessage(room, memberId, String(text), now);
+	if (!next) {
+		throw new PartyError("Join the party first, and say something", 400);
+	}
+	await writeRoom(next, now);
+	return { view: toView(next, now), serverNow: now };
+}
+
+/** React (D-125). Members only; emoji enum-checked in the model. */
+export async function reactParty(
+	roomId: string,
+	memberId: string,
+	emoji: string,
+): Promise<PartyStateResponse> {
+	const now = Date.now();
+	const room = await requireRoom(roomId);
+	const next = addReaction(room, memberId, String(emoji), now);
+	if (!next) {
+		throw new PartyError("Join the party first, and pick a real one", 400);
+	}
+	await writeRoom(next, now);
+	return { view: toView(next, now), serverNow: now };
+}
+
 /* -------------------------------------------------------------------------
    Rate limiting (D-117)
 
@@ -212,6 +249,10 @@ const LIMITS = {
 	join: { limit: 30, windowS: 600 },
 	/** Every add costs an upstream playback lookup; bounded accordingly. */
 	add: { limit: 120, windowS: 600 },
+	/** Talk is cheap but stored; a message a second is a lively room. */
+	chat: { limit: 60, windowS: 600 },
+	/** Reactions are the cheapest write and the most tempting to spam. */
+	react: { limit: 180, windowS: 600 },
 } as const;
 
 export async function assertWithinLimit(

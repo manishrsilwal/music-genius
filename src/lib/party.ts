@@ -30,6 +30,28 @@ export interface PartyMember {
 	host: boolean;
 }
 
+/** One line in the party's side chat (D-125). */
+export interface PartyMessage {
+	memberId: string;
+	/** Snapshotted at send time, so a message survives its author leaving. */
+	name: string;
+	text: string;
+	/** Server ms. */
+	at: number;
+}
+
+/**
+ * One live reaction (D-125). Ephemeral by design: reactions are a burst of
+ * presence, not a record — `toView` drops them once they age out.
+ */
+export interface PartyReaction {
+	memberId: string;
+	name: string;
+	emoji: string;
+	/** Server ms. */
+	at: number;
+}
+
 /** The playback claim: position `position` (seconds) as of server-time `at`. */
 export interface PartyPlayback {
 	playing: boolean;
@@ -48,6 +70,10 @@ export interface PartyRoom {
 	/** -1 until the first track is queued. */
 	currentIndex: number;
 	playback: PartyPlayback;
+	/** The side chat (D-125), capped at CHAT_LIMIT — a room, not an archive. */
+	messages: PartyMessage[];
+	/** Live reactions (D-125); stale ones are pruned on every write and view. */
+	reactions: PartyReaction[];
 }
 
 /** What every member may see — the room without its secret. */
@@ -67,6 +93,25 @@ export const MEMBER_STALE_MS = 25_000;
 
 /** Nobody queues a hundred songs at a house party in good faith. */
 export const QUEUE_LIMIT = 100;
+
+/**
+ * The side chat keeps a room's worth of talk, not a transcript (D-125): 50
+ * lines covers everything on screen plus scrollback context, and keeps the
+ * poll payload bounded — every member re-downloads the room every 2s.
+ */
+export const CHAT_LIMIT = 50;
+export const CHAT_TEXT_LIMIT = 280;
+
+/**
+ * The reaction vocabulary (D-125). A fixed set, not free emoji: validated
+ * like every enum here, renderable as buttons, and immune to 4-byte
+ * surprises in storage.
+ */
+export const REACTIONS = ["🔥", "💜", "😭", "🕺", "🎯", "😂"] as const;
+
+/** How long a reaction stays on screen — a burst, not a badge. */
+export const REACTION_TTL_MS = 8_000;
+const REACTION_CAP = 30;
 
 const NAME_LIMIT = 24;
 
@@ -109,6 +154,8 @@ export function createRoomState(
 		queue: [],
 		currentIndex: -1,
 		playback: { playing: false, position: 0, at: now },
+		messages: [],
+		reactions: [],
 	};
 }
 
@@ -255,10 +302,59 @@ export function advanceFrom(
 	return advance(room, now);
 }
 
+/**
+ * Say something in the side chat (D-125). Members only; blank and oversized
+ * text is refused rather than trimmed into surprise. Null = no change.
+ */
+export function addMessage(
+	room: PartyRoom,
+	memberId: string,
+	text: string,
+	now: number,
+): PartyRoom | null {
+	const member = room.members.find((entry) => entry.id === memberId);
+	if (!member) return null;
+	const trimmed = text.trim();
+	if (trimmed.length === 0 || trimmed.length > CHAT_TEXT_LIMIT) return null;
+	const messages = [
+		...room.messages,
+		{ memberId, name: member.name, text: trimmed, at: now },
+	].slice(-CHAT_LIMIT);
+	return { ...room, messages, updatedAt: now };
+}
+
+/**
+ * React (D-125). Enum-checked against REACTIONS; stale reactions are pruned
+ * on the same write, so the array cannot grow past a burst. Null = no change.
+ */
+export function addReaction(
+	room: PartyRoom,
+	memberId: string,
+	emoji: string,
+	now: number,
+): PartyRoom | null {
+	const member = room.members.find((entry) => entry.id === memberId);
+	if (!member) return null;
+	if (!(REACTIONS as readonly string[]).includes(emoji)) return null;
+	const reactions = [
+		...room.reactions.filter((entry) => now - entry.at < REACTION_TTL_MS),
+		{ memberId, name: member.name, emoji, at: now },
+	].slice(-REACTION_CAP);
+	return { ...room, reactions, updatedAt: now };
+}
+
 /** The room as members see it: pruned of ghosts, stripped of the secret. */
 export function toView(room: PartyRoom, now: number): PartyView {
 	const { hostKey: _hostKey, ...view } = room;
-	return { ...view, members: pruneMembers(room.members, now) };
+	return {
+		...view,
+		members: pruneMembers(room.members, now),
+		// Reactions age out of the VIEW too, so a member who reacts and then
+		// nobody writes still sees the burst fade on the next poll.
+		reactions: room.reactions.filter(
+			(entry) => now - entry.at < REACTION_TTL_MS,
+		),
+	};
 }
 
 /**
