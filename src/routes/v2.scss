@@ -520,10 +520,17 @@
 		--font-display: var(--v2-display);
 
 		@include m.from("lg") {
-			// The right rail: sticky from the top, in the half that sat
-			// empty. `bottom` sticky is the below-lg phone behaviour.
+			// The owner's pick between a full-height panel and a centred
+			// card: CENTRED. A top-to-bottom panel holds ~300px of content
+			// and would re-invent the empty slab at full height; this card
+			// keeps every pixel earned and floats at the viewport's middle,
+			// balancing the text mass on the left. Sticky at half the
+			// viewport, pulled up half its own height = optically centred,
+			// riding along as the words scroll. `bottom` sticky remains the
+			// below-lg phone behaviour.
 			bottom: auto;
-			top: 1.25rem;
+			top: 50dvh;
+			translate: 0 -50%;
 			max-width: none;
 		}
 
