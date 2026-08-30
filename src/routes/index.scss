@@ -170,6 +170,10 @@
 	@include m.from("lg") {
 		grid-template-columns: minmax(0, 42rem) minmax(16rem, 24rem);
 		gap: 3.5rem;
+		// Stretch, not start (owner's marker): the chat tile's bottom edge
+		// runs level with the rail's, and the thread absorbs the extra
+		// height — more conversation, not more padding.
+		align-items: stretch;
 	}
 }
 
