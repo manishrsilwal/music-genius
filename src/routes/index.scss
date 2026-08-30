@@ -99,6 +99,46 @@
 .landing__party {
 	margin-top: 2rem;
 	text-align: center;
+
+	// First visit, desktop: the teaser rail carries the door (D-124's
+	// second pass), so this centred line stands down rather than echo it.
+	&[data-rail-carries] {
+		@include m.from("lg") {
+			display: none;
+		}
+	}
+}
+
+// The rail's party door (D-124's second pass): the same pill anatomy the
+// chat's exits wore, now beside the teaser songs it belongs with.
+.landing__teaser-party {
+	@include m.tap-target;
+	@include m.press;
+	justify-self: start;
+	display: inline-flex;
+	align-items: center;
+	margin-top: 0.75rem;
+	padding: 0.55rem 1.1rem;
+	border: 1px solid var(--color-hairline);
+	border-radius: var(--radius-pill);
+	font-family: var(--font-ui);
+	font-size: var(--text-micro);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: var(--color-ink);
+	transition:
+		background-color 0.2s var(--ease-editorial),
+		color 0.2s var(--ease-editorial),
+		border-color 0.2s var(--ease-editorial);
+
+	&:hover,
+	&:focus-visible {
+		@include m.bright;
+	}
+
+	@include m.reduced-motion {
+		transition: none;
+	}
 }
 
 .landing__party-link {

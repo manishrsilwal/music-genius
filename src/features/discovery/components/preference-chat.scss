@@ -63,6 +63,41 @@
 		font-size: var(--text-caption);
 		font-weight: 500;
 		color: var(--color-ink-muted);
+		min-width: 0;
+	}
+
+	// The full escape (D-064) at the header's end: a real bordered control
+	// in the corner every messenger reserves for the exit — visible from
+	// the first glance, and billing no height to the conversation.
+	&__skip-all {
+		@include m.tap-target;
+		@include m.press;
+		margin-inline-start: auto;
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		padding: 0.45rem 0.9rem;
+		border: 1px solid var(--color-hairline);
+		border-radius: var(--radius-pill);
+		font-family: var(--font-ui);
+		font-size: var(--text-micro);
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: var(--color-ink);
+		white-space: nowrap;
+		transition:
+			background-color 0.2s var(--ease-editorial),
+			color 0.2s var(--ease-editorial),
+			border-color 0.2s var(--ease-editorial);
+
+		&:hover,
+		&:focus-visible {
+			@include m.bright;
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
 	}
 
 	// Flex, not grid: a grid with headroom spreads its rows apart
@@ -74,9 +109,10 @@
 		align-items: flex-start;
 		gap: 0.5rem;
 		// The window shows the LIVE end of the conversation; history
-		// scrolls away above. Sized for a question plus its full reply
-		// row — the fold pays for every rem.
-		max-height: 16rem;
+		// scrolls away above. 19rem, up from 16: the doors row below the
+		// tile retired (D-124's second pass) and its height came home to
+		// the conversation it was taken from.
+		max-height: 19rem;
 		overflow-y: auto;
 		overscroll-behavior: contain;
 		padding-inline-end: 0.5rem;
@@ -298,43 +334,6 @@
 	&__privacy {
 		margin: 0;
 		color: var(--color-ink-faint);
-	}
-
-	// The ways OUT of the conversation, below the surface they leave:
-	// peer doorways, same quiet clothes — the search escape (D-064,
-	// unchanged in rank) and the party (D-115).
-	&__doors {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.625rem;
-	}
-
-	&__door {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.55rem 1.1rem;
-		border: 1px solid var(--color-hairline);
-		border-radius: var(--radius-pill);
-		font-family: var(--font-ui);
-		font-size: var(--text-micro);
-		font-weight: 600;
-		letter-spacing: 0.02em;
-		color: var(--color-ink);
-		transition:
-			background-color 0.2s var(--ease-editorial),
-			color 0.2s var(--ease-editorial),
-			border-color 0.2s var(--ease-editorial);
-		@include m.tap-target;
-		@include m.press;
-
-		&:hover,
-		&:focus-visible {
-			@include m.bright;
-		}
-
-		@include m.reduced-motion {
-			transition: none;
-		}
 	}
 }
 

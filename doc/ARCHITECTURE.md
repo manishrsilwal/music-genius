@@ -159,6 +159,18 @@ button. It reuses the also-liked rows via a `rail` single-column
 variant; below lg it is absent entirely, because there the fold
 belongs to the chat alone (D-028).
 
+**Second pass, same day: the doors were still overlooked.** The
+owner's report — the two doorway pills below the tile felt hidden
+AND billed their height to the chat. Both rehoused where the eye
+already is. The full escape (D-064, rank unchanged) moved INTO the
+chat header's end — the corner every messenger reserves for its
+exit, always on screen, "Skip to search" — and the freed height came
+home to the conversation (thread window 16rem → 19rem). The party
+door rides the teaser rail on desktop, beside the songs it is a peer
+offer to; the page-end caption returns for the first visit on
+PHONES only (`data-rail-carries` hides it from lg, where it would
+echo the rail), and keeps serving every other state at every width.
+
 ### D-123 — The product is named Refrain
 **Decided 2026-08-30.** The owner chose "Refrain" from a creative
 slate ahead of hosting: the line that returns — the part of a song

@@ -292,6 +292,17 @@ function Discovery() {
 								Today's rotation from our shelf — no questions needed.
 							</p>
 							<AlsoLiked picks={teaser} art rail />
+
+							{/*
+							  The party doorway rides the rail on desktop (D-124's
+							  second pass): "come listen with friends" is the same
+							  offer as the teaser songs — something real to do
+							  before answering anything. Below lg the rail is gone
+							  and the page-end caption carries the door instead.
+							*/}
+							<Link to="/party" className="landing__teaser-party">
+								Listen together — start a party
+							</Link>
 						</aside>
 					</motion.div>
 				) : unpersonalised ? (
@@ -569,18 +580,18 @@ function Discovery() {
 			{/*
 			  The party's doorway (D-115) — one quiet line at the page's end,
 			  deliberately outside the bento so the landing's composition is
-			  untouched. Placement is provisional; the room is the feature.
-			  Not on the first-visit state (D-122): the chat's doorway row
-			  already holds the party, and a second, page-wide-centred copy
-			  floated disconnected beside the left-set tile (owner's review).
+			  untouched. On the first visit it serves PHONES only (D-124's
+			  second pass): from lg the teaser rail carries the door where
+			  the eye already is, and this centred line would be its echo.
 			*/}
-			{answered !== false && (
-				<p className="landing__party text-micro">
-					<Link to="/party" className="landing__party-link">
-						Listen together — start a party with friends
-					</Link>
-				</p>
-			)}
+			<p
+				className="landing__party text-micro"
+				data-rail-carries={answered === false || undefined}
+			>
+				<Link to="/party" className="landing__party-link">
+					Listen together — start a party with friends
+				</Link>
+			</p>
 		</motion.main>
 	);
 }

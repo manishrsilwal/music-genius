@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -41,12 +40,14 @@ import "./preference-chat.scss";
  * reader answers instead, and when neither hears anything, the chips are
  * still right there — the conversation never dead-ends.
  *
- * Anatomy after the owner's layout review: the tile is a MESSENGER, not a
- * form — a named header, quick-reply chips that live inside the thread
- * under the question they answer, a typing indicator while the AI reads,
- * and a round send. The two ways OUT of the conversation (skip-to-search,
- * the party) are doorways BELOW the tile, not controls inside it: leaving
- * the chat should not look like part of the chat.
+ * Anatomy after the owner's layout reviews: the tile is a MESSENGER, not a
+ * form — a header with the repeat-sign avatar and one role line, quick-reply
+ * chips that live inside the thread under the question they answer, a
+ * typing indicator while the AI reads, and a round send. The full escape
+ * (D-064) sits at the header's end — where a messenger keeps its exit —
+ * after a spell below the tile proved both overlookable and expensive in
+ * fold. The party doorway lives outside this component entirely (the
+ * landing's teaser rail on desktop, the page-end caption on phones).
  *
  * Every visible word is written here, never generated: the interpreter
  * returns enums only, and `heardLabels` re-speaks them in the option
@@ -259,6 +260,20 @@ export function PreferenceChat({
 						</svg>
 					</span>
 					<p className="chat__role">Turns feelings into songs</p>
+					{/*
+					  The one full escape (D-064), promoted to the header's end —
+					  where every messenger keeps its exit, and where the eye
+					  looks first for a way out. Below the tile it was overlooked
+					  AND billed its height to the chat (owner's report, twice).
+					  Same rank, better seat: always on screen, costing nothing.
+					*/}
+					<button
+						type="button"
+						className="chat__skip-all"
+						onClick={() => onComplete(draft)}
+					>
+						Skip to search
+					</button>
 				</header>
 
 				{/* aria-live, so the bot's next question is announced without the
@@ -433,27 +448,6 @@ export function PreferenceChat({
 					Taps stay on this device. Typed words are sent once to be understood,
 					and not kept.
 				</p>
-			</div>
-
-			{/*
-			  The ways OUT of the conversation, below the surface they leave
-			  (owner's layout review — leaving the chat should not look like
-			  part of the chat). Two peer doorways: the search (D-064's one
-			  full escape, unchanged in rank) and the party (D-115's doorway,
-			  moved up from the page's end where the chat had pushed it out
-			  of the first view).
-			*/}
-			<div className="chat__doors">
-				<button
-					type="button"
-					className="chat__door"
-					onClick={() => onComplete(draft)}
-				>
-					Skip all — just let me search
-				</button>
-				<Link to="/party" className="chat__door">
-					Listen together — start a party
-				</Link>
 			</div>
 		</div>
 	);
