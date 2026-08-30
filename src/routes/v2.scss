@@ -518,20 +518,22 @@
 		}
 	}
 
+	// Type scale matched to the player card's (owner's call): the two rail
+	// cards speak at one size.
 	&__meaning-title {
 		margin: 0 0 0.7rem;
 		font-family: var(--v2-display);
-		font-size: 1.35rem;
+		font-size: 1.15rem;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 		color: var(--v2-black);
 	}
 
 	&__meaning-p {
-		margin: 0 0 0.8rem;
-		font-size: 0.95rem;
+		margin: 0 0 0.7rem;
+		font-size: 0.8rem;
 		font-weight: 500;
-		line-height: 1.65;
+		line-height: 1.6;
 		color: var(--v2-body);
 
 		&:last-child {
@@ -544,7 +546,7 @@
 		padding: 0.8rem 1rem;
 		border: 2px solid var(--v2-black);
 		background: var(--v2-muted);
-		font-size: 0.95rem;
+		font-size: 0.8rem;
 		font-weight: 600;
 		line-height: 1.55;
 		color: var(--v2-black);
@@ -553,7 +555,7 @@
 			display: block;
 			margin-top: 0.4rem;
 			font-style: normal;
-			font-size: 0.8rem;
+			font-size: 0.72rem;
 			color: var(--v2-ink);
 		}
 	}
@@ -567,7 +569,7 @@
 	&__meaning-you-label {
 		margin: 0 0 0.5rem;
 		font-family: var(--v2-display);
-		font-size: 0.9rem;
+		font-size: 0.8rem;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
 		color: var(--v2-rose);
@@ -583,7 +585,7 @@
 		border: 2px solid var(--v2-black);
 		color: #fff;
 		font-weight: 700;
-		font-size: 0.9rem;
+		font-size: 0.8rem;
 	}
 
 	&__player {
