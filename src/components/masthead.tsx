@@ -21,7 +21,7 @@ export function Masthead() {
 		<Link
 			to="/"
 			className="masthead"
-			aria-label="Lyrical Explorer, home"
+			aria-label="Refrain, home"
 			// Announces "current page" when the reader is already on the landing.
 			// The mark stays put rather than disappearing there: an element that
 			// exists on some pages and not others is chrome the reader has to
@@ -71,7 +71,7 @@ export function Masthead() {
 			  This is the reverse of the old behaviour: the compact half is what
 			  survives, rather than the whole thing disappearing.
 			*/}
-			<span className="masthead__word">Lyrical Explorer</span>
+			<span className="masthead__word">Refrain</span>
 		</Link>
 	);
 }

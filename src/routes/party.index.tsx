@@ -16,7 +16,7 @@ import "@/features/party/components/party.scss";
 export const Route = createFileRoute("/party/")({
 	head: () => ({
 		meta: [
-			{ title: "Start a listen party — Lyrical Explorer" },
+			{ title: "Start a listen party — Refrain" },
 			{
 				name: "description",
 				content:

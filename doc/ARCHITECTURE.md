@@ -134,6 +134,29 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-123 — The product is named Refrain
+**Decided 2026-08-30.** The owner chose "Refrain" from a creative
+slate ahead of hosting: the line that returns — the part of a song
+the listener carries — and the word itself, editorial in tone, which
+suits a product that treats lyrics as reading. Checked before
+committing: LRCLIB-space collisions none; the only same-name product
+anywhere near music is a small iOS songwriting notepad; refrain.app,
+refrain.fm, refrain.co and refrain.music all probed unregistered on
+2026-08-30 (registration is the owner's move, and availability can
+shift).
+
+Renamed everywhere a READER meets the name: masthead wordmark and
+aria-label, the intro splash, tab titles and og:site_name/og:title,
+the party pages' titles, the default OG card, robots.txt, the chat
+counterpart's nameplate (it was named "The Explorer" after the old
+brand), the LRCLIB User-Agent, and the README. Deliberately NOT
+renamed: the repo (music-genius — a rename breaks nothing but is the
+owner's call), the `tle:` localStorage prefix (legacy initials; a
+key migration would orphan every reader's stored preferences, taste
+and party sessions for zero visible gain), and historical decision
+text in this register, which records what things were called when
+decided. "Lyrical Explorer" survives only as history.
+
 ### D-122 — The stepper becomes a conversation, and feelings become enums
 **Built 2026-08-28.** The owner's ask: "a chat system where user just
 selects in a chat and expresses their feelings which evidently

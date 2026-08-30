@@ -17,7 +17,7 @@ export const Route = createFileRoute("/robots.txt")({
 			GET: () => {
 				const origin = env.siteUrl;
 
-				const body = `# Lyrical Explorer
+				const body = `# Refrain
 
 User-agent: *
 Allow: /

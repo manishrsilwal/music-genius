@@ -17,7 +17,7 @@ const BASE = "https://lrclib.net/api";
  * earns the benefit of the doubt if we ever trip their rate limiter.
  */
 const USER_AGENT =
-	"TypographicLyricalExplorer/0.1 (https://github.com/manishrsilwal/music-genius)";
+	"Refrain/0.1 (https://github.com/manishrsilwal/music-genius)";
 
 /** Raw upstream shape. Never leaves this file. */
 interface LrclibRecord {

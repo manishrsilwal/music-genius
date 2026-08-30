@@ -37,7 +37,7 @@ export const Route = createFileRoute("/api/og")({
 						const png = await renderCard({
 							lines: ["One queue, one clock —", "everyone reads along."],
 							title: "You're invited to a listen party",
-							artist: "Lyrical Explorer",
+							artist: "Refrain",
 							theme: themeById(null, "dusk"),
 						});
 						return new Response(png as unknown as BodyInit, {

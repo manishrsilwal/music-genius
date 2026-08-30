@@ -252,7 +252,7 @@ export function PreferenceChat({
 						</svg>
 					</span>
 					<div>
-						<p className="chat__name">The Explorer</p>
+						<p className="chat__name">Refrain</p>
 						<p className="chat__status text-micro">turns feelings into songs</p>
 					</div>
 				</header>

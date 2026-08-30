@@ -1,4 +1,6 @@
-# Typographic Lyrical Explorer
+# Refrain
+
+*The line that returns. (Working title "Lyrical Explorer" until D-123.)*
 
 Lyrics as a premium editorial reading experience — synced to audio, annotated with
 AI-synthesized context, and beautifully set.

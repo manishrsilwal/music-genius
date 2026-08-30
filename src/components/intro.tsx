@@ -79,7 +79,7 @@ export function Intro() {
 					/>
 				</svg>
 
-				<p className="intro__word">Lyrical Explorer</p>
+				<p className="intro__word">Refrain</p>
 			</div>
 		</div>
 	);

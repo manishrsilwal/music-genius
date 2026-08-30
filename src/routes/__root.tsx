@@ -40,13 +40,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 			{
 				/*
-				 * The name readers see (D-104). The chrome has said "Lyrical
-				 * Explorer" since D-059; "Typographic Lyrical Explorer" was the
-				 * PRD's codename, three abstract nouns that truncate in a tab
-				 * and appear nowhere in the UI. The tagline rides the landing
-				 * title — it is the product's best line.
+				 * The name readers see. "Refrain" since D-123 — the line that
+				 * returns, chosen by the owner over the working title "Lyrical
+				 * Explorer" (which itself replaced the PRD codename in D-104).
+				 * The tagline rides the landing title — it is the product's
+				 * best line.
 				 */
-				title: "Lyrical Explorer — find the lyrics, know the meaning",
+				title: "Refrain — find the lyrics, know the meaning",
 			},
 			/*
 			 * Social cards (D-051). A shared link previously rendered as a bare
@@ -56,10 +56,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			 * og:image per song; these are the defaults for everything else.
 			 */
 			{ property: "og:type", content: "website" },
-			{ property: "og:site_name", content: "Lyrical Explorer" },
+			{ property: "og:site_name", content: "Refrain" },
 			{
 				property: "og:title",
-				content: "Lyrical Explorer — find the lyrics, know the meaning",
+				content: "Refrain — find the lyrics, know the meaning",
 			},
 			{
 				property: "og:description",

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/party/$roomId")({
 		const origin = loaderData ?? "";
 		return {
 			meta: [
-				{ title: "Listen party — Lyrical Explorer" },
+				{ title: "Listen party — Refrain" },
 				// A private room's preview should not advertise its contents.
 				{ name: "robots", content: "noindex" },
 				{
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/party/$roomId")({
 				{ property: "og:image:height", content: "1080" },
 				{
 					property: "og:image:alt",
-					content: "An invitation to a listen party on Lyrical Explorer",
+					content: "An invitation to a listen party on Refrain",
 				},
 			],
 		};
