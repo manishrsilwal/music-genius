@@ -656,6 +656,71 @@
 			text-underline-offset: 0.2em;
 		}
 
+		// ONE hover language for every control in the dock (owner's review:
+		// the toggle and the pills each answered the pointer differently —
+		// v1's translucent hover washes were mixed for a dark canvas and
+		// barely registered here). Pills and chips lift a step; the primary
+		// toggle lifts further, its rank made visible; the switch is a text
+		// link and answers as one — colour, not flight.
+		.playback__sync,
+		.playback__choose-btn,
+		.playback__elsewhere {
+			transition:
+				translate 0.15s ease,
+				box-shadow 0.15s ease;
+
+			&:hover,
+			&:focus-visible {
+				translate: -1px -1px;
+				box-shadow: 4px 4px 0 var(--v2-black);
+			}
+
+			&:active {
+				translate: 1px 1px;
+				box-shadow: 2px 2px 0 var(--v2-black);
+			}
+		}
+
+		.playback__toggle {
+			transition:
+				translate 0.15s ease,
+				box-shadow 0.15s ease;
+
+			&:hover:not(:disabled),
+			&:focus-visible {
+				translate: -2px -2px;
+				box-shadow: 5px 5px 0 var(--v2-black);
+				background: var(--track-accent);
+			}
+
+			&:active {
+				translate: 1px 1px;
+				box-shadow: 2px 2px 0 var(--v2-black);
+			}
+		}
+
+		.playback__switch:hover,
+		.playback__switch:focus-visible {
+			color: var(--v2-rose);
+			background: none;
+			translate: none;
+		}
+
+		@include m.reduced-motion {
+			.playback__sync,
+			.playback__choose-btn,
+			.playback__elsewhere,
+			.playback__toggle {
+				transition: none;
+
+				&:hover,
+				&:active,
+				&:focus-visible {
+					translate: none;
+				}
+			}
+		}
+
 		.playback__seek {
 			accent-color: var(--v2-rose);
 		}
