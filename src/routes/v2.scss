@@ -539,6 +539,31 @@
 			min-height: 0;
 		}
 
+		// The deal, up top: title and the one-paragraph terms of playback,
+		// ruled off from the controls with the card's own hard line.
+		.v2read__player-head {
+			border-bottom: 2px solid var(--v2-black);
+			padding-bottom: 0.65rem;
+			margin-bottom: 0.85rem;
+		}
+
+		.v2read__player-title {
+			margin: 0 0 0.3rem;
+			font-family: var(--v2-display);
+			font-size: 1.15rem;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: var(--v2-black);
+		}
+
+		.v2read__player-note {
+			margin: 0;
+			font-size: 0.8rem;
+			font-weight: 500;
+			line-height: 1.55;
+			color: var(--v2-body);
+		}
+
 		// One decision per row (owner's review: SYNC sat beside pause at
 		// equal size and fill, reading as a second transport button, and
 		// the provider switch was dressed as a call-to-action). The bar's

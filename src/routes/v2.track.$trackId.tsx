@@ -127,6 +127,22 @@ function ReadV2() {
 				</div>
 
 				<div className="v2read__player">
+					{/*
+					  The whole playback deal, said once up top (owner's ask):
+					  what Spotify gives, what Premium unlocks, what YouTube
+					  trades — so the switch below is an informed choice, not
+					  a mystery lever. Written copy; the bar's own status line
+					  still reports the live specifics underneath.
+					*/}
+					<div className="v2read__player-head">
+						<h2 className="v2read__player-title">Play it here</h2>
+						<p className="v2read__player-note">
+							Spotify plays a 30-second preview — with Premium signed in
+							on this browser, it's the full song. YouTube plays
+							everything as a video, intros and all. Switch between them
+							below, free, anytime.
+						</p>
+					</div>
 					<Await
 						promise={playback}
 						fallback={
