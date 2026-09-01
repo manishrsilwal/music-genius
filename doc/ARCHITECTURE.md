@@ -134,6 +134,25 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-129 — One way to say remove
+**Built 2026-09-01.** The owner's screenshot of the new bands: the
+also shelf's hide (a bold bordered chip) and continue reading's
+remove (v1's thin ghost ring) sat one band apart wearing different
+anatomies — "these kinds of UI should be consistent throughout the
+app." One recipe now serves every per-row dismissal in v2: a 1.85rem
+squared white chip, 2px black border, 2px hard shadow, bold mark,
+rose fill on hover. The reading shelf's mark is an SVG stroke where
+the also shelf's is a glyph, so the stroke-width is matched by CSS —
+same mark, not just same box. The chip is under 44px, so both get
+the tap-target mixin's invisible finger pad (the also chip never had
+it; its old 2.75rem min-height was doing that job by accident).
+
+Named in the same breath: "Show me different picks" was the last
+control speaking rose-underline v1 — it keeps its dashed
+not-a-card outline (it IS a different thing: a slot that re-deals,
+not a card that opens) but now speaks the Load-more/Clear button
+language: black, 800, uppercase, honey hover.
+
 ### D-128 — The result page stops wearing v1's skeleton
 **Built 2026-09-01.** The owner's review of the personalised Discover
 page: "the entire UI of this page have not been thought through with

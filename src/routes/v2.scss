@@ -1730,13 +1730,20 @@
 		text-transform: uppercase;
 	}
 
+	// The shuffle slot keeps its dashed not-a-card outline, but speaks the
+	// same button language as Load more and Clear (owner's consistency
+	// report) — black, 800, uppercase, honey on hover.
 	.dives__more {
-		border: 2px dashed var(--v2-black);
+		border: 3px dashed var(--v2-black);
 		border-radius: 0.5rem;
-		color: var(--v2-rose);
-		font-weight: 700;
+		color: var(--v2-black);
+		font-weight: 800;
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
 
-		&:hover {
+		&:hover,
+		&:focus-visible {
 			border-color: var(--v2-black);
 			background: var(--v2-honey);
 		}
@@ -1802,16 +1809,41 @@
 		font-weight: 700;
 	}
 
-	.also__hide {
+	// — One way to say "remove", app-wide (owner's report: the also shelf's
+	// hide and continue reading's remove wore two different anatomies). One
+	// recipe for every per-row dismissal: a squared white chip, hard black
+	// border and shadow, bold mark, rose when it means it.
+	.also__hide,
+	.recent__remove {
+		width: 1.85rem;
+		height: 1.85rem;
+		// v1's bases carry their own minimums (the also chip reserves
+		// 2.75rem of rail); the chip is 1.85rem — the tap-target mixin
+		// supplies the finger's 44px invisibly, for BOTH (the also chip
+		// never had it; its old min-height was doing that job).
+		min-width: 0;
+		min-height: 0;
+		@include m.tap-target;
+		display: grid;
+		place-items: center;
 		border: 2px solid var(--v2-black);
+		border-radius: 0.25rem;
 		background: var(--v2-card);
+		box-shadow: 2px 2px 0 var(--v2-black);
 		color: var(--v2-black);
-		font-weight: 700;
+		font-weight: 800;
 
-		&:hover {
+		&:hover,
+		&:focus-visible {
 			background: var(--v2-rose);
 			color: #fff;
 		}
+	}
+
+	// The reading shelf's mark is an SVG stroke where the also shelf's is a
+	// glyph — matching the stroke weight is what makes them the same mark.
+	.recent__remove svg path {
+		stroke-width: 2.25;
 	}
 
 	// — Taste chips, recut as STAMPS (owner's rework brief: no v1 pill
@@ -2097,16 +2129,6 @@
 		border: 2px solid var(--v2-black);
 	}
 
-	.recent__remove {
-		border: 2px solid var(--v2-black);
-		background: var(--v2-card);
-		font-weight: 700;
-
-		&:hover {
-			background: var(--v2-rose);
-			color: #fff;
-		}
-	}
 }
 
 @keyframes v2-pop {
