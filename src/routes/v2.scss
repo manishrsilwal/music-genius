@@ -1538,6 +1538,23 @@
 			translate: 1px 1px;
 			box-shadow: 1px 1px 0 var(--v2-black);
 		}
+
+		// The deal (D-130): while the new hand is coming, the arrows spin.
+		// No reduced-motion guard needed — the page skips the dealing state
+		// entirely for those readers, so this attribute never appears.
+		&[aria-busy="true"] svg {
+			animation: v2-spin 0.7s linear infinite;
+		}
+	}
+
+	// The cards dim while the deal is in flight, and the new hand
+	// staggers in through the shelf's own entrance animation.
+	&__deal {
+		transition: opacity 0.2s ease;
+
+		&[data-busy] {
+			opacity: 0.35;
+		}
 	}
 
 	// ContinueReading announces itself through v1's SectionHeading — inside
@@ -2234,5 +2251,11 @@
 
 	100% {
 		opacity: 0;
+	}
+}
+
+@keyframes v2-spin {
+	to {
+		rotate: 360deg;
 	}
 }

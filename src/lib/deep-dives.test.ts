@@ -238,6 +238,31 @@ describe("taste (D-121)", () => {
 		expect(picks.some((t) => hidden.includes(t.lrclibId))).toBe(false);
 	});
 
+	it("the shuffle deals different songs even when the tier is narrow (D-130)", () => {
+		// All three axes answered: the exact-match tier can be shelf-sized,
+		// and the seeded re-rank then only REORDERED the same three cards
+		// (the owner's report). A pressed rotation pages through the whole
+		// mood-true ranking instead — new songs, mood promise intact.
+		const prefs = {
+			...NONE,
+			mood: "defiant",
+			pull: "confession",
+			familiarity: "deep",
+		} as const;
+		const first = pickDeepDives(prefs, seed, undefined, [], undefined, 0);
+		const second = pickDeepDives(
+			prefs,
+			seed + 7919,
+			undefined,
+			[],
+			undefined,
+			1,
+		);
+		expect(second.every((t) => matchesMood(t, "defiant"))).toBe(true);
+		const firstIds = new Set(first.map((t) => t.lrclibId));
+		expect(second.some((t) => !firstIds.has(t.lrclibId))).toBe(true);
+	});
+
 	it("liking pulls similar tracks forward in the wander", () => {
 		// Like two of the artist's songs; the third should move UP — shared
 		// artist is the strongest thing "more like this" can mean. Rank

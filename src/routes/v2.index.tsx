@@ -56,9 +56,30 @@ function DiscoverV2() {
 	const seen = useMemo(() => entries.map((entry) => entry.id), [entries]);
 	const [alsoCount, setAlsoCount] = useState(12);
 
+	/*
+	 * The deal (D-130). The pick itself is instantaneous — local ranking,
+	 * no network — so a press used to swap cards mid-glance, which read as
+	 * nothing happening. The pause IS the feedback: cards dim, the arrows
+	 * spin, the new hand staggers in. Readers who ask for reduced motion
+	 * get the honest version — an instant swap, no artificial wait.
+	 */
+	const [dealing, setDealing] = useState(false);
+	const reshuffle = () => {
+		if (dealing) return;
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+			shuffle();
+			return;
+		}
+		setDealing(true);
+		window.setTimeout(() => {
+			shuffle();
+			setDealing(false);
+		}, 450);
+	};
+
 	const dives = useMemo(
-		() => pickDeepDives(preferences, seed, undefined, seen, taste),
-		[preferences, seed, seen, taste],
+		() => pickDeepDives(preferences, seed, undefined, seen, taste, rotation),
+		[preferences, seed, seen, taste, rotation],
 	);
 	const also = useMemo(
 		() => pickAlsoLiked(preferences, seed, dives, alsoCount, seen, taste),
@@ -181,7 +202,8 @@ function DiscoverV2() {
 									<button
 										type="button"
 										className="v2band__action"
-										onClick={shuffle}
+										onClick={reshuffle}
+										aria-busy={dealing || undefined}
 									>
 										<svg
 											viewBox="0 0 14 14"
@@ -213,20 +235,22 @@ function DiscoverV2() {
 							<p className="v2band__lead">
 								Three from our catalogue. They change every time you come back.
 							</p>
-							{dives.length > 0 ? (
-								<DeepDives
-									picks={dives}
-									preferences={preferences}
-									verdicts={{ isLiked, onLike: toggleLike, onHide: hide }}
-									trackTo="/v2/track/$trackId"
-								/>
-							) : (
-								<p className="v2band__lead">
-									Nothing on our shelf is true to your answers yet — we would
-									rather leave it short than fill it with songs you did not ask
-									for. Search reaches every song, in every language.
-								</p>
-							)}
+							<div className="v2band__deal" data-busy={dealing || undefined}>
+								{dives.length > 0 ? (
+									<DeepDives
+										picks={dives}
+										preferences={preferences}
+										verdicts={{ isLiked, onLike: toggleLike, onHide: hide }}
+										trackTo="/v2/track/$trackId"
+									/>
+								) : (
+									<p className="v2band__lead">
+										Nothing on our shelf is true to your answers yet — we would
+										rather leave it short than fill it with songs you did not
+										ask for. Search reaches every song, in every language.
+									</p>
+								)}
+							</div>
 						</div>
 					</section>
 

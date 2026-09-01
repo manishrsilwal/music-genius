@@ -134,6 +134,31 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-130 — The shuffle deals new cards, not the same hand
+**Built 2026-09-01.** The owner's report: "Show me different picks
+just reshuffles the position of the cards instead of showing
+different songs." Correct, and D-072 said so in its own comments:
+when all three axes are answered, the exact-match tier can be
+shelf-sized, and the seeded re-rank can only reorder it — a
+trade-off chosen as honesty for a plain visit. But a deliberate
+press of the shuffle is a different request, and it now gets a
+different answer: `pickDeepDives` takes the press count (`rotation`)
+as its own argument, and when the tier is too narrow to rotate
+(under `count × 2`), successive presses page through the WHOLE
+mood-true ranking in windows of three, wrapping at the end. The mood
+promise holds — the pool is mood-filtered before the walk — and the
+secondary axes relax in exactly the order relevance ranked them.
+Rotation 0 (a plain visit) is untouched; both cuts pass the count.
+
+With the walk, a deal transition in v2: the pick is local and
+instantaneous, so cards used to swap mid-glance — which is what made
+the same-hand bug feel like NOTHING happening. The pause is the
+feedback: cards dim to 0.35, the button's arrows spin (700ms linear),
+the new hand staggers in through the shelf's own entrance, ~450ms
+end to end. Readers under prefers-reduced-motion skip the dealing
+state entirely — instant swap, no artificial wait, and the spin
+attribute never renders.
+
 ### D-129 — One way to say remove
 **Built 2026-09-01.** The owner's screenshot of the new bands: the
 also shelf's hide (a bold bordered chip) and continue reading's

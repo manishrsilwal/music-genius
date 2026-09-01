@@ -148,8 +148,8 @@ function Discovery() {
 	const [alsoCount, setAlsoCount] = useState(12);
 
 	const dives = useMemo(
-		() => pickDeepDives(preferences, seed, undefined, seen, taste),
-		[preferences, seed, seen, taste],
+		() => pickDeepDives(preferences, seed, undefined, seen, taste, rotation),
+		[preferences, seed, seen, taste, rotation],
 	);
 	const also = useMemo(
 		() => pickAlsoLiked(preferences, seed, dives, alsoCount, seen, taste),

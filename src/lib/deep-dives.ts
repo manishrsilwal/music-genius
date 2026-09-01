@@ -1751,6 +1751,12 @@ export function pickDeepDives(
 	seen: readonly string[] = [],
 	/** What the reader has hidden and liked (D-121). */
 	taste?: Taste,
+	/**
+	 * Which press of the shuffle this is (D-130). Zero — a plain visit —
+	 * changes nothing. See the narrow-tier walk below for why the picker
+	 * needs to know the press count and not just a perturbed seed.
+	 */
+	rotation = 0,
 ): CuratedTrack[] {
 	let ranked = rankAll(preferences, seed, new Set(seen), taste);
 
@@ -1772,6 +1778,27 @@ export function pickDeepDives(
 			rank: -entry.position,
 		}),
 	);
+
+	/*
+	 * The narrow-tier walk (D-130). When every answer is given, the top
+	 * tier can be exactly shelf-sized — and then the seeded re-rank above
+	 * can only REORDER the same three cards, which the owner read (rightly)
+	 * as the shuffle doing nothing. D-072 chose that honesty on a plain
+	 * visit; a deliberate press of "show me different picks" is a different
+	 * request, and it gets a different answer: successive presses page
+	 * through the WHOLE mood-true ranking, wrapping at the end. The mood
+	 * promise holds — the pool was mood-filtered before this line — and the
+	 * secondary axes relax in exactly the order relevance ranked them.
+	 */
+	if (rotation !== 0 && shortlist.length < count * 2 && ranked.length > count) {
+		const offset = (rotation * count) % ranked.length;
+		const rotated = [...ranked.slice(offset), ...ranked.slice(0, offset)];
+		const windowed = rotated.map((entry, index) => ({
+			...entry,
+			rank: -index,
+		}));
+		return selectDiverse(windowed, count);
+	}
 
 	return selectDiverse(shortlist, count);
 }
