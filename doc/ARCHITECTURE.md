@@ -164,6 +164,15 @@ it does, the lines carry no pointer, no hover, no handler: a line
 that looks clickable while YouTube or Spotify is still loading is a
 promise the tap silently breaks.
 
+Third round (owner): a tap is an explicit "follow from HERE", so it
+re-engages the whole following apparatus. On the bar's side the
+jump now also does what the Sync button does — `resume()` through a
+manual scroll's override and `setWantSync(true)` past an earlier
+sync-off. On the page's side the manual-scroll hold ends at the
+tap, the tapped line centres IMMEDIATELY (not a beat later when the
+player's clock reports back), and the auto-follow and karaoke dim
+carry on from it.
+
 ### D-133 — The lyrics learn to follow the voice
 **Built 2026-09-01.** The owner's ask, with Spotify's lyric view as
 the reference: while the music plays, the current line alone should

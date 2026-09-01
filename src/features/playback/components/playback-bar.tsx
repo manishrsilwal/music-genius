@@ -161,13 +161,6 @@ export function PlaybackBar({
 	const [wantSync, setWantSync] = useState<boolean | null>(null);
 	const desire = wantSync ?? !drifted;
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: the nonce IS the request; seek/toggle/playing are read at fire time
-	useEffect(() => {
-		if (!jumpTo || !ready) return;
-		seek(jumpTo.seconds);
-		if (!playing) toggle();
-	}, [jumpTo?.nonce]);
-
 	// The active player's readiness, reported upward (D-134 second round)
 	// so the page only offers tap-to-play once a tap would actually land.
 	useEffect(() => {
@@ -176,6 +169,19 @@ export function PlaybackBar({
 
 	const syncing = synced && playing && desire;
 	const { manual, resume } = useManualOverride(syncing);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: the nonce IS the request; the rest is read at fire time
+	useEffect(() => {
+		if (!jumpTo || !ready) return;
+		seek(jumpTo.seconds);
+		if (!playing) toggle();
+		// A line tap is an explicit "follow from HERE" (D-134 third round):
+		// it rejoins sync the way the Sync button does — through a manual
+		// scroll's override and even an earlier sync-off — because the
+		// reader just pointed at the words they want followed.
+		setWantSync(true);
+		resume();
+	}, [jumpTo?.nonce]);
 
 	/** One control for "follow the song": resumes after a manual scroll too. */
 	const followOn = syncing && !manual;

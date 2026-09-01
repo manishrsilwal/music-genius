@@ -140,12 +140,6 @@ function ReadV2() {
 	 * ACTIVE source's readiness; until then the lines are just text.
 	 */
 	const [playerReady, setPlayerReady] = useState(false);
-	const jumpToLine = (time: number | null) => {
-		if (time == null || !playerReady) return;
-		const selection = window.getSelection();
-		if (selection && !selection.isCollapsed) return;
-		setJumpTo({ seconds: time, nonce: Date.now() });
-	};
 
 	const reduce = useRef(false);
 	useEffect(() => {
@@ -153,6 +147,26 @@ function ReadV2() {
 			"(prefers-reduced-motion: reduce)",
 		).matches;
 	}, []);
+
+	const jumpToLine = (key: string, time: number | null) => {
+		if (time == null || !playerReady) return;
+		const selection = window.getSelection();
+		if (selection && !selection.isCollapsed) return;
+		/*
+		 * The tap is an explicit re-engagement (owner's third round): the
+		 * manual-scroll hold ends NOW, the tapped line centres immediately
+		 * rather than waiting for the player's clock to report back, and
+		 * the auto-follow carries on from it. The bar rejoins sync on its
+		 * side of the same request.
+		 */
+		lastManual.current = 0;
+		setManualHold(false);
+		document.getElementById(`v2line-${key}`)?.scrollIntoView({
+			behavior: reduce.current ? "auto" : "smooth",
+			block: "center",
+		});
+		setJumpTo({ seconds: time, nonce: Date.now() });
+	};
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: the active line IS the schedule
 	useEffect(() => {
@@ -202,7 +216,9 @@ function ReadV2() {
 											undefined
 										}
 										onClick={
-											track.synced ? () => jumpToLine(line.time) : undefined
+											track.synced
+												? () => jumpToLine(lineKey(s, l), line.time)
+												: undefined
 										}
 									>
 										{line.text}
