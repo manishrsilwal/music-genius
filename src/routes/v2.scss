@@ -1431,6 +1431,95 @@
 	}
 }
 
+// ---------- 404 / 500 in costume (D-135) ----------
+// The code as a tilted rose sticker, the title in Anton, one filled way
+// onward — the same grammar as everything else on the loud cut.
+.v2error {
+	min-height: 55vh;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 1rem;
+	max-width: 42rem;
+
+	&__code {
+		margin: 0;
+		align-self: flex-start;
+		background: var(--v2-rose);
+		color: #fff;
+		border: var(--v2-border);
+		box-shadow: var(--v2-shadow);
+		padding: 0.1rem 1.1rem 0.25rem;
+		font-family: var(--v2-display);
+		font-size: clamp(2.5rem, 6vw, 4rem);
+		letter-spacing: 0.06em;
+		rotate: -2deg;
+	}
+
+	&__title {
+		margin: 0;
+		font-family: var(--v2-display);
+		font-weight: 400;
+		font-size: clamp(2.25rem, 5vw, 3.5rem);
+		line-height: 0.95;
+		text-transform: uppercase;
+		color: var(--v2-black);
+	}
+
+	&__body {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--v2-body);
+		max-width: 46ch;
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 1.1rem;
+		margin-top: 0.5rem;
+	}
+
+	&__go {
+		@include v2-pressable;
+		padding: 0.7rem 1.4rem;
+		background: var(--v2-rose);
+		color: #fff;
+		font-weight: 800;
+		font-size: 0.85rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	&__quiet {
+		color: var(--v2-body);
+		font-weight: 700;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+
+		&:hover {
+			color: var(--v2-rose);
+		}
+	}
+
+	// Development only; full-width under the actions so a long message
+	// scrolls in its own box instead of stretching the row.
+	&__detail {
+		flex-basis: 100%;
+		max-width: 100%;
+		overflow-x: auto;
+		margin: 0;
+		padding: 0.75rem 1rem;
+		border: 2px solid var(--v2-black);
+		background: var(--v2-muted);
+		font-size: 0.75rem;
+		color: var(--v2-black);
+	}
+}
+
 // ---------- Discover, the v1 flow in costume (D-126) ----------
 .v2panel {
 	border: var(--v2-border);

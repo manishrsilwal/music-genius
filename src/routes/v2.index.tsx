@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
+import { V2Error } from "@/components/v2-route-message";
 import { ContinueReading } from "@/features/discovery/components/continue-reading";
 import {
 	AlsoLiked,
@@ -35,6 +36,8 @@ import {
 export const Route = createFileRoute("/v2/")({
 	loader: () => ({ today: new Date().toISOString().slice(0, 10) }),
 	component: DiscoverV2,
+	// Caught HERE so the failure renders inside the v2 layout (D-135).
+	errorComponent: V2Error,
 });
 
 function DiscoverV2() {

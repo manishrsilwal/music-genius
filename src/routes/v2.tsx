@@ -1,5 +1,7 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
+import { V2NotFound } from "@/components/v2-route-message";
+
 import "./v2.scss";
 
 /**
@@ -31,6 +33,12 @@ export const Route = createFileRoute("/v2")({
 		],
 	}),
 	component: V2Layout,
+	/**
+	 * A miss under /v2 renders HERE, in the layout's own outlet — bar and
+	 * scope kept (D-135). Left to bubble, the root's v1-dressed page took
+	 * over and v1's masthead came back with it.
+	 */
+	notFoundComponent: V2NotFound,
 });
 
 function V2Layout() {

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
+import { V2Error } from "@/components/v2-route-message";
 import { readStoredName, usePartyRoom } from "@/features/party/hooks/use-party";
 import { useYouTubePlayer } from "@/features/playback/hooks/use-youtube-player";
 import { orderMembers, positionAt, REACTIONS } from "@/lib/party";
@@ -21,6 +22,8 @@ import type { TrackSummary } from "@/lib/types";
 export const Route = createFileRoute("/v2/party/$roomId")({
 	head: () => ({ meta: [{ title: "Listen party — Refrain v2" }] }),
 	component: PartyRoomV2,
+	// Caught HERE so the failure renders inside the v2 layout (D-135).
+	errorComponent: V2Error,
 });
 
 const TICK_MS = 500;

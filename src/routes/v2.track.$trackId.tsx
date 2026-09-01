@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { V2Error } from "@/components/v2-route-message";
 import { useRecordVisit } from "@/features/discovery/hooks/use-history";
 import { usePreferences } from "@/features/discovery/hooks/use-preferences";
 import { useInsights } from "@/features/insights/hooks/use-insights";
@@ -45,6 +46,8 @@ export const Route = createFileRoute("/v2/track/$trackId")({
 		],
 	}),
 	component: ReadV2,
+	// Caught HERE so the failure renders inside the v2 layout (D-135).
+	errorComponent: V2Error,
 	notFoundComponent: () => (
 		<p className="disco__empty">
 			Not in the library — head back and search again.

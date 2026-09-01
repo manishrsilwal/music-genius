@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { V2Error } from "@/components/v2-route-message";
 import {
 	readStoredName,
 	storeName,
@@ -16,6 +17,8 @@ import {
 export const Route = createFileRoute("/v2/party/")({
 	head: () => ({ meta: [{ title: "Listen party — Refrain v2" }] }),
 	component: PartyLobbyV2,
+	// Caught HERE so the failure renders inside the v2 layout (D-135).
+	errorComponent: V2Error,
 });
 
 function PartyLobbyV2() {

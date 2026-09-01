@@ -134,6 +134,25 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-135 — The loud cut keeps its costume when things go wrong
+**Built 2026-09-01.** The owner's sweep: 404 and 500 under /v2 still
+wore v1. Worse than a wrong theme — the root boundaries REPLACE the
+tree, so the `.v2` scope vanished and v1's masthead came back over a
+v1 message page; a reader two screens into the loud cut was suddenly
+somewhere else entirely.
+
+The fix is placement as much as styling. `V2NotFound` hangs on the
+/v2 LAYOUT route, where TanStack renders a not-found in the layout's
+own outlet — bar kept, scope kept, so /v2/anything-wrong stays in
+costume. `V2Error` hangs on each v2 CHILD route (Discover, track,
+party lobby, party room), so a loader or render failure is caught
+inside the layout instead of bubbling past it to the root. The pages
+speak the house grammar: the code as a tilted rose sticker, the
+title in Anton, one filled way onward (Try again keeps v1's
+reset-then-invalidate lesson, D-041; the error detail stays
+dev-only). v1's root boundaries are untouched and still back
+every non-v2 route.
+
 ### D-134 — Tap a line, hear that line
 **Built 2026-09-01.** The owner's ask, Spotify's move: click a lyric
 line and the song plays from there. The page issues a seek through a
