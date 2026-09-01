@@ -172,6 +172,43 @@ function DiscoverV2() {
 								<span className="v2band__sticker" aria-hidden="true">
 									By hand
 								</span>
+								{/* The shelf's action lives in the shelf's HEAD, top
+								    right — where Clear sits one band down (owner's
+								    third round). No onShuffle to DeepDives, so v1's
+								    ghost slot never renders in v2 and the grid keeps
+								    its three full columns. */}
+								{dives.length > 0 && (
+									<button
+										type="button"
+										className="v2band__action"
+										onClick={shuffle}
+									>
+										<svg
+											viewBox="0 0 14 14"
+											width="13"
+											height="13"
+											aria-hidden="true"
+											focusable="false"
+										>
+											<path
+												d="M1.5 5.5 A5 5 0 0 1 11 3.5 M12.5 8.5 A5 5 0 0 1 3 10.5"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="1.5"
+												strokeLinecap="round"
+											/>
+											<path
+												d="M11.5 0.8 L11.3 4 L8.2 3.4 Z"
+												fill="currentColor"
+											/>
+											<path
+												d="M2.5 13.2 L2.7 10 L5.8 10.6 Z"
+												fill="currentColor"
+											/>
+										</svg>
+										Show me different picks
+									</button>
+								)}
 							</header>
 							<p className="v2band__lead">
 								Three from our catalogue. They change every time you come back.
@@ -180,7 +217,6 @@ function DiscoverV2() {
 								<DeepDives
 									picks={dives}
 									preferences={preferences}
-									onShuffle={shuffle}
 									verdicts={{ isLiked, onLike: toggleLike, onHide: hide }}
 									trackTo="/v2/track/$trackId"
 								/>

@@ -1509,6 +1509,37 @@
 		max-width: 52ch;
 	}
 
+	// A shelf-level action in the band's head, pushed to the far edge —
+	// the position Clear already holds one band down (owner's ruling,
+	// D-129 third round). Same chip register as Clear and Load more.
+	&__action {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		margin-inline-start: auto;
+		border: 2px solid var(--v2-black);
+		box-shadow: 2px 2px 0 var(--v2-black);
+		background: var(--v2-card);
+		padding: 0.35rem 0.8rem;
+		color: var(--v2-black);
+		font-weight: 800;
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		cursor: pointer;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--v2-rose);
+			color: #fff;
+		}
+
+		&:active {
+			translate: 1px 1px;
+			box-shadow: 1px 1px 0 var(--v2-black);
+		}
+	}
+
 	// ContinueReading announces itself through v1's SectionHeading — inside
 	// a band, that heading speaks band: no hairline (the band's own rule
 	// does that job), the label at headline size, Clear as a bordered chip.
@@ -1730,50 +1761,11 @@
 		text-transform: uppercase;
 	}
 
-	// The shuffle leaves the grid (owner's call, D-129 second round): in v2
-	// every band ends on ONE action in the same register — Load more,
-	// Clear — and this is Deep dives'. The ghost slot read as a broken
-	// fourth card against the loud grid. The slot spans the row so the
-	// button lands BELOW the cards; v1 keeps its D-097 ghost card — this
-	// is scope CSS, the shared component is untouched.
-	.dives__slot:has(> .dives__more) {
-		grid-column: 1 / -1;
-		justify-self: start;
-	}
-
-	.dives__more {
-		display: inline-flex;
-		flex-direction: row;
-		align-items: center;
-		gap: 0.5rem;
-		width: max-content;
-		height: auto;
-		min-height: 0;
-		padding: 0.5rem 1.2rem;
-		border: 2px solid var(--v2-black);
-		border-radius: 0;
-		box-shadow: 3px 3px 0 var(--v2-black);
-		background: var(--v2-card);
-		color: var(--v2-black);
-		font-weight: 800;
-		font-size: 0.8rem;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-
-		&:hover,
-		&:focus-visible {
-			border-color: var(--v2-black);
-			background: var(--v2-blue);
-			color: #fff;
-			translate: -1px -1px;
-			box-shadow: 4px 4px 0 var(--v2-black);
-		}
-
-		&:active {
-			translate: 1px 1px;
-			box-shadow: 2px 2px 0 var(--v2-black);
-		}
-	}
+	// No .dives__more styles in v2: the shuffle moved to the band's HEAD
+	// (v2band__action) and v2 simply never passes onShuffle, so the D-097
+	// ghost slot — and the narrow fourth grid column the base reserves
+	// for it — never exists here. The owner's red line: that reserved
+	// column was why three cards stopped short of the band's edge.
 
 	.dives__verdict {
 		font-weight: 700;
@@ -1890,10 +1882,24 @@
 		}
 	}
 
-	// The reading shelf's mark is an SVG stroke where the also shelf's is a
-	// glyph — matching the stroke weight is what makes them the same mark.
-	.recent__remove svg path {
-		stroke-width: 2.25;
+	// The reading shelf's mark is an SVG stroke where the also shelf's is
+	// the × glyph — a matched stroke-width still read as two different
+	// crosses (owner's third round). Same LITERAL mark now: the SVG
+	// stands down and ::before draws the glyph the also chip uses.
+	// ::before, not ::after — the tap-target mixin owns ::after.
+	.recent__remove svg {
+		display: none;
+	}
+
+	.recent__remove::before {
+		content: "×";
+		line-height: 1;
+	}
+
+	.also__hide,
+	.recent__remove::before {
+		font-size: 0.95rem;
+		font-weight: 800;
 	}
 
 	// — Taste chips, recut as STAMPS (owner's rework brief: no v1 pill

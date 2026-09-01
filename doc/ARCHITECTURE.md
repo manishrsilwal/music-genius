@@ -157,13 +157,23 @@ to `.also__item` so the border wraps link and remove together;
 the link sheds its own border and keeps only the soft hover wash.
 
 Same round, "Show me different picks": the D-097 ghost card read as
-a broken fourth slot against the loud grid. Owner's ruling of three
-options: every v2 band ends on ONE action button in the Load-more /
-Clear register, and the shuffle is Deep dives'. Done in scope CSS —
-`.dives__slot:has(> .dives__more)` spans the grid row so the button
-lands below the cards — the shared component is untouched and v1
-keeps its ghost card, exactly the trackTo-era contract: shared
-brains, per-cut clothes.
+a broken fourth slot against the loud grid; first cut moved it below
+the cards as a row-spanning action button in the Load-more register.
+
+Third round (owner's red line): the cards still stopped short of the
+band's edge — the base grid's `:has(.dives__more)` reserves a narrow
+fourth COLUMN for the ghost slot, and row-spanning the slot kept it
+in the DOM, so the column stayed reserved. And the button's position
+was ruled wrong besides. The real cut: v2 does not pass `onShuffle`
+at all — the ghost never renders, the reserved column never exists,
+three cards fill the band — and the v2 page renders its own shuffle
+as a `v2band__action` in the band's HEAD, top right, the position
+Clear already holds one band down. Shelf-level actions live in the
+shelf's head; list-extending actions (Load more) stay at the list's
+end. Also third round: the two × marks still read as different
+crosses (SVG stroke vs glyph) despite matched stroke-width — the
+reading chip's SVG stands down and CSS draws the same literal ×
+glyph on both (::before, since the tap-target mixin owns ::after).
 
 ### D-128 — The result page stops wearing v1's skeleton
 **Built 2026-09-01.** The owner's review of the personalised Discover
