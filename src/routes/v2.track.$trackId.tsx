@@ -152,10 +152,7 @@ function ReadV2() {
 			  lg the player returns to the bottom of the screen, compact.
 			*/}
 			<div className="v2read__grid">
-				<div
-					className="v2read__lines"
-					data-following={following || undefined}
-				>
+				<div className="v2read__lines" data-following={following || undefined}>
 					{track.stanzas.map((stanza, s) => (
 						<div key={stanza.id} className="contents">
 							{s > 0 && (
