@@ -1836,13 +1836,26 @@
 		}
 	}
 
-	// The link inside sheds the chrome the item now carries; the base's
-	// soft hover wash stays — it marks the link's own half of the card.
+	// The link inside sheds the chrome the item now carries — hover wash
+	// included (owner's report: the base washes the LINK, which stops
+	// short of the × strip and leaves a white seam at the card's end).
+	// The wash moves to the whole item, the way the reading shelf's rows
+	// already hover; solid muted, not the base's rgba — a translucent
+	// hover here would let the honey band bleed through the card.
 	.also__row {
 		border: 0;
 		box-shadow: none;
-		border-radius: 0.5rem 0 0 0.5rem;
+		border-radius: 0.5rem;
 		background: transparent;
+
+		&:hover {
+			background: transparent;
+		}
+	}
+
+	.also__item:hover,
+	.recent__row:hover {
+		background: var(--v2-muted);
 	}
 
 	.also {
