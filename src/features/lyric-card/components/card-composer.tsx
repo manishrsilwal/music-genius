@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import {
 	CARD_SIZE,
 	type CardTheme,
-	cardThemes,
+	type CardVariant,
 	cardTypeScale,
+	LOUD_MEASURE,
+	themesFor,
 } from "@/lib/card";
 import { riseVariants, transition } from "@/lib/motion";
 import type { Palette } from "@/lib/types";
@@ -17,7 +19,14 @@ interface ComposerProps {
 	title: string;
 	artist: string;
 	palette: Palette | null;
+	/** Which cut's card grammar to offer (D-132). Classic when omitted. */
+	variant?: CardVariant;
 	onClose: () => void;
+}
+
+/** px of the 1080 render, as cqw of the square preview — D-018's ratio. */
+function cq(px: number): string {
+	return `${((px / CARD_SIZE) * 100).toFixed(3)}cqw`;
 }
 
 /**
@@ -32,9 +41,11 @@ export function CardComposer({
 	title,
 	artist,
 	palette,
+	variant = "classic",
 	onClose,
 }: ComposerProps) {
-	const themes = cardThemes(palette);
+	const loud = variant === "loud";
+	const themes = themesFor(variant, palette);
 	const [theme, setTheme] = useState<CardTheme>(themes[0] as CardTheme);
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -48,7 +59,9 @@ export function CardComposer({
 		return () => document.removeEventListener("keydown", onKey);
 	}, [onClose]);
 
-	const scale = cardTypeScale(lines);
+	const scale = loud
+		? cardTypeScale(lines, LOUD_MEASURE)
+		: cardTypeScale(lines);
 
 	async function download() {
 		setBusy(true);
@@ -63,6 +76,7 @@ export function CardComposer({
 					artist,
 					themeId: theme.id,
 					palette,
+					variant,
 				}),
 			});
 			if (!response.ok) throw new Error("Render failed");
@@ -103,40 +117,110 @@ export function CardComposer({
 				initial="hidden"
 				animate="visible"
 			>
-				<div
-					className="composer__preview"
-					style={{ background: theme.background }}
-					// The preview is a picture of the export, not content to read twice.
-					aria-hidden="true"
-				>
+				{loud ? (
+					// The loud preview mirrors the loud render (D-132): same
+					// 48/10/72 geometry, expressed as cqw of the square.
 					<div
-						style={{
-							flexGrow: 1,
-							display: "flex",
-							flexDirection: "column",
-							justifyContent: "center",
-						}}
+						className="composer__preview"
+						style={{ background: theme.background, padding: cq(48) }}
+						aria-hidden="true"
 					>
-						{lines.map((line, index) => (
-							<span
-								// biome-ignore lint/suspicious/noArrayIndexKey: fixed, non-reordering list
-								key={`${index}-${line}`}
-								className="composer__line"
+						<div
+							style={{
+								flexGrow: 1,
+								display: "flex",
+								flexDirection: "column",
+								justifyContent: "space-between",
+								background: "#ffffff",
+								border: `${cq(10)} solid #0a0a0a`,
+								boxShadow: `${cq(18)} ${cq(18)} 0 #0a0a0a`,
+								padding: cq(72),
+							}}
+						>
+							<div style={{ display: "flex" }}>
+								<span
+									style={{
+										background: "#e11d48",
+										color: "#ffffff",
+										border: `${cq(6)} solid #0a0a0a`,
+										boxShadow: `${cq(8)} ${cq(8)} 0 #0a0a0a`,
+										padding: `${cq(12)} ${cq(30)}`,
+										fontFamily: "var(--font-ui)",
+										fontWeight: 500,
+										fontSize: cq(36),
+										letterSpacing: cq(7),
+										textTransform: "uppercase",
+										transform: "rotate(-3deg)",
+									}}
+								>
+									Refrain
+								</span>
+							</div>
+							<div
 								style={{
-									color: theme.ink,
-									// cqw = percent of the preview's width, matching the 1080px render.
-									fontSize: `${((scale.size / CARD_SIZE) * 100).toFixed(3)}cqw`,
-									lineHeight: scale.leading,
+									flexGrow: 1,
+									display: "flex",
+									flexDirection: "column",
+									justifyContent: "center",
 								}}
 							>
-								{line}
+								{lines.map((line, index) => (
+									<span
+										// biome-ignore lint/suspicious/noArrayIndexKey: fixed, non-reordering list
+										key={`${index}-${line}`}
+										className="composer__line"
+										style={{
+											color: theme.ink,
+											fontWeight: 700,
+											fontSize: cq(scale.size),
+											lineHeight: scale.leading,
+										}}
+									>
+										{line}
+									</span>
+								))}
+							</div>
+							<span className="composer__credit" style={{ color: theme.muted }}>
+								{title} · {artist}
 							</span>
-						))}
+						</div>
 					</div>
-					<span className="composer__credit" style={{ color: theme.muted }}>
-						{title} · {artist}
-					</span>
-				</div>
+				) : (
+					<div
+						className="composer__preview"
+						style={{ background: theme.background }}
+						// The preview is a picture of the export, not content to read twice.
+						aria-hidden="true"
+					>
+						<div
+							style={{
+								flexGrow: 1,
+								display: "flex",
+								flexDirection: "column",
+								justifyContent: "center",
+							}}
+						>
+							{lines.map((line, index) => (
+								<span
+									// biome-ignore lint/suspicious/noArrayIndexKey: fixed, non-reordering list
+									key={`${index}-${line}`}
+									className="composer__line"
+									style={{
+										color: theme.ink,
+										// cqw = percent of the preview's width, matching the 1080px render.
+										fontSize: cq(scale.size),
+										lineHeight: scale.leading,
+									}}
+								>
+									{line}
+								</span>
+							))}
+						</div>
+						<span className="composer__credit" style={{ color: theme.muted }}>
+							{title} · {artist}
+						</span>
+					</div>
+				)}
 
 				<div>
 					<p className="mb-3 text-micro uppercase tracking-label text-ink-faint">

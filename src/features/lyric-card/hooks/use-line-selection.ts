@@ -21,10 +21,22 @@ export interface LineSelection {
 	rect: DOMRect;
 }
 
-/** Selector for an element representing one lyric line. */
-const LINE = ".canvas__line";
+/**
+ * Where lyric lines live in the DOM. v1's canvas is the default; v2's
+ * reading page passes its own classes (D-132) — the hook was hardwired to
+ * `.canvas`, which is why selection did nothing on the loud cut.
+ */
+export interface SelectionScope {
+	root: string;
+	line: string;
+}
 
-export function useLineSelection(): {
+const DEFAULT_SCOPE: SelectionScope = {
+	root: ".canvas",
+	line: ".canvas__line",
+};
+
+export function useLineSelection(scope: SelectionScope = DEFAULT_SCOPE): {
 	selection: LineSelection | null;
 	clear: () => void;
 } {
@@ -49,14 +61,14 @@ export function useLineSelection(): {
 					? range.commonAncestorContainer
 					: range.commonAncestorContainer.parentElement;
 
-			const canvas = container?.closest(".canvas");
+			const canvas = container?.closest(scope.root);
 			if (!canvas) {
 				// Selection outside the lyric canvas is none of our business.
 				setSelection(null);
 				return;
 			}
 
-			const touched = [...canvas.querySelectorAll(LINE)].filter((line) =>
+			const touched = [...canvas.querySelectorAll(scope.line)].filter((line) =>
 				range.intersectsNode(line),
 			);
 
@@ -85,7 +97,7 @@ export function useLineSelection(): {
 			cancelAnimationFrame(frame);
 			document.removeEventListener("selectionchange", onChange);
 		};
-	}, []);
+	}, [scope.root, scope.line]);
 
 	return { selection, clear };
 }

@@ -13,7 +13,13 @@
 import { readFile } from "node:fs/promises";
 import satori from "satori";
 
-import { CARD_SIZE, type CardTheme, cardTypeScale } from "../lib/card";
+import {
+	CARD_SIZE,
+	type CardTheme,
+	type CardVariant,
+	cardTypeScale,
+	LOUD_MEASURE,
+} from "../lib/card";
 import { getRasteriser } from "../lib/og";
 import { detectLang } from "../lib/script";
 import {
@@ -95,6 +101,8 @@ export interface CardRequest {
 	title: string;
 	artist: string;
 	theme: CardTheme;
+	/** Which cut's grammar the card wears (D-132). Classic when omitted. */
+	variant?: CardVariant;
 }
 
 export async function renderCard({
@@ -102,8 +110,12 @@ export async function renderCard({
 	title,
 	artist,
 	theme,
+	variant = "classic",
 }: CardRequest): Promise<Uint8Array> {
-	const { size, leading } = cardTypeScale(lines);
+	const loud = variant === "loud";
+	const { size, leading } = loud
+		? cardTypeScale(lines, LOUD_MEASURE)
+		: cardTypeScale(lines);
 
 	// Same detector the document's `lang` attribute uses (D-053), so the card
 	// and the page it was exported from resolve Han to the same regional
@@ -117,15 +129,70 @@ export async function renderCard({
 		? `${DISPLAY_STACK}, ${loaded.name}`
 		: DISPLAY_STACK;
 
-	const svg = await satori(
+	/*
+	 * The lyric block, shared by both grammars: each line its own element —
+	 * Satori ignores "\n", and collapsing lyrics into flowing prose would
+	 * destroy the line structure that is the writing itself. The loud cut
+	 * sets the lines bold; the classic keeps the book weight.
+	 */
+	const lyricBlock = (
 		<div
 			style={{
 				display: "flex",
 				flexDirection: "column",
-				justifyContent: "space-between",
+				justifyContent: "center",
+				flexGrow: 1,
+			}}
+		>
+			{lines.map((line, index) => (
+				<div
+					// biome-ignore lint/suspicious/noArrayIndexKey: fixed, non-reordering list
+					key={`${index}-${line}`}
+					style={{
+						display: "flex",
+						fontFamily,
+						fontWeight: loud ? 700 : 400,
+						fontSize: size,
+						lineHeight: leading,
+						color: theme.ink,
+						// An empty line still has to occupy its height.
+						minHeight: size * leading,
+					}}
+				>
+					{line || " "}
+				</div>
+			))}
+		</div>
+	);
+
+	const credit = (
+		<div
+			style={{
+				display: "flex",
+				fontFamily: "Outfit",
+				fontSize: 24,
+				letterSpacing: 3.4,
+				textTransform: "uppercase",
+				color: theme.muted,
+			}}
+		>
+			{`${title} · ${artist}`}
+		</div>
+	);
+
+	/*
+	 * The loud card (D-132): v2's grammar, verbatim — a white panel with a
+	 * hard black frame and offset shadow on a flat bright ground, the brand
+	 * a tilted rose sticker with its own black border and drop. The geometry
+	 * here (48 margin + 10 border + 72 padding) is what LOUD_MEASURE prices.
+	 */
+	const loudCard = (
+		<div
+			style={{
+				display: "flex",
 				width: "100%",
 				height: "100%",
-				padding: 104,
+				padding: 48,
 				background: theme.background,
 			}}
 		>
@@ -133,47 +200,59 @@ export async function renderCard({
 				style={{
 					display: "flex",
 					flexDirection: "column",
-					justifyContent: "center",
+					justifyContent: "space-between",
 					flexGrow: 1,
+					background: "#ffffff",
+					border: "10px solid #0a0a0a",
+					boxShadow: "18px 18px 0 #0a0a0a",
+					padding: 72,
 				}}
 			>
-				{/*
-				  Each line is its own element. Satori ignores "\n", and collapsing
-				  lyrics into flowing prose would destroy the line structure that is
-				  the writing itself.
-				*/}
-				{lines.map((line, index) => (
+				<div style={{ display: "flex" }}>
 					<div
-						// biome-ignore lint/suspicious/noArrayIndexKey: fixed, non-reordering list
-						key={`${index}-${line}`}
 						style={{
 							display: "flex",
-							fontFamily,
-							fontSize: size,
-							lineHeight: leading,
-							color: theme.ink,
-							// An empty line still has to occupy its height.
-							minHeight: size * leading,
+							background: "#e11d48",
+							color: "#ffffff",
+							border: "6px solid #0a0a0a",
+							boxShadow: "8px 8px 0 #0a0a0a",
+							padding: "12px 30px",
+							fontFamily: "Outfit",
+							fontSize: 36,
+							fontWeight: 500,
+							letterSpacing: 7,
+							textTransform: "uppercase",
+							transform: "rotate(-3deg)",
 						}}
 					>
-						{line || " "}
+						Refrain
 					</div>
-				))}
+				</div>
+				{lyricBlock}
+				{credit}
 			</div>
+		</div>
+	);
 
+	const svg = await satori(
+		loud ? (
+			loudCard
+		) : (
 			<div
 				style={{
 					display: "flex",
-					fontFamily: "Outfit",
-					fontSize: 24,
-					letterSpacing: 3.4,
-					textTransform: "uppercase",
-					color: theme.muted,
+					flexDirection: "column",
+					justifyContent: "space-between",
+					width: "100%",
+					height: "100%",
+					padding: 104,
+					background: theme.background,
 				}}
 			>
-				{`${title} · ${artist}`}
+				{lyricBlock}
+				{credit}
 			</div>
-		</div>,
+		),
 		{
 			width: CARD_SIZE,
 			height: CARD_SIZE,

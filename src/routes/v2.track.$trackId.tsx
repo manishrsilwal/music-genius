@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRecordVisit } from "@/features/discovery/hooks/use-history";
 import { usePreferences } from "@/features/discovery/hooks/use-preferences";
 import { useInsights } from "@/features/insights/hooks/use-insights";
+import { CardAffordance } from "@/features/lyric-card/components/card-affordance";
 import { PlaybackBar } from "@/features/playback/components/playback-bar";
 import { type LinePosition, lineKey } from "@/lib/lrc";
 import { getTrackFn, getTrackPlaybackFn } from "@/server/lyrics.functions";
@@ -275,6 +276,22 @@ function ReadV2() {
 					)}
 				</aside>
 			</div>
+
+			{/*
+			  Selection → card, v1's flow in v2's clothes (owner's report: it
+			  was missing here entirely). The scope points the document-level
+			  selection listener at THIS page's line markup, and the loud
+			  variant renders v2's card — white panel, hard frame, the brand
+			  as a rose sticker. No palette: the loud grounds are v2's own
+			  surfaces, not the artwork's hue.
+			*/}
+			<CardAffordance
+				title={track.title}
+				artist={track.artist}
+				palette={null}
+				variant="loud"
+				scope={{ root: ".v2read__lines", line: ".v2read__line" }}
+			/>
 		</main>
 	);
 }

@@ -1,9 +1,13 @@
 import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 
+import type { CardVariant } from "@/lib/card";
 import type { Palette } from "@/lib/types";
 
-import { useLineSelection } from "../hooks/use-line-selection";
+import {
+	type SelectionScope,
+	useLineSelection,
+} from "../hooks/use-line-selection";
 import { CardComposer, SelectionTooltip } from "./card-composer";
 
 /**
@@ -17,12 +21,18 @@ export function CardAffordance({
 	title,
 	artist,
 	palette,
+	variant = "classic",
+	scope,
 }: {
 	title: string;
 	artist: string;
 	palette: Palette | null;
+	/** Which cut's card grammar the composer offers (D-132). */
+	variant?: CardVariant;
+	/** Where the lyric lines live — v2's reading page passes its own. */
+	scope?: SelectionScope;
 }) {
-	const { selection, clear } = useLineSelection();
+	const { selection, clear } = useLineSelection(scope);
 	const [composing, setComposing] = useState<string[] | null>(null);
 
 	return (
@@ -42,6 +52,7 @@ export function CardAffordance({
 						title={title}
 						artist={artist}
 						palette={palette}
+						variant={variant}
 						onClose={() => {
 							setComposing(null);
 							clear();

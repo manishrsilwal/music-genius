@@ -4,6 +4,8 @@ import {
 	CARD_SIZE,
 	cardThemes,
 	cardTypeScale,
+	LOUD_MEASURE,
+	loudThemes,
 	measureEm,
 	themeById,
 } from "./card";
@@ -174,5 +176,30 @@ describe("cardThemes", () => {
 
 	it("themeById falls back to the first theme for an unknown id", () => {
 		expect(themeById(null, "nonsense").id).toBe(cardThemes(null)[0]?.id);
+	});
+});
+
+describe("the loud card (D-132)", () => {
+	it("offers three grounds, every one with fixed black ink", () => {
+		const themes = loudThemes();
+		expect(themes).toHaveLength(3);
+		for (const theme of themes) {
+			expect(theme.ink).toBe("#0a0a0a");
+		}
+	});
+
+	it("themeById resolves loud ids only under the loud variant", () => {
+		expect(themeById(null, "loud-honey", "loud").id).toBe("loud-honey");
+		// The classic list does not know the loud ids — falls back.
+		expect(themeById(null, "loud-honey").id).toBe("dusk");
+	});
+
+	it("the loud measure never sizes type larger than the classic", () => {
+		// The loud panel's frame and sticker cost room; type sized for the
+		// classic measure would overflow it.
+		const lines = ["a fairly long line of lyric words here"];
+		expect(cardTypeScale(lines, LOUD_MEASURE).size).toBeLessThanOrEqual(
+			cardTypeScale(lines).size,
+		);
 	});
 });

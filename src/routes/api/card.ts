@@ -16,6 +16,7 @@ interface CardBody {
 	artist?: unknown;
 	themeId?: unknown;
 	palette?: unknown;
+	variant?: unknown;
 }
 
 export const Route = createFileRoute("/api/card")({
@@ -42,9 +43,12 @@ export const Route = createFileRoute("/api/card")({
 					);
 				}
 
+				// Allowlisted, not trusted: anything but the loud cut is classic.
+				const variant = body.variant === "loud" ? "loud" : "classic";
 				const theme = themeById(
 					(body.palette as never) ?? null,
 					String(body.themeId ?? "dusk"),
+					variant,
 				);
 
 				try {
@@ -53,6 +57,7 @@ export const Route = createFileRoute("/api/card")({
 						title: String(body.title ?? "").slice(0, 80),
 						artist: String(body.artist ?? "").slice(0, 80),
 						theme,
+						variant,
 					});
 
 					return new Response(png as unknown as BodyInit, {

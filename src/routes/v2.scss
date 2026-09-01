@@ -2298,6 +2298,75 @@
 		}
 	}
 
+	// — Selection → lyric card (D-132) —
+	// A selected passage is marked in honey, the highlighter the mood
+	// promise already uses — v1's lime wash belongs to the other cut.
+	::selection {
+		background: var(--v2-honey);
+		color: var(--v2-black);
+	}
+
+	.card-tip {
+		border: 2px solid var(--v2-black);
+		border-radius: 0;
+		background: var(--v2-black);
+		color: #fff;
+		font-weight: 800;
+		box-shadow: 3px 3px 0 var(--v2-rose);
+		rotate: -1.5deg;
+	}
+
+	.composer__panel {
+		border: var(--v2-border);
+		border-radius: 0;
+		background: var(--v2-card);
+		box-shadow: 8px 8px 0 var(--v2-black);
+	}
+
+	.composer__preview {
+		border: 2px solid var(--v2-black);
+		border-radius: 0;
+	}
+
+	.composer__swatch {
+		border: 2px solid var(--v2-black);
+		border-radius: 0;
+
+		&[aria-pressed="true"] {
+			box-shadow: none;
+			outline: 3px solid var(--v2-blue);
+			outline-offset: 2px;
+		}
+	}
+
+	.composer__go {
+		border: 2px solid var(--v2-black);
+		border-radius: 0;
+		box-shadow: 3px 3px 0 var(--v2-black);
+		background: var(--v2-rose);
+		color: #fff;
+		font-weight: 800;
+
+		&:hover:not(:disabled) {
+			background: var(--v2-rose);
+			translate: -1px -1px;
+			box-shadow: 4px 4px 0 var(--v2-black);
+		}
+	}
+
+	.composer__cancel {
+		border: 2px solid var(--v2-black);
+		border-radius: 0;
+		background: var(--v2-card);
+		color: var(--v2-black);
+		font-weight: 700;
+
+		&:hover {
+			background: var(--v2-honey);
+			color: var(--v2-black);
+		}
+	}
+
 	// — Continue reading rows —
 	.recent__row {
 		border: 2px solid var(--v2-black);

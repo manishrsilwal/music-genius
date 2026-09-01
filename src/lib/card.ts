@@ -97,8 +97,58 @@ export function cardThemes(palette: Palette | null): CardTheme[] {
 	];
 }
 
-export function themeById(palette: Palette | null, id: string): CardTheme {
-	const themes = cardThemes(palette);
+/**
+ * Which cut the card is dressed for (D-132). The classic card is v1's —
+ * palette-derived gradients. The loud card is v2's: a white panel with a
+ * hard black frame and offset shadow on a flat bright ground, the brand
+ * as a tilted rose sticker. Same lines, same scale maths, two grammars.
+ */
+export type CardVariant = "classic" | "loud";
+
+/**
+ * The loud card's grounds — v2's own surfaces (pink canvas, honey, soft
+ * blue). Ink and muted are fixed: the words always sit on the white
+ * panel, so legibility never depends on the ground behind it.
+ */
+export function loudThemes(): CardTheme[] {
+	return [
+		{
+			id: "loud-pink",
+			label: "Pink ground",
+			background: "#fff1f2",
+			ink: "#0a0a0a",
+			muted: "#475569",
+		},
+		{
+			id: "loud-honey",
+			label: "Honey ground",
+			background: "#fde68a",
+			ink: "#0a0a0a",
+			muted: "#475569",
+		},
+		{
+			id: "loud-blue",
+			label: "Blue ground",
+			background: "#dbeafe",
+			ink: "#0a0a0a",
+			muted: "#475569",
+		},
+	];
+}
+
+export function themesFor(
+	variant: CardVariant,
+	palette: Palette | null,
+): CardTheme[] {
+	return variant === "loud" ? loudThemes() : cardThemes(palette);
+}
+
+export function themeById(
+	palette: Palette | null,
+	id: string,
+	variant: CardVariant = "classic",
+): CardTheme {
+	const themes = themesFor(variant, palette);
 	return themes.find((theme) => theme.id === id) ?? (themes[0] as CardTheme);
 }
 
@@ -156,6 +206,15 @@ const FIT_MARGIN = 0.97;
 const LEADING_MAX = 1.42;
 
 /**
+ * The loud card's measure (D-132). Its ground margin (48), panel border
+ * (10) and panel padding (72) cost 130 a side against the classic's 104,
+ * and the sticker row and credit take vertical room the classic spends on
+ * nothing — so the lines get their own, smaller box. Shared by the
+ * preview and the render, the same D-018 contract as the classic.
+ */
+export const LOUD_MEASURE = { width: 820, height: 640 };
+
+/**
  * Advance of one character, in em (D-057).
  *
  * CJK is answered by range rather than by table. Every glyph in a Noto CJK
@@ -208,7 +267,14 @@ export function measureEm(text: string): number {
 	return total;
 }
 
-export function cardTypeScale(lines: string[]): {
+export function cardTypeScale(
+	lines: string[],
+	/** The box the lines must fit — the loud card passes its own (D-132). */
+	measure: { width: number; height: number } = {
+		width: CONTENT_WIDTH,
+		height: CONTENT_HEIGHT,
+	},
+): {
 	size: number;
 	leading: number;
 } {
@@ -220,8 +286,8 @@ export function cardTypeScale(lines: string[]): {
 	// Width leads (D-020): type grows until it fills the measure, whatever the
 	// script. Devanagari advances are narrower than Latin, so a line-count rule
 	// left those cards filling barely half the width and looking unset.
-	const byWidth = (CONTENT_WIDTH * FIT_MARGIN) / widestEm;
-	const byHeight = CONTENT_HEIGHT / (lines.length * LEADING_MAX);
+	const byWidth = (measure.width * FIT_MARGIN) / widestEm;
+	const byHeight = measure.height / (lines.length * LEADING_MAX);
 
 	const size = Math.max(MIN_SIZE, Math.min(byWidth, byHeight, MAX_SIZE));
 	const leading = size > 60 ? 1.32 : size > 48 ? 1.36 : 1.42;

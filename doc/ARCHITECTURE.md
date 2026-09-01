@@ -134,6 +134,40 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-132 — The lyric card learns to shout
+**Built 2026-09-01.** The owner's report: selecting lyrics in v2 gave
+no card, "which was in v1" — and the card "must follow the funky
+design of v2 and also show the brand name." The cause: the selection
+hook was hardwired to v1's `.canvas` markup, so on the loud cut it
+watched for lines that never existed. The hook takes a
+`SelectionScope` now (root + line selectors, canvas by default) and
+v2's reading page passes its own; the affordance, composer, API and
+renderer gain a `variant`.
+
+The **loud variant** is v2's grammar rendered by the same Satori
+pipeline: a flat bright ground (three treatments — pink, honey, soft
+blue, v2's own surfaces), a white panel with a 10px black frame and
+18px offset shadow, the lyric lines bold on the panel, the credit at
+its foot, and REFRAIN as a tilted rose sticker with its own border
+and drop — the brand the owner asked for. Ink is fixed black: the
+words always sit on the white panel, so legibility never depends on
+the ground. No palette dependence — the loud grounds are the
+product's surfaces, not the artwork's hue, which also spares v2's
+loader a visuals fetch.
+
+Geometry is priced, not eyeballed: the loud frame costs 130 a side
+against the classic's 104, plus the sticker row and credit — so
+`cardTypeScale` takes a measure argument and `LOUD_MEASURE`
+(820×640) bounds the lines. Preview and render share it, D-018's
+contract. The type still sets in the measured display faces (the
+advance table is cut for them); Anton on the card would need its own
+metrics run and is left for a future crop. v1's card is untouched —
+`variant` defaults classic everywhere, and the API allowlists.
+
+In scope CSS: v2's selection wash is honey (v1's lime belongs to the
+other cut), the selection tooltip is a tilted black chip with a rose
+drop, and the composer wears the house border/shadow/squared kit.
+
 ### D-131 — The timeline gets a row of its own
 **Built 2026-09-01.** The owner's screenshot of the rail player:
 "the player track is small." Not a styling bug — arithmetic. The v2
