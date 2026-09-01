@@ -1767,6 +1767,13 @@
 	// for it — never exists here. The owner's red line: that reserved
 	// column was why three cards stopped short of the band's edge.
 
+	// Air between the card and its margin notes (owner's request): the
+	// base allows 2px, but here the card ends in a 4px hard shadow that
+	// swallows it — the verdicts sat pressed against the drop.
+	.dives__verdicts {
+		margin-top: 0.6rem;
+	}
+
 	.dives__verdict {
 		font-weight: 700;
 		color: var(--v2-black);
