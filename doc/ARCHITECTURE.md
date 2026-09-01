@@ -164,6 +164,15 @@ it does, the lines carry no pointer, no hover, no handler: a line
 that looks clickable while YouTube or Spotify is still loading is a
 promise the tap silently breaks.
 
+Fourth round (owner): on the Spotify embed the first tap played
+from the start and only the second landed. The embed's controller
+silently DROPS a seek issued before its playback session exists —
+seek-then-play therefore played from 0:00. The hook now remembers a
+pre-session seek and delivers it on the first `playback_update`
+that shows the song moving; the direct attempt stays too, since a
+re-seek to the same second is a no-op when the embed did honour it.
+Session and pending refs reset with the controller on track change.
+
 Third round (owner): a tap is an explicit "follow from HERE", so it
 re-engages the whole following apparatus. On the bar's side the
 jump now also does what the Sync button does — `resume()` through a

@@ -149,6 +149,15 @@ export function useSpotifyPlayer(
 	mountRef: React.RefObject<HTMLDivElement | null>,
 ): PlaybackState {
 	const controllerRef = useRef<EmbedController | null>(null);
+	/*
+	 * Whether the embed's playback SESSION exists yet (D-134, fourth
+	 * round). The controller silently drops a seek issued before the song
+	 * has ever played — so seek-then-play landed at 0:00 and only a second
+	 * tap worked. Until the first update that shows the song moving, seeks
+	 * are remembered here and delivered the moment the session stands.
+	 */
+	const sessionLive = useRef(false);
+	const pendingSeek = useRef<number | null>(null);
 	const [status, setStatus] = useState<PlaybackStatus>("loading");
 	const [reason, setReason] = useState<string | null>(null);
 	const [playing, setPlaying] = useState(false);
@@ -219,6 +228,17 @@ export function useSpotifyPlayer(
 					controller.addListener("playback_update", (payload) => {
 						if (cancelled || !payload) return;
 						const { isPaused, duration: ms, position } = payload.data;
+						// The first update that shows the song MOVING is the
+						// session standing up — the moment a held-back seek
+						// can finally land (D-134, fourth round).
+						if (!isPaused) {
+							sessionLive.current = true;
+							if (pendingSeek.current != null) {
+								const target = pendingSeek.current;
+								pendingSeek.current = null;
+								controllerRef.current?.seek(target);
+							}
+						}
 						setPlaying(!isPaused);
 						setCurrentTime(position / 1000);
 						if (ms > 0) setDuration(ms / 1000);
@@ -237,6 +257,8 @@ export function useSpotifyPlayer(
 				// which is exactly the case this cleanup exists to handle.
 			}
 			controllerRef.current = null;
+			sessionLive.current = false;
+			pendingSeek.current = null;
 			mountRef.current?.replaceChildren();
 			setStatus("loading");
 			setReason(null);
@@ -250,6 +272,13 @@ export function useSpotifyPlayer(
 	}, []);
 
 	const seek = useCallback((seconds: number) => {
+		// Before the session exists the controller drops this on the floor —
+		// remember it as well, and the update listener delivers it the
+		// moment the song moves. Attempting the direct seek stays: if the
+		// embed does honour it, the re-seek to the same second is a no-op.
+		if (!sessionLive.current) {
+			pendingSeek.current = seconds;
+		}
 		controllerRef.current?.seek(seconds);
 	}, []);
 
