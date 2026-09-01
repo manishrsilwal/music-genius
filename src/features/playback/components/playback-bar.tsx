@@ -34,6 +34,7 @@ export function PlaybackBar({
 	lyricsDuration,
 	onSyncChange,
 	onPlayingChange,
+	jumpTo,
 }: {
 	/** Null while the lookup is still running, and null if it found nothing. */
 	videoId: string | null;
@@ -68,6 +69,14 @@ export function PlaybackBar({
 	 * instead of a second copy of the same image announcing it in miniature.
 	 */
 	onPlayingChange?: (playing: boolean) => void;
+	/**
+	 * A page-issued seek (D-134): clicking a lyric line plays the song from
+	 * that line's timestamp. The nonce distinguishes two clicks on the same
+	 * line — same seconds, new request. Honoured when a player is ready;
+	 * starts playback if it was paused, the way a tap on Spotify's lyric
+	 * view does.
+	 */
+	jumpTo?: { seconds: number; nonce: number } | null;
 }) {
 	const mountRef = useRef<HTMLDivElement>(null);
 	const spotifyMountRef = useRef<HTMLDivElement>(null);
@@ -142,6 +151,13 @@ export function PlaybackBar({
 	 */
 	const [wantSync, setWantSync] = useState<boolean | null>(null);
 	const desire = wantSync ?? !drifted;
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: the nonce IS the request; seek/toggle/playing are read at fire time
+	useEffect(() => {
+		if (!jumpTo || !ready) return;
+		seek(jumpTo.seconds);
+		if (!playing) toggle();
+	}, [jumpTo?.nonce]);
 
 	const syncing = synced && playing && desire;
 	const { manual, resume } = useManualOverride(syncing);

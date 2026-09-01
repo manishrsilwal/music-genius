@@ -121,6 +121,25 @@ function ReadV2() {
 	const activeAt = position ? (lineOrder.get(position.key) ?? -1) : -1;
 	const following = playing && activeAt >= 0 && !manualHold;
 
+	/*
+	 * Tap a line, hear that line (D-134, Spotify's move): a click on a
+	 * timed line asks the bar to seek there and play. Guarded against the
+	 * card flow — a mouse-up that ENDS a text selection is the composer's
+	 * business, not a seek — and a keyboard reader keeps the seekbar,
+	 * which already speaks arrow keys; sixty tab stops through a lyric
+	 * would be worse than the feature.
+	 */
+	const [jumpTo, setJumpTo] = useState<{
+		seconds: number;
+		nonce: number;
+	} | null>(null);
+	const jumpToLine = (time: number | null) => {
+		if (time == null) return;
+		const selection = window.getSelection();
+		if (selection && !selection.isCollapsed) return;
+		setJumpTo({ seconds: time, nonce: Date.now() });
+	};
+
 	const reduce = useRef(false);
 	useEffect(() => {
 		reduce.current = window.matchMedia(
@@ -160,15 +179,22 @@ function ReadV2() {
 							)}
 							{stanza.lines.map((line, l) =>
 								line.text.trim().length > 0 ? (
+									// biome-ignore lint/a11y/useKeyWithClickEvents: seek-on-click is a pointer enhancement; the seekbar carries the keyboard path — sixty tab stops through a lyric would cost more than they give (D-134)
 									<p
 										key={lineKey(s, l)}
 										id={`v2line-${lineKey(s, l)}`}
 										className="v2read__line"
 										data-active={position?.key === lineKey(s, l) || undefined}
+										data-jumpable={
+											(track.synced && line.time != null) || undefined
+										}
 										data-sung={
 											(activeAt >= 0 &&
 												(lineOrder.get(lineKey(s, l)) ?? 0) < activeAt) ||
 											undefined
+										}
+										onClick={
+											track.synced ? () => jumpToLine(line.time) : undefined
 										}
 									>
 										{line.text}
@@ -216,6 +242,7 @@ function ReadV2() {
 									lyricsDuration={track.duration}
 									onSyncChange={setPosition}
 									onPlayingChange={setPlaying}
+									jumpTo={jumpTo}
 								/>
 							}
 						>
@@ -231,6 +258,7 @@ function ReadV2() {
 									lyricsDuration={track.duration}
 									onSyncChange={setPosition}
 									onPlayingChange={setPlaying}
+									jumpTo={jumpTo}
 								/>
 							)}
 						</Await>

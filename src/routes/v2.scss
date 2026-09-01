@@ -579,6 +579,18 @@
 		}
 	}
 
+	// A timed line is a CONTROL as well as text (D-134): tap it and the
+	// song plays from there. Pointer plus the honey wash on hover — the
+	// same language the selection highlight already speaks, so "this text
+	// responds" reads consistently across the page.
+	&__line[data-jumpable] {
+		cursor: pointer;
+
+		&:not([data-active]):hover {
+			background: var(--v2-honey);
+		}
+	}
+
 	// The karaoke registers (D-133): Spotify's grammar in v2's ink, and
 	// ONLY while genuinely following — the [data-following] gate drops on
 	// pause, lost sync, or a manual-scroll hold, and every line returns to

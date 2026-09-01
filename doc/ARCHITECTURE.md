@@ -134,6 +134,28 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-134 — Tap a line, hear that line
+**Built 2026-09-01.** The owner's ask, Spotify's move: click a lyric
+line and the song plays from there. The page issues a seek through a
+new `jumpTo` prop on the playback bar — `{seconds, nonce}`, the
+nonce telling two taps on the same line apart — and the bar honours
+it when a player is ready: seek, then play if paused. Works on both
+sources; both player hooks already expose `seek`.
+
+Three guards. A mouse-up that ends a TEXT SELECTION is the card
+composer's business, not a seek — the click handler stands down when
+the selection is non-collapsed, so the two line features coexist.
+Untimed lines (and unsynced tracks) get no handler, no pointer, no
+false promise. And the keyboard path stays the seekbar, which
+already speaks arrow keys — sixty tab stops through a lyric would
+cost keyboard readers more than a per-line shortcut gives them; the
+a11y lint is overridden with that reasoning on the element.
+
+Affordance: timed lines carry a pointer cursor and the honey hover
+wash — the same language the selection highlight speaks, so "this
+text responds" reads consistently. v2's page only; the bar prop is
+inert for v1 until its canvas chooses to wire it.
+
 ### D-133 — The lyrics learn to follow the voice
 **Built 2026-09-01.** The owner's ask, with Spotify's lyric view as
 the reference: while the music plays, the current line alone should
