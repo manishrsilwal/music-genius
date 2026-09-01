@@ -805,14 +805,23 @@
 			}
 
 			// The Spotify card has no toggle/scrub/video row; its map gets
-			// the same space-between settings line.
+			// the same space-between settings line. The notice leads the
+			// embed (owner's call): "Premium plays full songs" explains
+			// what the card below is about to do, so it reads BEFORE it —
+			// after, it was an apology.
 			&[data-source="spotify"] {
 				grid-template-areas:
+					"meta meta meta"
 					"embed embed embed"
-					"switch meta sync";
+					"switch . sync";
 
 				.playback__sync {
 					justify-self: end;
+				}
+
+				.playback__meta {
+					justify-self: start;
+					text-align: start;
 				}
 			}
 		}
