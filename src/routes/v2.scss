@@ -654,19 +654,16 @@
 		}
 	}
 
-	&__meaning-you {
-		margin-top: 1.1rem;
-		padding-top: 0.9rem;
-		border-top: 2px solid var(--v2-black);
-	}
-
-	&__meaning-you-label {
-		margin: 0 0 0.5rem;
-		font-family: var(--v2-display);
-		font-size: 0.8rem;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: var(--v2-rose);
+	// "For you" is its own card above the meaning now (owner's call) —
+	// same cloth as __meaning, but it must not GROW: the meaning card is
+	// the rail's flex:1, and two greedy cards would split the leftover
+	// height and stretch a three-line note over dead space. It may still
+	// SHRINK (flex-basis auto, min-height 0) so a long resonance scrolls
+	// inside its body instead of pushing the meaning card off the rail.
+	@include m.from("lg") {
+		&__meaning--you {
+			flex: 0 1 auto;
+		}
 	}
 
 	// The reader's own lines, marked the way the sung line is — the same

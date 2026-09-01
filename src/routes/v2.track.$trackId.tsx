@@ -189,6 +189,28 @@ function ReadV2() {
 						</Await>
 					</div>
 
+					{/*
+					  "For you" is its own card, cut from the meaning card's
+					  cloth and seated above it (owner's call). It gates
+					  itself: resonance is null when the reader has stated no
+					  preferences, so someone who arrived by search alone
+					  simply never sees it — no personal claim without a
+					  person to claim it about.
+					*/}
+					{insightState !== "unavailable" && insight?.resonance && (
+						<section className="v2read__meaning v2read__meaning--you">
+							<h2 className="v2read__meaning-title">For you</h2>
+							<div className="v2read__meaning-body">
+								{insight.resonance.lines.map((line) => (
+									<p key={line} className="v2read__meaning-line">
+										{line}
+									</p>
+								))}
+								<p className="v2read__meaning-p">{insight.resonance.text}</p>
+							</div>
+						</section>
+					)}
+
 					{insightState !== "unavailable" && (
 						<section className="v2read__meaning">
 							<h2 className="v2read__meaning-title">What it means</h2>
@@ -216,19 +238,6 @@ function ReadV2() {
 												“{insight.quote.text}”
 												<cite>— {insight.quote.attribution}</cite>
 											</blockquote>
-										)}
-										{insight.resonance && (
-											<div className="v2read__meaning-you">
-												<p className="v2read__meaning-you-label">For you</p>
-												{insight.resonance.lines.map((line) => (
-													<p key={line} className="v2read__meaning-line">
-														{line}
-													</p>
-												))}
-												<p className="v2read__meaning-p">
-													{insight.resonance.text}
-												</p>
-											</div>
 										)}
 									</>
 								)}
