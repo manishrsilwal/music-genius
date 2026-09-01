@@ -62,6 +62,8 @@
 	--v2-rose: #e11d48;
 	--v2-rose-soft: #fb7185;
 	--v2-blue: #2563eb;
+	--v2-honey: #fde68a;
+	--v2-blue-soft: #dbeafe;
 	--v2-muted: #f0ecf2;
 	--v2-line: #fecdd3;
 	--v2-black: #0a0a0a;
@@ -77,6 +79,11 @@
 	background: var(--v2-bg);
 	color: var(--v2-body);
 	font-family: var(--v2-text);
+	// The Discover bands bleed to the viewport edge with 50vw margins, and
+	// 100vw includes the (custom, 15px) page scrollbar — `clip`, not
+	// `hidden`: hidden makes this a scroll container and unseats the track
+	// page's sticky rail; clip just cuts the sliver.
+	overflow-x: clip;
 
 	// v1's whole flow renders inside v2 now (D-126) — the chat, the taste
 	// chips, both shelves, continue reading, the search — and every one of
@@ -1088,7 +1095,7 @@
 		background: var(--v2-card);
 
 		&[data-tint="1"] {
-			background: #fde68a;
+			background: var(--v2-honey);
 		}
 
 		&[data-tint="2"] {
@@ -1256,7 +1263,7 @@
 		color: var(--v2-black);
 
 		&[data-current] {
-			background: #fde68a;
+			background: var(--v2-honey);
 			box-shadow: 3px 3px 0 var(--v2-black);
 		}
 	}
@@ -1365,9 +1372,12 @@
 		}
 	}
 
-	&__bento {
+	// The result page is a poster: stamps, then the search, then the
+	// full-bleed bands, with the pink ground showing between them.
+	&__result {
 		display: grid;
 		gap: 1.75rem;
+		margin-top: 1.25rem;
 	}
 
 	&__filter {
@@ -1397,30 +1407,17 @@
 		max-width: 40rem;
 	}
 
-	&__shelf-title {
-		margin: 0 0 0.25rem;
-		font-family: var(--v2-display);
-		font-size: 1.35rem;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: var(--v2-black);
-	}
-
-	&__shelf-lead {
-		margin: 0 0 1rem;
-		font-size: 0.85rem;
-		font-weight: 500;
-	}
-
 	&__more {
-		margin-top: 1rem;
+		margin-top: 1.25rem;
 		border: 2px solid var(--v2-black);
 		box-shadow: 3px 3px 0 var(--v2-black);
 		background: var(--v2-card);
-		border-radius: 999px;
-		padding: 0.45rem 1.1rem;
-		font-weight: 700;
-		font-size: 0.85rem;
+		border-radius: 0;
+		padding: 0.5rem 1.2rem;
+		font-weight: 800;
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
 		color: var(--v2-black);
 		cursor: pointer;
 
@@ -1428,6 +1425,8 @@
 		&:focus-visible {
 			translate: -1px -1px;
 			box-shadow: 4px 4px 0 var(--v2-black);
+			background: var(--v2-blue);
+			color: #fff;
 		}
 
 		&:active {
@@ -1440,6 +1439,112 @@
 		display: grid;
 		gap: 0.5rem;
 		margin-bottom: 1rem;
+	}
+}
+
+// Full-bleed colour bands (the owner's pick for the result page): each
+// shelf runs edge to edge of the VIEWPORT in its own fill — white, honey,
+// soft blue — ruled top and bottom, with the pink ground breathing between
+// them. `50% - 50vw` walks out of the centred frame; the sliver where
+// 100vw includes the scrollbar is clipped by .v2's overflow-x.
+.v2band {
+	margin-inline: calc(50% - 50vw);
+	padding: 2rem 1.5rem 2.5rem;
+	border-block: var(--v2-border);
+	background: var(--v2-card);
+
+	&--honey {
+		background: var(--v2-honey);
+	}
+
+	&--blue {
+		background: var(--v2-blue-soft);
+	}
+
+	// Re-centres the content on the frame's own 69rem grid, so the fill
+	// bleeds but the type stays in the column everything else uses.
+	&__inner {
+		max-width: 69rem;
+		margin-inline: auto;
+	}
+
+	&__head {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 1rem;
+		margin-bottom: 0.4rem;
+	}
+
+	&__title {
+		margin: 0;
+		font-family: var(--v2-display);
+		font-weight: 400;
+		font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+		line-height: 1;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		color: var(--v2-black);
+	}
+
+	// ONE sticker per band, rationed like the chat's loud anatomy — a
+	// black tag with a rose drop, tilted against the Anton headline.
+	&__sticker {
+		background: var(--v2-black);
+		color: #fff;
+		font-weight: 800;
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.09em;
+		padding: 0.32rem 0.7rem;
+		rotate: -2.5deg;
+		box-shadow: 3px 3px 0 var(--v2-rose);
+	}
+
+	&__lead {
+		margin: 0 0 1.4rem;
+		font-weight: 600;
+		font-size: 0.9rem;
+		color: var(--v2-body);
+		max-width: 52ch;
+	}
+
+	// ContinueReading announces itself through v1's SectionHeading — inside
+	// a band, that heading speaks band: no hairline (the band's own rule
+	// does that job), the label at headline size, Clear as a bordered chip.
+	.section-heading {
+		border-top: 0;
+		padding-top: 0;
+		margin-bottom: 1.1rem;
+	}
+
+	.section-heading__bar {
+		align-items: center;
+	}
+
+	.section-heading__label {
+		font-family: var(--v2-display);
+		font-weight: 400;
+		font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+		line-height: 1;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		color: var(--v2-black);
+	}
+
+	.section-heading__bar > button {
+		border: 2px solid var(--v2-black);
+		box-shadow: 2px 2px 0 var(--v2-black);
+		background: var(--v2-card);
+		padding: 0.35rem 0.8rem;
+		color: var(--v2-black);
+		font-weight: 800;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--v2-rose);
+			color: #fff;
+		}
 	}
 }
 
@@ -1513,7 +1618,7 @@
 		&:hover,
 		&:focus-visible {
 			border-color: var(--v2-black);
-			background: #fde68a;
+			background: var(--v2-honey);
 			translate: none;
 			box-shadow: none;
 		}
@@ -1633,7 +1738,7 @@
 
 		&:hover {
 			border-color: var(--v2-black);
-			background: #fde68a;
+			background: var(--v2-honey);
 		}
 	}
 
@@ -1652,12 +1757,19 @@
 		}
 	}
 
+	// The mood promise reads like a highlighter ran over it — the shared
+	// reason is the shelf's one claim, so it gets the honey marker.
 	.dives__shared {
-		font-weight: 600;
+		font-weight: 700;
+		font-size: 0.9rem;
+		color: var(--v2-black);
 	}
 
 	.dives__shared-value {
-		color: var(--v2-rose);
+		color: var(--v2-black);
+		background: var(--v2-honey);
+		padding: 0.1rem 0.35rem;
+		box-decoration-break: clone;
 	}
 
 	// — People also like rows —
@@ -1702,21 +1814,154 @@
 		}
 	}
 
-	// — Taste chips —
+	// — Taste chips, recut as STAMPS (owner's rework brief: no v1 pill
+	// anatomy). Each answer is a small tilted card — the axis name in a
+	// whisper, the answer in Anton — and each axis wears its own fill:
+	// mood rose, pull blue, familiarity honey, languages white, Retake
+	// black. The tilt straightens under the pointer, like the cards.
+	.taste__row {
+		gap: 0.7rem;
+	}
+
 	.taste__chip {
-		border: 2px solid var(--v2-black);
-		box-shadow: 3px 3px 0 var(--v2-black);
+		display: grid;
+		justify-items: start;
+		gap: 0.15rem;
+		border: var(--v2-border);
+		border-radius: 0;
+		box-shadow: var(--v2-shadow);
 		background: var(--v2-card);
+		padding: 0.5rem 0.9rem 0.55rem;
+		transition:
+			translate 0.15s ease,
+			box-shadow 0.15s ease,
+			rotate 0.15s ease;
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--v2-black);
+			translate: -2px -2px;
+			rotate: 0deg;
+			box-shadow: var(--v2-shadow-up);
+		}
+
+		&:focus-visible {
+			outline: 3px solid var(--v2-blue);
+			outline-offset: 2px;
+		}
+
+		// The open chip anchors the panel below it: pinned flat, ringed.
+		&[data-open] {
+			rotate: 0deg;
+			outline: 3px solid var(--v2-blue);
+			outline-offset: 2px;
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+
+			&:hover {
+				translate: none;
+			}
+		}
+	}
+
+	.taste__chip-label {
+		color: inherit;
+		opacity: 0.75;
 		font-weight: 700;
+		font-size: 0.6rem;
+		letter-spacing: 0.09em;
+	}
+
+	// The answer is the loud half — Anton, like everything v2 says with
+	// its chest. v1 paints it accent-rose, invisible on the rose stamp:
+	// inherit instead, each fill brings its own ink.
+	.taste__chip-value {
+		color: inherit;
+		font-family: var(--v2-display);
+		font-weight: 400;
+		font-size: 1.05rem;
+		line-height: 1.1;
+		letter-spacing: 0.03em;
+		text-transform: uppercase;
+	}
+
+	.taste__row > .taste__chip:nth-of-type(1) {
+		background: var(--v2-rose);
+		color: #fff;
+		rotate: -1.5deg;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--v2-rose);
+		}
+	}
+
+	.taste__row > .taste__chip:nth-of-type(2) {
+		background: var(--v2-blue);
+		color: #fff;
+		rotate: 1deg;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--v2-blue);
+		}
+	}
+
+	.taste__row > .taste__chip:nth-of-type(3) {
+		background: var(--v2-honey);
+		color: var(--v2-black);
+		rotate: -1deg;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--v2-honey);
+		}
+	}
+
+	.taste__row > .taste__chip:nth-of-type(4) {
+		background: var(--v2-card);
+		color: var(--v2-black);
+		rotate: 1.5deg;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--v2-card);
+		}
 	}
 
 	.taste__reset {
-		border: 2px solid var(--v2-black);
-		border-radius: 999px;
-		box-shadow: 3px 3px 0 var(--v2-black);
-		background: var(--v2-card);
-		padding: 0.4rem 0.9rem;
-		color: var(--v2-black);
+		border: var(--v2-border);
+		border-radius: 0;
+		box-shadow: var(--v2-shadow);
+		background: var(--v2-black);
+		padding: 0.6rem 1rem;
+		color: #fff;
+		rotate: -1deg;
+		transition:
+			translate 0.15s ease,
+			box-shadow 0.15s ease,
+			rotate 0.15s ease,
+			background-color 0.15s ease;
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--v2-black);
+			background: var(--v2-blue);
+			color: #fff;
+			translate: -2px -2px;
+			rotate: 0deg;
+			box-shadow: var(--v2-shadow-up);
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+
+			&:hover {
+				translate: none;
+			}
+		}
 	}
 
 	.taste__options {
@@ -1725,18 +1970,72 @@
 		background: var(--v2-card);
 	}
 
+	// The fill is the selected signal, same rule as the chat: rose card,
+	// white words, no ghost tick paying rent in the corner.
+	.taste__tick {
+		display: none;
+	}
+
+	.taste__option {
+		border-radius: 0;
+
+		&:hover {
+			background: var(--v2-honey);
+		}
+	}
+
 	.taste__option[data-selected] {
-		box-shadow: inset 0 0 0 2px var(--v2-rose);
+		box-shadow: none;
+		background: var(--v2-rose);
+
+		.taste__option-label {
+			color: #fff;
+		}
+
+		.taste__option-hint {
+			color: #fff;
+			opacity: 0.85;
+		}
+
+		&:hover {
+			background: var(--v2-rose);
+		}
 	}
 
 	// — Search field + its flyout —
+	// The field's label stops whispering in v1's grey letterspacing and
+	// becomes a black tab riding the input's top edge — the sticker
+	// grammar doing the label's job. `:not(.sr-only)` matters: hidden
+	// labels (hideLabel contexts) must stay clipped, and these properties
+	// would drag one back into view.
+	.search > label:not(.sr-only) {
+		position: relative;
+		z-index: 1;
+		display: inline-block;
+		width: max-content;
+		margin: 0 0 -0.55rem 1rem;
+		background: var(--v2-black);
+		color: #fff;
+		font-weight: 800;
+		font-size: 0.68rem;
+		letter-spacing: 0.1em;
+		padding: 0.3rem 0.7rem 0.75rem;
+		rotate: -1.5deg;
+	}
+
 	.search__input {
 		border: var(--v2-border);
 		box-shadow: var(--v2-shadow);
 		background: var(--v2-card);
 		border-radius: 0;
-		font-weight: 600;
+		font-weight: 700;
+		font-size: 1.05rem;
 		color: var(--v2-black);
+
+		&::placeholder {
+			color: var(--v2-body);
+			font-weight: 600;
+		}
 	}
 
 	// The status line leaves the flow (owner's screenshot: it held the
@@ -1763,7 +2062,7 @@
 	// the bare selector painted the whole panel honey (owner's screenshot).
 	.search__option[data-highlighted="true"],
 	.search__option:hover {
-		background: #fde68a;
+		background: var(--v2-honey);
 	}
 
 	// A missing cover is a drawn slot, not a broken image (owner's

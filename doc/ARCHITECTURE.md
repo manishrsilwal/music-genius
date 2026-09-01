@@ -134,6 +134,43 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-128 — The result page stops wearing v1's skeleton
+**Built 2026-09-01.** The owner's review of the personalised Discover
+page: "the entire UI of this page have not been thought through with
+the UI direction of v2 in mind — it's just a cheap copy of the UI in
+v1 having theme of v2." Correct: D-126's token re-point re-coloured
+v1's anatomy (grey letterspaced labels, pill taste-chips, one white
+panel per shelf) without replacing its grammar. Three directions were
+offered; the owner picked **full-bleed colour bands**.
+
+The page is now a poster. Each shelf runs edge-to-edge of the
+viewport in its own fill — Deep Dives white, People-also-like honey,
+Keep-reading soft blue — ruled top and bottom, pink ground breathing
+between, an Anton headline with ONE tilted sticker tag per band
+(loudness stays rationed, the chat's lesson). `.v2band` escapes the
+centred 72rem frame with `margin-inline: calc(50% - 50vw)`; the
+scrollbar sliver that 100vw includes is cut by `overflow-x: clip` on
+`.v2` — clip, not hidden, because hidden makes a scroll container and
+unseats the track page's sticky rail.
+
+The v1 leaks named and fixed: taste chips recut as tilted STAMPS
+(axis name a whisper, answer in Anton, each axis its own fill — mood
+rose, pull blue, familiarity honey, languages white, Retake black;
+`--track-accent` rose text would have vanished on the rose stamp, so
+the value inherits its stamp's ink); the search label recut from
+v1's grey letterspacing into a black tab riding the input's top edge
+(`:not(.sr-only)` guard so hidden labels stay hidden); the shared
+mood-promise line under a honey highlighter; taste options and
+Load-more squared, ticks retired for the fill-is-the-signal rule;
+ContinueReading's SectionHeading re-dressed inside `.v2band` only —
+scoping matters, the track page's meaning card uses the same
+component at card scale.
+
+**Rejected:** sticker-board (no containers at all — loudest, worst
+scan order) and a sticky rail + shelves (most app-like, shrinks the
+hero). New tokens `--v2-honey` and `--v2-blue-soft`; the raw
+`#fde68a`s already in the sheet were folded into the token.
+
 ### D-127 — The offer shrinks to the stock, and the stock grows to the offer
 **Built 2026-08-31.** The owner's ruling, overturning D-120's
 offer-wider-than-stock: "if there are no music in the given

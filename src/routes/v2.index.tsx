@@ -129,9 +129,11 @@ function DiscoverV2() {
 					)}
 				</div>
 			) : (
-				<div className="v2disco__bento">
-					{/* The reader's answers, editable in place; Retake reopens
-					    the chat. The hidden-songs door back rides beside it. */}
+				<div className="v2disco__result">
+					{/* The reader's answers as STAMPS — mood rose, pull blue,
+					    familiarity honey, languages white, Retake black — each a
+					    mini card of its own, not v1's quiet pills. Retake reopens
+					    the chat; the hidden-songs door back rides beside them. */}
 					<section className="v2disco__filter">
 						<TasteChips
 							preferences={preferences}
@@ -158,59 +160,81 @@ function DiscoverV2() {
 						<SearchField trackTo="/v2/track/$trackId" />
 					</div>
 
-					<section className="v2panel">
-						<h2 className="v2disco__shelf-title">Deep dives</h2>
-						<p className="v2disco__shelf-lead">
-							Three from a catalogue we chose by hand. They change every time
-							you come back.
-						</p>
-						{dives.length > 0 ? (
-							<DeepDives
-								picks={dives}
-								preferences={preferences}
-								onShuffle={shuffle}
-								verdicts={{ isLiked, onLike: toggleLike, onHide: hide }}
-								trackTo="/v2/track/$trackId"
-							/>
-						) : (
-							<p className="v2disco__shelf-lead">
-								Nothing on our shelf is true to your answers yet — we would
-								rather leave it short than fill it with songs you did not ask
-								for. Search reaches every song, in every language.
+					{/* Full-bleed colour bands (owner's pick): each shelf is an
+					    edge-to-edge block in its own fill — white, honey, blue —
+					    Anton headline plus one sticker tag, the pink ground
+					    showing between them. The band IS how a v2 section
+					    announces itself; the white panels were v1's grammar. */}
+					<section className="v2band v2band--white">
+						<div className="v2band__inner">
+							<header className="v2band__head">
+								<h2 className="v2band__title">Deep dives</h2>
+								<span className="v2band__sticker" aria-hidden="true">
+									By hand
+								</span>
+							</header>
+							<p className="v2band__lead">
+								Three from our catalogue. They change every time you come back.
 							</p>
-						)}
+							{dives.length > 0 ? (
+								<DeepDives
+									picks={dives}
+									preferences={preferences}
+									onShuffle={shuffle}
+									verdicts={{ isLiked, onLike: toggleLike, onHide: hide }}
+									trackTo="/v2/track/$trackId"
+								/>
+							) : (
+								<p className="v2band__lead">
+									Nothing on our shelf is true to your answers yet — we would
+									rather leave it short than fill it with songs you did not ask
+									for. Search reaches every song, in every language.
+								</p>
+							)}
+						</div>
 					</section>
 
 					{also.length > 0 && (
-						<section className="v2panel">
-							<h2 className="v2disco__shelf-title">People also like</h2>
-							<AlsoLiked
-								picks={also}
-								art
-								onHide={hide}
-								trackTo="/v2/track/$trackId"
-							/>
-							{!alsoExhausted && (
-								<button
-									type="button"
-									className="v2disco__more"
-									onClick={() => setAlsoCount(alsoCount + 12)}
-								>
-									Load more
-								</button>
-							)}
+						<section className="v2band v2band--honey">
+							<div className="v2band__inner">
+								<header className="v2band__head">
+									<h2 className="v2band__title">People also like</h2>
+									<span className="v2band__sticker" aria-hidden="true">
+										Fresh daily
+									</span>
+								</header>
+								<AlsoLiked
+									picks={also}
+									art
+									onHide={hide}
+									trackTo="/v2/track/$trackId"
+								/>
+								{!alsoExhausted && (
+									<button
+										type="button"
+										className="v2disco__more"
+										onClick={() => setAlsoCount(alsoCount + 12)}
+									>
+										Load more
+									</button>
+								)}
+							</div>
 						</section>
 					)}
 
+					{/* A div, not a section — ContinueReading brings its own
+					    <section> and heading; the band restyles them in place. */}
 					{entries.length > 0 && (
-						<section className="v2panel">
-							<ContinueReading
-								entries={entries}
-								onRemove={remove}
-								onClear={clear}
-								trackTo="/v2/track/$trackId"
-							/>
-						</section>
+						<div className="v2band v2band--blue">
+							<div className="v2band__inner">
+								<ContinueReading
+									entries={entries}
+									onRemove={remove}
+									onClear={clear}
+									trackTo="/v2/track/$trackId"
+								/>
+							</div>
+						</div>
 					)}
 				</div>
 			)}
