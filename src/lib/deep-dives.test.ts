@@ -239,13 +239,21 @@ describe("taste (D-121)", () => {
 	});
 
 	it("liking pulls similar tracks forward in the wander", () => {
-		// Like two of the artist's songs; the third should surface — shared
-		// artist is the strongest thing "more like this" can mean.
+		// Like two of the artist's songs; the third should move UP — shared
+		// artist is the strongest thing "more like this" can mean. Rank
+		// against the tasteless ordering, not a fixed window: a growing
+		// catalogue kept pushing the track past whatever cutoff the test
+		// froze (this broke at 90 entries), while the claim under test is
+		// the movement, not the destination.
 		const liked = nepathya.slice(0, 2);
-		const picks = pickAlsoLiked(NONE, seed, [], 12, [], { liked });
-		expect(
-			picks.some((t) => t.artist === "Nepathya" && !liked.includes(t.lrclibId)),
-		).toBe(true);
+		const third = nepathya[2] as string;
+		const whole = CATALOGUE.length;
+		const without = pickAlsoLiked(NONE, seed, [], whole, [], {});
+		const withLikes = pickAlsoLiked(NONE, seed, [], whole, [], { liked });
+		const rank = (picks: typeof withLikes) =>
+			picks.findIndex((t) => t.lrclibId === third);
+		expect(rank(withLikes)).toBeGreaterThanOrEqual(0);
+		expect(rank(withLikes)).toBeLessThan(rank(without));
 	});
 
 	it("an answered mood still outranks every accumulated like", () => {
