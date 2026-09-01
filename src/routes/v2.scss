@@ -517,6 +517,13 @@
 			grid-template-columns: minmax(0, 65ch) minmax(20rem, 27rem);
 			gap: 3.5rem;
 		}
+
+		// The rail earns a second column at xl (owner's pick: side by
+		// side) — wide screens had this width sitting empty while the
+		// meaning card hid below the fold.
+		@include m.from("xl") {
+			grid-template-columns: minmax(0, 65ch) minmax(20rem, 48rem);
+		}
 	}
 
 	// The reading focus: bold, big, one measure (UX cards: 65–75ch line
@@ -590,6 +597,16 @@
 			position: sticky;
 			top: 1.25rem;
 		}
+
+		// From xl the rail is a two-column grid: the player spans the top,
+		// For you and What it means sit beside each other — everything on
+		// screen at once, which the stack could not give.
+		@include m.from("xl") {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			align-items: start;
+			gap: 1.25rem;
+		}
 	}
 
 	// A card of its own, one register quieter than the dock.
@@ -616,6 +633,14 @@
 			flex-direction: column;
 			flex: none;
 			max-height: 32rem;
+		}
+	}
+
+	// Alone — a search visit, where no For-you card renders — the meaning
+	// spans the xl rail's width rather than leaving a phantom column.
+	@include m.from("xl") {
+		section.v2read__meaning:only-of-type {
+			grid-column: 1 / -1;
 		}
 	}
 
@@ -684,6 +709,12 @@
 		position: sticky;
 		bottom: 0.75rem;
 		max-width: 42rem;
+
+		// In the xl two-column rail, the player heads BOTH columns.
+		@include m.from("xl") {
+			grid-column: 1 / -1;
+			max-width: none;
+		}
 
 		// A dock, not a ghost (owner's screenshot: the bar floated
 		// TRANSPARENT over the lyrics, its chrome painted in colours mixed
