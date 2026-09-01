@@ -1469,6 +1469,10 @@
 		color: var(--v2-black);
 	}
 
+	.chat__replies {
+		gap: 0.4rem;
+	}
+
 	.chat__bubble {
 		border: 2px solid var(--v2-black);
 		border-radius: 0.5rem;
@@ -1503,8 +1507,8 @@
 		background: var(--v2-card);
 		color: var(--v2-black);
 		font-weight: 600;
-		font-size: 0.85rem;
-		padding: 0.45rem 0.85rem;
+		font-size: 0.8rem;
+		padding: 0.35rem 0.75rem;
 
 		&:hover,
 		&:focus-visible {
@@ -1558,12 +1562,11 @@
 		}
 	}
 
+	// The fill IS the selected signal in v2 (rose), so the always-rendered
+	// ghost tick is pure width — seven language chips each paying for a
+	// mark the colour already gives (owner's review: pills too big).
 	.chat__tick {
-		color: var(--v2-black);
-	}
-
-	.chat__chip[data-selected] .chat__tick {
-		color: #fff;
+		display: none;
 	}
 
 	.chat__composer {

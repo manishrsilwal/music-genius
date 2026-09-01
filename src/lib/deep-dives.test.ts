@@ -550,9 +550,10 @@ describe("languages (D-120)", () => {
 	});
 
 	it("returns an empty shelf, not a substitution, for an unstocked language", () => {
-		// Korean, since the first blessing stocked Nepali the same day this
-		// test was written — may every language retire from this test.
-		const prefs = { ...NONE, languages: ["korean" as const] };
+		// Spanish, since the Punjabi/Korean harvest retired Korean from this
+		// test (Nepali retired at the first blessing) — may every language
+		// retire from it.
+		const prefs = { ...NONE, languages: ["spanish" as const] };
 		expect(pickDeepDives(prefs, seed)).toHaveLength(0);
 		expect(pickAlsoLiked(prefs, seed)).toHaveLength(0);
 	});
@@ -566,10 +567,14 @@ describe("languages (D-120)", () => {
 		const ordered = orderLanguagesByLocale(["ne-NP", "hi"]);
 		expect(ordered[0]?.value).toBe("nepali");
 		expect(ordered[1]?.value).toBe("hindi");
-		// Unmentioned languages keep the curated order behind them.
-		expect(orderLanguagesByLocale([]).map((o) => o.value)).toEqual([
-			...LANGUAGES,
-		]);
+		// Unmentioned languages keep the curated order behind them — and the
+		// offer holds ONLY stocked languages (D-127): every offered value has
+		// at least one track, and every stocked language is offered.
+		const offered = orderLanguagesByLocale([]).map((o) => o.value);
+		const stocked = LANGUAGES.filter((language) =>
+			CATALOGUE.some((track) => track.language === language),
+		);
+		expect(offered).toEqual(stocked);
 	});
 
 	it("parses languages off a query string, enum-checked and deduped", () => {

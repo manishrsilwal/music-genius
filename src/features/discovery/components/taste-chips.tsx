@@ -9,6 +9,7 @@ import {
 	MOOD_OPTIONS,
 	type Mood,
 	type Option,
+	offeredLanguageOptions,
 	type Preferences,
 	PULL_OPTIONS,
 	type Pull,
@@ -171,7 +172,7 @@ export function TasteChips({
 						transition={transition.editorial}
 					>
 						{open === "languages"
-							? LANGUAGE_OPTIONS.map((option) => {
+							? offeredLanguageOptions().map((option) => {
 									const selected = (preferences.languages ?? []).includes(
 										option.value,
 									);

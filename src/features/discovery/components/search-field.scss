@@ -57,7 +57,14 @@
 		inset-inline: 0;
 		top: calc(100% + 0.75rem);
 		z-index: var(--layer-autocomplete);
-		overflow: hidden;
+		// Twenty results now ride behind the fold of the panel (the owner's
+		// "Monster Skillet" test surfaced six near-identical cuts and no way
+		// past them): the list scrolls within itself, capped so the panel
+		// never swallows the page.
+		max-height: min(24rem, 60vh);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		scrollbar-width: thin;
 		border-radius: var(--radius-card);
 		@include m.floating;
 	}

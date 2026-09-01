@@ -15,9 +15,12 @@ async function search(
 	query: string,
 	signal?: AbortSignal,
 ): Promise<TrackSummary[]> {
-	const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
-		signal,
-	});
+	const response = await fetch(
+		`/api/search?q=${encodeURIComponent(query)}&limit=20`,
+		{
+			signal,
+		},
+	);
 	if (!response.ok) throw new Error("Search is unavailable right now");
 	return response.json();
 }

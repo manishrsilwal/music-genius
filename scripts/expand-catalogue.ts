@@ -140,13 +140,13 @@ for (const candidate of candidates) {
 	const label = `${candidate.title} — ${candidate.artist}`;
 
 	// The same enum discipline the app applies to everything untrusted.
-	const mood = (MOODS as readonly string[]).includes(candidate.mood);
-	const pull = (PULLS as readonly string[]).includes(candidate.pull);
-	const familiarity =
+	const moodOk = (MOODS as readonly string[]).includes(candidate.mood);
+	const pullOk = (PULLS as readonly string[]).includes(candidate.pull);
+	const familiarityOk =
 		(FAMILIARITIES as readonly string[]).includes(candidate.familiarity) &&
 		candidate.familiarity !== "surprise";
-	const era = candidate.era === "classic" || candidate.era === "modern";
-	if (!mood || !pull || !familiarity || !era) {
+	const eraOk = candidate.era === "classic" || candidate.era === "modern";
+	if (!moodOk || !pullOk || !familiarityOk || !eraOk) {
 		dropped.push(`${label}  (malformed axes)`);
 		continue;
 	}

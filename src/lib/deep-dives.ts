@@ -138,7 +138,13 @@ export const FAMILIARITY_OPTIONS: Option<Familiarity>[] = [
 ];
 
 /**
- * The offered languages, with the reader's own first (D-120).
+ * The offered languages, with the reader's own first (D-120) — and only
+ * languages the shelf actually STOCKS (D-127, the owner overturning
+ * D-120's offer-wider-than-stock ruling): a language whose every shelf is
+ * empty is a dead end wearing a button, and the honest empty state kept
+ * being read as a bug. The union type stays wider so old stored choices
+ * survive; the OFFER shrinks to what can be served, and grows on its own
+ * the day a language is blessed into the catalogue.
  *
  * "Priority based on location" without a location: `navigator.languages` is
  * the device's ORDERED list of preferred languages — no geolocation service,
@@ -156,7 +162,14 @@ export function orderLanguagesByLocale(
 		const hit = primaries.findIndex((tag) => option.tags.includes(tag));
 		return hit === -1 ? primaries.length : hit;
 	};
-	return [...LANGUAGE_OPTIONS].sort((a, b) => rank(a) - rank(b));
+	return offeredLanguageOptions().sort((a, b) => rank(a) - rank(b));
+}
+
+/** The offer, derived from stock — see the note above (D-127). */
+export function offeredLanguageOptions(): LanguageOption[] {
+	return LANGUAGE_OPTIONS.filter((option) =>
+		CATALOGUE.some((track) => track.language === option.value),
+	);
 }
 
 export interface Preferences {
