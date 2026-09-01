@@ -8,6 +8,7 @@ import {
 	type CardVariant,
 	cardMeasure,
 	cardTypeScale,
+	loudTypeScale,
 	themesFor,
 } from "@/lib/card";
 import { riseVariants, transition } from "@/lib/motion";
@@ -61,7 +62,11 @@ export function CardComposer({
 		return () => document.removeEventListener("keydown", onKey);
 	}, [onClose]);
 
-	const scale = cardTypeScale(lines, cardMeasure(variant, format));
+	// The loud card wraps, so it scales its own way (D-132); the classic
+	// keeps its no-wrap contract. Each preview shares its export's maths.
+	const scale = loud
+		? loudTypeScale(lines, cardMeasure("loud", format))
+		: cardTypeScale(lines, cardMeasure("classic", format));
 
 	/*
 	 * The preview keeps the export's aspect (D-018 covers shape too) but a
@@ -166,10 +171,12 @@ export function CardComposer({
 										border: `${cq(6)} solid ${theme.loud?.frame ?? "#0a0a0a"}`,
 										boxShadow: `${cq(8)} ${cq(8)} 0 ${theme.loud?.shadow ?? "#0a0a0a"}`,
 										padding: `${cq(12)} ${cq(30)}`,
-										fontFamily: "var(--font-ui)",
-										fontWeight: 500,
-										fontSize: cq(36),
-										letterSpacing: cq(7),
+										// The export's own faces: Anton for the brand —
+										// v2's pages load it, so the preview has it too.
+										fontFamily: '"Anton", "Arial Narrow", sans-serif',
+										fontWeight: 400,
+										fontSize: cq(40),
+										letterSpacing: cq(4),
 										textTransform: "uppercase",
 										transform: "rotate(-3deg)",
 									}}
@@ -192,6 +199,10 @@ export function CardComposer({
 										className="composer__line"
 										style={{
 											color: theme.ink,
+											// The export's line face — NOT var(--font-display),
+											// which the v2 scope points at Anton; the render
+											// sets lines in Epilogue 700 (D-018).
+											fontFamily: '"Epilogue", "Avenir Next", sans-serif',
 											fontWeight: 700,
 											fontSize: cq(scale.size),
 											lineHeight: scale.leading,

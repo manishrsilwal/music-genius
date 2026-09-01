@@ -14,6 +14,8 @@ import {
 	FULLWIDTH_ADVANCE_KR,
 	FULLWIDTH_ADVANCE_SC,
 	GLYPH_ADVANCE,
+	LOUD_FALLBACK_ADVANCE,
+	LOUD_GLYPH_ADVANCE,
 } from "./card-metrics";
 import type { Palette } from "./types";
 
@@ -308,12 +310,7 @@ export function cardMeasure(
  * the words ran off the bottom of the image — which nobody saw while those
  * same characters were still rendering as tofu.
  */
-function advanceOf(char: string): number {
-	const known = GLYPH_ADVANCE[char];
-	if (known !== undefined) return known;
-
-	const cp = char.codePointAt(0) ?? 0;
-
+function fullwidthAdvance(cp: number): number | null {
 	// Hangul syllables and jamo. Narrower than the ideographs, and measured
 	// from a face that carries no Hanja at all.
 	if ((cp >= 0xac00 && cp <= 0xd7a3) || (cp >= 0x1100 && cp <= 0x11ff)) {
@@ -336,7 +333,26 @@ function advanceOf(char: string): number {
 		return Math.max(FULLWIDTH_ADVANCE_JP, FULLWIDTH_ADVANCE_SC);
 	}
 
-	return FALLBACK_ADVANCE;
+	return null;
+}
+
+function advanceOf(char: string): number {
+	const known = GLYPH_ADVANCE[char];
+	if (known !== undefined) return known;
+	return fullwidthAdvance(char.codePointAt(0) ?? 0) ?? FALLBACK_ADVANCE;
+}
+
+/**
+ * The loud card's advance (D-132): Epilogue 700 for Latin — the measured
+ * table — and past Latin exactly what the classic uses, because the loud
+ * card falls back to the same companion faces per glyph.
+ */
+function loudAdvanceOf(char: string): number {
+	const loud = LOUD_GLYPH_ADVANCE[char];
+	if (loud !== undefined) return loud;
+	const companion = GLYPH_ADVANCE[char];
+	if (companion !== undefined) return companion;
+	return fullwidthAdvance(char.codePointAt(0) ?? 0) ?? LOUD_FALLBACK_ADVANCE;
 }
 
 /** Width of `text` at 1px, in em units. */
@@ -372,4 +388,81 @@ export function cardTypeScale(
 	const leading = size > 60 ? 1.32 : size > 48 ? 1.36 : 1.42;
 
 	return { size: Math.floor(size), leading };
+}
+
+/**
+ * The loud card's ceiling sits above the classic's: its face is a heavy
+ * condensed-adjacent sans and its whole grammar is a poster's, so a short
+ * selection is allowed to be a billboard.
+ */
+const LOUD_MAX_SIZE = 128;
+
+/** Tighter than the classic's — Epilogue 700 at poster size wants less air. */
+function loudLeading(size: number): number {
+	return size > 72 ? 1.16 : size > 48 ? 1.22 : 1.3;
+}
+
+/** Greedy word-wrap: how many rows `line` takes at `size` in `width` px. */
+function wrappedRows(line: string, size: number, width: number): number {
+	const words = line.split(/\s+/).filter(Boolean);
+	if (words.length === 0) return 1;
+	const space = loudAdvanceOf(" ") * size;
+
+	let rows = 1;
+	let used = 0;
+	for (const word of words) {
+		const w = measureEmLoud(word) * size;
+		const extended = used === 0 ? w : used + space + w;
+		if (extended <= width) {
+			used = extended;
+		} else {
+			rows += 1;
+			used = w;
+		}
+	}
+	return rows;
+}
+
+/** Width of `text` at 1px in the LOUD face's em units. */
+export function measureEmLoud(text: string): number {
+	let total = 0;
+	for (const char of text) total += loudAdvanceOf(char);
+	return total;
+}
+
+/**
+ * Type scale for the LOUD card (D-132, owner's report): the classic scale
+ * forbids wrapping — the line structure IS the writing — which floors one
+ * long line to tiny type. The loud card is a poster, and a poster wraps:
+ * size is the largest at which no single word overflows the measure and
+ * every selected line's wrapped rows still fit the height. Selected lines
+ * keep their own blocks; only within a line does the text flow.
+ *
+ * Walked downward a pixel at a time rather than solved in closed form:
+ * the row count is a step function of size, and the search is at most a
+ * hundred cheap iterations run once per keystroke-less modal.
+ */
+export function loudTypeScale(
+	lines: string[],
+	measure: { width: number; height: number },
+): { size: number; leading: number } {
+	const usable = measure.width * FIT_MARGIN;
+	const widestWordEm = lines
+		.flatMap((line) => line.split(/\s+/))
+		.filter(Boolean)
+		.reduce((max, word) => Math.max(max, measureEmLoud(word)), 0.001);
+
+	const fits = (size: number): boolean => {
+		if (widestWordEm * size > usable) return false;
+		let rows = 0;
+		for (const line of lines) {
+			rows += line.trim() ? wrappedRows(line, size, usable) : 1;
+		}
+		return rows * size * loudLeading(size) <= measure.height;
+	};
+
+	let size = LOUD_MAX_SIZE;
+	while (size > MIN_SIZE && !fits(size)) size -= 1;
+
+	return { size, leading: loudLeading(size) };
 }

@@ -21,6 +21,7 @@ import {
 	type CardVariant,
 	cardMeasure,
 	cardTypeScale,
+	loudTypeScale,
 } from "../lib/card";
 import { getRasteriser } from "../lib/og";
 import { detectLang } from "../lib/script";
@@ -39,6 +40,13 @@ import {
  */
 const DISPLAY_STACK = ["Fraunces", ...Object.keys(SCRIPT_FONTS)].join(", ");
 
+/**
+ * The loud card's line stack (D-132): Epilogue first — the v2 reading
+ * page's own face — then the same script companions, because a lyric line
+ * mixes scripts on the loud cut exactly as it does on the classic.
+ */
+const LOUD_STACK = ["Epilogue", ...Object.keys(SCRIPT_FONTS)].join(", ");
+
 type LoadedFont = {
 	name: string;
 	data: Buffer;
@@ -47,11 +55,15 @@ type LoadedFont = {
 };
 
 async function loadFonts(): Promise<LoadedFont[]> {
-	const [display, displayBold, ui] = await Promise.all([
-		readFile(BASE_FONTS.display),
-		readFile(BASE_FONTS.displayBold),
-		readFile(BASE_FONTS.ui),
-	]);
+	const [display, displayBold, ui, loudDisplay, loudText, loudTextMedium] =
+		await Promise.all([
+			readFile(BASE_FONTS.display),
+			readFile(BASE_FONTS.displayBold),
+			readFile(BASE_FONTS.ui),
+			readFile(BASE_FONTS.loudDisplay),
+			readFile(BASE_FONTS.loudText),
+			readFile(BASE_FONTS.loudTextMedium),
+		]);
 
 	const scripts = await Promise.all(
 		Object.entries(SCRIPT_FONTS).map(async ([name, file]) => ({
@@ -67,6 +79,9 @@ async function loadFonts(): Promise<LoadedFont[]> {
 		{ name: "Fraunces", data: displayBold, weight: 700, style: "normal" },
 		...scripts,
 		{ name: "Outfit", data: ui, weight: 500, style: "normal" },
+		{ name: "Anton", data: loudDisplay, weight: 400, style: "normal" },
+		{ name: "Epilogue", data: loudText, weight: 700, style: "normal" },
+		{ name: "Epilogue", data: loudTextMedium, weight: 500, style: "normal" },
 	];
 }
 
@@ -119,7 +134,11 @@ export async function renderCard({
 }: CardRequest): Promise<Uint8Array> {
 	const loud = variant === "loud";
 	const dims = CARD_DIMS[format];
-	const { size, leading } = cardTypeScale(lines, cardMeasure(variant, format));
+	// The loud card wraps and the classic never does (D-132): two scales,
+	// each shared verbatim with its preview.
+	const { size, leading } = loud
+		? loudTypeScale(lines, cardMeasure("loud", format))
+		: cardTypeScale(lines, cardMeasure("classic", format));
 
 	// Same detector the document's `lang` attribute uses (D-053), so the card
 	// and the page it was exported from resolve Han to the same regional
@@ -129,9 +148,8 @@ export async function renderCard({
 	const cjk = lang ? cjkFont(lang) : null;
 	const loaded = cjk ? await cjk : null;
 
-	const fontFamily = loaded
-		? `${DISPLAY_STACK}, ${loaded.name}`
-		: DISPLAY_STACK;
+	const stack = loud ? LOUD_STACK : DISPLAY_STACK;
+	const fontFamily = loaded ? `${stack}, ${loaded.name}` : stack;
 
 	/*
 	 * The lyric block, shared by both grammars: each line its own element —
@@ -173,7 +191,8 @@ export async function renderCard({
 		<div
 			style={{
 				display: "flex",
-				fontFamily: "Outfit",
+				fontFamily: loud ? "Epilogue" : "Outfit",
+				fontWeight: 500,
 				fontSize: 24,
 				letterSpacing: 3.4,
 				textTransform: "uppercase",
@@ -229,10 +248,11 @@ export async function renderCard({
 							border: `6px solid ${chrome.frame}`,
 							boxShadow: `8px 8px 0 ${chrome.shadow}`,
 							padding: "12px 30px",
-							fontFamily: "Outfit",
-							fontSize: 36,
-							fontWeight: 500,
-							letterSpacing: 7,
+							// The brand speaks Anton — the loud cut's own logo face.
+							fontFamily: "Anton",
+							fontSize: 40,
+							fontWeight: 400,
+							letterSpacing: 4,
 							textTransform: "uppercase",
 							transform: "rotate(-3deg)",
 						}}

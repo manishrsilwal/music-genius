@@ -20,6 +20,12 @@ export const BASE_FONTS = {
 	display: `${FONT_DIR}/fraunces/files/fraunces-latin-400-normal.woff`,
 	displayBold: `${FONT_DIR}/fraunces/files/fraunces-latin-700-normal.woff`,
 	ui: `${FONT_DIR}/outfit/files/outfit-latin-500-normal.woff`,
+	// The loud card's faces (D-132): the v2 cut's own voices, so the export
+	// matches the page the selection came from — Anton for the brand
+	// sticker, Epilogue at the reading page's weights for lines and credit.
+	loudDisplay: `${FONT_DIR}/anton/files/anton-latin-400-normal.woff`,
+	loudText: `${FONT_DIR}/epilogue/files/epilogue-latin-700-normal.woff`,
+	loudTextMedium: `${FONT_DIR}/epilogue/files/epilogue-latin-500-normal.woff`,
 } as const;
 
 /**

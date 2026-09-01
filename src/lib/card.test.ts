@@ -7,7 +7,9 @@ import {
 	cardThemes,
 	cardTypeScale,
 	loudThemes,
+	loudTypeScale,
 	measureEm,
+	measureEmLoud,
 	themeById,
 } from "./card";
 
@@ -230,5 +232,33 @@ describe("the loud card (D-132)", () => {
 			expect(story.width).toBe(square.width);
 			expect(story.height).toBeGreaterThan(square.height);
 		}
+	});
+
+	it("the loud scale wraps instead of shrinking (owner's story card)", () => {
+		// The classic must fit this line unwrapped and lands near its floor;
+		// the loud card is a poster, wraps, and gets to be one.
+		const line = ["I said, ooh, I'm drowning in the night"];
+		const classic = cardTypeScale(line, cardMeasure("classic", "story"));
+		const loud = loudTypeScale(line, cardMeasure("loud", "story"));
+		expect(loud.size).toBeGreaterThan(classic.size * 2);
+	});
+
+	it("the loud scale never lets one word overflow the measure", () => {
+		const measure = cardMeasure("loud", "square");
+		const word = "supercalifragilisticexpialidocious";
+		const { size } = loudTypeScale([word], measure);
+		expect(measureEmLoud(word) * size).toBeLessThanOrEqual(
+			measure.width * 0.97 + 1,
+		);
+	});
+
+	it("more selected text means smaller loud type", () => {
+		const measure = cardMeasure("loud", "square");
+		const short = loudTypeScale(["one line"], measure).size;
+		const long = loudTypeScale(
+			Array(6).fill("a much longer set of words in every line"),
+			measure,
+		).size;
+		expect(long).toBeLessThan(short);
 	});
 });

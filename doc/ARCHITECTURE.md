@@ -157,12 +157,28 @@ loader a visuals fetch.
 
 Geometry is priced, not eyeballed: the loud frame costs 130 a side
 against the classic's 104, plus the sticker row and credit — so
-`cardTypeScale` takes a measure argument and `LOUD_MEASURE`
-(820×640) bounds the lines. Preview and render share it, D-018's
-contract. The type still sets in the measured display faces (the
-advance table is cut for them); Anton on the card would need its own
-metrics run and is left for a future crop. v1's card is untouched —
-`variant` defaults classic everywhere, and the API allowlists.
+`cardTypeScale` takes a measure argument and the loud measure bounds
+the lines. Preview and render share it, D-018's contract. v1's card
+is untouched — `variant` defaults classic everywhere, and the API
+allowlists.
+
+Fourth round (owner's story export): the card still spoke v1 — lines
+in the display serif ("the font is not loading", fairly), and one
+38-character line floored near MIN_SIZE because the classic scale
+refuses to wrap. Two fixes. The loud card now sets its lines in
+**Epilogue 700** and its sticker in **Anton** — the v2 pages' own
+faces, served from fontsource woffs like every other card face — and
+the metrics generator gained a loud pass, so `LOUD_GLYPH_ADVANCE`
+measures Epilogue 700 the way the classic table measures the serif
+(past Latin both cards share the companion faces, so the classic
+table stays the truth there). And the loud card WRAPS: `loudTypeScale`
+walks down from a 128px poster ceiling to the largest size at which
+no word overflows and every line's greedy-wrapped rows fit the
+height — selected lines keep their own blocks, text flows within
+one. The classic's no-wrap contract is untouched; it is the line
+structure of the reading, where the loud card is a poster of it.
+Verified by rendering the owner's exact card server-side: 1080×1920,
+128px Epilogue, three wrapped rows.
 
 In scope CSS: v2's selection wash is honey (v1's lime belongs to the
 other cut), the selection tooltip is a tilted black chip with a rose

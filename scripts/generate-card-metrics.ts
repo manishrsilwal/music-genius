@@ -130,36 +130,59 @@ const WIDE_SOURCES = [
 	},
 ];
 
+/**
+ * The loud card's Latin face (D-132): its lines set in Epilogue 700 — the
+ * v2 reading page's own weight — whose advances differ enough from the
+ * display serif's that sharing a table would misfit every loud card.
+ * Latin only: past Latin the loud card falls back to the same companion
+ * faces as the classic, so their advances above stay the truth for both.
+ */
+const LOUD_SOURCE: Source = {
+	path: "node_modules/@fontsource/epilogue/files/epilogue-latin-700-normal.woff",
+	ranges: [[0x20, 0x7e]],
+};
+
 const OUT = "src/lib/card-metrics.ts";
 
-const widths: Record<string, number> = {};
-let total = 0;
-let counted = 0;
+async function measure(
+	sources: Source[],
+): Promise<{ widths: Record<string, number>; fallback: number }> {
+	const widths: Record<string, number> = {};
+	let total = 0;
+	let counted = 0;
 
-for (const source of SOURCES) {
-	const buffer = await readFile(source.path);
-	const font = opentype.parse(
-		buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
-	);
+	for (const source of sources) {
+		const buffer = await readFile(source.path);
+		const font = opentype.parse(
+			buffer.buffer.slice(
+				buffer.byteOffset,
+				buffer.byteOffset + buffer.byteLength,
+			),
+		);
 
-	for (const [start, end] of source.ranges) {
-		for (let code = start; code <= end; code++) {
-			const char = String.fromCodePoint(code);
-			const glyph = font.charToGlyph(char);
-			// index 0 is .notdef — the font has no such glyph.
-			if (!glyph || glyph.index === 0 || glyph.advanceWidth == null) continue;
+		for (const [start, end] of source.ranges) {
+			for (let code = start; code <= end; code++) {
+				const char = String.fromCodePoint(code);
+				const glyph = font.charToGlyph(char);
+				// index 0 is .notdef — the font has no such glyph.
+				if (!glyph || glyph.index === 0 || glyph.advanceWidth == null)
+					continue;
 
-			const width = glyph.advanceWidth / font.unitsPerEm;
-			widths[char] = Number(width.toFixed(4));
-			if (width > 0) {
-				total += width;
-				counted++;
+				const width = glyph.advanceWidth / font.unitsPerEm;
+				widths[char] = Number(width.toFixed(4));
+				if (width > 0) {
+					total += width;
+					counted++;
+				}
 			}
 		}
 	}
+
+	return { widths, fallback: Number((total / counted).toFixed(4)) };
 }
 
-const fallback = Number((total / counted).toFixed(4));
+const { widths, fallback } = await measure(SOURCES);
+const loud = await measure([LOUD_SOURCE]);
 
 /**
  * Measure one uniform advance per CJK face, and refuse to emit a constant that
@@ -233,6 +256,15 @@ export const FULLWIDTH_ADVANCE_SC = ${wide.FULLWIDTH_ADVANCE_SC};
 export const FULLWIDTH_ADVANCE_KR = ${wide.FULLWIDTH_ADVANCE_KR};
 
 export const GLYPH_ADVANCE: Record<string, number> = ${JSON.stringify(widths, null, 0)};
+
+/**
+ * The loud card's Latin face — Epilogue 700, the v2 reading weight
+ * (D-132). Latin only: beyond it the loud card shares the classic's
+ * companion faces, so GLYPH_ADVANCE stays the truth for both.
+ */
+export const LOUD_FALLBACK_ADVANCE = ${loud.fallback};
+
+export const LOUD_GLYPH_ADVANCE: Record<string, number> = ${JSON.stringify(loud.widths, null, 0)};
 `;
 
 await Bun.write(OUT, body);
