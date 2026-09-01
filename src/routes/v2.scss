@@ -581,10 +581,14 @@
 		gap: 1.25rem;
 		min-width: 0;
 
+		// No viewport cap (owner's third call): squeezing both cards into
+		// 100dvh left their contents unreadable. The rail scrolls with the
+		// page now; sticky stays for the short-song case where it still
+		// fits, and the player card's own sticky-bottom keeps the controls
+		// on screen when it does not.
 		@include m.from("lg") {
 			position: sticky;
 			top: 1.25rem;
-			max-height: calc(100dvh - 2.5rem);
 		}
 	}
 
@@ -603,12 +607,15 @@
 		padding-inline-end: 0.375rem;
 	}
 
+	// A reading height, not a viewport share (owner's third call): the
+	// two cards stand equal at a size the words can breathe in, and a
+	// longer text scrolls inside its body past it.
 	@include m.from("lg") {
 		&__meaning {
 			display: flex;
 			flex-direction: column;
-			flex: 1;
-			min-height: 0;
+			flex: none;
+			height: 32rem;
 		}
 	}
 
