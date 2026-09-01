@@ -198,7 +198,7 @@ function ReadV2() {
 					  person to claim it about.
 					*/}
 					{insightState !== "unavailable" && insight?.resonance && (
-						<section className="v2read__meaning v2read__meaning--you">
+						<section className="v2read__meaning">
 							<h2 className="v2read__meaning-title">For you</h2>
 							<div className="v2read__meaning-body">
 								{insight.resonance.lines.map((line) => (

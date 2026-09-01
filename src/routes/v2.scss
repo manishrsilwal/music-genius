@@ -654,17 +654,11 @@
 		}
 	}
 
-	// "For you" is its own card above the meaning now (owner's call) —
-	// same cloth as __meaning, but it must not GROW: the meaning card is
-	// the rail's flex:1, and two greedy cards would split the leftover
-	// height and stretch a three-line note over dead space. It may still
-	// SHRINK (flex-basis auto, min-height 0) so a long resonance scrolls
-	// inside its body instead of pushing the meaning card off the rail.
-	@include m.from("lg") {
-		&__meaning--you {
-			flex: 0 1 auto;
-		}
-	}
+	// "For you" and "What it means" split the rail as EQUALS (owner's
+	// second call — the content-hugging card read as way too small): both
+	// carry __meaning's flex: 1 with a zero basis, so the two cards stand
+	// at the same height whatever their contents weigh, and each body
+	// scrolls inside itself.
 
 	// The reader's own lines, marked the way the sung line is — the same
 	// grammar meaning the same thing.
