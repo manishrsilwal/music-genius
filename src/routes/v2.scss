@@ -1736,16 +1736,51 @@
 		color: var(--v2-black);
 	}
 
+	// The status line leaves the flow (owner's screenshot: it held the
+	// flyout ~2rem away from the input). Absolute keeps the announcement
+	// for screen readers without reserving the gap; the panel hugs the
+	// field the way a flyout should.
+	.search output {
+		position: absolute;
+		top: calc(100% + 0.2rem);
+		inset-inline-start: 1.1rem;
+		margin: 0;
+		height: auto;
+	}
+
 	.search__results {
+		top: calc(100% + 0.6rem);
 		border: var(--v2-border);
 		box-shadow: var(--v2-shadow);
 		background: var(--v2-card);
 		border-radius: 0;
 	}
 
-	.search__option[data-highlighted],
+	// "true" matters: the attribute renders on EVERY row, false included —
+	// the bare selector painted the whole panel honey (owner's screenshot).
+	.search__option[data-highlighted="true"],
 	.search__option:hover {
 		background: #fde68a;
+	}
+
+	// A missing cover is a drawn slot, not a broken image (owner's
+	// screenshot: bare wells read as failed loads): white box, black
+	// border, and a note glyph where art never arrived — some LRCLIB
+	// uploads simply have no cover anywhere.
+	.search__thumb {
+		background: var(--v2-card);
+		border: 2px solid var(--v2-black);
+		border-radius: 0.25rem;
+		display: grid;
+		place-items: center;
+
+		&:empty::after {
+			content: "♪";
+			font-size: 1.1rem;
+			font-weight: 700;
+			color: var(--v2-black);
+			opacity: 0.4;
+		}
 	}
 
 	// — Continue reading rows —
