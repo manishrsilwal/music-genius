@@ -1730,12 +1730,30 @@
 		text-transform: uppercase;
 	}
 
-	// The shuffle slot keeps its dashed not-a-card outline, but speaks the
-	// same button language as Load more and Clear (owner's consistency
-	// report) — black, 800, uppercase, honey on hover.
+	// The shuffle leaves the grid (owner's call, D-129 second round): in v2
+	// every band ends on ONE action in the same register — Load more,
+	// Clear — and this is Deep dives'. The ghost slot read as a broken
+	// fourth card against the loud grid. The slot spans the row so the
+	// button lands BELOW the cards; v1 keeps its D-097 ghost card — this
+	// is scope CSS, the shared component is untouched.
+	.dives__slot:has(> .dives__more) {
+		grid-column: 1 / -1;
+		justify-self: start;
+	}
+
 	.dives__more {
-		border: 3px dashed var(--v2-black);
-		border-radius: 0.5rem;
+		display: inline-flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.5rem;
+		width: max-content;
+		height: auto;
+		min-height: 0;
+		padding: 0.5rem 1.2rem;
+		border: 2px solid var(--v2-black);
+		border-radius: 0;
+		box-shadow: 3px 3px 0 var(--v2-black);
+		background: var(--v2-card);
 		color: var(--v2-black);
 		font-weight: 800;
 		font-size: 0.8rem;
@@ -1745,7 +1763,15 @@
 		&:hover,
 		&:focus-visible {
 			border-color: var(--v2-black);
-			background: var(--v2-honey);
+			background: var(--v2-blue);
+			color: #fff;
+			translate: -1px -1px;
+			box-shadow: 4px 4px 0 var(--v2-black);
+		}
+
+		&:active {
+			translate: 1px 1px;
+			box-shadow: 2px 2px 0 var(--v2-black);
 		}
 	}
 
@@ -1780,20 +1806,44 @@
 	}
 
 	// — People also like rows —
-	.also__row {
+	// The card is the ITEM, not the link (owner's report, D-129 second
+	// round): the also shelf drew its border on the link and left the
+	// remove chip floating outside, while continue reading drew it on the
+	// row and kept the chip inside. One anatomy now — the inside one —
+	// so the border wraps link and remove together on both shelves.
+	.also__item {
 		border: 2px solid var(--v2-black);
 		border-radius: 0.5rem;
 		background: var(--v2-card);
 		box-shadow: 2px 2px 0 var(--v2-black);
+		padding-inline-end: 0.5rem;
+		gap: 0.5rem;
 		transition:
 			translate 0.15s ease,
 			box-shadow 0.15s ease;
 
-		&:hover {
-			background: var(--v2-card);
+		&:hover,
+		&:focus-within {
 			translate: -1px -1px;
 			box-shadow: 3px 3px 0 var(--v2-black);
 		}
+
+		@include m.reduced-motion {
+			transition: none;
+
+			&:hover {
+				translate: none;
+			}
+		}
+	}
+
+	// The link inside sheds the chrome the item now carries; the base's
+	// soft hover wash stays — it marks the link's own half of the card.
+	.also__row {
+		border: 0;
+		box-shadow: none;
+		border-radius: 0.5rem 0 0 0.5rem;
+		background: transparent;
 	}
 
 	.also {

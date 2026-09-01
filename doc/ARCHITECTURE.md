@@ -147,11 +147,23 @@ same mark, not just same box. The chip is under 44px, so both get
 the tap-target mixin's invisible finger pad (the also chip never had
 it; its old 2.75rem min-height was doing that job by accident).
 
-Named in the same breath: "Show me different picks" was the last
-control speaking rose-underline v1 — it keeps its dashed
-not-a-card outline (it IS a different thing: a slot that re-deals,
-not a card that opens) but now speaks the Load-more/Clear button
-language: black, 800, uppercase, honey hover.
+Second round, owner's screenshot of the chips in place: the also
+shelf's chip floated OUTSIDE its card while continue reading's sat
+inside — both shelves dodge button-in-anchor with sibling elements,
+but v1 drew the card chrome on different ones (the also shelf on the
+link, reading on the row wrapper), and the re-point carried both
+answers through. Owner's ruling: inside. In v2 the card chrome moves
+to `.also__item` so the border wraps link and remove together;
+the link sheds its own border and keeps only the soft hover wash.
+
+Same round, "Show me different picks": the D-097 ghost card read as
+a broken fourth slot against the loud grid. Owner's ruling of three
+options: every v2 band ends on ONE action button in the Load-more /
+Clear register, and the shuffle is Deep dives'. Done in scope CSS —
+`.dives__slot:has(> .dives__more)` spans the grid row so the button
+lands below the cards — the shared component is untouched and v1
+keeps its ghost card, exactly the trackTo-era contract: shared
+brains, per-cut clothes.
 
 ### D-128 — The result page stops wearing v1's skeleton
 **Built 2026-09-01.** The owner's review of the personalised Discover
