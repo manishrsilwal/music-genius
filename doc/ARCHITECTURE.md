@@ -134,6 +134,21 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-133 — The lyrics learn to follow the voice
+**Built 2026-09-01.** The owner's ask, with Spotify's lyric view as
+the reference: while the music plays, the current line alone should
+stand out and the rest recede. Adopted in v2's ink with one addition
+the reference does not make: the dim exists ONLY while genuinely
+following. Three registers by opacity — sung lines at 0.3, the
+coming lines at 0.55, the current line full on its rose marker —
+gated by a `data-following` attribute that requires playing AND a
+synced position AND no manual-scroll hold. Pause, lose sync, or
+scroll away to read, and every line returns to full ink within a
+beat: a reading product never greys its own text under a reader.
+The manual hold already existed as a ref for the auto-scroll; it is
+mirrored into state so the dim can lift with it, on the same 4s
+clock. v2 only — v1's canvas keeps its own quieter treatment.
+
 ### D-132 — The lyric card learns to shout
 **Built 2026-09-01.** The owner's report: selecting lyrics in v2 gave
 no card, "which was in v1" — and the card "must follow the funky

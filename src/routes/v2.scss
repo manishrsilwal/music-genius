@@ -557,6 +557,7 @@
 		transition:
 			background-color 0.2s ease,
 			color 0.2s ease,
+			opacity 0.3s ease,
 			rotate 0.2s ease;
 
 		// The current line, in the accent — the style card's hard-edged
@@ -576,6 +577,24 @@
 				rotate: 0deg;
 			}
 		}
+	}
+
+	// The karaoke registers (D-133): Spotify's grammar in v2's ink, and
+	// ONLY while genuinely following — the [data-following] gate drops on
+	// pause, lost sync, or a manual-scroll hold, and every line returns to
+	// full ink; a reading product never greys its text under a reader.
+	// Three voices: sung lines step far back, the current line stands full
+	// on its rose mark, and what's coming waits at half voice.
+	&__lines[data-following] &__line {
+		opacity: 0.55;
+	}
+
+	&__lines[data-following] &__line[data-sung] {
+		opacity: 0.3;
+	}
+
+	&__lines[data-following] &__line[data-active] {
+		opacity: 1;
 	}
 
 	// The rail (owner's request): player, then the meaning right under it.

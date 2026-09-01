@@ -4,7 +4,7 @@ import {
 	defer,
 	notFound,
 } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useRecordVisit } from "@/features/discovery/hooks/use-history";
 import { usePreferences } from "@/features/discovery/hooks/use-preferences";
@@ -76,20 +76,50 @@ function ReadV2() {
 	/*
 	 * Follow the song unless the reader just took the wheel — the same
 	 * contract v1's canvas keeps, in one timestamp instead of a hook: any
-	 * wheel/touch/key scroll pauses following for a beat.
+	 * wheel/touch/key scroll pauses following for a beat. Mirrored into
+	 * state as well (D-133): the karaoke dim below has to LIFT during the
+	 * hold, and a ref alone cannot re-render the page.
 	 */
 	const lastManual = useRef(0);
+	const [manualHold, setManualHold] = useState(false);
 	useEffect(() => {
+		let timer: ReturnType<typeof setTimeout> | undefined;
 		const note = () => {
 			lastManual.current = Date.now();
+			setManualHold(true);
+			clearTimeout(timer);
+			timer = setTimeout(() => setManualHold(false), MANUAL_HOLD_MS);
 		};
 		window.addEventListener("wheel", note, { passive: true });
 		window.addEventListener("touchmove", note, { passive: true });
 		return () => {
+			clearTimeout(timer);
 			window.removeEventListener("wheel", note);
 			window.removeEventListener("touchmove", note);
 		};
 	}, []);
+
+	/*
+	 * The karaoke registers (D-133, owner's ask, Spotify's grammar in v2's
+	 * ink): while the song PLAYS and the lines are synced, what was sung
+	 * steps back, the current line stands full, what's coming waits at
+	 * half voice. The dim exists only while genuinely following — paused,
+	 * unsynced, or during a manual-scroll hold, the page is a book again;
+	 * a reading product must never grey its own text while someone reads.
+	 */
+	const [playing, setPlaying] = useState(false);
+	const lineOrder = useMemo(() => {
+		const map = new Map<string, number>();
+		let at = 0;
+		track.stanzas.forEach((stanza, s) => {
+			stanza.lines.forEach((line, l) => {
+				if (line.text.trim().length > 0) map.set(lineKey(s, l), at++);
+			});
+		});
+		return map;
+	}, [track]);
+	const activeAt = position ? (lineOrder.get(position.key) ?? -1) : -1;
+	const following = playing && activeAt >= 0 && !manualHold;
 
 	const reduce = useRef(false);
 	useEffect(() => {
@@ -122,7 +152,10 @@ function ReadV2() {
 			  lg the player returns to the bottom of the screen, compact.
 			*/}
 			<div className="v2read__grid">
-				<div className="v2read__lines">
+				<div
+					className="v2read__lines"
+					data-following={following || undefined}
+				>
 					{track.stanzas.map((stanza, s) => (
 						<div key={stanza.id} className="contents">
 							{s > 0 && (
@@ -135,6 +168,11 @@ function ReadV2() {
 										id={`v2line-${lineKey(s, l)}`}
 										className="v2read__line"
 										data-active={position?.key === lineKey(s, l) || undefined}
+										data-sung={
+											(activeAt >= 0 &&
+												(lineOrder.get(lineKey(s, l)) ?? 0) < activeAt) ||
+											undefined
+										}
 									>
 										{line.text}
 									</p>
@@ -180,6 +218,7 @@ function ReadV2() {
 									synced={track.synced}
 									lyricsDuration={track.duration}
 									onSyncChange={setPosition}
+									onPlayingChange={setPlaying}
 								/>
 							}
 						>
@@ -194,6 +233,7 @@ function ReadV2() {
 									synced={track.synced}
 									lyricsDuration={track.duration}
 									onSyncChange={setPosition}
+									onPlayingChange={setPlaying}
 								/>
 							)}
 						</Await>
