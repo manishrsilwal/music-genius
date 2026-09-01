@@ -7,6 +7,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 import { useRecordVisit } from "@/features/discovery/hooks/use-history";
+import { usePreferences } from "@/features/discovery/hooks/use-preferences";
 import { useInsights } from "@/features/insights/hooks/use-insights";
 import { PlaybackBar } from "@/features/playback/components/playback-bar";
 import { type LinePosition, lineKey } from "@/lib/lrc";
@@ -59,6 +60,14 @@ function ReadV2() {
 	// The meaning (owner's review: it was missing from v2 entirely) — the
 	// same engine as v1's drawer, worn as a panel after the words.
 	const { state: insightState, insight } = useInsights(track.id);
+	// Whether a personal reading is COMING, known before the model answers:
+	// the insight request asks for the resonance slot exactly when one of
+	// these three is stated (languages don't drive a personal reading), so
+	// the For-you card can appear at once and load like its neighbour.
+	const { preferences } = usePreferences();
+	const personal = Boolean(
+		preferences.mood || preferences.pull || preferences.familiarity,
+	);
 	// The same reading trail v1 keeps (D-126): this visit joins Continue
 	// reading, and the shelves push what was read to the back.
 	useRecordVisit({ id: track.id, title: track.title, artist: track.artist });
@@ -191,22 +200,42 @@ function ReadV2() {
 
 					{/*
 					  "For you" is its own card, cut from the meaning card's
-					  cloth and seated above it (owner's call). It gates
-					  itself: resonance is null when the reader has stated no
-					  preferences, so someone who arrived by search alone
-					  simply never sees it — no personal claim without a
-					  person to claim it about.
+					  cloth (owner's call) — and it LIVES like it too (owner's
+					  follow-up): gated on the reader being personal, which the
+					  stored answers say before the model does, so the card
+					  stands with a working line from the first paint instead
+					  of popping in when the API lands. A search visitor with
+					  no answers still never sees it.
 					*/}
-					{insightState !== "unavailable" && insight?.resonance && (
+					{insightState !== "unavailable" && personal && (
 						<section className="v2read__meaning">
 							<h2 className="v2read__meaning-title">For you</h2>
 							<div className="v2read__meaning-body">
-								{insight.resonance.lines.map((line) => (
-									<p key={line} className="v2read__meaning-line">
-										{line}
+								{insightState === "generating" && (
+									<p className="v2read__meaning-p">Reading it your way…</p>
+								)}
+								{insightState === "failed" && (
+									<p className="v2read__meaning-p">
+										Your reading didn't load this time.
 									</p>
-								))}
-								<p className="v2read__meaning-p">{insight.resonance.text}</p>
+								)}
+								{insightState === "ready" && !insight?.resonance && (
+									<p className="v2read__meaning-p">
+										No personal reading came through this time.
+									</p>
+								)}
+								{insight?.resonance && (
+									<>
+										{insight.resonance.lines.map((line) => (
+											<p key={line} className="v2read__meaning-line">
+												{line}
+											</p>
+										))}
+										<p className="v2read__meaning-p">
+											{insight.resonance.text}
+										</p>
+									</>
+								)}
 							</div>
 						</section>
 					)}
