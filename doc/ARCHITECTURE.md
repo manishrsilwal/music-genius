@@ -156,6 +156,14 @@ wash — the same language the selection highlight speaks, so "this
 text responds" reads consistently. v2's page only; the bar prop is
 inert for v1 until its canvas chooses to wire it.
 
+Second round (owner): no affordance before the player can honour
+it. The bar gained `onReadyChange`, reporting the ACTIVE source's
+readiness — switching players reports false again until the new one
+stands up, and an unavailable recording never reports true. Until
+it does, the lines carry no pointer, no hover, no handler: a line
+that looks clickable while YouTube or Spotify is still loading is a
+promise the tap silently breaks.
+
 ### D-133 — The lyrics learn to follow the voice
 **Built 2026-09-01.** The owner's ask, with Spotify's lyric view as
 the reference: while the music plays, the current line alone should

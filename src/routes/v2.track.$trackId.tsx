@@ -133,8 +133,15 @@ function ReadV2() {
 		seconds: number;
 		nonce: number;
 	} | null>(null);
+	/*
+	 * No affordance before the player can honour it (owner's second round):
+	 * while YouTube or Spotify is still standing up, a clickable-looking
+	 * line is a promise the tap would silently break. The bar reports its
+	 * ACTIVE source's readiness; until then the lines are just text.
+	 */
+	const [playerReady, setPlayerReady] = useState(false);
 	const jumpToLine = (time: number | null) => {
-		if (time == null) return;
+		if (time == null || !playerReady) return;
 		const selection = window.getSelection();
 		if (selection && !selection.isCollapsed) return;
 		setJumpTo({ seconds: time, nonce: Date.now() });
@@ -186,7 +193,8 @@ function ReadV2() {
 										className="v2read__line"
 										data-active={position?.key === lineKey(s, l) || undefined}
 										data-jumpable={
-											(track.synced && line.time != null) || undefined
+											(track.synced && playerReady && line.time != null) ||
+											undefined
 										}
 										data-sung={
 											(activeAt >= 0 &&
@@ -243,6 +251,7 @@ function ReadV2() {
 									onSyncChange={setPosition}
 									onPlayingChange={setPlaying}
 									jumpTo={jumpTo}
+									onReadyChange={setPlayerReady}
 								/>
 							}
 						>
@@ -259,6 +268,7 @@ function ReadV2() {
 									onSyncChange={setPosition}
 									onPlayingChange={setPlaying}
 									jumpTo={jumpTo}
+									onReadyChange={setPlayerReady}
 								/>
 							)}
 						</Await>

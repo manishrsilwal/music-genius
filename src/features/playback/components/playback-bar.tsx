@@ -35,6 +35,7 @@ export function PlaybackBar({
 	onSyncChange,
 	onPlayingChange,
 	jumpTo,
+	onReadyChange,
 }: {
 	/** Null while the lookup is still running, and null if it found nothing. */
 	videoId: string | null;
@@ -77,6 +78,14 @@ export function PlaybackBar({
 	 * view does.
 	 */
 	jumpTo?: { seconds: number; nonce: number } | null;
+	/**
+	 * Whether the ACTIVE player can take commands right now (D-134, second
+	 * round): the page withholds the tap-to-play affordance until this says
+	 * so — a line that looks clickable while the player is still loading
+	 * is a promise the tap silently breaks. Tracks the chosen source:
+	 * switching players reports false again until the new one stands up.
+	 */
+	onReadyChange?: (ready: boolean) => void;
 }) {
 	const mountRef = useRef<HTMLDivElement>(null);
 	const spotifyMountRef = useRef<HTMLDivElement>(null);
@@ -158,6 +167,12 @@ export function PlaybackBar({
 		seek(jumpTo.seconds);
 		if (!playing) toggle();
 	}, [jumpTo?.nonce]);
+
+	// The active player's readiness, reported upward (D-134 second round)
+	// so the page only offers tap-to-play once a tap would actually land.
+	useEffect(() => {
+		onReadyChange?.(ready && !unavailable);
+	}, [ready, unavailable, onReadyChange]);
 
 	const syncing = synced && playing && desire;
 	const { manual, resume } = useManualOverride(syncing);
