@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 
 import {
 	CARD_SIZE,
+	type CardFormat,
 	type CardTheme,
 	type CardVariant,
+	cardMeasure,
 	cardTypeScale,
-	LOUD_MEASURE,
 	themesFor,
 } from "@/lib/card";
 import { riseVariants, transition } from "@/lib/motion";
@@ -47,6 +48,7 @@ export function CardComposer({
 	const loud = variant === "loud";
 	const themes = themesFor(variant, palette);
 	const [theme, setTheme] = useState<CardTheme>(themes[0] as CardTheme);
+	const [format, setFormat] = useState<CardFormat>("square");
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -59,9 +61,22 @@ export function CardComposer({
 		return () => document.removeEventListener("keydown", onKey);
 	}, [onClose]);
 
-	const scale = loud
-		? cardTypeScale(lines, LOUD_MEASURE)
-		: cardTypeScale(lines);
+	const scale = cardTypeScale(lines, cardMeasure(variant, format));
+
+	/*
+	 * The preview keeps the export's aspect (D-018 covers shape too) but a
+	 * 9:16 tower at the panel's full width would not fit a screen — so the
+	 * story preview narrows and centres, and cqw keeps every ratio true at
+	 * the smaller width.
+	 */
+	const previewShape =
+		format === "story"
+			? {
+					aspectRatio: "9 / 16",
+					width: "min(15rem, 70%)",
+					marginInline: "auto" as const,
+				}
+			: undefined;
 
 	async function download() {
 		setBusy(true);
@@ -77,6 +92,7 @@ export function CardComposer({
 					themeId: theme.id,
 					palette,
 					variant,
+					format,
 				}),
 			});
 			if (!response.ok) throw new Error("Render failed");
@@ -85,7 +101,7 @@ export function CardComposer({
 			const url = URL.createObjectURL(blob);
 			const anchor = document.createElement("a");
 			anchor.href = url;
-			anchor.download = `${title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-lyric-card.png`;
+			anchor.download = `${title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-lyric-card${format === "story" ? "-story" : ""}.png`;
 			anchor.click();
 			// Revoke on the next tick; revoking synchronously can cancel the save.
 			setTimeout(() => URL.revokeObjectURL(url), 1000);
@@ -126,6 +142,7 @@ export function CardComposer({
 						style={{
 							background: theme.loud?.ground ?? "#fff1f2",
 							padding: cq(48),
+							...previewShape,
 						}}
 						aria-hidden="true"
 					>
@@ -192,7 +209,7 @@ export function CardComposer({
 				) : (
 					<div
 						className="composer__preview"
-						style={{ background: theme.background }}
+						style={{ background: theme.background, ...previewShape }}
 						// The preview is a picture of the export, not content to read twice.
 						aria-hidden="true"
 					>
@@ -225,6 +242,30 @@ export function CardComposer({
 						</span>
 					</div>
 				)}
+
+				<div>
+					<p className="mb-3 text-micro uppercase tracking-label text-ink-faint">
+						Format
+					</p>
+					<div className="composer__formats">
+						<button
+							type="button"
+							className="composer__format"
+							aria-pressed={format === "square"}
+							onClick={() => setFormat("square")}
+						>
+							Square
+						</button>
+						<button
+							type="button"
+							className="composer__format"
+							aria-pressed={format === "story"}
+							onClick={() => setFormat("story")}
+						>
+							Story · 9:16
+						</button>
+					</div>
+				</div>
 
 				<div>
 					<p className="mb-3 text-micro uppercase tracking-label text-ink-faint">

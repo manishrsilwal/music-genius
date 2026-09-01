@@ -181,6 +181,17 @@ so every card looks lifted off a Refrain page. Chrome lives on the
 theme, not derived at render time — preview and export read the
 same object and cannot disagree (D-018 again).
 
+Third round: two SHAPES (owner's ask) — square (1080, feeds) and
+story (1080×1920, 9:16). Width stays 1080 in both, so every
+width-relative ratio (the preview's cqw sizing included) holds
+across formats, and the rasteriser's fit-to-width brings the
+story's height along for free. `cardMeasure(variant, format)`
+generalises the line-box arithmetic — its square numbers are
+locked by test to the constants the classic card always used — and
+both variants of both cuts get both shapes; the story preview
+narrows and centres so a 9:16 tower fits the composer. The API
+allowlists the format the way it does the variant.
+
 ### D-131 — The timeline gets a row of its own
 **Built 2026-09-01.** The owner's screenshot of the rail player:
 "the player track is small." Not a styling bug — arithmetic. The v2

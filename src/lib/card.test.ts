@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	CARD_DIMS,
 	CARD_SIZE,
+	cardMeasure,
 	cardThemes,
 	cardTypeScale,
-	LOUD_MEASURE,
 	loudThemes,
 	measureEm,
 	themeById,
@@ -204,8 +205,30 @@ describe("the loud card (D-132)", () => {
 		// The loud panel's frame and sticker cost room; type sized for the
 		// classic measure would overflow it.
 		const lines = ["a fairly long line of lyric words here"];
-		expect(cardTypeScale(lines, LOUD_MEASURE).size).toBeLessThanOrEqual(
-			cardTypeScale(lines).size,
+		expect(
+			cardTypeScale(lines, cardMeasure("loud", "square")).size,
+		).toBeLessThanOrEqual(cardTypeScale(lines).size);
+	});
+
+	it("the square measures are exactly the classic constants", () => {
+		// cardMeasure generalises what the card has always done — the square
+		// numbers must not have moved in the generalisation.
+		expect(cardMeasure("classic", "square")).toEqual({
+			width: CONTENT_WIDTH,
+			height: CONTENT_HEIGHT,
+		});
+	});
+
+	it("the story stands 9:16 and gives the lines its extra height", () => {
+		expect(CARD_DIMS.story.width / CARD_DIMS.story.height).toBeCloseTo(
+			9 / 16,
+			2,
 		);
+		for (const variant of ["classic", "loud"] as const) {
+			const square = cardMeasure(variant, "square");
+			const story = cardMeasure(variant, "story");
+			expect(story.width).toBe(square.width);
+			expect(story.height).toBeGreaterThan(square.height);
+		}
 	});
 });

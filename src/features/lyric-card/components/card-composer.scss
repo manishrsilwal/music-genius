@@ -59,6 +59,41 @@
 		letter-spacing: 0.315cqw; // 3.4 / 1080
 	}
 
+	// The card's shape: square for feeds, 9:16 for a story. Two named
+	// options rather than swatches — a shape has a name, a gradient does not.
+	&__formats {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	&__format {
+		flex: 1;
+		padding: 0.55rem 0.9rem;
+		border-radius: var(--radius-pill);
+		border: 1px solid var(--color-hairline);
+		font-family: var(--font-ui);
+		font-size: var(--text-caption);
+		color: var(--color-ink-muted);
+		transition:
+			color 0.18s var(--ease-editorial),
+			border-color 0.18s var(--ease-editorial);
+		@include m.press;
+
+		&:hover {
+			color: var(--color-ink);
+		}
+
+		&[aria-pressed="true"] {
+			border-color: var(--color-ink);
+			color: var(--color-ink);
+			font-weight: 600;
+		}
+
+		@include m.reduced-motion {
+			transition: none;
+		}
+	}
+
 	&__themes {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);

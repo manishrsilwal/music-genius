@@ -14,11 +14,13 @@ import { readFile } from "node:fs/promises";
 import satori from "satori";
 
 import {
+	CARD_DIMS,
 	CARD_SIZE,
+	type CardFormat,
 	type CardTheme,
 	type CardVariant,
+	cardMeasure,
 	cardTypeScale,
-	LOUD_MEASURE,
 } from "../lib/card";
 import { getRasteriser } from "../lib/og";
 import { detectLang } from "../lib/script";
@@ -103,6 +105,8 @@ export interface CardRequest {
 	theme: CardTheme;
 	/** Which cut's grammar the card wears (D-132). Classic when omitted. */
 	variant?: CardVariant;
+	/** Square for feeds, story for the 9:16 canvas. Square when omitted. */
+	format?: CardFormat;
 }
 
 export async function renderCard({
@@ -111,11 +115,11 @@ export async function renderCard({
 	artist,
 	theme,
 	variant = "classic",
+	format = "square",
 }: CardRequest): Promise<Uint8Array> {
 	const loud = variant === "loud";
-	const { size, leading } = loud
-		? cardTypeScale(lines, LOUD_MEASURE)
-		: cardTypeScale(lines);
+	const dims = CARD_DIMS[format];
+	const { size, leading } = cardTypeScale(lines, cardMeasure(variant, format));
 
 	// Same detector the document's `lang` attribute uses (D-053), so the card
 	// and the page it was exported from resolve Han to the same regional
@@ -262,11 +266,13 @@ export async function renderCard({
 			</div>
 		),
 		{
-			width: CARD_SIZE,
-			height: CARD_SIZE,
+			width: dims.width,
+			height: dims.height,
 			fonts: loaded ? [...(await fonts()), loaded] : await fonts(),
 		},
 	);
 
+	// fitTo width: the height follows the SVG's own aspect, so the story's
+	// 1920 comes along without a second knob.
 	return getRasteriser().toPng(svg, CARD_SIZE);
 }

@@ -262,13 +262,36 @@ const FIT_MARGIN = 0.97;
 const LEADING_MAX = 1.42;
 
 /**
- * The loud card's measure (D-132). Its ground margin (48), panel border
- * (10) and panel padding (72) cost 130 a side against the classic's 104,
- * and the sticker row and credit take vertical room the classic spends on
- * nothing — so the lines get their own, smaller box. Shared by the
- * preview and the render, the same D-018 contract as the classic.
+ * The card's shape (owner's ask): square for feeds — Instagram's native
+ * 1080 — and story for the 9:16 canvas an Instagram story fills. Width
+ * stays 1080 in both, so every width-relative ratio (the preview's cqw
+ * sizing included) holds across formats.
  */
-export const LOUD_MEASURE = { width: 820, height: 640 };
+export type CardFormat = "square" | "story";
+
+export const CARD_DIMS: Record<CardFormat, { width: number; height: number }> =
+	{
+		square: { width: CARD_SIZE, height: CARD_SIZE },
+		story: { width: CARD_SIZE, height: 1920 },
+	};
+
+/**
+ * The box the LINES must fit, by grammar and shape (D-132). Classic
+ * spends 104 a side plus the credit's 92; loud spends 130 a side (48
+ * ground + 10 frame + 72 padding) plus 180 for the sticker row and
+ * credit. One function, shared by preview and render — the D-018
+ * contract — and the square numbers are exactly the constants the
+ * classic card has always used.
+ */
+export function cardMeasure(
+	variant: CardVariant,
+	format: CardFormat,
+): { width: number; height: number } {
+	const dims = CARD_DIMS[format];
+	return variant === "loud"
+		? { width: dims.width - 260, height: dims.height - 260 - 180 }
+		: { width: dims.width - 208, height: dims.height - 208 - 92 };
+}
 
 /**
  * Advance of one character, in em (D-057).

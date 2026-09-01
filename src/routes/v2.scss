@@ -2339,6 +2339,25 @@
 		}
 	}
 
+	.composer__format {
+		border: 2px solid var(--v2-black);
+		border-radius: 0;
+		background: var(--v2-card);
+		color: var(--v2-black);
+		font-weight: 700;
+
+		&:hover {
+			background: var(--v2-honey);
+			color: var(--v2-black);
+		}
+
+		&[aria-pressed="true"] {
+			border-color: var(--v2-black);
+			background: var(--v2-rose);
+			color: #fff;
+		}
+	}
+
 	.composer__go {
 		border: 2px solid var(--v2-black);
 		border-radius: 0;
