@@ -180,6 +180,13 @@ structure of the reading, where the loud card is a poster of it.
 Verified by rendering the owner's exact card server-side: 1080×1920,
 128px Epilogue, three wrapped rows.
 
+Fifth round: the selection snap overruled. PRD §3.4's hook took every
+touched line WHOLE — drag half a line, get the full line on the card.
+The owner's report reverses it: the line structure survives (each
+touched line stays its own entry) but the first and last are clamped
+to the selection's own boundaries, so the card carries exactly the
+words the reader chose. Applies to both cuts — the hook is shared.
+
 In scope CSS: v2's selection wash is honey (v1's lime belongs to the
 other cut), the selection tooltip is a tilted black chip with a rose
 drop, and the composer wears the house border/shadow/squared kit.

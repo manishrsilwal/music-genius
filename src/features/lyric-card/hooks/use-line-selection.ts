@@ -3,13 +3,14 @@ import { useCallback, useEffect, useState } from "react";
 import { MAX_LINES } from "@/lib/card";
 
 /**
- * Detects a lyric selection and snaps it to whole lines (PRD §3.4).
+ * Detects a lyric selection and keeps its LINE STRUCTURE (PRD §3.4).
  *
- * The reader drags across text, but a card is built from lines, not from
- * characters. Rather than take the raw selected string — which would clip
- * mid-word and lose the line structure — we find every line ELEMENT the range
- * touches and take those lines whole. Dragging halfway through a line still
- * yields that entire line.
+ * The reader drags across text, and a card is built from lines: we find
+ * every line ELEMENT the range touches so each stays its own entry. Within
+ * the first and last of them, the text is clamped to what was actually
+ * selected — taking touched lines whole turned a half-line drag into full
+ * lines on the card (the owner's report), which put words on the export
+ * the reader deliberately left out.
  *
  * Works for long-press too: on touch, a long-press produces a native selection,
  * so both interactions land here without separate handling.
@@ -72,8 +73,28 @@ export function useLineSelection(scope: SelectionScope = DEFAULT_SCOPE): {
 				range.intersectsNode(line),
 			);
 
+			/*
+			 * Each line's text, CLAMPED to the selection (owner's report:
+			 * "I only selected these text, but the card shows the whole
+			 * lines"). The original snap took every touched line whole; now
+			 * the lines still arrive as separate entries — the structure the
+			 * card is built from survives — but the first and last carry
+			 * only the words the reader actually chose.
+			 */
 			const lines = touched
-				.map((line) => line.textContent?.trim() ?? "")
+				.map((line) => {
+					const lineRange = document.createRange();
+					lineRange.selectNodeContents(line);
+					if (
+						lineRange.compareBoundaryPoints(Range.START_TO_START, range) < 0
+					) {
+						lineRange.setStart(range.startContainer, range.startOffset);
+					}
+					if (lineRange.compareBoundaryPoints(Range.END_TO_END, range) > 0) {
+						lineRange.setEnd(range.endContainer, range.endOffset);
+					}
+					return lineRange.toString().trim();
+				})
 				.filter((text) => text.length > 0);
 
 			if (lines.length === 0 || lines.length > MAX_LINES) {
