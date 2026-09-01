@@ -776,12 +776,18 @@
 		// neither competes with playing the song.
 		.playback:not([data-docked]) {
 			grid-template-columns: auto minmax(0, 1fr) auto;
+			// The timeline gets a row of its OWN (owner's report, D-131): on
+			// one line with the toggle and the video chip, a ~28rem rail
+			// left it a hundred-pixel sliver — the one control a reader
+			// drags, squeezed by two it only glances at. Full width on top,
+			// the classic player grammar.
 			// The status sits BETWEEN the switch and the sync it points at
 			// (owner's review: "manual scroll" floated alone mid-card, a
 			// warning divorced from its remedy). One foot row: the switch
 			// opens it, the words explain, sync closes it.
 			grid-template-areas:
-				"toggle scrub video"
+				"scrub scrub scrub"
+				"toggle . video"
 				"switch meta sync";
 			align-items: center;
 			max-width: none;
@@ -925,8 +931,52 @@
 			}
 		}
 
+		// The timeline in costume (D-131): the base's 4px grey hairline is
+		// v1's whisper. Here it is a track in the card's own grammar —
+		// bordered, squared, rose fill on muted — and tall enough to be
+		// GRABBED, not aimed at. The thumb keeps the base's manner
+		// (hidden until reached for) but arrives as a bordered square.
 		.playback__seek {
 			accent-color: var(--v2-rose);
+			height: 1.25rem;
+
+			@mixin v2-seek-track {
+				height: 0.6rem;
+				border: 2px solid var(--v2-black);
+				border-radius: 0;
+				background: linear-gradient(
+					to right,
+					var(--v2-rose) var(--progress, 0%),
+					var(--v2-muted) var(--progress, 0%)
+				);
+			}
+
+			@mixin v2-seek-thumb {
+				width: 1.1rem;
+				height: 1.1rem;
+				border: 2px solid var(--v2-black);
+				border-radius: 0;
+				background: var(--v2-card);
+			}
+
+			&::-webkit-slider-runnable-track {
+				@include v2-seek-track;
+			}
+
+			&::-moz-range-track {
+				@include v2-seek-track;
+			}
+
+			&::-webkit-slider-thumb {
+				@include v2-seek-thumb;
+				// Centre on the bordered track: content 0.6rem plus 4px of
+				// border, against a 1.1rem thumb.
+				margin-top: calc((0.6rem + 4px - 1.1rem) / 2);
+			}
+
+			&::-moz-range-thumb {
+				@include v2-seek-thumb;
+			}
 		}
 
 		.playback__time,

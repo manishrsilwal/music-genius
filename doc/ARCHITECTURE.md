@@ -134,6 +134,26 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-131 — The timeline gets a row of its own
+**Built 2026-09-01.** The owner's screenshot of the rail player:
+"the player track is small." Not a styling bug — arithmetic. The v2
+map put toggle, timeline and video chip on one row; in a ~28rem rail
+the toggle (3.4rem) and the YouTube chip (8rem, D-109's floor for
+YT's own chrome) eat the ends, and the one control a reader DRAGS
+was left a hundred-pixel sliver between its own time labels. Rows
+are re-dealt: the timeline takes a full-width row on top — the
+classic player grammar, and v1's own base layout — with the toggle
+and chip below it, the settings foot row unchanged.
+
+With the room, the costume: the base's 4px grey hairline is v1's
+whisper, so in v2 the track is 0.6rem, black-bordered, squared, rose
+fill over muted — grabbed, not aimed at. The thumb keeps the base's
+manner (hidden until reached for) but arrives as a bordered square.
+The "Switch to Spotify" link vs the SYNC pill on the foot row was
+looked at and left: the register gap is the earlier one-decision-
+per-row ruling doing its job — a quiet mode link should not dress
+like a stateful control.
+
 ### D-130 — The shuffle deals new cards, not the same hand
 **Built 2026-09-01.** The owner's report: "Show me different picks
 just reshuffles the position of the cards instead of showing
