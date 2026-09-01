@@ -134,6 +134,37 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-127 — The offer shrinks to the stock, and the stock grows to the offer
+**Built 2026-08-31.** The owner's ruling, overturning D-120's
+offer-wider-than-stock: "if there are no music in the given
+languages, please do not suggest those languages" — the honest empty
+state kept being read as a bug, twice now. The offered language list
+(the chat's step, the taste panel, v2's chips) is DERIVED from
+catalogue stock everywhere via `offeredLanguageOptions()`; the
+`Language` union stays wide so stored choices survive, and the offer
+grows on its own the day a language is blessed. The unstocked-language
+empty-shelf behaviour remains for readers whose stored choice predates
+the shrink.
+
+The same message ordered the stock grown: "add the musics for the
+languages: Eng, Nep, Hindi, Punjabi, Korean" — the explicit owner's
+hand D-120's contract requires. English, Hindi and Nepali were already
+stocked; the D-120 pipeline harvested and this commit blesses
+**8 Punjabi and 10 Korean** entries (two passes each planned; the
+second Korean pass died on an LRCLIB 503 mid-verification and is
+retried separately). Yield stayed harvest-honest: 18 kept of 42
+proposed — LRCLIB's synced coverage, not the model's imagination, is
+the gate. One tag is an editorial read rather than the tagger's: the
+pipeline's lyric fetch failed on Whalien 52, so its mood (longing,
+also defiant — a whale singing to be heard) was read by hand, the
+same D-121 process the owner blessed for the original 53.
+
+Alongside: search depth (the client now asks the API for its full 20
+and the flyout scrolls within itself at 60vh — the owner's "Monster
+Skillet" test dead-ended at six near-identical cuts), and the v2
+chat's ghost ticks retired (the rose fill is the selected signal;
+seven chips each paid width for a mark the colour already gave).
+
 ### D-126 — v2 gets v1's flow, not just its surfaces
 **Built 2026-08-31.** The owner's ruling on the loud cut: "I like
 this design but the functionality is nowhere near v1 — implement
