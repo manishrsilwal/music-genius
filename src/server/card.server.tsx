@@ -181,11 +181,19 @@ export async function renderCard({
 	);
 
 	/*
-	 * The loud card (D-132): v2's grammar, verbatim — a white panel with a
-	 * hard black frame and offset shadow on a flat bright ground, the brand
-	 * a tilted rose sticker with its own black border and drop. The geometry
-	 * here (48 margin + 10 border + 72 padding) is what LOUD_MEASURE prices.
+	 * The loud card (D-132, recut on the owner's second ruling): the theme
+	 * paints the PANEL — the card's own body — and the ink, credit and
+	 * sticker come re-derived from the same theme; the ground under it is
+	 * the product's constant warm canvas. The geometry (48 margin + 10
+	 * border + 72 padding) is what LOUD_MEASURE prices.
 	 */
+	const chrome = theme.loud ?? {
+		ground: "#fff1f2",
+		frame: "#0a0a0a",
+		shadow: "#0a0a0a",
+		sticker: "#e11d48",
+		stickerInk: "#ffffff",
+	};
 	const loudCard = (
 		<div
 			style={{
@@ -193,7 +201,7 @@ export async function renderCard({
 				width: "100%",
 				height: "100%",
 				padding: 48,
-				background: theme.background,
+				background: chrome.ground,
 			}}
 		>
 			<div
@@ -202,9 +210,9 @@ export async function renderCard({
 					flexDirection: "column",
 					justifyContent: "space-between",
 					flexGrow: 1,
-					background: "#ffffff",
-					border: "10px solid #0a0a0a",
-					boxShadow: "18px 18px 0 #0a0a0a",
+					background: theme.background,
+					border: `10px solid ${chrome.frame}`,
+					boxShadow: `18px 18px 0 ${chrome.shadow}`,
 					padding: 72,
 				}}
 			>
@@ -212,10 +220,10 @@ export async function renderCard({
 					<div
 						style={{
 							display: "flex",
-							background: "#e11d48",
-							color: "#ffffff",
-							border: "6px solid #0a0a0a",
-							boxShadow: "8px 8px 0 #0a0a0a",
+							background: chrome.sticker,
+							color: chrome.stickerInk,
+							border: `6px solid ${chrome.frame}`,
+							boxShadow: `8px 8px 0 ${chrome.shadow}`,
 							padding: "12px 30px",
 							fontFamily: "Outfit",
 							fontSize: 36,

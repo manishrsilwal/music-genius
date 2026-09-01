@@ -168,6 +168,19 @@ In scope CSS: v2's selection wash is honey (v1's lime belongs to the
 other cut), the selection tooltip is a tilted black chip with a rose
 drop, and the composer wears the house border/shadow/squared kit.
 
+Second round (owner's card in hand): the treatment tinted the thin
+outer margin while the panel stayed white — "the card bg itself
+should change instead of the surface it is in." Recut: `background`
+IS the panel fill now (white / honey / rose / black), and each theme
+ships its full chrome — ink and credit picked for contrast on that
+fill (black credit on rose: a pale tint fails at credit size; warm
+brown on honey), the sticker in a colourway that pops against it
+(rose/white on white and black, black/honey on honey, white/rose on
+rose). The ground is the one constant: the product's warm canvas,
+so every card looks lifted off a Refrain page. Chrome lives on the
+theme, not derived at render time — preview and export read the
+same object and cannot disagree (D-018 again).
+
 ### D-131 — The timeline gets a row of its own
 **Built 2026-09-01.** The owner's screenshot of the rail player:
 "the player track is small." Not a styling bug — arithmetic. The v2

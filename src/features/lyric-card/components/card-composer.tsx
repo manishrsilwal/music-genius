@@ -119,10 +119,14 @@ export function CardComposer({
 			>
 				{loud ? (
 					// The loud preview mirrors the loud render (D-132): same
-					// 48/10/72 geometry, expressed as cqw of the square.
+					// 48/10/72 geometry, expressed as cqw of the square. The
+					// theme paints the PANEL; the chrome re-derives from it.
 					<div
 						className="composer__preview"
-						style={{ background: theme.background, padding: cq(48) }}
+						style={{
+							background: theme.loud?.ground ?? "#fff1f2",
+							padding: cq(48),
+						}}
 						aria-hidden="true"
 					>
 						<div
@@ -131,19 +135,19 @@ export function CardComposer({
 								display: "flex",
 								flexDirection: "column",
 								justifyContent: "space-between",
-								background: "#ffffff",
-								border: `${cq(10)} solid #0a0a0a`,
-								boxShadow: `${cq(18)} ${cq(18)} 0 #0a0a0a`,
+								background: theme.background,
+								border: `${cq(10)} solid ${theme.loud?.frame ?? "#0a0a0a"}`,
+								boxShadow: `${cq(18)} ${cq(18)} 0 ${theme.loud?.shadow ?? "#0a0a0a"}`,
 								padding: cq(72),
 							}}
 						>
 							<div style={{ display: "flex" }}>
 								<span
 									style={{
-										background: "#e11d48",
-										color: "#ffffff",
-										border: `${cq(6)} solid #0a0a0a`,
-										boxShadow: `${cq(8)} ${cq(8)} 0 #0a0a0a`,
+										background: theme.loud?.sticker ?? "#e11d48",
+										color: theme.loud?.stickerInk ?? "#ffffff",
+										border: `${cq(6)} solid ${theme.loud?.frame ?? "#0a0a0a"}`,
+										boxShadow: `${cq(8)} ${cq(8)} 0 ${theme.loud?.shadow ?? "#0a0a0a"}`,
 										padding: `${cq(12)} ${cq(30)}`,
 										fontFamily: "var(--font-ui)",
 										fontWeight: 500,

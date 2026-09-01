@@ -45,6 +45,19 @@ export interface CardTheme {
 	background: string;
 	ink: string;
 	muted: string;
+	/**
+	 * The loud card's chrome (D-132, second round). Only loud themes carry
+	 * it: the treatment paints the PANEL — the card's own body — and the
+	 * sticker and frame re-derive per fill, while the ground under the
+	 * panel stays the product's one warm surface.
+	 */
+	loud?: {
+		ground: string;
+		frame: string;
+		shadow: string;
+		sticker: string;
+		stickerInk: string;
+	};
 }
 
 /**
@@ -106,32 +119,75 @@ export function cardThemes(palette: Palette | null): CardTheme[] {
 export type CardVariant = "classic" | "loud";
 
 /**
- * The loud card's grounds — v2's own surfaces (pink canvas, honey, soft
- * blue). Ink and muted are fixed: the words always sit on the white
- * panel, so legibility never depends on the ground behind it.
+ * The loud card's treatments (owner's second ruling): the swatch changes
+ * the CARD — `background` is the panel fill, the dominant surface — and
+ * every other colour re-derives from it: ink and credit for contrast on
+ * that fill, the sticker in a colourway that pops against it. The ground
+ * under the panel is the one thing that never changes: the product's own
+ * warm canvas, so the card always looks lifted off a Refrain page.
  */
 export function loudThemes(): CardTheme[] {
+	const ground = "#fff1f2";
 	return [
 		{
-			id: "loud-pink",
-			label: "Pink ground",
-			background: "#fff1f2",
+			id: "loud-white",
+			label: "White card",
+			background: "#ffffff",
 			ink: "#0a0a0a",
 			muted: "#475569",
+			loud: {
+				ground,
+				frame: "#0a0a0a",
+				shadow: "#0a0a0a",
+				sticker: "#e11d48",
+				stickerInk: "#ffffff",
+			},
 		},
 		{
 			id: "loud-honey",
-			label: "Honey ground",
+			label: "Honey card",
 			background: "#fde68a",
 			ink: "#0a0a0a",
-			muted: "#475569",
+			// Warm brown, not slate: the credit has to read as part of the
+			// honey world, and still clears the fill by a wide margin.
+			muted: "#78350f",
+			loud: {
+				ground,
+				frame: "#0a0a0a",
+				shadow: "#0a0a0a",
+				sticker: "#0a0a0a",
+				stickerInk: "#fde68a",
+			},
 		},
 		{
-			id: "loud-blue",
-			label: "Blue ground",
-			background: "#dbeafe",
-			ink: "#0a0a0a",
-			muted: "#475569",
+			id: "loud-rose",
+			label: "Rose card",
+			background: "#e11d48",
+			ink: "#ffffff",
+			// Black, not a pale rose: at credit size a tint fails contrast
+			// on this fill; black clears it and stays in the palette.
+			muted: "#0a0a0a",
+			loud: {
+				ground,
+				frame: "#0a0a0a",
+				shadow: "#0a0a0a",
+				sticker: "#ffffff",
+				stickerInk: "#e11d48",
+			},
+		},
+		{
+			id: "loud-black",
+			label: "Black card",
+			background: "#0a0a0a",
+			ink: "#ffffff",
+			muted: "#fda4af",
+			loud: {
+				ground,
+				frame: "#0a0a0a",
+				shadow: "#0a0a0a",
+				sticker: "#e11d48",
+				stickerInk: "#ffffff",
+			},
 		},
 	];
 }

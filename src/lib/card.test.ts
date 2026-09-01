@@ -180,11 +180,17 @@ describe("cardThemes", () => {
 });
 
 describe("the loud card (D-132)", () => {
-	it("offers three grounds, every one with fixed black ink", () => {
+	it("offers four panel fills, each carrying its full chrome recipe", () => {
 		const themes = loudThemes();
-		expect(themes).toHaveLength(3);
+		expect(themes).toHaveLength(4);
 		for (const theme of themes) {
-			expect(theme.ink).toBe("#0a0a0a");
+			// The treatment paints the PANEL (owner's second ruling), and
+			// every dependent colour ships with it — nothing derives at
+			// render time, so preview and export cannot disagree.
+			expect(theme.loud).toBeDefined();
+			expect(theme.loud?.ground).toBe("#fff1f2");
+			expect(theme.loud?.sticker).toBeTruthy();
+			expect(theme.loud?.stickerInk).toBeTruthy();
 		}
 	});
 
