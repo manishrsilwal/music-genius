@@ -7,13 +7,23 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { V2Error } from "@/components/v2-route-message";
+import { ReadNext } from "@/features/discovery/components/read-next";
+import {
+	TrackVersions,
+	VariantNotice,
+} from "@/features/discovery/components/track-versions";
 import { useRecordVisit } from "@/features/discovery/hooks/use-history";
 import { usePreferences } from "@/features/discovery/hooks/use-preferences";
 import { useInsights } from "@/features/insights/hooks/use-insights";
 import { CardAffordance } from "@/features/lyric-card/components/card-affordance";
 import { PlaybackBar } from "@/features/playback/components/playback-bar";
 import { type LinePosition, lineKey } from "@/lib/lrc";
-import { getTrackFn, getTrackPlaybackFn } from "@/server/lyrics.functions";
+import { detectLang } from "@/lib/script";
+import {
+	getSiteOriginFn,
+	getTrackFn,
+	getTrackPlaybackFn,
+} from "@/server/lyrics.functions";
 
 /**
  * v2 Lyrics view (D-125): the reading focus. Large bold lines, the current
@@ -27,24 +37,61 @@ import { getTrackFn, getTrackPlaybackFn } from "@/server/lyrics.functions";
 
 export const Route = createFileRoute("/v2/track/$trackId")({
 	loader: async ({ params }) => {
-		const track = await getTrackFn({ data: { id: params.trackId } });
+		const [track, origin] = await Promise.all([
+			getTrackFn({ data: { id: params.trackId } }),
+			getSiteOriginFn(),
+		]);
 		if (!track) throw notFound();
 		const playback = defer(
 			getTrackPlaybackFn({
 				data: { title: track.title, artist: track.artist },
 			}),
 		);
-		return { track, playback };
+		return { track, playback, origin };
 	},
-	head: ({ loaderData }) => ({
-		meta: [
-			{
-				title: loaderData
-					? `${loaderData.track.title} — ${loaderData.track.artist} · Refrain v2`
-					: "Not in the library",
-			},
-		],
-	}),
+	head: ({ loaderData, params }) => {
+		if (!loaderData) return { meta: [{ title: "Not in the library" }] };
+		const { title, artist, synced } = loaderData.track;
+		const description = synced
+			? `Read the lyrics to ${title} by ${artist}, synced line by line to the song.`
+			: `Read the lyrics to ${title} by ${artist}, set to be read — not skimmed.`;
+		return {
+			/*
+			 * Canonical points at the V1 page (D-136): the two cuts serve the
+			 * same words at two URLs while the owner decides between them, and
+			 * a crawler should treat v2 as another door to the same room — not
+			 * duplicate content.
+			 */
+			links: [
+				{
+					rel: "canonical",
+					href: `${loaderData.origin}/track/${encodeURIComponent(params.trackId)}`,
+				},
+			],
+			meta: [
+				{ title: `${title} — ${artist} · Refrain v2` },
+				{ name: "description", content: description },
+				/*
+				 * The same social card v1 ships (D-051, ported in D-136): a
+				 * shared /v2 link previews as a set lyric card rather than a
+				 * bare URL. Absolute, because crawlers drop relative og URLs.
+				 */
+				{ property: "og:type", content: "article" },
+				{ property: "og:title", content: `${title} — ${artist} · Lyrics` },
+				{ property: "og:description", content: description },
+				{
+					property: "og:image",
+					content: `${loaderData.origin}/api/og?trackId=${encodeURIComponent(params.trackId)}`,
+				},
+				{ property: "og:image:width", content: "1080" },
+				{ property: "og:image:height", content: "1080" },
+				{
+					property: "og:image:alt",
+					content: `Lyrics from ${title} by ${artist}`,
+				},
+			],
+		};
+	},
 	component: ReadV2,
 	// Caught HERE so the failure renders inside the v2 layout (D-135).
 	errorComponent: V2Error,
@@ -181,6 +228,17 @@ function ReadV2() {
 		});
 	}, [position?.key]);
 
+	/*
+	 * The lyric's own language on the lyric's own element (D-053, ported in
+	 * D-136): without it a screen reader pronounces 봄날 as English. On the
+	 * LINES container, not the page — the chrome around them is English.
+	 */
+	const script = detectLang(
+		track.stanzas
+			.flatMap((stanza) => stanza.lines.map((line) => line.text))
+			.join(" "),
+	);
+
 	return (
 		<main>
 			<header className="v2read__head">
@@ -195,7 +253,11 @@ function ReadV2() {
 			  lg the player returns to the bottom of the screen, compact.
 			*/}
 			<div className="v2read__grid">
-				<div className="v2read__lines" data-following={following || undefined}>
+				<div
+					className="v2read__lines"
+					lang={script ?? undefined}
+					data-following={following || undefined}
+				>
 					{track.stanzas.map((stanza, s) => (
 						<div key={stanza.id} className="contents">
 							{s > 0 && (
@@ -363,6 +425,36 @@ function ReadV2() {
 												<cite>— {insight.quote.attribution}</cite>
 											</blockquote>
 										)}
+										{/*
+										  The trust apparatus, ported from v1's drawer
+										  (D-136): the numbered sources the synthesis
+										  was grounded in, and the honest caveat when
+										  it was written without any.
+										*/}
+										{insight.sources.length > 0 && (
+											<div className="v2read__meaning-sources">
+												<p className="v2read__meaning-sources-label">Sources</p>
+												<ol>
+													{insight.sources.map((source) => (
+														<li key={source.url}>
+															<a
+																href={source.url}
+																target="_blank"
+																rel="noreferrer"
+															>
+																{source.title}
+															</a>
+														</li>
+													))}
+												</ol>
+											</div>
+										)}
+										{insight.ungrounded && (
+											<p className="v2read__meaning-ungrounded">
+												Written without sources — read it as one interpretation,
+												not the record.
+											</p>
+										)}
 									</>
 								)}
 							</div>
@@ -370,6 +462,25 @@ function ReadV2() {
 					)}
 				</aside>
 			</div>
+
+			{/*
+			  The foot (D-136, closing the audit's gaps): where to go when the
+			  song ends (D-076 — an offer, not a queue) and the reader's way
+			  out of a wrong recording (OD-028), with the variant caveat said
+			  plainly when this IS an alternate cut. At the words' end on
+			  purpose — both are for someone who has finished, or noticed the
+			  lines not lining up, and neither happens before reading.
+			*/}
+			<footer className="v2read__foot">
+				<VariantNotice title={track.title} />
+				<ReadNext currentId={track.id} trackTo="/v2/track/$trackId" />
+				<TrackVersions
+					trackId={track.id}
+					title={track.title}
+					artist={track.artist}
+					trackTo="/v2/track/$trackId"
+				/>
+			</footer>
 
 			{/*
 			  Selection → card, v1's flow in v2's clothes (owner's report: it

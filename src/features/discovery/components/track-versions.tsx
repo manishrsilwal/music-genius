@@ -29,10 +29,13 @@ export function TrackVersions({
 	trackId,
 	title,
 	artist,
+	trackTo = "/track/$trackId",
 }: {
 	trackId: string;
 	title: string;
 	artist: string;
+	/** Which track route a version opens — v2 passes its own (D-126). */
+	trackTo?: "/track/$trackId" | "/v2/track/$trackId";
 }) {
 	const { data } = useQuery({
 		queryKey: ["versions", title.toLowerCase(), artist.toLowerCase()],
@@ -62,7 +65,7 @@ export function TrackVersions({
 				{others.map((item) => (
 					<li key={item.id}>
 						<Link
-							to="/track/$trackId"
+							to={trackTo}
 							params={{ trackId: item.id }}
 							className="versions__row"
 						>

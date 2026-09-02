@@ -609,6 +609,59 @@
 		opacity: 1;
 	}
 
+	// Sources and the honesty caveat inside the meaning card (D-136): the
+	// same trust apparatus v1's drawer carries, at the card's own scale.
+	&__meaning-sources {
+		margin-top: 1rem;
+		padding-top: 0.8rem;
+		border-top: 2px solid var(--v2-black);
+
+		ol {
+			margin: 0;
+			padding-inline-start: 1.2rem;
+			display: grid;
+			gap: 0.3rem;
+		}
+
+		a {
+			font-size: 0.78rem;
+			font-weight: 600;
+			color: var(--v2-blue);
+			text-decoration: underline;
+			text-underline-offset: 0.2em;
+
+			&:hover {
+				color: var(--v2-rose);
+			}
+		}
+	}
+
+	&__meaning-sources-label {
+		margin: 0 0 0.4rem;
+		font-family: var(--v2-display);
+		font-size: 0.8rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--v2-black);
+	}
+
+	&__meaning-ungrounded {
+		margin: 1rem 0 0;
+		padding: 0.5rem 0.7rem;
+		border: 2px dashed var(--v2-black);
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--v2-body);
+	}
+
+	// The foot: Read next and Other recordings, after the words (D-136).
+	&__foot {
+		margin-top: 3rem;
+		display: grid;
+		gap: 2rem;
+		max-width: 65ch;
+	}
+
 	// The rail (owner's request): player, then the meaning right under it.
 	// Sticky as a WHOLE from lg and capped to the viewport, so the meaning
 	// is visible without reaching the words' end; the meaning card scrolls
@@ -2504,6 +2557,77 @@
 			background: var(--v2-honey);
 			color: var(--v2-black);
 		}
+	}
+
+	// — Read next + Other recordings, the track foot (D-136) —
+	.read-next__label,
+	.versions__label {
+		font-family: var(--v2-display);
+		font-weight: 400;
+		font-size: 1.35rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--v2-black);
+	}
+
+	.read-next__card {
+		border: var(--v2-border);
+		border-radius: 0.5rem;
+		background: var(--v2-card);
+		box-shadow: var(--v2-shadow);
+		transition:
+			translate 0.15s ease,
+			box-shadow 0.15s ease;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--v2-card);
+			border-color: var(--v2-black);
+			translate: -2px -2px;
+			box-shadow: var(--v2-shadow-up);
+		}
+	}
+
+	.read-next__title {
+		font-family: var(--v2-display);
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		color: var(--v2-black);
+	}
+
+	.versions__row {
+		border: 2px solid var(--v2-black);
+		border-radius: 0.5rem;
+		background: var(--v2-card);
+		box-shadow: 2px 2px 0 var(--v2-black);
+		transition:
+			translate 0.15s ease,
+			box-shadow 0.15s ease;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--v2-card);
+			border-color: var(--v2-black);
+			translate: -1px -1px;
+			box-shadow: 3px 3px 0 var(--v2-black);
+		}
+	}
+
+	.versions__title {
+		font-weight: 700;
+		color: var(--v2-black);
+	}
+
+	// The you-are-on-a-variant caveat as a honey notice, said plainly.
+	.versions__variant {
+		width: fit-content;
+		margin: 0;
+		padding: 0.5rem 0.8rem;
+		border: 2px dashed var(--v2-black);
+		background: var(--v2-honey);
+		color: var(--v2-black);
+		font-size: 0.8rem;
+		font-weight: 700;
 	}
 
 	// — Continue reading rows —

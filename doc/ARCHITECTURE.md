@@ -134,6 +134,39 @@ Switching target later must be a one-file change per subsystem.
 > **Risk:** the scaffolder pinned `nitro@3.0.260610-beta`. A beta server runtime
 > underpins the whole deployment story. Watch for a stable 3.x before launch.
 
+### D-136 — The audit's gaps close: v2 gets what v1 never handed over
+**Built 2026-09-02.** The owner asked what v1 has that v2 silently
+lost; the diff found five, and all five land here.
+
+**Read next** (D-076) and **Other recordings** (OD-028) join the v2
+track page as a foot after the words — an offer and an exit, both
+for a reader who has finished or noticed the lines not lining up,
+with the variant caveat said plainly as a honey notice when the page
+IS an alternate cut. Both components gained the standard `trackTo`
+prop; v1 renders exactly as before.
+
+**The trust apparatus**: the meaning card now shows the numbered
+sources the synthesis was grounded in and the ungrounded caveat when
+it was written without any — the data was in the response all along,
+just unrendered on the loud cut.
+
+**The social card** (D-051): v2 track heads carry the full og set —
+the /api/og lyric card, absolute URL, declared 1080 square — so a
+shared /v2 link previews as a set lyric card. And the same head
+declares **canonical as the V1 URL**: while both cuts serve the same
+words at two addresses, a crawler should read v2 as another door to
+the same room, not duplicate content — which also settles the
+sitemap flag without touching robots.
+
+**The lyric's language** (D-053): `detectLang` over the stanzas sets
+`lang` on the LINES container — a screen reader now pronounces 봄날
+as Korean — and only there, because the chrome around the words is
+English.
+
+Left as deliberate differences, unchanged: no artwork hero or
+palette accent on the loud cut's track page, insights as a standing
+card rather than a drawer, the party doorway in the nav alone.
+
 ### D-135 — The loud cut keeps its costume when things go wrong
 **Built 2026-09-01.** The owner's sweep: 404 and 500 under /v2 still
 wore v1. Worse than a wrong theme — the root boundaries REPLACE the

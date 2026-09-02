@@ -23,7 +23,14 @@ import "./read-next.scss";
  * and closing the tab loses nothing. A queue is a promise to keep playing;
  * this is a door held open.
  */
-export function ReadNext({ currentId }: { currentId: string }) {
+export function ReadNext({
+	currentId,
+	trackTo = "/track/$trackId",
+}: {
+	currentId: string;
+	/** Which track route the doors open — v2 passes its own (D-126). */
+	trackTo?: "/track/$trackId" | "/v2/track/$trackId";
+}) {
 	const { preferences } = usePreferences();
 	const { entries } = useHistory();
 
@@ -48,7 +55,7 @@ export function ReadNext({ currentId }: { currentId: string }) {
 				{picks.map((pick) => (
 					<li key={pick.lrclibId}>
 						<Link
-							to="/track/$trackId"
+							to={trackTo}
 							params={{ trackId: pick.lrclibId }}
 							className="read-next__card"
 						>
