@@ -438,6 +438,19 @@ crosses (SVG stroke vs glyph) despite matched stroke-width — the
 reading chip's SVG stands down and CSS draws the same literal ×
 glyph on both (::before, since the tap-target mixin owns ::after).
 
+Fourth round (owner, 2026-09-02): Clear was the one action chip in
+the shelf heads still speaking with a bare word — Retake carries its
+restart arrow, the shuffle its cycle arrows, every row-dismissal its
+×. Clear now leads with a trash glyph, drawn inline in the same
+hand as the others (14-square viewBox, 1.5 stroke, round caps) in
+the shared ContinueReading, so both cuts get it. Bulk clear reads as
+trash, not as a bigger × — × already means "this one row" in this
+app, and reusing it for "all of them" would make the two costs look
+alike. The interior layout (inline-flex, the 0.45rem gap matching
+`v2band__action`) lives on a `recent__clear` class in the
+component's own stylesheet; v2's chip recipe keeps restyling only
+the box.
+
 ### D-128 — The result page stops wearing v1's skeleton
 **Built 2026-09-01.** The owner's review of the personalised Discover
 page: "the entire UI of this page have not been thought through with

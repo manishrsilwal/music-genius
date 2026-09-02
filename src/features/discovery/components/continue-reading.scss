@@ -5,6 +5,20 @@
 // Deliberately the quietest shelf on the page. A Deep Dive card argues for a
 // track the reader has never heard of and needs the room to do it; this is a
 // door back to something they already chose, and only has to be findable.
+// The shelf's bulk clear, up in the heading. It lives outside the .recent
+// list in the DOM (SectionHeading renders it), so it hangs off the block by
+// name only. Flex pairs the trash glyph with the label in both cuts — v2's
+// chip recipe restyles the box, this owns the interior layout.
+.recent__clear {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+
+	svg {
+		flex: none;
+	}
+}
+
 .recent {
 	list-style: none;
 	margin: 0;

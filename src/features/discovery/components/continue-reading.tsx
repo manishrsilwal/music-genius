@@ -36,8 +36,32 @@ export function ContinueReading({
 					<button
 						type="button"
 						onClick={onClear}
-						className="tap text-micro uppercase tracking-label text-ink-faint hover:text-ink"
+						className="recent__clear tap text-micro uppercase tracking-label text-ink-faint hover:text-ink"
 					>
+						{/* Decorative — the label beside it says the same thing. */}
+						<svg
+							viewBox="0 0 14 14"
+							width="12"
+							height="12"
+							aria-hidden="true"
+							focusable="false"
+						>
+							<path
+								d="M2 3.5h10M5.5 3.5V2.2h3v1.3M3.5 3.5l.55 7.6a1 1 0 0 0 1 .9h3.9a1 1 0 0 0 1-.9l.55-7.6"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="1.5"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							/>
+							<path
+								d="M5.75 6v3.5M8.25 6v3.5"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="1.5"
+								strokeLinecap="round"
+							/>
+						</svg>
 						Clear
 					</button>
 				}
