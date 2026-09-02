@@ -663,7 +663,7 @@
 		display: grid;
 		gap: 2rem;
 		max-width: 65ch;
-		padding-bottom: calc(4.75rem + 1.75rem + env(safe-area-inset-bottom, 0px));
+		padding-bottom: calc(6rem + 1.75rem + env(safe-area-inset-bottom, 0px));
 	}
 
 	// The rail (owner's request): player, then the meaning right under it.
@@ -1059,20 +1059,15 @@
 			}
 		}
 
-		.playback__seek {
-			accent-color: var(--v2-rose);
-		}
-
 		// The timeline in costume (D-131): the base's 4px grey hairline is
 		// v1's whisper. Here it is a track in the card's own grammar —
 		// bordered, squared, rose fill on muted — and tall enough to be
 		// GRABBED, not aimed at. The thumb keeps the base's manner
 		// (hidden until reached for) but arrives as a bordered square.
-		// UNDOCKED ONLY (owner's dock screenshot): written flat, the fat
-		// trail rode the dock's top edge over the play button, and the
-		// card's white knob fought the dock's rose one. The dock keeps its
-		// slim edge line — that grammar is the dock's own.
-		.playback:not([data-docked]) .playback__seek {
+		// ONE timeline for both costumes (owner's final ruling): the dock
+		// wears exactly this too — its geometry makes room below.
+		.playback__seek {
+			accent-color: var(--v2-rose);
 			height: 1.25rem;
 
 			@mixin v2-seek-track {
@@ -2666,14 +2661,19 @@
 		// video chip (height = (dock − pad) × 0.68) collapses on `auto`,
 		// and the chip grew to a quarter of the screen (owner's
 		// screenshot). The dock gets the product's real numbers back.
-		--dock-height: 4.75rem;
+		// Taller than v1's dock on purpose (owner's ruling: the dock wears
+		// the card's own chunky timeline, everything the same): the trail
+		// gets a dedicated row at the top, and the controls a clear row
+		// beneath it — no trail over the play button.
+		--dock-height: 6rem;
 		--dock-pad: 0.625rem;
+		padding-top: 1.75rem;
 		border-top-width: 3px;
 		color: var(--v2-black);
 
 		// One centreline for everything on the dock (owner's call) —
 		// enforced here so no reused override can knock a child off it.
-		// The scrub is absolute on the top edge and rightly ignores this.
+		// The scrub is absolute in the trail row and rightly ignores this.
 		display: flex;
 		align-items: center;
 
@@ -2681,15 +2681,21 @@
 			align-self: center;
 		}
 
+		// The trail row: just inside the top rule, full bleed like a band.
+		.playback__scrub {
+			top: 0.3rem;
+		}
+
 		.playback__video {
 			border: 2px solid var(--v2-black);
 			border-radius: 0.25rem;
 		}
 
-		// The docked trail keeps the chunky costume, but the base dock
-		// paints its unfilled half in the sheet hairline — BLACK since the
-		// re-point — so the remaining time read as already played. Rose
-		// over muted, same as the card's.
+		// The dock's timeline IS the card's (owner's ruling) — but the base
+		// dock restates the track fill (its hairline is BLACK since the
+		// re-point) and the knob's fill (rose), so both are said again here
+		// at dock-beating specificity: rose over muted, white square knob
+		// on the trail's midline.
 		.playback__seek {
 			&::-webkit-slider-runnable-track {
 				background: linear-gradient(
@@ -2705,6 +2711,15 @@
 					var(--v2-rose) var(--progress, 0%),
 					var(--v2-muted) var(--progress, 0%)
 				);
+			}
+
+			&::-webkit-slider-thumb {
+				background: var(--v2-card);
+				margin-top: calc((0.6rem - 1.1rem) / 2);
+			}
+
+			&::-moz-range-thumb {
+				background: var(--v2-card);
 			}
 		}
 
