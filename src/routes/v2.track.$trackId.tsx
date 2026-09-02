@@ -198,6 +198,17 @@ function ReadV2() {
 		).matches;
 	}, []);
 
+	/*
+	 * Sync pressed = "take me to the song" (owner's call): the manual hold
+	 * ends now, so the position report that follows re-engagement — always
+	 * a key change, since the bar reports null while unsynced — scrolls
+	 * the live line to centre at once instead of on the NEXT line.
+	 */
+	const onSyncEngaged = () => {
+		lastManual.current = 0;
+		setManualHold(false);
+	};
+
 	const jumpToLine = (key: string, time: number | null) => {
 		if (time == null || !playerReady) return;
 		const selection = window.getSelection();
@@ -333,6 +344,7 @@ function ReadV2() {
 									onPlayingChange={setPlaying}
 									jumpTo={jumpTo}
 									onReadyChange={setPlayerReady}
+									onSyncEngaged={onSyncEngaged}
 								/>
 							}
 						>
@@ -350,6 +362,7 @@ function ReadV2() {
 									onPlayingChange={setPlaying}
 									jumpTo={jumpTo}
 									onReadyChange={setPlayerReady}
+									onSyncEngaged={onSyncEngaged}
 								/>
 							)}
 						</Await>

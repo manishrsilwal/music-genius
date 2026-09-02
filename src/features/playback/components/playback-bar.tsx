@@ -36,6 +36,7 @@ export function PlaybackBar({
 	onPlayingChange,
 	jumpTo,
 	onReadyChange,
+	onSyncEngaged,
 }: {
 	/** Null while the lookup is still running, and null if it found nothing. */
 	videoId: string | null;
@@ -86,6 +87,12 @@ export function PlaybackBar({
 	 * switching players reports false again until the new one stands up.
 	 */
 	onReadyChange?: (ready: boolean) => void;
+	/**
+	 * Fired when the reader RE-ENGAGES sync (the Sync button turning
+	 * following back on) — the page scrolls to the current line at once
+	 * instead of waiting for the next line change (D-136 follow-up).
+	 */
+	onSyncEngaged?: () => void;
 }) {
 	const mountRef = useRef<HTMLDivElement>(null);
 	const spotifyMountRef = useRef<HTMLDivElement>(null);
@@ -191,6 +198,11 @@ export function PlaybackBar({
 		} else {
 			setWantSync(true);
 			resume();
+			// Rejoining is a promise to be AT the song, not merely to follow
+			// its next move (owner's report: Sync from the dock left the
+			// page where it was until the line happened to change). The
+			// page scrolls to the current line on this signal.
+			onSyncEngaged?.();
 		}
 	};
 

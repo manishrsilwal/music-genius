@@ -2653,6 +2653,16 @@
 		border-top-width: 3px;
 		color: var(--v2-black);
 
+		// One centreline for everything on the dock (owner's call) —
+		// enforced here so no reused override can knock a child off it.
+		// The scrub is absolute on the top edge and rightly ignores this.
+		display: flex;
+		align-items: center;
+
+		> * {
+			align-self: center;
+		}
+
 		.playback__video {
 			border: 2px solid var(--v2-black);
 			border-radius: 0.25rem;
