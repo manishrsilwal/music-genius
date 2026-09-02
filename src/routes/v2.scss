@@ -943,7 +943,9 @@
 			}
 		}
 
-		.playback__toggle {
+		// Undocked only: 3.4rem of play button in a 3.5rem dock is a
+		// collision, not a control (owner's dock screenshot).
+		.playback:not([data-docked]) .playback__toggle {
 			justify-self: start;
 			min-width: 3.4rem;
 			min-height: 3.4rem;
@@ -1057,13 +1059,20 @@
 			}
 		}
 
+		.playback__seek {
+			accent-color: var(--v2-rose);
+		}
+
 		// The timeline in costume (D-131): the base's 4px grey hairline is
 		// v1's whisper. Here it is a track in the card's own grammar —
 		// bordered, squared, rose fill on muted — and tall enough to be
 		// GRABBED, not aimed at. The thumb keeps the base's manner
 		// (hidden until reached for) but arrives as a bordered square.
-		.playback__seek {
-			accent-color: var(--v2-rose);
+		// UNDOCKED ONLY (owner's dock screenshot): written flat, the fat
+		// trail rode the dock's top edge over the play button, and the
+		// card's white knob fought the dock's rose one. The dock keeps its
+		// slim edge line — that grammar is the dock's own.
+		.playback:not([data-docked]) .playback__seek {
 			height: 1.25rem;
 
 			@mixin v2-seek-track {
