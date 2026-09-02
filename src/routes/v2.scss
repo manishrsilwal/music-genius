@@ -2643,8 +2643,20 @@
 		--color-sheet-hairline: #0a0a0a;
 		--color-sheet-muted: #475569;
 		--track-accent-deep: #e11d48;
+		// The rail card sets --dock-height: auto — right for a card,
+		// poison for a dock: the height calc that sizes the bar AND its
+		// video chip (height = (dock − pad) × 0.68) collapses on `auto`,
+		// and the chip grew to a quarter of the screen (owner's
+		// screenshot). The dock gets the product's real numbers back.
+		--dock-height: 4.75rem;
+		--dock-pad: 0.625rem;
 		border-top-width: 3px;
 		color: var(--v2-black);
+
+		.playback__video {
+			border: 2px solid var(--v2-black);
+			border-radius: 0.25rem;
+		}
 
 		.playback__title {
 			color: var(--v2-black);

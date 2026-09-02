@@ -178,6 +178,17 @@ rose, a 3px top rule; the two spots writing text in
 directly. The dock stays wanted in v2 — it is how the player
 reaches the foot and the phone.
 
+Second dock round (owner's screenshot): the video chip ballooned to
+a quarter of the screen. The rail card sets `--dock-height: auto` —
+right for a card, poison for a dock, whose bar and chip both size
+from a calc that collapses on `auto`. The docked bar re-declares the
+product's real dock numbers on itself, where an own-element
+declaration beats the inherited card value; the chip also gains the
+house border. On the owner's switch question: the source switch is
+ALREADY absent from the dock by design (docked, the bar is down to
+essentials) and stays in the player card, where D-112's reasoning
+holds — a one-time choice with no visible undo is a trap.
+
 ### D-135 — The loud cut keeps its costume when things go wrong
 **Built 2026-09-01.** The owner's sweep: 404 and 500 under /v2 still
 wore v1. Worse than a wrong theme — the root boundaries REPLACE the
