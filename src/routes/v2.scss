@@ -2630,6 +2630,31 @@
 		font-weight: 700;
 	}
 
+	// — The docked bar (D-136 follow-up) —
+	// The bottom dock paints from the SHEET token family (D-076's light
+	// sheet), which the scope's re-point never covered — v1's cream and
+	// lime surfaced whole at the foot of the track page (owner's
+	// screenshot). Re-pointed here, scoped to the dock alone: sheet is the
+	// white card, its hairline black, the deep accent rose. The two spots
+	// where the dock writes text in --color-on-bright (white in v2, for
+	// rose fills) get their ink said directly instead.
+	.playback[data-docked] {
+		--color-sheet: #ffffff;
+		--color-sheet-hairline: #0a0a0a;
+		--color-sheet-muted: #475569;
+		--track-accent-deep: #e11d48;
+		border-top-width: 3px;
+		color: var(--v2-black);
+
+		.playback__title {
+			color: var(--v2-black);
+		}
+
+		.playback__elsewhere:hover {
+			color: var(--v2-black);
+		}
+	}
+
 	// — Continue reading rows —
 	.recent__row {
 		border: 2px solid var(--v2-black);

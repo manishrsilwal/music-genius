@@ -167,6 +167,17 @@ Left as deliberate differences, unchanged: no artwork hero or
 palette accent on the loud cut's track page, insights as a standing
 card rather than a drawer, the party doorway in the nav alone.
 
+Follow-up (owner's screenshot of the new foot): scrolling past the
+rail docks the playback bar, and the DOCK paints from the sheet
+token family — D-076's light sheet — which the scope's re-point
+never covered, so v1's cream and lime surfaced whole at the page
+foot, with a white title invisible on the cream. Re-pointed on the
+dock alone: sheet → white card, hairline → black, deep accent →
+rose, a 3px top rule; the two spots writing text in
+--color-on-bright (white in v2, for rose fills) get black said
+directly. The dock stays wanted in v2 — it is how the player
+reaches the foot and the phone.
+
 ### D-135 — The loud cut keeps its costume when things go wrong
 **Built 2026-09-01.** The owner's sweep: 404 and 500 under /v2 still
 wore v1. Worse than a wrong theme — the root boundaries REPLACE the
