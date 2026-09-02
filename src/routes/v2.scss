@@ -663,7 +663,7 @@
 		display: grid;
 		gap: 2rem;
 		max-width: 65ch;
-		padding-bottom: calc(6rem + 1.75rem + env(safe-area-inset-bottom, 0px));
+		padding-bottom: calc(5.5rem + 1.75rem + env(safe-area-inset-bottom, 0px));
 	}
 
 	// The rail (owner's request): player, then the meaning right under it.
@@ -2662,12 +2662,13 @@
 		// and the chip grew to a quarter of the screen (owner's
 		// screenshot). The dock gets the product's real numbers back.
 		// Taller than v1's dock on purpose (owner's ruling: the dock wears
-		// the card's own chunky timeline, everything the same): the trail
-		// gets a dedicated row at the top, and the controls a clear row
-		// beneath it — no trail over the play button.
-		--dock-height: 6rem;
+		// the card's own chunky timeline): the trail rides FLUSH against
+		// the top rule — border on border, one seamless edge, no pink
+		// sliver between (owner's "two lines" report) — and the controls
+		// get a clear row beneath it.
+		--dock-height: 5.5rem;
 		--dock-pad: 0.625rem;
-		padding-top: 1.75rem;
+		padding-top: 1.25rem;
 		border-top-width: 3px;
 		color: var(--v2-black);
 
@@ -2681,9 +2682,11 @@
 			align-self: center;
 		}
 
-		// The trail row: just inside the top rule, full bleed like a band.
+		// Flush: the input centres its 0.6rem trail inside its 1.25rem
+		// hit-area, so the input pulls UP by that slack — the trail's own
+		// top border lands exactly on the dock's, reading as one edge.
 		.playback__scrub {
-			top: 0.3rem;
+			top: calc((0.6rem - 1.25rem) / 2);
 		}
 
 		.playback__video {
